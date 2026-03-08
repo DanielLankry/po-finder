@@ -4,6 +4,7 @@ import "./globals.css";
 import "@/lib/env";
 import CookieConsent from "@/components/layout/CookieConsent";
 import AccessibilityWidget from "@/components/layout/AccessibilityWidget";
+import { Analytics } from "@vercel/analytics/next";
 
 const heebo = Heebo({
   variable: "--font-heebo",
@@ -35,6 +36,7 @@ export default function RootLayout({
         <main id="main-content">{children}</main>
         <AccessibilityWidget />
         <CookieConsent />
+        <Analytics />
       </body>
     </html>
   );
