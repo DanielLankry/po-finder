@@ -1,0 +1,51 @@
+import Link from "next/link";
+import { MapPin } from "lucide-react";
+
+const LINKS = [
+  { href: "/about", label: "אודות" },
+  { href: "/pricing", label: "מחירים" },
+  { href: "/contact", label: "צרו קשר" },
+  { href: "/terms", label: "תנאי שימוש" },
+  { href: "/privacy", label: "מדיניות פרטיות" },
+  { href: "/accessibility", label: "נגישות" },
+];
+
+export default function Footer() {
+  return (
+    <footer
+      className="border-t border-slate-200 bg-white py-8"
+      dir="rtl"
+      aria-label="כותרת תחתית"
+    >
+      <div className="max-w-[1280px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-lg"
+          aria-label="פה — דף הבית"
+        >
+          <MapPin className="h-5 w-5 fill-blue-600 text-blue-600" aria-hidden="true" />
+          <span className="font-display font-extrabold text-lg text-blue-600">פה</span>
+        </Link>
+
+        <nav aria-label="קישורי תחתית">
+          <ul className="flex flex-wrap items-center gap-4 sm:gap-6">
+            {LINKS.map(({ href, label }) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  className="text-slate-500 text-sm hover:text-blue-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded"
+                >
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <p className="text-slate-400 text-xs">
+          © 2026 פה. כל הזכויות שמורות.
+        </p>
+      </div>
+    </footer>
+  );
+}

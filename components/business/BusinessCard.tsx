@@ -1,0 +1,172 @@
+"use client";
+
+import {
+  Star, Clock, Heart,
+  Coffee, CakeSlice, Beef, UtensilsCrossed, Pizza, MapPin,
+} from "lucide-react";
+import type { BusinessWithSchedule } from "@/lib/types";
+import { CATEGORY_LABELS } from "@/lib/types";
+import { isOpenNow } from "@/lib/utils/schedule";
+
+// ── SVG icons (no emoji anti-pattern) ────────────────────────────────────────
+const CATEGORY_ICON_SM: Record<string, React.ReactNode> = {
+  coffee: <Coffee  className="h-3.5 w-3.5" />,
+  sweets: <CakeSlice className="h-3.5 w-3.5" />,
+  meat:   <Beef  className="h-3.5 w-3.5" />,
+  pasta:  <UtensilsCrossed className="h-3.5 w-3.5" />,
+  pizza:  <Pizza className="h-3.5 w-3.5" />,
+};
+
+const CATEGORY_ICON_LG: Record<string, React.ReactNode> = {
+  coffee: <Coffee  className="h-8 w-8" />,
+  sweets: <CakeSlice className="h-8 w-8" />,
+  meat:   <Beef  className="h-8 w-8" />,
+  pasta:  <UtensilsCrossed className="h-8 w-8" />,
+  pizza:  <Pizza className="h-8 w-8" />,
+};
+
+// Color-coded chips per category
+const CATEGORY_CHIP: Record<string, { bg: string; text: string }> = {
+  coffee: { bg: "#FEF3C7", text: "#92400E" },
+  sweets: { bg: "#FCE7F3", text: "#BE185D" },
+  meat:   { bg: "#FEE2E2", text: "#991B1B" },
+  pasta:  { bg: "#FEF9C3", text: "#78350F" },
+  pizza:  { bg: "#FFEDD5", text: "#C2410C" },
+};
+
+interface BusinessCardProps {
+  business: BusinessWithSchedule;
+  isSelected: boolean;
+  isHovered?: boolean;
+  scrollRef?: React.RefObject<HTMLDivElement | null>;
+  onClick: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+}
+export default function BusinessCard({
+  business,
+  isSelected,
+  isHovered,
+  scrollRef,
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+}: BusinessCardProps) {
+  const schedule = business.today_schedule ?? null;
+  const open = isOpenNow(schedule);
+  const primaryPhoto =
+    business.photos?.find((p) => p.is_primary) ?? business.photos?.[0];
+  const address = schedule?.address ?? business.address;
+  const chip = CATEGORY_CHIP[business.category];
+
+  return (
+    <div 
+      ref={scrollRef} 
+      className="px-2 py-2" 
+      onMouseEnter={onMouseEnter} 
+      onMouseLeave={onMouseLeave}
+    >
+      <button
+        onClick={onClick}
+        className={`w-full text-right cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-[24px] group relative bg-white block p-3.5 border ${
+          isSelected 
+            ? "border-[#059669] shadow-[0_8px_24px_rgba(5,150,105,0.25)] ring-1 ring-[#059669] scale-[1.02]" 
+            : isHovered 
+              ? "border-black/5 shadow-[0_20px_40px_rgba(0,0,0,0.12)] scale-[1.02] transform -translate-y-1"
+              : "border-transparent shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)] hover:border-black/5 transform hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98]"
+        }`}
+        aria-pressed={isSelected}
+        aria-label={`${business.name} — ${CATEGORY_LABELS[business.category]}`}
+      >
+        <div className="flex flex-col gap-3.5" dir="rtl">
+          {/* ── Photo wrapper (aspect square) ───────────────────────────────── */}
+          <div className="relative w-full aspect-[4/3] rounded-[16px] overflow-hidden bg-[#F8F8F8] isolate">
+            {primaryPhoto ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={primaryPhoto.url}
+                  alt={`תמונה של ${business.name}`}
+                  className={`w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] ${isHovered ? 'scale-105' : 'group-hover:scale-105'}`}
+                  loading="lazy"
+                />
+                <div className={`absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 to-transparent transition-opacity duration-300 pointer-events-none ${isHovered ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
+              </>
+            ) : (
+              <div
+                className={`w-full h-full flex items-center justify-center bg-gradient-to-br from-[#F3F4F6] to-[#E5E7EB] transition-transform duration-500 ${isHovered ? 'scale-105' : 'group-hover:scale-105'}`}
+                aria-hidden="true"
+              >
+                <span style={chip ? { color: chip.text } : { color: "#6B7280" }}>
+                  {CATEGORY_ICON_LG[business.category] ?? <MapPin className="h-8 w-8" />}
+                </span>
+              </div>
+            )}
+            
+            {/* Heart button overlay (top left in RTL, right in visual) */}
+            <div 
+              className={`absolute top-3 left-3 z-10 p-2.5 rounded-full bg-white/10 backdrop-blur-md transition-all duration-300 ${isHovered ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} hover:bg-white/30`}
+               onClick={(e) => {
+                 e.stopPropagation();
+                 // TODO: Save to favorites
+               }}
+               role="button"
+               aria-label="שמור למועדפים"
+            >
+              <Heart className="h-5 w-5 text-white active:scale-90 transition-transform stroke-[2px] drop-shadow-md" />
+            </div>
+
+            {/* Optional "Open Now" badge over image */}
+            {open && (
+              <div className="absolute top-3 right-3 z-10 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg pointer-events-none transition-transform duration-300 group-hover:-translate-y-0.5 border border-white/20">
+                 <span className="text-[12px] font-bold tracking-wide text-[#059669]">
+                   פתוח עכשיו
+                 </span>
+              </div>
+            )}
+          </div>
+
+          {/* ── Text content (3 lines) ───────────────────────────────────────── */}
+          <div className="flex flex-col gap-1 px-1">
+            {/* Line 1: Name and Rating */}
+            <div className="flex justify-between items-start gap-2">
+              <p className={`font-bold text-[16px] leading-snug line-clamp-1 truncate transition-colors duration-200 ${isHovered ? 'text-[#059669]' : 'text-[#222222] group-hover:text-[#059669]'}`}>
+                {business.name}
+              </p>
+              {business.avg_rating > 0 && (
+                <div className="flex items-center gap-1 flex-shrink-0 mt-0.5">
+                  <Star className="h-3.5 w-3.5 fill-[#222222] text-[#222222]" aria-hidden="true" />
+                  <span className="text-[13px] font-bold text-[#222222]">
+                    {business.avg_rating.toFixed(1)}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Line 2: Address / Neighborhood */}
+            {address && (
+              <p className="text-[15px] text-[#717171] line-clamp-1 truncate font-medium">
+                {address}
+              </p>
+            )}
+
+            {/* Line 3: Status / Hours / Category */}
+            <p className="text-[14px] text-[#717171] mt-1 font-medium flex gap-1.5 items-center">
+               <span className="font-semibold text-[#222222] px-2 py-0.5 bg-gray-100 rounded-md text-[13px]">
+                 {CATEGORY_LABELS[business.category]}
+               </span>
+               {schedule?.open_time && schedule?.close_time && (
+                 <>
+                   <span className="text-gray-300">•</span>
+                   <span className="text-[#222222]">
+                     {schedule.open_time.slice(0, 5)}–{schedule.close_time.slice(0, 5)}
+                   </span>
+                 </>
+               )}
+            </p>
+          </div>
+        </div>
+      </button>
+    </div>
+  );
+}

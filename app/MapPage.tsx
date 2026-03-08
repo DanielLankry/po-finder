@@ -1,0 +1,141 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import { Map as MapIcon, List } from "lucide-react";
+import Navbar from "@/components/layout/Navbar";
+import FilterBar from "@/components/filters/FilterBar";
+import FilterDrawer, { type FilterState } from "@/components/filters/FilterDrawer";
+import BusinessListPanel from "@/components/business/BusinessListPanel";
+import type { BusinessCategory, BusinessSchedule, BusinessWithSchedule, Photo } from "@/lib/types";
+import { createClient } from "@/lib/supabase/client";
+import type { LocationResult } from "@/components/map/PlacesSearchBar";
+
+const BusinessMap = dynamic(() => import("@/components/map/BusinessMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-full bg-[#F7F7F5]">
+      <div className="h-10 w-10 rounded-full border-4 border-[#D1FAE5] border-t-[#059669] animate-spin" />
+    </div>
+  ),
+});
+
+const NAVBAR_H = 72;
+const FILTERBAR_H = 64;
+const CONTENT_TOP = NAVBAR_H + FILTERBAR_H;
+
+export default function MapPage() {
+  const [activeCategory, setActiveCategory] = useState<BusinessCategory | "all">("all");
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({ kashrut: "all", minRating: 0, openNow: false });
+  const [businesses, setBusinesses] = useState<BusinessWithSchedule[]>([]);
+  const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
+  const [hoveredBusinessId, setHoveredBusinessId] = useState<string | null>(null);
+  const [mobileView, setMobileView] = useState<"list" | "map">("list");
+  const [searchCenter, setSearchCenter] = useState<LocationResult | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
+
+    async function fetchBusinesses() {
+      const [{ data: bizData }, { data: schedData }] = await Promise.all([
+        supabase.from("businesses").select("*, photos(*)").eq("is_active", true),
+        supabase.from("business_schedules").select("*").eq("date", today),
+      ]);
+      const scheduleMap = new Map(
+        (schedData as BusinessSchedule[] ?? []).map((s) => [s.business_id, s])
+      );
+      setBusinesses(
+        (bizData ?? []).map((b) => ({
+          ...b,
+          photos: (b.photos ?? []) as Photo[],
+          today_schedule: scheduleMap.get(b.id) ?? null,
+        }))
+      );
+      setLoading(false);
+    }
+
+    fetchBusinesses();
+  }, []);
+
+  return (
+    <div className="h-screen flex flex-col overflow-hidden bg-[#F1F5F2]" dir="rtl">
+      <Navbar
+        onLocationSelect={(loc) => {
+          setSearchCenter(loc);
+          setMobileView("map");
+        }}
+      />
+      <FilterBar
+        activeCategory={activeCategory}
+        onCategoryChange={setActiveCategory}
+        onFilterOpen={() => setFilterDrawerOpen(true)}
+      />
+
+      {/* Main split content */}
+      <div
+        className="flex overflow-hidden"
+        style={{ marginTop: CONTENT_TOP, height: `calc(100vh - ${CONTENT_TOP}px)` }}
+      >
+        {/* List panel — right side (RTL start), 800px on desktop to support 2 grid columns, full on mobile */}
+        <div
+          className={`flex-shrink-0 border-l border-[#EBEBEB] overflow-hidden bg-white
+            w-full md:w-[600px] lg:w-[840px]
+            ${mobileView === "list" ? "flex flex-col" : "hidden md:flex md:flex-col"}`}
+        >
+          <BusinessListPanel
+            businesses={businesses}
+            activeCategory={activeCategory}
+            filters={filters}
+            selectedBusinessId={selectedBusinessId}
+            onBusinessSelect={(b) => setSelectedBusinessId(b.id)}
+            onBackToList={() => setSelectedBusinessId(null)}
+            hoveredBusinessId={hoveredBusinessId}
+            onBusinessHover={(id) => setHoveredBusinessId(id)}
+            loading={loading}
+          />
+        </div>
+
+        {/* Map panel — fills remaining space, floats with rounded corners */}
+        <div className={`flex-1 relative p-3 md:p-5 lg:p-6 ${mobileView === "map" ? "block" : "hidden md:block"}`}>
+          <div className="w-full h-full rounded-[24px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-black/[0.04]">
+          <BusinessMap
+            businesses={businesses}
+            activeCategory={activeCategory}
+            filters={filters}
+            selectedBusinessId={selectedBusinessId}
+            onBusinessSelect={(b) => setSelectedBusinessId(b.id)}
+            externalHoveredId={hoveredBusinessId}
+            onBusinessHover={(id) => setHoveredBusinessId(id)}
+            searchCenter={searchCenter}
+          />
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile floating toggle */}
+      <div className="md:hidden fixed bottom-6 inset-x-0 z-20 flex justify-center pointer-events-none fade-in-up stagger-2">
+        <button
+          onClick={() => setMobileView((v) => (v === "list" ? "map" : "list"))}
+          className="pointer-events-auto flex items-center gap-2.5 h-12 px-6 rounded-full bg-black/85 backdrop-blur-xl text-white font-bold text-[15px] shadow-[0_8px_32px_rgba(0,0,0,0.3)] border border-white/10 hover:bg-black hover:scale-105 transition-all duration-300 active:scale-95"
+          aria-label={mobileView === "list" ? "עבור למפה" : "עבור לרשימה"}
+        >
+          {mobileView === "list" ? (
+            <><MapIcon className="h-[18px] w-[18px]" aria-hidden="true" /> מפה</>
+          ) : (
+            <><List className="h-[18px] w-[18px]" aria-hidden="true" /> רשימה</>
+          )}
+        </button>
+      </div>
+
+      <FilterDrawer
+        open={filterDrawerOpen}
+        onClose={() => setFilterDrawerOpen(false)}
+        filters={filters}
+        onFiltersChange={setFilters}
+      />
+    </div>
+  );
+}
