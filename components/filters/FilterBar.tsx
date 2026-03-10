@@ -2,6 +2,7 @@
 
 import { Coffee, CakeSlice, Beef, UtensilsCrossed, Leaf, Wheat, Flower2, Gem, Shirt, SlidersHorizontal } from "lucide-react";
 import type { BusinessCategory } from "@/lib/types";
+import PlacesSearchBar, { type LocationResult } from "@/components/map/PlacesSearchBar";
 
 type Category = BusinessCategory | "all";
 
@@ -9,6 +10,7 @@ interface FilterBarProps {
   activeCategory: Category;
   onCategoryChange: (cat: Category) => void;
   onFilterOpen: () => void;
+  onLocationSelect?: (loc: LocationResult) => void;
 }
 
 const CATEGORIES: { value: Category; label: string; icon: React.ReactNode }[] = [
@@ -28,13 +30,21 @@ export default function FilterBar({
   activeCategory,
   onCategoryChange,
   onFilterOpen,
+  onLocationSelect,
 }: FilterBarProps) {
   return (
     <div
-      className="fixed top-[72px] inset-x-0 z-10 bg-[#FAFAF7]/90 backdrop-blur-xl border-b border-black/[0.06] px-5 shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300"
+      className="fixed top-[72px] inset-x-0 z-10 bg-[#FAFAF7]/90 backdrop-blur-xl border-b border-black/[0.06] shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300"
       dir="rtl"
     >
-      <div className="flex items-center justify-between gap-4 py-3">
+      {/* Mobile-only search row */}
+      {onLocationSelect && (
+        <div className="md:hidden px-4 pt-2.5 pb-1">
+          <PlacesSearchBar onLocationSelect={onLocationSelect} />
+        </div>
+      )}
+
+      <div className="flex items-center justify-between gap-4 py-3 px-5">
         {/* Category pills — scroll from right */}
         <div className="flex-1 overflow-x-auto scrollbar-hide py-2 mask-linear-fade -my-1">
           <div className="flex gap-2.5 w-max items-center px-1">
