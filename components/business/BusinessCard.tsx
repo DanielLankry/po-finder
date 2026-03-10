@@ -1,37 +1,37 @@
 "use client";
 
 import {
-  Star, Clock, Heart,
-  Coffee, CakeSlice, Beef, UtensilsCrossed, Pizza, MapPin,
+  Star, Heart,
+  Coffee, CakeSlice, Beef, UtensilsCrossed, Leaf, Wheat, Flower2, Gem, Shirt, MapPin,
 } from "lucide-react";
 import type { BusinessWithSchedule } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
 import { isOpenNow } from "@/lib/utils/schedule";
 
-// ── SVG icons (no emoji anti-pattern) ────────────────────────────────────────
-const CATEGORY_ICON_SM: Record<string, React.ReactNode> = {
-  coffee: <Coffee  className="h-3.5 w-3.5" />,
-  sweets: <CakeSlice className="h-3.5 w-3.5" />,
-  meat:   <Beef  className="h-3.5 w-3.5" />,
-  pasta:  <UtensilsCrossed className="h-3.5 w-3.5" />,
-  pizza:  <Pizza className="h-3.5 w-3.5" />,
-};
-
+// ── SVG icons per category ────────────────────────────────────────────────────
 const CATEGORY_ICON_LG: Record<string, React.ReactNode> = {
-  coffee: <Coffee  className="h-8 w-8" />,
-  sweets: <CakeSlice className="h-8 w-8" />,
-  meat:   <Beef  className="h-8 w-8" />,
-  pasta:  <UtensilsCrossed className="h-8 w-8" />,
-  pizza:  <Pizza className="h-8 w-8" />,
+  coffee:  <Coffee className="h-8 w-8" />,
+  food:    <UtensilsCrossed className="h-8 w-8" />,
+  sweets:  <CakeSlice className="h-8 w-8" />,
+  meat:    <Beef className="h-8 w-8" />,
+  vegan:   <Leaf className="h-8 w-8" />,
+  celiac:  <Wheat className="h-8 w-8" />,
+  flowers: <Flower2 className="h-8 w-8" />,
+  jewelry: <Gem className="h-8 w-8" />,
+  vintage: <Shirt className="h-8 w-8" />,
 };
 
 // Color-coded chips per category
 const CATEGORY_CHIP: Record<string, { bg: string; text: string }> = {
-  coffee: { bg: "#FEF3C7", text: "#92400E" },
-  sweets: { bg: "#FCE7F3", text: "#BE185D" },
-  meat:   { bg: "#FEE2E2", text: "#991B1B" },
-  pasta:  { bg: "#FEF9C3", text: "#78350F" },
-  pizza:  { bg: "#FFEDD5", text: "#C2410C" },
+  coffee:  { bg: "#FEF3C7", text: "#92400E" },
+  food:    { bg: "#FFEDD5", text: "#C2410C" },
+  sweets:  { bg: "#FCE7F3", text: "#BE185D" },
+  meat:    { bg: "#FEE2E2", text: "#991B1B" },
+  vegan:   { bg: "#DCFCE7", text: "#166534" },
+  celiac:  { bg: "#FEF9C3", text: "#78350F" },
+  flowers: { bg: "#FDF2F8", text: "#9D174D" },
+  jewelry: { bg: "#EDE9FE", text: "#5B21B6" },
+  vintage: { bg: "#F5F0FF", text: "#6D28D9" },
 };
 
 interface BusinessCardProps {
@@ -94,10 +94,11 @@ export default function BusinessCard({
               </>
             ) : (
               <div
-                className={`w-full h-full flex items-center justify-center bg-gradient-to-br from-[#F3F4F6] to-[#E5E7EB] transition-transform duration-500 ${isHovered ? 'scale-105' : 'group-hover:scale-105'}`}
+                className={`w-full h-full flex items-center justify-center transition-transform duration-500 ${isHovered ? 'scale-105' : 'group-hover:scale-105'}`}
+                style={{ backgroundColor: chip?.bg ?? "#F3F4F6" }}
                 aria-hidden="true"
               >
-                <span style={chip ? { color: chip.text } : { color: "#6B7280" }}>
+                <span style={{ color: chip?.text ?? "#6B7280" }}>
                   {CATEGORY_ICON_LG[business.category] ?? <MapPin className="h-8 w-8" />}
                 </span>
               </div>
@@ -152,7 +153,10 @@ export default function BusinessCard({
 
             {/* Line 3: Status / Hours / Category */}
             <p className="text-[14px] text-[#717171] mt-1 font-medium flex gap-1.5 items-center">
-               <span className="font-semibold text-[#222222] px-2 py-0.5 bg-gray-100 rounded-md text-[13px]">
+               <span
+                 className="font-semibold px-2 py-0.5 rounded-md text-[13px]"
+                 style={{ backgroundColor: chip?.bg ?? "#F3F4F6", color: chip?.text ?? "#374151" }}
+               >
                  {CATEGORY_LABELS[business.category]}
                </span>
                {schedule?.open_time && schedule?.close_time && (
