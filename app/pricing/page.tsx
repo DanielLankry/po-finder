@@ -9,6 +9,8 @@ import { PLANS } from "@/lib/plans";
 
 export default function PricingPage() {
   const [loading, setLoading] = useState(false);
+  const showBanner = typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("reason") === "subscription_required";
 
   async function handleSubscribe() {
     setLoading(true);
@@ -35,6 +37,11 @@ export default function PricingPage() {
       <Navbar />
       <main className="min-h-screen bg-white pt-[88px] pb-16" dir="rtl">
         <div className="max-w-4xl mx-auto px-4">
+          {showBanner && (
+            <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 text-amber-800 text-sm text-center font-medium">
+              ⚡ כדי לגשת ללוח הבקרה ולהופיע על המפה, יש צורך במנוי פעיל
+            </div>
+          )}
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-stone-900 mb-3">

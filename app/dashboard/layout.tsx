@@ -18,6 +18,19 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     redirect("/auth/login?redirectTo=/dashboard");
   }
 
+  // Check subscription status
+  const { data: userData } = await supabase
+    .from("users")
+    .select("subscription_status")
+    .eq("id", user.id)
+    .single();
+
+  const isSubscribed = userData?.subscription_status === "active" || userData?.subscription_status === "past_due";
+
+  if (!isSubscribed) {
+    redirect("/pricing?reason=subscription_required");
+  }
+
   return (
     <>
       <Navbar />
