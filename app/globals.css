@@ -53,7 +53,7 @@
   /* Keep amber for star ratings (gold is universal) */
   --color-amber-400: #FBBF24;
   --color-amber-500: #F59E0B;
-  --color-surface: #F7F7F5;
+  --color-surface: #FAFAF7;
   --color-kashrut: #047857;
   --color-verified: #7C3AED;
   --color-stone-100: #F5F5F4;
@@ -100,7 +100,7 @@
   --primary-foreground: #FFFFFF;
   --secondary: #10B981;
   --secondary-foreground: #FFFFFF;
-  --muted: #F7F7F5;
+  --muted: #FAFAF7;
   --muted-foreground: #717171;
   --accent: #ECFDF5;
   --accent-foreground: #065F46;
@@ -129,7 +129,28 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
-    font-feature-settings: "ss01";
+    font-feature-settings: "kern" 1, "liga" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Hebrew-specific: tighter letter spacing, better line height */
+  :lang(he), [dir="rtl"] {
+    letter-spacing: -0.01em;
+    line-height: 1.65;
+    word-spacing: 0.02em;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  p {
+    font-weight: 400;
+    line-height: 1.65;
   }
 }
 

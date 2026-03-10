@@ -131,7 +131,7 @@ export default function BusinessCard({
           <div className="flex flex-col gap-1 px-1">
             {/* Line 1: Name and Rating */}
             <div className="flex justify-between items-start gap-2">
-              <p className={`font-bold text-[16px] leading-snug line-clamp-1 truncate transition-colors duration-200 ${isHovered ? 'text-[#059669]' : 'text-[#222222] group-hover:text-[#059669]'}`}>
+              <p className={`font-extrabold text-[17px] leading-tight line-clamp-1 truncate tracking-tight transition-colors duration-200 ${isHovered ? 'text-[#059669]' : 'text-[#111111] group-hover:text-[#059669]'}`}>
                 {business.name}
               </p>
               {business.avg_rating > 0 && (
@@ -146,7 +146,7 @@ export default function BusinessCard({
 
             {/* Line 2: Address / Neighborhood */}
             {address && (
-              <p className="text-[15px] text-[#717171] line-clamp-1 truncate font-medium">
+              <p className="text-[14px] text-[#888888] line-clamp-1 truncate font-medium">
                 {address}
               </p>
             )}

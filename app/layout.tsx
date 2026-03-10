@@ -9,7 +9,7 @@ import { Analytics } from "@vercel/analytics/next";
 const heebo = Heebo({
   variable: "--font-heebo",
   subsets: ["latin", "hebrew"],
-  weight: ["500", "700", "800", "900"],
+  weight: ["400", "500", "700", "800", "900"],
   display: "swap",
 });
 
