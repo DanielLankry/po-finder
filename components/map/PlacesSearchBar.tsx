@@ -23,6 +23,7 @@ export default function PlacesSearchBar({
 }: PlacesSearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [locating, setLocating] = useState(false);
+  const [gpsError, setGpsError] = useState<string | null>(null);
 
   // Keep callback ref stable to avoid re-init of autocomplete
   const callbackRef = useRef(onLocationSelect);
@@ -65,8 +66,12 @@ export default function PlacesSearchBar({
   }, [isLoaded]);
 
   const handleGPS = useCallback(() => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      setGpsError("הדפדפן לא תומך באיתור מיקום");
+      return;
+    }
     setLocating(true);
+    setGpsError(null);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         callbackRef.current({
@@ -76,43 +81,57 @@ export default function PlacesSearchBar({
         });
         setLocating(false);
       },
-      () => setLocating(false),
-      { timeout: 8000 }
+      (err) => {
+        setLocating(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          setGpsError("הגישה למיקום נחסמה. אפשרו גישה למיקום בהגדרות הדפדפן");
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          setGpsError("לא הצלחנו לאתר את המיקום שלכם");
+        } else {
+          setGpsError("תם הזמן לאיתור מיקום. נסו שוב");
+        }
+      },
+      { timeout: 10000, enableHighAccuracy: true }
     );
   }, []);
 
   return (
-    <div className="flex items-center gap-2 w-full">
-      {/* Search input with Places autocomplete */}
-      <div className="relative flex-1">
-        <Search
-          className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#AAAAAA] pointer-events-none"
-          aria-hidden="true"
-        />
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder={placeholder}
-          disabled={!isLoaded}
-          className="w-full h-10 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] ps-10 pe-4 text-base md:text-sm text-[#222222] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-2 focus:ring-[#059669] focus:border-transparent focus:bg-white transition-all disabled:opacity-50"
-          dir="rtl"
-          aria-label="חיפוש מיקום"
-        />
-      </div>
+    <div className="w-full">
+      <div className="flex items-center gap-2 w-full">
+        {/* Search input with Places autocomplete */}
+        <div className="relative flex-1">
+          <Search
+            className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#AAAAAA] pointer-events-none"
+            aria-hidden="true"
+          />
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder={placeholder}
+            disabled={!isLoaded}
+            className="w-full h-10 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] ps-10 pe-4 text-base md:text-sm text-[#222222] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-2 focus:ring-[#059669] focus:border-transparent focus:bg-white transition-all disabled:opacity-50"
+            dir="rtl"
+            aria-label="חיפוש מיקום"
+          />
+        </div>
 
-      {/* GPS / current location button */}
-      <button
-        onClick={handleGPS}
-        disabled={locating}
-        title="מיקום נוכחי"
-        className="flex-shrink-0 h-10 w-10 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] flex items-center justify-center hover:bg-[#ECFDF5] hover:border-[#059669]/40 transition-all disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
-        aria-label="השתמש במיקום הנוכחי"
-      >
-        <LocateFixed
-          className={`h-4 w-4 text-[#059669] ${locating ? "animate-pulse" : ""}`}
-          aria-hidden="true"
-        />
-      </button>
+        {/* GPS / current location button */}
+        <button
+          onClick={handleGPS}
+          disabled={locating}
+          title="מיקום נוכחי"
+          className="flex-shrink-0 h-10 w-10 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] flex items-center justify-center hover:bg-[#ECFDF5] hover:border-[#059669]/40 transition-all disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+          aria-label="השתמש במיקום הנוכחי"
+        >
+          <LocateFixed
+            className={`h-4 w-4 text-[#059669] ${locating ? "animate-pulse" : ""}`}
+            aria-hidden="true"
+          />
+        </button>
+      </div>
+      {gpsError && (
+        <p className="text-red-500 text-xs mt-1.5" dir="rtl" role="alert">{gpsError}</p>
+      )}
     </div>
   );
 }
