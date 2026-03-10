@@ -1,6 +1,15 @@
 export type UserRole = "customer" | "business_owner";
 
-export type BusinessCategory = "coffee" | "sweets" | "meat" | "pasta" | "pizza";
+export type BusinessCategory =
+  | "coffee"    // קפה ושתייה
+  | "food"      // אוכל (כולל פסטה, פיצה, אוכל רחוב)
+  | "sweets"    // מתוקים ומאפים
+  | "meat"      // בשרים
+  | "vegan"     // טבעוני וצמחוני
+  | "celiac"    // ידידותי לצליאקים
+  | "flowers"   // פרחים
+  | "jewelry"   // תכשיטים
+  | "vintage";  // וינטג׳ ויד שנייה
 
 export type KashrutStatus = "kosher" | "kosher_mehadrin" | "none";
 
@@ -87,11 +96,15 @@ export interface BusinessWithSchedule extends Business {
 }
 
 export const CATEGORY_LABELS: Record<BusinessCategory, string> = {
-  coffee: "קפה",
-  sweets: "מתוקים",
-  meat: "בשרים",
-  pasta: "פסטה",
-  pizza: "פיצה",
+  coffee:  "קפה ושתייה",
+  food:    "אוכל",
+  sweets:  "מתוקים ומאפים",
+  meat:    "בשרים",
+  vegan:   "טבעוני וצמחוני",
+  celiac:  "ידידותי לצליאקים",
+  flowers: "פרחים",
+  jewelry: "תכשיטים",
+  vintage: "וינטג׳ ויד שנייה",
 };
 
 export const KASHRUT_LABELS: Record<KashrutStatus, string> = {

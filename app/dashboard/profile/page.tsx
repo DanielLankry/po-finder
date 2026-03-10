@@ -31,7 +31,7 @@ export default function ProfilePage() {
   const [form, setForm] = useState({
     name: "",
     description: "",
-    category: "coffee" as BusinessCategory,
+    category: "food" as BusinessCategory,
     kashrut: "none" as KashrutStatus,
     phone: "",
     whatsapp: "",

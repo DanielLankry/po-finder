@@ -1,6 +1,6 @@
 "use client";
 
-import { Coffee, CakeSlice, Beef, UtensilsCrossed, Pizza, SlidersHorizontal } from "lucide-react";
+import { Coffee, CakeSlice, Beef, UtensilsCrossed, Leaf, Wheat, Flower2, Gem, Shirt, SlidersHorizontal } from "lucide-react";
 import type { BusinessCategory } from "@/lib/types";
 
 type Category = BusinessCategory | "all";
@@ -12,12 +12,16 @@ interface FilterBarProps {
 }
 
 const CATEGORIES: { value: Category; label: string; icon: React.ReactNode }[] = [
-  { value: "all",    label: "הכל",    icon: null },
-  { value: "coffee", label: "קפה",    icon: <Coffee className="h-4 w-4" /> },
-  { value: "sweets", label: "מתוקים", icon: <CakeSlice className="h-4 w-4" /> },
-  { value: "meat",   label: "בשרים",  icon: <Beef className="h-4 w-4" /> },
-  { value: "pasta",  label: "פסטה",   icon: <UtensilsCrossed className="h-4 w-4" /> },
-  { value: "pizza",  label: "פיצה",   icon: <Pizza className="h-4 w-4" /> },
+  { value: "all",     label: "הכל",              icon: null },
+  { value: "coffee",  label: "קפה ושתייה",        icon: <Coffee className="h-4 w-4" /> },
+  { value: "food",    label: "אוכל",              icon: <UtensilsCrossed className="h-4 w-4" /> },
+  { value: "sweets",  label: "מתוקים ומאפים",     icon: <CakeSlice className="h-4 w-4" /> },
+  { value: "meat",    label: "בשרים",             icon: <Beef className="h-4 w-4" /> },
+  { value: "vegan",   label: "טבעוני וצמחוני",    icon: <Leaf className="h-4 w-4" /> },
+  { value: "celiac",  label: "ידידותי לצליאקים",  icon: <Wheat className="h-4 w-4" /> },
+  { value: "flowers", label: "פרחים",             icon: <Flower2 className="h-4 w-4" /> },
+  { value: "jewelry", label: "תכשיטים",           icon: <Gem className="h-4 w-4" /> },
+  { value: "vintage", label: "וינטג׳ ויד שנייה",  icon: <Shirt className="h-4 w-4" /> },
 ];
 
 export default function FilterBar({
