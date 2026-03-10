@@ -166,7 +166,21 @@ export default function BusinessMap({
         const internalHovered = hoveredId === business.id;
         const isHovered = internalHovered || externalHoveredId === business.id;
         const open = isOpenNow(schedule ?? null);
-        const fillColor = open ? "#FF385C" : "#D6D3D1";
+
+        const CATEGORY_COLORS: Record<string, string> = {
+          coffee:  "#92400E",
+          food:    "#C2410C",
+          sweets:  "#BE185D",
+          meat:    "#991B1B",
+          vegan:   "#166534",
+          celiac:  "#78350F",
+          flowers: "#9D174D",
+          jewelry: "#5B21B6",
+          vintage: "#6D28D9",
+        };
+        const fillColor = open
+          ? (CATEGORY_COLORS[business.category] ?? "#059669")
+          : "#D6D3D1";
 
         return (
           <OverlayView
@@ -209,7 +223,7 @@ export default function BusinessMap({
                 className={`rounded-full border-[1.5px] border-white transition-all duration-300 shadow-sm relative flex items-center justify-center ${
                   isSelected || isHovered ? "w-6 h-6" : "w-4 h-4"
                 }`}
-                style={{ backgroundColor: open ? "#059669" : "#D6D3D1" }}
+                style={{ backgroundColor: fillColor }}
               >
                 {!open && (
                   <div className={`absolute inset-0 m-auto bg-white/80 rounded-full transition-all duration-300 ${isSelected || isHovered ? "w-2 h-2" : "w-1.5 h-1.5"}`} />
