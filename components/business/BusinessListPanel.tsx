@@ -1,12 +1,25 @@
 "use client";
 
 import { useRef, useEffect, createRef } from "react";
-import { MapPin } from "lucide-react";
+import { MapPin, Star } from "lucide-react";
 import type { BusinessWithSchedule, BusinessCategory } from "@/lib/types";
+import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import type { FilterState } from "@/components/filters/FilterDrawer";
 import { isOpenNow } from "@/lib/utils/schedule";
 import BusinessCard from "./BusinessCard";
 import StatusCard from "./StatusCard";
+
+const CATEGORY_CHIP: Record<string, { bg: string; text: string }> = {
+  coffee:  { bg: "#FEF3C7", text: "#92400E" },
+  food:    { bg: "#FFEDD5", text: "#C2410C" },
+  sweets:  { bg: "#FCE7F3", text: "#BE185D" },
+  meat:    { bg: "#FEE2E2", text: "#991B1B" },
+  vegan:   { bg: "#DCFCE7", text: "#166534" },
+  celiac:  { bg: "#FEF9C3", text: "#78350F" },
+  flowers: { bg: "#FDF2F8", text: "#9D174D" },
+  jewelry: { bg: "#EDE9FE", text: "#5B21B6" },
+  vintage: { bg: "#F5F0FF", text: "#6D28D9" },
+};
 
 interface BusinessListPanelProps {
   businesses: BusinessWithSchedule[];
@@ -127,8 +140,41 @@ export default function BusinessListPanel({
                  </div>
                )}
              </div>
-             <h2 className="text-[28px] font-extrabold mb-1.5 text-[#222222] tracking-tight">{selectedBusiness.name}</h2>
-             <p className="text-[15px] font-medium text-[#717171] mb-6">{selectedBusiness.address}</p>
+             <h2 className="text-[26px] font-extrabold mb-1 text-[#111111] tracking-tight">{selectedBusiness.name}</h2>
+
+             {/* Rating + category row */}
+             <div className="flex items-center gap-2 flex-wrap mb-3">
+               {selectedBusiness.avg_rating > 0 && (
+                 <span className="flex items-center gap-1 text-[13px] font-bold text-[#222222]">
+                   <Star className="h-3.5 w-3.5 fill-[#222222]" />
+                   {selectedBusiness.avg_rating.toFixed(1)}
+                   <span className="font-normal text-[#888888]">({selectedBusiness.review_count})</span>
+                 </span>
+               )}
+               {selectedBusiness.avg_rating > 0 && <span className="text-[#DDDDDD]">·</span>}
+               <span className="text-[13px] font-semibold px-2.5 py-0.5 rounded-full"
+                 style={{ backgroundColor: CATEGORY_CHIP[selectedBusiness.category]?.bg ?? "#F3F4F6", color: CATEGORY_CHIP[selectedBusiness.category]?.text ?? "#374151" }}>
+                 {CATEGORY_LABELS[selectedBusiness.category]}
+               </span>
+               {selectedBusiness.kashrut !== "none" && (
+                 <span className="text-[13px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                   {KASHRUT_LABELS[selectedBusiness.kashrut]}
+                 </span>
+               )}
+               {selectedBusiness.business_number && (
+                 <span className="text-[12px] font-semibold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                   ✓ מאומת
+                 </span>
+               )}
+             </div>
+
+             {/* Description */}
+             {selectedBusiness.description && (
+               <p className="text-[14px] text-[#555555] leading-relaxed mb-4 border-b border-[#F0F0EC] pb-4">
+                 {selectedBusiness.description}
+               </p>
+             )}
+
              <StatusCard business={selectedBusiness} schedule={selectedBusiness.today_schedule ?? null} />
           </div>
         </div>
