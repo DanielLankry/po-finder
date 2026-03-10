@@ -23,8 +23,8 @@ export default function Footer() {
           className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-lg"
           aria-label="פה — דף הבית"
         >
-          <MapPin className="h-5 w-5 fill-blue-600 text-blue-600" aria-hidden="true" />
-          <span className="font-display font-extrabold text-lg text-blue-600">פה</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="פה" className="h-7 w-auto" />
         </Link>
 
         <nav aria-label="קישורי תחתית">
