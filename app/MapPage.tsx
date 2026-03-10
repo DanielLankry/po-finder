@@ -22,7 +22,9 @@ const BusinessMap = dynamic(() => import("@/components/map/BusinessMap"), {
 
 const NAVBAR_H = 72;
 const FILTERBAR_H = 64;
+const MOBILE_SEARCH_H = 52; // extra search row on mobile
 const CONTENT_TOP = NAVBAR_H + FILTERBAR_H;
+const CONTENT_TOP_MOBILE = NAVBAR_H + FILTERBAR_H + MOBILE_SEARCH_H;
 
 export default function MapPage() {
   const [activeCategory, setActiveCategory] = useState<BusinessCategory | "all">("all");
@@ -69,16 +71,21 @@ export default function MapPage() {
           setMobileView("map");
         }}
       />
+
       <FilterBar
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
         onFilterOpen={() => setFilterDrawerOpen(true)}
+        onLocationSelect={(loc) => {
+          setSearchCenter(loc);
+          setMobileView("map");
+        }}
       />
 
       {/* Main split content */}
       <div
-        className="flex overflow-hidden"
-        style={{ marginTop: CONTENT_TOP, height: `calc(100vh - ${CONTENT_TOP}px)` }}
+        className="flex overflow-hidden md:mt-[136px] mt-[188px]"
+        style={{ height: `calc(100vh - ${CONTENT_TOP}px)` }}
       >
         {/* List panel — right side (RTL start), 800px on desktop to support 2 grid columns, full on mobile */}
         <div
