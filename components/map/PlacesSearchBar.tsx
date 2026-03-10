@@ -73,12 +73,23 @@ export default function PlacesSearchBar({
     setLocating(true);
     setGpsError(null);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        callbackRef.current({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-          name: "המיקום שלי",
-        });
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        // Reverse geocode to get actual street address
+        let name = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        try {
+          const geocoder = new google.maps.Geocoder();
+          const result = await geocoder.geocode({ location: { lat, lng } });
+          if (result.results?.[0]) {
+            name = result.results[0].formatted_address;
+          }
+        } catch {
+          // fallback to coordinates
+        }
+
+        callbackRef.current({ lat, lng, name });
         setLocating(false);
       },
       (err) => {
