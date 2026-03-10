@@ -18,6 +18,17 @@ interface BusinessListPanelProps {
   hoveredBusinessId?: string | null;
   onBusinessHover?: (id: string | null) => void;
   loading?: boolean;
+  userLocation?: { lat: number; lng: number } | null;
+}
+
+function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 // ── Shimmer skeleton card ─────────────────────────────────────────────────────
@@ -49,16 +60,28 @@ export default function BusinessListPanel({
   hoveredBusinessId,
   onBusinessHover,
   loading = false,
+  userLocation,
 }: BusinessListPanelProps) {
   const cardRefs = useRef<Map<string, React.RefObject<HTMLDivElement | null>>>(new Map());
 
-  const filtered = businesses.filter((b) => {
-    if (activeCategory !== "all" && b.category !== activeCategory) return false;
-    if (filters.kashrut !== "all" && b.kashrut !== filters.kashrut) return false;
-    if (filters.minRating > 0 && b.avg_rating < filters.minRating) return false;
-    if (filters.openNow && !isOpenNow(b.today_schedule ?? null)) return false;
-    return true;
-  });
+  const filtered = businesses
+    .filter((b) => {
+      if (activeCategory !== "all" && b.category !== activeCategory) return false;
+      if (filters.kashrut !== "all" && b.kashrut !== filters.kashrut) return false;
+      if (filters.minRating > 0 && b.avg_rating < filters.minRating) return false;
+      if (filters.openNow && !isOpenNow(b.today_schedule ?? null)) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      if (!userLocation) return 0;
+      const latA = a.today_schedule?.lat ?? a.lat;
+      const lngA = a.today_schedule?.lng ?? a.lng;
+      const latB = b.today_schedule?.lat ?? b.lat;
+      const lngB = b.today_schedule?.lng ?? b.lng;
+      const dA = latA && lngA ? getDistanceKm(userLocation.lat, userLocation.lng, latA, lngA) : Infinity;
+      const dB = latB && lngB ? getDistanceKm(userLocation.lat, userLocation.lng, latB, lngB) : Infinity;
+      return dA - dB;
+    });
 
   // Ensure refs map is populated
   filtered.forEach((b) => {

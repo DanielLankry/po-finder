@@ -33,6 +33,7 @@ export default function MapPage() {
   const [hoveredBusinessId, setHoveredBusinessId] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
   const [searchCenter, setSearchCenter] = useState<LocationResult | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -95,6 +96,7 @@ export default function MapPage() {
             hoveredBusinessId={hoveredBusinessId}
             onBusinessHover={(id) => setHoveredBusinessId(id)}
             loading={loading}
+            userLocation={userLocation}
           />
         </div>
 
@@ -110,6 +112,7 @@ export default function MapPage() {
             externalHoveredId={hoveredBusinessId}
             onBusinessHover={(id) => setHoveredBusinessId(id)}
             searchCenter={searchCenter}
+            onUserLocationChange={setUserLocation}
           />
           </div>
         </div>

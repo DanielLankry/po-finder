@@ -22,6 +22,7 @@ interface BusinessMapProps {
   externalHoveredId?: string | null;
   onBusinessHover?: (id: string | null) => void;
   searchCenter?: { lat: number; lng: number } | null;
+  onUserLocationChange?: (loc: { lat: number; lng: number }) => void;
 }
 
 
@@ -42,6 +43,7 @@ export default function BusinessMap({
   externalHoveredId,
   onBusinessHover,
   searchCenter,
+  onUserLocationChange,
 }: BusinessMapProps) {
   const [selectedBusiness, setSelectedBusiness] =
     useState<BusinessWithSchedule | null>(null);
@@ -71,7 +73,9 @@ export default function BusinessMap({
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          setUserLocation(loc);
+          onUserLocationChange?.(loc);
         },
         () => {
           // Denied — use Tel Aviv default
@@ -266,6 +270,7 @@ export default function BusinessMap({
               navigator.geolocation.getCurrentPosition((pos) => {
                 const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
                 setUserLocation(loc);
+                onUserLocationChange?.(loc);
                 mapRef.current?.panTo(loc);
                 mapRef.current?.setZoom(15);
               });
