@@ -86,10 +86,8 @@ export default function RegisterPage() {
       <div className="flex flex-1 flex-col justify-center px-8 py-12 md:px-16 lg:px-24 overflow-y-auto">
         <div className="mb-8">
           <Link href="/" className="inline-flex items-center gap-2 group">
-            <MapPin className="h-7 w-7 fill-blue-600 text-blue-600 transition-transform group-hover:scale-110" />
-            <span className="font-display font-extrabold text-2xl text-blue-600">
-              פה
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="פה" className="h-10 w-auto" />
           </Link>
         </div>
 
@@ -252,7 +250,8 @@ export default function RegisterPage() {
 
         <div className="relative z-10 text-white text-center px-12">
           <div className="inline-flex items-center justify-center h-20 w-20 rounded-3xl bg-white/15 backdrop-blur-sm mb-6 shadow-lg">
-            <MapPin className="h-10 w-10 fill-white text-white" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="פה" className="h-12 w-auto" />
           </div>
           <p className="font-display font-extrabold text-5xl mb-4 tracking-tight">פה</p>
           <p className="text-xl font-medium opacity-90 leading-relaxed">

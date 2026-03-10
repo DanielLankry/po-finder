@@ -56,10 +56,8 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
           className="flex items-center gap-1.5 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-lg group"
           aria-label="פה — דף הבית"
         >
-          <PinIcon />
-          <span className="text-[28px] tracking-wide text-[#059669] transition-colors group-hover:text-[#047857]" style={{ fontFamily: "var(--font-secular)", fontWeight: 400 }}>
-            פה
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="פה" className="h-9 w-auto" />
         </Link>
 
         {/* Search bar — center (hidden on mobile) */}

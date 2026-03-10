@@ -66,10 +66,8 @@ function LoginForm() {
         {/* Logo */}
         <div className="mb-10">
           <Link href="/" className="inline-flex items-center gap-2 group">
-            <MapPin className="h-7 w-7 fill-[#059669] text-[#059669] transition-transform group-hover:scale-110" />
-            <span className="font-display font-extrabold text-2xl text-[#059669]">
-              פה
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="פה" className="h-10 w-auto" />
           </Link>
         </div>
 
