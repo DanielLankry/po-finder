@@ -253,12 +253,12 @@ export default function BusinessMap({
             style={{ transform: "translate(-50%, -50%)" }}
           >
             {/* Pulsing ring */}
-            <div className="absolute inset-0 rounded-full bg-[#22C55E]/20 animate-ping"
-              style={{ width: 32, height: 32, top: -8, left: -8 }} />
-            {/* Green dot — same size/border as business dot */}
+            <div className="absolute inset-0 rounded-full bg-red-500/20 animate-ping"
+              style={{ width: 22, height: 22, top: -5, left: -5 }} />
+            {/* Red dot */}
             <div
-              className="w-6 h-6 rounded-full border-[2px] border-white shadow-sm"
-              style={{ backgroundColor: "#22C55E" }}
+              className="w-3 h-3 rounded-full border-[1.5px] border-white shadow-sm"
+              style={{ backgroundColor: "#EF4444" }}
             />
           </div>
         </OverlayView>
