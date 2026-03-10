@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Heebo, Frank_Ruhl_Libre } from "next/font/google";
+import { Heebo, Secular_One } from "next/font/google";
 import "./globals.css";
 import "@/lib/env";
 import CookieConsent from "@/components/layout/CookieConsent";
@@ -13,10 +13,10 @@ const heebo = Heebo({
   display: "swap",
 });
 
-const frankRuhl = Frank_Ruhl_Libre({
+const secularOne = Secular_One({
   variable: "--font-logo",
   subsets: ["latin", "hebrew"],
-  weight: ["900"],
+  weight: ["400"],
   display: "swap",
 });
 
@@ -33,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="he" dir="rtl">
-      <body className={`${heebo.variable} ${frankRuhl.variable} antialiased font-sans`}>
+      <body className={`${heebo.variable} ${secularOne.variable} antialiased font-sans`}>
         <a
           href="#main-content"
           className="skip-to-content"
