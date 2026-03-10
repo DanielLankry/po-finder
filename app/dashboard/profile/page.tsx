@@ -106,19 +106,23 @@ export default function ProfilePage() {
       };
 
       if (business) {
-        await supabase
+        const { error: updateError } = await supabase
           .from("businesses")
           .update(payload)
           .eq("id", business.id);
+        if (updateError) throw updateError;
       } else {
-        await supabase.from("businesses").insert({
+        const { error: insertError } = await supabase.from("businesses").insert({
           owner_id: user.id,
           ...payload,
         });
+        if (insertError) throw insertError;
       }
       setSuccess(true);
-    } catch {
-      setError("שגיאה בשמירת הפרטים. נסו שוב.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : (err as { message?: string })?.message;
+      setError(`שגיאה בשמירת הפרטים: ${msg ?? "נסו שוב"}`);
+      console.error("Supabase save error:", err);
     }
     setSaving(false);
   }
