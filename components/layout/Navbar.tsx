@@ -57,7 +57,7 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
           aria-label="פה — דף הבית"
         >
           <PinIcon />
-          <span className="text-[28px] tracking-wide text-[#059669] transition-colors group-hover:text-[#047857]" style={{ fontFamily: "var(--font-logo)", fontWeight: 400 }}>
+          <span className="text-[28px] tracking-wide text-[#059669] transition-colors group-hover:text-[#047857]" style={{ fontFamily: "var(--font-secular)", fontWeight: 400 }}>
             פה
           </span>
         </Link>

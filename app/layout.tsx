@@ -1,20 +1,13 @@
 import type { Metadata } from "next";
-import { Heebo, Secular_One } from "next/font/google";
+import { Secular_One } from "next/font/google";
 import "./globals.css";
 import "@/lib/env";
 import CookieConsent from "@/components/layout/CookieConsent";
 import AccessibilityWidget from "@/components/layout/AccessibilityWidget";
 import { Analytics } from "@vercel/analytics/next";
 
-const heebo = Heebo({
-  variable: "--font-heebo",
-  subsets: ["latin", "hebrew"],
-  weight: ["400", "500", "700", "800", "900"],
-  display: "swap",
-});
-
 const secularOne = Secular_One({
-  variable: "--font-logo",
+  variable: "--font-secular",
   subsets: ["latin", "hebrew"],
   weight: ["400"],
   display: "swap",
@@ -33,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="he" dir="rtl">
-      <body className={`${heebo.variable} ${secularOne.variable} antialiased font-sans`}>
+      <body className={`${secularOne.variable} antialiased font-sans`}>
         <a
           href="#main-content"
           className="skip-to-content"

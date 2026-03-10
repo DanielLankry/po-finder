@@ -7,8 +7,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-heebo);
-  --font-display: var(--font-heebo);
+  --font-sans: var(--font-secular);
+  --font-display: var(--font-secular);
   --font-mono: var(--font-geist-mono);
 
   /* shadcn required mappings */
