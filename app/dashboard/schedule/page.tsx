@@ -144,7 +144,14 @@ export default function SchedulePage() {
 
   async function handleDelete() {
     if (!schedule) return;
-    await supabase.from("business_schedules").delete().eq("id", schedule.id);
+    const { error: delError } = await supabase
+      .from("business_schedules")
+      .delete()
+      .eq("id", schedule.id);
+    if (delError) {
+      setError(`שגיאה במחיקה: ${delError.message}`);
+      return;
+    }
     setSchedule(null);
     setForm({ address: "", lat: "", lng: "", open_time: "", close_time: "", note: "" });
     setSuccess(false);

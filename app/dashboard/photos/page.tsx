@@ -10,6 +10,7 @@ export default function PhotosPage() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
@@ -43,27 +44,38 @@ export default function PhotosPage() {
   async function uploadFiles(files: FileList | File[]) {
     if (!businessId) return;
     setUploading(true);
+    setUploadError(null);
 
     for (const file of Array.from(files)) {
       if (!file.type.startsWith("image/")) continue;
 
-      const ext = file.name.split(".").pop();
+      const ext = file.name.split(".").pop() ?? "jpg";
       const fileName = `${businessId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: storageError } = await supabase.storage
         .from("photos")
         .upload(fileName, file, { cacheControl: "3600" });
 
-      if (uploadError) continue;
+      if (storageError) {
+        setUploadError(`שגיאה בהעלאה: ${storageError.message}`);
+        continue;
+      }
 
       const { data: { publicUrl } } = supabase.storage.from("photos").getPublicUrl(fileName);
 
       const isPrimary = photos.length === 0;
-      const { data: photo } = await supabase
+      const { data: photo, error: dbError } = await supabase
         .from("photos")
         .insert({ business_id: businessId, url: publicUrl, is_primary: isPrimary })
         .select()
         .single();
+
+      if (dbError) {
+        setUploadError(`שגיאה בשמירת תמונה: ${dbError.message}`);
+        // Clean up orphaned storage file
+        await supabase.storage.from("photos").remove([fileName]);
+        continue;
+      }
 
       if (photo) setPhotos((prev) => [...prev, photo as Photo]);
     }
@@ -73,18 +85,28 @@ export default function PhotosPage() {
   async function setPrimary(photoId: string) {
     if (!businessId) return;
 
-    await supabase.from("photos").update({ is_primary: false }).eq("business_id", businessId);
-    await supabase.from("photos").update({ is_primary: true }).eq("id", photoId);
+    const { error: e1 } = await supabase.from("photos").update({ is_primary: false }).eq("business_id", businessId);
+    const { error: e2 } = await supabase.from("photos").update({ is_primary: true }).eq("id", photoId);
 
-    setPhotos((prev) =>
-      prev.map((p) => ({ ...p, is_primary: p.id === photoId }))
-    );
+    if (e1 || e2) {
+      setUploadError("שגיאה בעדכון תמונה ראשית");
+      return;
+    }
+    setPhotos((prev) => prev.map((p) => ({ ...p, is_primary: p.id === photoId })));
   }
 
   async function deletePhoto(photo: Photo) {
-    const filePath = photo.url.split("/photos/")[1];
-    if (filePath) await supabase.storage.from("photos").remove([filePath]);
-    await supabase.from("photos").delete().eq("id", photo.id);
+    // Extract storage path from public URL — everything after /object/public/photos/
+    const match = photo.url.match(/\/object\/public\/photos\/(.+)$/);
+    const filePath = match?.[1];
+    if (filePath) {
+      await supabase.storage.from("photos").remove([decodeURIComponent(filePath)]);
+    }
+    const { error: dbError } = await supabase.from("photos").delete().eq("id", photo.id);
+    if (dbError) {
+      setUploadError(`שגיאה במחיקה: ${dbError.message}`);
+      return;
+    }
     setPhotos((prev) => prev.filter((p) => p.id !== photo.id));
   }
 
@@ -134,6 +156,9 @@ export default function PhotosPage() {
           <p className="text-stone-400 text-xs mt-1">PNG, JPG, WEBP עד 10MB</p>
           {uploading && (
             <p className="text-blue-600 text-sm mt-2 font-medium">...מעלה</p>
+          )}
+          {uploadError && (
+            <p className="text-red-600 text-sm mt-2" role="alert">{uploadError}</p>
           )}
         </div>
 

@@ -112,11 +112,14 @@ export default function ProfilePage() {
           .eq("id", business.id);
         if (updateError) throw updateError;
       } else {
-        const { error: insertError } = await supabase.from("businesses").insert({
-          owner_id: user.id,
-          ...payload,
-        });
+        const { data: inserted, error: insertError } = await supabase
+          .from("businesses")
+          .insert({ owner_id: user.id, ...payload })
+          .select()
+          .single();
         if (insertError) throw insertError;
+        // Update local state so next save does UPDATE not INSERT
+        if (inserted) setBusiness(inserted);
       }
       setSuccess(true);
     } catch (err: unknown) {
