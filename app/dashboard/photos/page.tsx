@@ -46,8 +46,18 @@ export default function PhotosPage() {
     setUploading(true);
     setUploadError(null);
 
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
     for (const file of Array.from(files)) {
-      if (!file.type.startsWith("image/")) continue;
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        setUploadError(`סוג קובץ לא נתמך: ${file.name}`);
+        continue;
+      }
+      if (file.size > MAX_SIZE) {
+        setUploadError(`הקובץ ${file.name} גדול מ-10MB`);
+        continue;
+      }
 
       const ext = file.name.split(".").pop() ?? "jpg";
       const fileName = `${businessId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
+import { getSafeOrigin } from "@/lib/get-origin";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,7 +14,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const origin = req.headers.get("origin") || "http://localhost:3000";
+    const origin = getSafeOrigin(req);
 
     // Check if user already has a Stripe customer ID
     const { data: userData } = await supabase

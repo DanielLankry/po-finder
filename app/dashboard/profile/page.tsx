@@ -90,16 +90,28 @@ export default function ProfilePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Validate website URL (prevent javascript: and other unsafe schemes)
+      if (form.website) {
+        try {
+          const url = new URL(form.website);
+          if (!["http:", "https:"].includes(url.protocol)) {
+            throw new Error("URL לא תקין");
+          }
+        } catch {
+          throw new Error("כתובת האתר אינה תקינה — השתמשו בפורמט https://...");
+        }
+      }
+
       const payload = {
-        name: form.name,
-        description: form.description || null,
+        name: form.name.trim().slice(0, 100),
+        description: form.description?.trim().slice(0, 500) || null,
         category: form.category,
         kashrut: form.kashrut,
-        phone: form.phone || null,
-        whatsapp: form.whatsapp || null,
-        website: form.website || null,
-        instagram: form.instagram || null,
-        business_number: form.business_number || null,
+        phone: form.phone.trim() || null,
+        whatsapp: form.whatsapp.trim() || null,
+        website: form.website.trim() || null,
+        instagram: form.instagram.replace(/^@/, "").trim() || null,
+        business_number: form.business_number.trim() || null,
         address: form.address || null,
         lat: form.lat,
         lng: form.lng,
@@ -151,6 +163,7 @@ export default function ProfilePage() {
             onChange={(e) => update("name", e.target.value)}
             placeholder="קפה של דני"
             required
+            maxLength={100}
             className="h-11 rounded-xl border-stone-200 focus-visible:ring-blue-600"
           />
         </FormField>
@@ -161,6 +174,7 @@ export default function ProfilePage() {
             onChange={(e) => update("description", e.target.value)}
             placeholder="ספרו על העסק שלכם..."
             rows={3}
+            maxLength={500}
             className="rounded-xl border-stone-200 focus-visible:ring-blue-600 resize-none"
           />
         </FormField>
