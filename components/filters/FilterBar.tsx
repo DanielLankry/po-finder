@@ -45,7 +45,7 @@ export default function FilterBar({
                 aria-pressed={activeCategory === value}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-full transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] outline-none ${
                   activeCategory === value
-                    ? "bg-[#222222] text-white shadow-[0_4px_12px_rgba(34,34,34,0.15)] scale-105"
+                    ? "bg-[#222222] text-white shadow-[0_2px_8px_rgba(5,150,105,0.45)] scale-105"
                     : "bg-white/60 text-[#717171] hover:bg-white hover:text-[#222222] hover:shadow-sm border border-black/[0.04] focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2"
                 }`}
               >
