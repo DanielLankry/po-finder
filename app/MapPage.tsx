@@ -14,7 +14,7 @@ import type { LocationResult } from "@/components/map/PlacesSearchBar";
 const BusinessMap = dynamic(() => import("@/components/map/BusinessMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center h-full bg-[#F7F7F5]">
+    <div className="flex items-center justify-center h-full bg-[#FAFAF7]">
       <div className="h-10 w-10 rounded-full border-4 border-[#D1FAE5] border-t-[#059669] animate-spin" />
     </div>
   ),
@@ -62,7 +62,7 @@ export default function MapPage() {
   }, []);
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-[#F1F5F2]" dir="rtl">
+    <div className="h-screen flex flex-col overflow-hidden bg-[#FAFAF7]" dir="rtl">
       <Navbar
         onLocationSelect={(loc) => {
           setSearchCenter(loc);
@@ -82,7 +82,7 @@ export default function MapPage() {
       >
         {/* List panel — right side (RTL start), 800px on desktop to support 2 grid columns, full on mobile */}
         <div
-          className={`flex-shrink-0 border-l border-[#EBEBEB] overflow-hidden bg-white
+          className={`flex-shrink-0 border-l border-[#EBEBEB] overflow-hidden bg-[#FAFAF7]
             w-full md:w-[600px] lg:w-[840px]
             ${mobileView === "list" ? "flex flex-col" : "hidden md:flex md:flex-col"}`}
         >

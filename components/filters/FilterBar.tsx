@@ -31,7 +31,7 @@ export default function FilterBar({
 }: FilterBarProps) {
   return (
     <div
-      className="fixed top-[72px] inset-x-0 z-10 bg-white/75 backdrop-blur-xl border-b border-white/20 px-5 shadow-[0_8px_32px_rgba(0,0,0,0.04)] transition-all duration-300"
+      className="fixed top-[72px] inset-x-0 z-10 bg-[#FAFAF7]/90 backdrop-blur-xl border-b border-black/[0.06] px-5 shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300"
       dir="rtl"
     >
       <div className="flex items-center justify-between gap-4 py-3">

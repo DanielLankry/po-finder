@@ -80,7 +80,7 @@ export default function BusinessCard({
       >
         <div className="flex flex-col gap-3.5" dir="rtl">
           {/* ── Photo wrapper (aspect square) ───────────────────────────────── */}
-          <div className="relative w-full aspect-[4/3] rounded-[16px] overflow-hidden bg-[#F8F8F8] isolate">
+          <div className="relative w-full aspect-[4/3] rounded-[16px] overflow-hidden bg-[#F0F0EC] isolate">
             {primaryPhoto ? (
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
