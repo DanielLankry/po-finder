@@ -148,12 +148,10 @@ export default function BusinessMap({
       options={{
         styles: warmMapStyle,
         disableDefaultUI: true,
-        zoomControl: true,
-        zoomControlOptions: {
-          position: google.maps.ControlPosition.LEFT_BOTTOM,
-        },
+        zoomControl: false,
         clickableIcons: false,
         gestureHandling: "greedy",
+        keyboardShortcuts: false,
       }}
       onLoad={onMapLoad}
       onClick={() => setSelectedBusiness(null)}

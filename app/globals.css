@@ -352,3 +352,7 @@
 .a11y-letter-spacing h3 {
   letter-spacing: 0.04em;
 }
+
+/* Google Maps — hide keyboard shortcuts & minimize attribution bar */
+.gm-style-cc { display: none !important; }
+a[href^="https://maps.google.com/maps"] { display: none !important; }
