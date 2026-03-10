@@ -206,13 +206,13 @@ export default function BusinessMap({
               }}
             >
               <div
-                className={`rounded-full border-[2px] border-white transition-all duration-300 shadow-sm relative flex items-center justify-center ${
-                  isSelected || isHovered ? "w-8 h-8" : "w-6 h-6"
+                className={`rounded-full border-[1.5px] border-white transition-all duration-300 shadow-sm relative flex items-center justify-center ${
+                  isSelected || isHovered ? "w-6 h-6" : "w-4 h-4"
                 }`}
-                style={{ backgroundColor: "#EF4444" }}
+                style={{ backgroundColor: open ? "#059669" : "#D6D3D1" }}
               >
                 {!open && (
-                  <div className={`absolute inset-0 m-auto bg-white/80 rounded-full transition-all duration-300 ${isSelected || isHovered ? "w-2.5 h-2.5" : "w-1.5 h-1.5"}`} />
+                  <div className={`absolute inset-0 m-auto bg-white/80 rounded-full transition-all duration-300 ${isSelected || isHovered ? "w-2 h-2" : "w-1.5 h-1.5"}`} />
                 )}
               </div>
 
