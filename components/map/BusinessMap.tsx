@@ -226,6 +226,28 @@ export default function BusinessMap({
         );
       })}
 
+      {/* User location dot */}
+      {userLocation && (
+        <OverlayView
+          position={userLocation}
+          mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+        >
+          <div
+            className="absolute"
+            style={{ transform: "translate(-50%, -50%)" }}
+          >
+            {/* Pulsing ring */}
+            <div className="absolute inset-0 rounded-full bg-[#22C55E]/20 animate-ping"
+              style={{ width: 32, height: 32, top: -8, left: -8 }} />
+            {/* Green dot — same size/border as business dot */}
+            <div
+              className="w-6 h-6 rounded-full border-[2px] border-white shadow-sm"
+              style={{ backgroundColor: "#22C55E" }}
+            />
+          </div>
+        </OverlayView>
+      )}
+
       {/* Mobile bottom sheet popup */}
       {selectedBusiness && isMobile && (
         <BusinessPopup
@@ -233,6 +255,29 @@ export default function BusinessMap({
           onClose={() => setSelectedBusiness(null)}
           isMobile
         />
+      )}
+
+      {/* Mobile — locate me button */}
+      {isMobile && (
+        <div className="absolute bottom-24 left-3 z-10">
+          <button
+            onClick={() => {
+              if (!navigator.geolocation) return;
+              navigator.geolocation.getCurrentPosition((pos) => {
+                const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                setUserLocation(loc);
+                mapRef.current?.panTo(loc);
+                mapRef.current?.setZoom(15);
+              });
+            }}
+            className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center border border-stone-200 active:bg-stone-100 transition-colors"
+            aria-label="מיקום שלי"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-[#22C55E]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+            </svg>
+          </button>
+        </div>
       )}
     </GoogleMap>
   );
