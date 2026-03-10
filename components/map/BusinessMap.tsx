@@ -249,15 +249,15 @@ export default function BusinessMap({
           mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
         >
           <div
-            className="absolute"
-            style={{ transform: "translate(-50%, -50%)" }}
+            className="relative flex items-center justify-center"
+            style={{ width: 24, height: 24, transform: "translate(-50%, -50%)" }}
           >
-            {/* Pulsing ring */}
-            <div className="absolute inset-0 rounded-full bg-red-500/20 animate-ping"
-              style={{ width: 22, height: 22, top: -5, left: -5 }} />
-            {/* Red dot */}
+            {/* Pulsing ring — centered on dot */}
+            <div className="absolute rounded-full bg-red-500/25 animate-ping"
+              style={{ width: 24, height: 24, top: 0, left: 0 }} />
+            {/* Red dot — centered */}
             <div
-              className="w-3 h-3 rounded-full border-[1.5px] border-white shadow-sm"
+              className="relative w-3 h-3 rounded-full border-[1.5px] border-white shadow-sm"
               style={{ backgroundColor: "#EF4444" }}
             />
           </div>
