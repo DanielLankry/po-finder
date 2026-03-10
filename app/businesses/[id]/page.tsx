@@ -41,7 +41,7 @@ export default async function BusinessPage({ params }: Props) {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-white" dir="rtl">
+      <div className="min-h-screen bg-[#FAFAF7]" dir="rtl">
         <div className="max-w-[1280px] mx-auto px-4 pt-[88px] pb-16">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 mb-6 text-sm text-stone-500">

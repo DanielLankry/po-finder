@@ -21,7 +21,7 @@ export default function ContactPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-white pt-[88px] pb-16" dir="rtl">
+      <main className="min-h-screen bg-[#FAFAF7] pt-[88px] pb-16" dir="rtl">
         <div className="max-w-3xl mx-auto px-4">
           <h1 className="font-display font-extrabold text-3xl text-stone-900 mb-2">
             צרו קשר

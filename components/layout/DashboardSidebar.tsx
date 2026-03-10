@@ -20,7 +20,7 @@ export default function DashboardSidebar() {
 
   return (
     <aside className="w-full md:w-56 flex-shrink-0" aria-label="ניווט לוח הבקרה">
-      <nav className="hidden md:block bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-card">
+      <nav className="hidden md:block bg-[#FAFAF7] rounded-2xl border border-slate-200 overflow-hidden shadow-card">
         {NAV_ITEMS.map(({ href, label, exact }) => {
           const active = isActive(href, exact);
           return (
@@ -40,7 +40,7 @@ export default function DashboardSidebar() {
         })}
       </nav>
 
-      <nav className="flex md:hidden overflow-x-auto scrollbar-hide bg-white rounded-2xl border border-slate-200 shadow-card">
+      <nav className="flex md:hidden overflow-x-auto scrollbar-hide bg-[#FAFAF7] rounded-2xl border border-slate-200 shadow-card">
         {NAV_ITEMS.map(({ href, label, exact }) => {
           const active = isActive(href, exact);
           return (

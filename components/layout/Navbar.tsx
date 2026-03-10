@@ -41,8 +41,8 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
     <header
       className={`fixed top-0 inset-x-0 z-50 h-[72px] flex items-center transition-all duration-300 ${
         scrolled
-          ? "bg-white/80 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-b border-white/20"
-          : "bg-white/95 shadow-[0_1px_0_rgba(0,0,0,0.04)] border-b border-transparent"
+          ? "bg-[#FAFAF7]/85 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-b border-white/20"
+          : "bg-[#FAFAF7]/98 shadow-[0_1px_0_rgba(0,0,0,0.04)] border-b border-transparent"
       }`}
     >
       <nav
@@ -57,7 +57,7 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
           aria-label="פה — דף הבית"
         >
           <PinIcon />
-          <span className="font-display font-black text-[26px] tracking-tight text-[#059669] transition-colors group-hover:text-[#047857]">
+          <span className="text-[28px] text-[#059669] transition-colors group-hover:text-[#047857]" style={{ fontFamily: "var(--font-logo)", fontWeight: 900 }}>
             פה
           </span>
         </Link>
@@ -158,7 +158,7 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
 
       {/* Mobile search overlay */}
       {mobileSearchOpen && (
-        <div className="fixed inset-0 z-50 bg-white/98 backdrop-blur-sm flex items-start pt-4 px-4 fade-in">
+        <div className="fixed inset-0 z-50 bg-[#FAFAF7]/98 backdrop-blur-sm flex items-start pt-4 px-4 fade-in">
           <div className="flex-1">
             {onLocationSelect ? (
               <PlacesSearchBar
@@ -191,7 +191,7 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-[72px] z-40 bg-white shadow-popup border-t border-slate-100 py-3 px-4 slide-in-right" dir="rtl">
+        <div className="md:hidden fixed inset-x-0 top-[72px] z-40 bg-[#FAFAF7] shadow-popup border-t border-slate-100 py-3 px-4 slide-in-right" dir="rtl">
           <Link
             href="/dashboard"
             className="flex items-center gap-2 py-3 text-slate-700 font-medium hover:text-[#047857] transition-colors"

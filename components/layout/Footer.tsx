@@ -13,7 +13,7 @@ const LINKS = [
 export default function Footer() {
   return (
     <footer
-      className="border-t border-slate-200 bg-white py-8"
+      className="border-t border-slate-200 bg-[#FAFAF7] py-8"
       dir="rtl"
       aria-label="כותרת תחתית"
     >

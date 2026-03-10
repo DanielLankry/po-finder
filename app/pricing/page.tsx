@@ -35,7 +35,7 @@ export default function PricingPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-white pt-[88px] pb-16" dir="rtl">
+      <main className="min-h-screen bg-[#FAFAF7] pt-[88px] pb-16" dir="rtl">
         <div className="max-w-4xl mx-auto px-4">
           {showBanner && (
             <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 text-amber-800 text-sm text-center font-medium">

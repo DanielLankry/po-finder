@@ -103,7 +103,7 @@ export default function BusinessListPanel({
       return (
         <div className="flex flex-col h-full bg-[#FAFAFA]" dir="rtl">
           {/* Header with back button */}
-          <div className="px-5 py-3.5 border-b border-[#EBEBEB] bg-white flex items-center shrink-0 sticky top-0 z-10 shadow-sm">
+          <div className="px-5 py-3.5 border-b border-[#EBEBEB] bg-[#FAFAF7] flex items-center shrink-0 sticky top-0 z-10 shadow-sm">
             <button
               onClick={() => onBackToList?.()}
               className="flex items-center gap-1.5 text-[#222222] hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-full px-4 py-2 -mx-4"
@@ -141,7 +141,7 @@ export default function BusinessListPanel({
   return (
     <div className="flex flex-col h-full" dir="rtl">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="px-5 py-3.5 border-b border-[#EBEBEB] bg-white flex-shrink-0 flex items-center gap-2.5">
+      <div className="px-5 py-3.5 border-b border-[#EBEBEB] bg-[#FAFAF7] flex-shrink-0 flex items-center gap-2.5">
         {loading ? (
           <div className="h-4 w-28 rounded-full shimmer" aria-hidden="true" />
         ) : (
@@ -160,7 +160,7 @@ export default function BusinessListPanel({
       </div>
 
       {/* ── Scrollable cards ───────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto bg-white scrollbar-thin">
+      <div className="flex-1 overflow-y-auto bg-[#FAFAF7] scrollbar-thin">
         {loading ? (
           // Show 6 shimmer skeleton cards while data loads
           Array.from({ length: 6 }, (_, i) => <SkeletonCard key={i} />)
