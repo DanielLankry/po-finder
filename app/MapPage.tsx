@@ -136,7 +136,7 @@ export default function MapPage() {
 
         {/* Map panel — fills remaining space, floats with rounded corners */}
         <div className={`flex-1 relative p-3 md:p-5 lg:p-6 ${mobileView === "map" ? "block" : "hidden md:block"}`}>
-          <div className="w-full h-full rounded-[24px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-black/[0.04]">
+          <div className="w-full h-full rounded-[24px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-black/[0.04]" dir="ltr">
           <BusinessMap
             businesses={businesses}
             activeCategory={activeCategory}
