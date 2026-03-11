@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, createRef } from "react";
+import { NumberTicker } from "@/components/ui/number-ticker";
 import { MapPin, Star } from "lucide-react";
 import type { BusinessWithSchedule, BusinessCategory } from "@/lib/types";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
@@ -195,16 +196,22 @@ export default function BusinessListPanel({
           </div>
         ) : (
           <div className="flex items-center gap-3 flex-wrap">
-            <p className="text-xl font-bold text-[#111111] tracking-tight">
-              {filtered.length > 0 ? `${filtered.length} עסקים` : "לא נמצאו עסקים"}
-            </p>
+            {filtered.length > 0 ? (
+              <p className="text-xl font-bold text-[#111111] tracking-tight flex items-baseline gap-1">
+                <NumberTicker value={filtered.length} className="text-xl font-bold text-[#111111]" />
+                <span>עסקים</span>
+              </p>
+            ) : (
+              <p className="text-xl font-bold text-[#111111] tracking-tight">לא נמצאו עסקים</p>
+            )}
             {openCount > 0 && (
               <span className="inline-flex items-center gap-2 text-sm font-semibold px-3.5 py-1.5 rounded-full bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0]">
                 <span className="relative flex h-2 w-2 flex-shrink-0" aria-hidden="true">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#059669] opacity-60" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[#059669]" />
                 </span>
-                {openCount} פתוחים עכשיו
+                <NumberTicker value={openCount} className="text-sm font-semibold text-[#047857]" />
+                <span>פתוחים עכשיו</span>
               </span>
             )}
           </div>
