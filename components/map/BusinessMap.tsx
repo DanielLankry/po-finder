@@ -316,11 +316,17 @@ export default function BusinessMap({
                 mapRef.current?.setZoom(15);
               });
             }}
-            className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center border border-stone-200 active:bg-stone-100 transition-colors"
+            className="w-11 h-11 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+            style={{ background: "linear-gradient(135deg,#059669 0%,#047857 100%)" }}
             aria-label="מיקום שלי"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-[#22C55E]" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+            {/* Navigation arrow — points to current location */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <line x1="12" y1="2" x2="12" y2="6" />
+              <line x1="12" y1="18" x2="12" y2="22" />
+              <line x1="2" y1="12" x2="6" y2="12" />
+              <line x1="18" y1="12" x2="22" y2="12" />
             </svg>
           </button>
         </div>

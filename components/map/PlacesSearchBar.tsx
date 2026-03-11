@@ -131,11 +131,12 @@ export default function PlacesSearchBar({
           onClick={handleGPS}
           disabled={locating}
           title="מיקום נוכחי"
-          className="flex-shrink-0 h-11 w-11 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] flex items-center justify-center hover:bg-[#ECFDF5] hover:border-[#059669]/40 transition-all disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+          className="flex-shrink-0 h-11 w-11 rounded-full flex items-center justify-center transition-all disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
+          style={{ background: "linear-gradient(135deg,#059669 0%,#047857 100%)" }}
           aria-label="השתמש במיקום הנוכחי"
         >
           <LocateFixed
-            className={`h-4 w-4 text-[#059669] ${locating ? "animate-pulse" : ""}`}
+            className={`h-[18px] w-[18px] text-white ${locating ? "animate-spin" : ""}`}
             aria-hidden="true"
           />
         </button>
