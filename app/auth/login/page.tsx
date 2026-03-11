@@ -60,27 +60,38 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen" dir="rtl">
-      {/* Form side — RIGHT in RTL */}
-      <div className="flex flex-1 flex-col justify-center px-8 py-12 md:px-16 lg:px-24">
-        {/* Logo */}
-        <div className="mb-10">
-          <Link href="/" className="inline-flex items-center gap-2 group">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="פה" className="h-10 w-auto" />
-          </Link>
-        </div>
+    <div className="relative min-h-screen" dir="rtl">
+      {/* Full-screen gradient background */}
+      <BackgroundGradientAnimation
+        gradientBackgroundStart="rgb(2, 44, 34)"
+        gradientBackgroundEnd="rgb(1, 30, 22)"
+        firstColor="5, 150, 105"
+        secondColor="16, 185, 129"
+        thirdColor="52, 211, 153"
+        fourthColor="6, 95, 70"
+        fifthColor="167, 243, 208"
+        pointerColor="110, 231, 183"
+        blendingValue="screen"
+        interactive
+      />
 
-        <div className="max-w-sm w-full fade-in-up">
-          <h1 className="font-display font-bold text-3xl text-[#0A0A0A] mb-1">
+      {/* Centered login card */}
+      <div className="absolute inset-0 flex items-center justify-center p-4 z-10">
+        <div className="w-full max-w-md bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-[0_32px_64px_rgba(0,0,0,0.4)] p-8">
+          {/* Logo */}
+          <div className="flex justify-center mb-7">
+            <Link href="/">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="פה קרוב" className="h-12 w-auto brightness-0 invert" />
+            </Link>
+          </div>
+
+          <h1 className="font-bold text-2xl text-white text-center mb-1">
             ברוכים הבאים חזרה
           </h1>
-          <p className="text-slate-500 text-sm mb-8">
+          <p className="text-white/60 text-sm text-center mb-7">
             אין לכם חשבון?{" "}
-            <Link
-              href="/auth/register"
-              className="text-[#059669] font-medium hover:text-[#047857] hover:underline"
-            >
+            <Link href="/auth/register" className="text-emerald-300 font-medium hover:text-emerald-200 hover:underline">
               הירשמו כאן
             </Link>
           </p>
@@ -90,22 +101,22 @@ function LoginForm() {
             type="button"
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 h-11 px-4 rounded-xl border border-slate-200 bg-white text-slate-700 font-medium text-sm hover:bg-slate-50 hover:border-slate-300 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2 disabled:opacity-50 btn-press shadow-sm"
+            className="w-full flex items-center justify-center gap-3 h-11 px-4 rounded-xl bg-white/90 hover:bg-white text-slate-700 font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 disabled:opacity-50 shadow-sm"
           >
             <GoogleIcon />
             כניסה עם גוגל
           </button>
 
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-slate-200" />
-            <span className="text-slate-400 text-xs">או</span>
-            <div className="flex-1 h-px bg-slate-200" />
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px bg-white/20" />
+            <span className="text-white/40 text-xs">או</span>
+            <div className="flex-1 h-px bg-white/20" />
           </div>
 
           {/* Email form */}
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div>
-              <Label htmlFor="email" className="text-slate-700 font-medium text-sm mb-1.5 block">
+              <Label htmlFor="email" className="text-white/80 font-medium text-sm mb-1.5 block">
                 כתובת מייל
               </Label>
               <Input
@@ -115,13 +126,13 @@ function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-11 rounded-xl border-slate-200 focus-visible:ring-[#059669] text-right"
+                className="h-11 rounded-xl bg-white/10 border-white/20 text-white placeholder:text-white/30 focus-visible:ring-emerald-400 focus-visible:border-emerald-400"
                 dir="ltr"
               />
             </div>
 
             <div>
-              <Label htmlFor="password" className="text-slate-700 font-medium text-sm mb-1.5 block">
+              <Label htmlFor="password" className="text-white/80 font-medium text-sm mb-1.5 block">
                 סיסמה
               </Label>
               <Input
@@ -131,72 +142,28 @@ function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-11 rounded-xl border-slate-200 focus-visible:ring-[#059669]"
+                className="h-11 rounded-xl bg-white/10 border-white/20 text-white placeholder:text-white/30 focus-visible:ring-emerald-400"
                 dir="ltr"
               />
             </div>
 
             <div className="flex justify-end">
-              <Link
-                href="/auth/forgot-password"
-                className="text-sm text-[#059669] hover:underline font-medium"
-              >
+              <Link href="/auth/forgot-password" className="text-sm text-emerald-300 hover:underline font-medium">
                 שכחתם את הסיסמה?
               </Link>
             </div>
 
-            {error && (
-              <p role="alert" className="text-red-600 text-sm">
-                {error}
-              </p>
-            )}
+            {error && <p role="alert" className="text-red-300 text-sm">{error}</p>}
 
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium shadow-[0_4px_14px_rgba(5,150,105,0.25)] hover:shadow-[0_6px_20px_rgba(5,150,105,0.3)] transition-all btn-press"
+              className="w-full h-11 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-semibold shadow-[0_4px_20px_rgba(5,150,105,0.4)] transition-all"
             >
               {loading ? "...נכנסים" : "כניסה"}
             </Button>
           </form>
         </div>
-      </div>
-
-      {/* Decorative side — LEFT in RTL (desktop only) */}
-      <div className="hidden lg:block flex-1 relative overflow-hidden">
-        <BackgroundGradientAnimation
-          gradientBackgroundStart="rgb(2, 44, 34)"
-          gradientBackgroundEnd="rgb(1, 30, 22)"
-          firstColor="5, 150, 105"
-          secondColor="16, 185, 129"
-          thirdColor="52, 211, 153"
-          fourthColor="6, 95, 70"
-          fifthColor="167, 243, 208"
-          pointerColor="110, 231, 183"
-          blendingValue="screen"
-          containerClassName="h-full w-full"
-          interactive
-        >
-          <div className="absolute inset-0 flex items-center justify-center z-10">
-            <div className="text-white text-center px-12">
-              <div className="inline-flex items-center justify-center h-24 w-24 rounded-full bg-white/10 backdrop-blur-xl mb-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)] border border-white/20">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo.png" alt="פה קרוב" className="h-14 w-auto brightness-0 invert" />
-              </div>
-              <p className="font-bold text-5xl mb-4 tracking-tight drop-shadow-lg">פה קרוב</p>
-              <p className="text-lg font-medium opacity-80 leading-relaxed max-w-xs mx-auto">
-                גלו עסקים ניידים קרוב אליכם — על המפה, בזמן אמת
-              </p>
-              <div className="mt-10 flex items-center justify-center gap-2.5 text-sm text-white/70 bg-white/5 backdrop-blur-md px-5 py-2.5 rounded-full border border-white/10 w-max mx-auto">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-300" />
-                </span>
-                <span>מאות עסקים ברחבי הארץ</span>
-              </div>
-            </div>
-          </div>
-        </BackgroundGradientAnimation>
       </div>
     </div>
   );
