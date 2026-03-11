@@ -180,19 +180,27 @@ export default function BusinessMap({
         };
         const emoji = CATEGORY_EMOJI[business.category] ?? "📍";
 
+        const size = isSelected || isHovered ? 40 : 32;
+
         return (
           <OverlayView
             key={business.id}
             position={{ lat, lng }}
             mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+            getPixelPositionOffset={() => ({ x: -(size / 2), y: -(size / 2) })}
           >
             <div
-              className={`absolute cursor-pointer select-none flex flex-col items-center justify-center transition-all duration-300 ease-out origin-center ${
-                isSelected || isHovered ? "z-20" : "z-10 hover:z-20"
-              }`}
               style={{
-                transform: `translate(-50%, -50%)`,
-                filter: isSelected || isHovered ? "drop-shadow(0 4px 12px rgba(0,0,0,0.25))" : "drop-shadow(0 2px 4px rgba(0,0,0,0.12))"
+                position: "relative",
+                width: size,
+                height: size,
+                zIndex: isSelected || isHovered ? 20 : 10,
+                filter: isSelected || isHovered
+                  ? "drop-shadow(0 4px 12px rgba(0,0,0,0.25))"
+                  : "drop-shadow(0 2px 4px rgba(0,0,0,0.12))",
+                cursor: "pointer",
+                userSelect: "none",
+                transition: "width 0.2s, height 0.2s, filter 0.2s",
               }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -218,19 +226,27 @@ export default function BusinessMap({
               }}
             >
               <div
-                className={`flex items-center justify-center rounded-full border-2 bg-white transition-all duration-300 shadow-md select-none ${
-                  isSelected || isHovered ? "w-10 h-10 text-2xl border-[#059669]" : "w-8 h-8 text-lg border-white/80"
-                } ${!open ? "grayscale opacity-50" : ""}`}
+                style={{
+                  width: size,
+                  height: size,
+                  fontSize: isSelected || isHovered ? "1.4rem" : "1.1rem",
+                  border: `2px solid ${isSelected || isHovered ? "#059669" : "rgba(255,255,255,0.8)"}`,
+                  opacity: open ? 1 : 0.5,
+                  filter: open ? "none" : "grayscale(1)",
+                }}
+                className="flex items-center justify-center rounded-full bg-white shadow-md select-none transition-all duration-200"
               >
                 {emoji}
               </div>
 
               {/* Popup for desktop */}
               {isSelected && !isMobile && (
-                <BusinessPopup
-                  business={business}
-                  onClose={() => setSelectedBusiness(null)}
-                />
+                <div style={{ position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)", zIndex: 30 }}>
+                  <BusinessPopup
+                    business={business}
+                    onClose={() => setSelectedBusiness(null)}
+                  />
+                </div>
               )}
             </div>
           </OverlayView>
@@ -242,14 +258,17 @@ export default function BusinessMap({
         <OverlayView
           position={userLocation}
           mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+          getPixelPositionOffset={() => ({ x: -12, y: -12 })}
         >
           <div
-            className="relative flex items-center justify-center"
-            style={{ width: 24, height: 24, transform: "translate(-50%, -50%)" }}
+            style={{ position: "relative", width: 24, height: 24 }}
+            className="flex items-center justify-center"
           >
-            {/* Pulsing ring — centered on dot */}
-            <div className="absolute rounded-full bg-red-500/25 animate-ping"
-              style={{ width: 24, height: 24, top: 0, left: 0 }} />
+            {/* Pulsing ring */}
+            <div
+              className="absolute rounded-full bg-red-500/25 animate-ping"
+              style={{ width: 24, height: 24, top: 0, left: 0 }}
+            />
             {/* Red dot — centered */}
             <div
               className="relative w-3 h-3 rounded-full border-[1.5px] border-white shadow-sm"
