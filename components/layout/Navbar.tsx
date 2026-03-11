@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MapPin, Search, Menu, X, Plus } from "lucide-react";
+import { Typewriter } from "@/components/ui/typewriter";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import PlacesSearchBar, { type LocationResult } from "@/components/map/PlacesSearchBar";
@@ -50,15 +51,27 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
         aria-label="ניווט ראשי"
         dir="rtl"
       >
-        {/* Logo — RIGHT in RTL (start) */}
-        <Link
-          href="/"
-          className="flex items-center gap-1.5 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-lg group"
-          aria-label="פה — דף הבית"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="פה" className="h-9 w-auto" />
-        </Link>
+        {/* Logo + tagline — RIGHT in RTL (start) */}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <Link
+            href="/"
+            className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-lg"
+            aria-label="פה קרוב — דף הבית"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="פה קרוב" className="h-9 w-auto" />
+          </Link>
+          {/* Typewriter tagline — desktop only */}
+          <div className="hidden md:flex items-center text-[13px] font-medium text-[#6B7280] border-r border-[#E5E7EB] pr-3">
+            <Typewriter
+              text={["לעסקים קטנים", "לדוכנים", "לעגלות קפה", "ליוצרים", "לשווקים ניידים"]}
+              speed={60}
+              deleteSpeed={35}
+              waitTime={2200}
+              className="text-[#059669] font-semibold"
+            />
+          </div>
+        </div>
 
         {/* Search bar — center (hidden on mobile) */}
         <div className="hidden md:flex flex-1 justify-center max-w-[400px] mx-auto">
