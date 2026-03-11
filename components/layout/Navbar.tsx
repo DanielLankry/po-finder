@@ -62,8 +62,8 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="פה קרוב" className="h-9 w-auto" />
           </Link>
-          {/* Typewriter tagline — desktop only */}
-          <div className="hidden md:flex items-center border-r border-[#E5E7EB] pr-3 w-[280px] overflow-hidden">
+          {/* Typewriter tagline — desktop: larger, mobile: smaller */}
+          <div className="flex items-center border-r border-[#E5E7EB] pr-3 overflow-hidden w-[160px] md:w-[280px]">
             <Typewriter
               text={[
                 "לעסקים קטנים",
@@ -81,7 +81,7 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
               speed={60}
               deleteSpeed={35}
               waitTime={2200}
-              className="text-[#059669] font-bold text-[24px] whitespace-nowrap"
+              className="text-[#059669] font-bold text-[17px] md:text-[24px] whitespace-nowrap"
             />
           </div>
         </div>

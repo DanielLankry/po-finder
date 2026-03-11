@@ -120,7 +120,7 @@ export default function PlacesSearchBar({
             type="text"
             placeholder={placeholder}
             disabled={!isLoaded}
-            className="w-full h-10 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] ps-10 pe-4 text-base md:text-sm text-[#222222] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-2 focus:ring-[#059669] focus:border-transparent focus:bg-white transition-all disabled:opacity-50"
+            className="w-full h-11 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] ps-10 pe-4 text-base md:text-sm text-[#222222] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-2 focus:ring-[#059669] focus:border-transparent focus:bg-white transition-all disabled:opacity-50"
             dir="rtl"
             aria-label="חיפוש מיקום"
           />
@@ -131,7 +131,7 @@ export default function PlacesSearchBar({
           onClick={handleGPS}
           disabled={locating}
           title="מיקום נוכחי"
-          className="flex-shrink-0 h-10 w-10 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] flex items-center justify-center hover:bg-[#ECFDF5] hover:border-[#059669]/40 transition-all disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+          className="flex-shrink-0 h-11 w-11 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] flex items-center justify-center hover:bg-[#ECFDF5] hover:border-[#059669]/40 transition-all disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
           aria-label="השתמש במיקום הנוכחי"
         >
           <LocateFixed
