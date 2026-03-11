@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessById } from "@/lib/db/businesses";
-import { getTodaySchedule } from "@/lib/db/schedules";
+import { getTodaySchedule, getWeeklySchedule } from "@/lib/db/schedules";
 import { getReviews } from "@/lib/db/reviews";
 import PhotoGrid from "@/components/business/PhotoGrid";
 import StatusCard from "@/components/business/StatusCard";
@@ -29,11 +29,28 @@ export default async function BusinessPage({ params }: Props) {
     notFound();
   }
 
-  const [schedule, reviews, { data: authData }] = await Promise.all([
+  const [schedule, weeklySchedule, reviews, { data: authData }] = await Promise.all([
     getTodaySchedule(id),
+    getWeeklySchedule(id),
     getReviews(id),
     (await createClient()).auth.getUser(),
   ]);
+
+  // If there's no daily override for today, derive it from the weekly template
+  const todayDow = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jerusalem" })).getDay();
+  const todayWeekly = weeklySchedule?.find((w) => w.day_of_week === todayDow);
+  const effectiveSchedule = schedule ?? (todayWeekly?.is_active ? {
+    id: todayWeekly.id,
+    business_id: todayWeekly.business_id,
+    date: new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" }),
+    address: todayWeekly.address,
+    lat: todayWeekly.lat,
+    lng: todayWeekly.lng,
+    open_time: todayWeekly.open_time,
+    close_time: todayWeekly.close_time,
+    note: todayWeekly.note,
+    created_at: todayWeekly.created_at,
+  } : null);
 
   const isLoggedIn = !!authData.user;
   const photos = business.photos ?? [];
@@ -92,9 +109,12 @@ export default async function BusinessPage({ params }: Props) {
               <hr className="border-stone-100 mb-6" />
 
               {/* Weekly hours */}
-              {business.weekly_hours && (
+              {(weeklySchedule?.length || business.weekly_hours) && (
                 <div className="mb-6">
-                  <HoursCard weeklyHours={business.weekly_hours} />
+                  <HoursCard
+                    weeklySchedule={weeklySchedule}
+                    weeklyHours={business.weekly_hours}
+                  />
                 </div>
               )}
 
@@ -118,7 +138,7 @@ export default async function BusinessPage({ params }: Props) {
 
             {/* Sticky status card — LEFT (narrower) */}
             <div className="lg:w-[360px] flex-shrink-0">
-              <StatusCard business={business} schedule={schedule} />
+              <StatusCard business={business} schedule={effectiveSchedule} />
             </div>
           </div>
         </div>
