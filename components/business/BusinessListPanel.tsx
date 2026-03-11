@@ -187,21 +187,27 @@ export default function BusinessListPanel({
   return (
     <div className="flex flex-col h-full" dir="rtl">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="px-5 py-3.5 border-b border-[#EBEBEB] bg-[#FAFAF7] flex-shrink-0 flex items-center gap-2.5">
+      <div className="px-5 pt-5 pb-4 border-b border-[#EBEBEB] bg-white flex-shrink-0 shadow-sm">
         {loading ? (
-          <div className="h-4 w-28 rounded-full shimmer" aria-hidden="true" />
+          <div className="flex items-center gap-3">
+            <div className="h-7 w-20 rounded-lg shimmer" aria-hidden="true" />
+            <div className="h-6 w-32 rounded-full shimmer" aria-hidden="true" />
+          </div>
         ) : (
-          <>
-            <p className="text-sm font-semibold text-[#222222]">
+          <div className="flex items-center gap-3 flex-wrap">
+            <p className="text-xl font-bold text-[#111111] tracking-tight">
               {filtered.length > 0 ? `${filtered.length} עסקים` : "לא נמצאו עסקים"}
             </p>
             {openCount > 0 && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#D1FAE5]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#059669]" aria-hidden="true" />
+              <span className="inline-flex items-center gap-2 text-sm font-semibold px-3.5 py-1.5 rounded-full bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0]">
+                <span className="relative flex h-2 w-2 flex-shrink-0" aria-hidden="true">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#059669] opacity-60" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#059669]" />
+                </span>
                 {openCount} פתוחים עכשיו
               </span>
             )}
-          </>
+          </div>
         )}
       </div>
 
