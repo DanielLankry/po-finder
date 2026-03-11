@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MapPin, Search, Menu, X, Plus } from "lucide-react";
-import { Typewriter } from "@/components/ui/typewriter";
+import AnimatedTextCycle from "@/components/ui/animated-text-cycle";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import PlacesSearchBar, { type LocationResult } from "@/components/map/PlacesSearchBar";
@@ -61,27 +61,26 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="פה קרוב" className="h-9 w-auto" />
           </Link>
-          {/* Typewriter tagline — desktop only */}
-          <div className="hidden md:flex items-center border-r border-[#E5E7EB] pr-3 w-[260px] overflow-hidden">
-            <Typewriter
-              text={[
-                "לעסקים קטנים",
-                "לדוכנים",
-                "לעגלות קפה",
-                "ליוצרים",
-                "לשווקים ניידים",
-                "לבעלי קיוסקים",
-                "לאופים ביתיים",
-                "לפרחנים",
-                "לסוחרי וינטג׳",
-                "לקייטרינג",
-                "לישראלים",
-              ]}
-              speed={60}
-              deleteSpeed={35}
-              waitTime={2200}
-              className="text-[#059669] font-bold text-[22px] whitespace-nowrap"
-            />
+          {/* Animated word cycle tagline — desktop only */}
+          <div className="hidden md:flex items-center border-r border-[#E5E7EB] pr-3 overflow-hidden">
+            <span className="text-[#059669] font-bold text-[20px] whitespace-nowrap flex items-center gap-1.5">
+              <AnimatedTextCycle
+                words={[
+                  "לעסקים קטנים",
+                  "לדוכנים",
+                  "לעגלות קפה",
+                  "ליוצרים",
+                  "לשווקים ניידים",
+                  "לבעלי קיוסקים",
+                  "לאופים ביתיים",
+                  "לפרחנים",
+                  "לסוחרי וינטג׳",
+                  "לקייטרינג",
+                ]}
+                interval={3000}
+                className="text-[#059669] text-[20px]"
+              />
+            </span>
           </div>
         </div>
 

@@ -1,6 +1,9 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { MapPin, Users, Heart, Shield } from "lucide-react";
+import { MapPin, Users, Heart, Shield, ArrowLeft } from "lucide-react";
+import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
+import { ShimmerButton } from "@/components/ui/shimmer-button";
+import Link from "next/link";
 
 export const metadata = {
   title: "אודות — פה",
@@ -13,6 +16,13 @@ export default function AboutPage() {
       <Navbar />
       <main className="min-h-screen bg-[#FAFAF7] pt-[88px] pb-16" dir="rtl">
         <div className="max-w-3xl mx-auto px-4">
+          {/* Shiny badge */}
+          <div className="mb-4">
+            <AnimatedShinyText className="inline-flex items-center gap-1.5 text-sm font-medium px-3.5 py-1.5 rounded-full border border-[#D1FAE5] bg-[#ECFDF5] text-[#047857]" shimmerWidth={120}>
+              ✨ פלטפורמה לעסקים קטנים
+            </AnimatedShinyText>
+          </div>
+
           <h1 className="font-display font-extrabold text-3xl text-stone-900 mb-2">
             אודות פה
           </h1>
@@ -142,15 +152,26 @@ export default function AboutPage() {
 
             {/* Contact CTA */}
             <section className="text-center py-4">
-              <p className="text-stone-600 mb-4">
+              <p className="text-stone-600 mb-6">
                 יש לכם שאלות? רוצים לשתף פעולה?
               </p>
-              <a
-                href="/contact"
-                className="inline-flex items-center justify-center h-11 px-6 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2"
-              >
-                צרו קשר
-              </a>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                <Link href="/contact">
+                  <ShimmerButton
+                    shimmerColor="#a7f3d0"
+                    background="rgba(5,150,105,1)"
+                    className="h-11 px-6 text-sm font-semibold"
+                  >
+                    <span className="flex items-center gap-2">
+                      צרו קשר
+                      <ArrowLeft className="h-4 w-4" />
+                    </span>
+                  </ShimmerButton>
+                </Link>
+                <Link href="/" className="inline-flex items-center gap-2 h-11 px-6 rounded-full border border-stone-200 bg-white text-stone-700 text-sm font-medium hover:bg-stone-50 transition-colors">
+                  חזרה למפה
+                </Link>
+              </div>
             </section>
           </div>
         </div>
