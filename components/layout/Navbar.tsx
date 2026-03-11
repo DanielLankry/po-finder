@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MapPin, Search, Menu, X, Plus } from "lucide-react";
-import AnimatedTextCycle from "@/components/ui/animated-text-cycle";
+import { Typewriter } from "@/components/ui/typewriter";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import PlacesSearchBar, { type LocationResult } from "@/components/map/PlacesSearchBar";
@@ -61,26 +61,27 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="פה קרוב" className="h-9 w-auto" />
           </Link>
-          {/* Animated word cycle tagline — desktop only */}
-          <div className="hidden md:flex items-center border-r border-[#E5E7EB] pr-3 overflow-hidden">
-            <span className="text-[#059669] font-bold text-[20px] whitespace-nowrap flex items-center gap-1.5">
-              <AnimatedTextCycle
-                words={[
-                  "לעסקים קטנים",
-                  "לדוכנים",
-                  "לעגלות קפה",
-                  "ליוצרים",
-                  "לשווקים ניידים",
-                  "לבעלי קיוסקים",
-                  "לאופים ביתיים",
-                  "לפרחנים",
-                  "לסוחרי וינטג׳",
-                  "לקייטרינג",
-                ]}
-                interval={3000}
-                className="text-[#059669] text-[20px]"
-              />
-            </span>
+          {/* Typewriter tagline — desktop only */}
+          <div className="hidden md:flex items-center border-r border-[#E5E7EB] pr-3 w-[280px] overflow-hidden">
+            <Typewriter
+              text={[
+                "לעסקים קטנים",
+                "לדוכנים",
+                "לעגלות קפה",
+                "ליוצרים",
+                "לשווקים ניידים",
+                "לבעלי קיוסקים",
+                "לאופים ביתיים",
+                "לפרחנים",
+                "לסוחרי וינטג׳",
+                "לקייטרינג",
+                "לישראלים",
+              ]}
+              speed={60}
+              deleteSpeed={35}
+              waitTime={2200}
+              className="text-[#059669] font-bold text-[24px] whitespace-nowrap"
+            />
           </div>
         </div>
 
@@ -106,6 +107,28 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
                </div>
             </button>
           )}
+        </div>
+
+        {/* Nav links — desktop only, between search and actions */}
+        <div className="hidden md:flex items-center gap-1 flex-shrink-0">
+          <Link
+            href="/about"
+            className="h-9 px-3.5 rounded-full text-[#717171] font-medium text-sm hover:bg-stone-100 hover:text-[#222222] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] flex items-center"
+          >
+            אודות
+          </Link>
+          <Link
+            href="/contact"
+            className="h-9 px-3.5 rounded-full text-[#717171] font-medium text-sm hover:bg-stone-100 hover:text-[#222222] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] flex items-center"
+          >
+            צרו קשר
+          </Link>
+          <Link
+            href="/pricing"
+            className="h-9 px-3.5 rounded-full text-[#717171] font-medium text-sm hover:bg-stone-100 hover:text-[#222222] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] flex items-center"
+          >
+            מחירים
+          </Link>
         </div>
 
         {/* Actions — LEFT in RTL (end) */}
