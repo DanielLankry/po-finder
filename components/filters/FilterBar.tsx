@@ -79,7 +79,7 @@ export default function FilterBar({
         <div className="flex-1 overflow-hidden py-1 -my-1">
 
           {/* Mobile — auto-scroll marquee */}
-          <div className="md:hidden" dir="ltr">
+          <div className="md:hidden" style={{ direction: "ltr" }}>
             <Marquee duration={30} pauseOnHover direction="left" fade fadeAmount={8} className="py-1">
               {CATEGORIES.map(({ value, label, icon }) => (
                 <CategoryButton key={value} value={value} label={label} icon={icon} active={activeCategory === value} onClick={onCategoryChange} />
