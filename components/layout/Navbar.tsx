@@ -114,7 +114,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
         </div>
 
         {/* Nav links — desktop only, LEFT of search bar (after it in RTL flow) */}
-        <div className="hidden md:flex items-center gap-2 flex-shrink-0 mx-2">
+        <div className="hidden md:flex items-center gap-3 flex-shrink-0 mx-2">
           <Link href="/about"
             className="h-8 px-3.5 rounded-full text-[#555] font-medium text-sm border border-stone-200 hover:border-[#059669]/50 hover:bg-[#ECFDF5] hover:text-[#047857] transition-all duration-200 flex items-center whitespace-nowrap"
           >אודות</Link>
@@ -127,7 +127,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-3 flex-shrink-0">
           {/* Mobile search icon */}
           <button
             className="md:hidden flex items-center justify-center h-10 w-10 rounded-full hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
