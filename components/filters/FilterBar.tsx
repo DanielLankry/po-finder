@@ -3,7 +3,6 @@
 import { Coffee, CakeSlice, Beef, UtensilsCrossed, Leaf, Wheat, Flower2, Gem, Shirt, SlidersHorizontal } from "lucide-react";
 import type { BusinessCategory } from "@/lib/types";
 import PlacesSearchBar, { type LocationResult } from "@/components/map/PlacesSearchBar";
-import { Marquee } from "@/components/ui/marquee";
 
 type Category = BusinessCategory | "all";
 
@@ -78,13 +77,14 @@ export default function FilterBar({
         {/* Category pills */}
         <div className="flex-1 overflow-hidden py-1 -my-1">
 
-          {/* Mobile — auto-scroll marquee */}
-          <div className="md:hidden" style={{ direction: "ltr" }}>
-            <Marquee duration={30} pauseOnHover direction="left" fade fadeAmount={8} className="py-1">
-              {CATEGORIES.map(({ value, label, icon }) => (
-                <CategoryButton key={value} value={value} label={label} icon={icon} active={activeCategory === value} onClick={onCategoryChange} />
-              ))}
-            </Marquee>
+          {/* Mobile — touch-scrollable row (RTL: scroll from right) */}
+          <div
+            className="md:hidden flex gap-2.5 overflow-x-auto scrollbar-hide items-center px-1 py-1"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
+            {CATEGORIES.map(({ value, label, icon }) => (
+              <CategoryButton key={value} value={value} label={label} icon={icon} active={activeCategory === value} onClick={onCategoryChange} />
+            ))}
           </div>
 
           {/* Desktop — static scrollable row */}
