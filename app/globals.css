@@ -356,3 +356,35 @@
 /* Google Maps — hide keyboard shortcuts & minimize attribution bar */
 .gm-style-cc { display: none !important; }
 a[href^="https://maps.google.com/maps"] { display: none !important; }
+
+/* BackgroundGradientAnimation keyframes */
+@keyframes first {
+  0% { transform: translate(0%, 0%) rotate(0deg); }
+  50% { transform: translate(15%, -10%) rotate(180deg); }
+  100% { transform: translate(0%, 0%) rotate(360deg); }
+}
+@keyframes second {
+  0% { transform: translate(-5%, 5%) rotate(0deg); }
+  50% { transform: translate(10%, 15%) rotate(-180deg); }
+  100% { transform: translate(-5%, 5%) rotate(-360deg); }
+}
+@keyframes third {
+  0% { transform: translate(10%, -5%) rotate(0deg); }
+  50% { transform: translate(-10%, 10%) rotate(180deg); }
+  100% { transform: translate(10%, -5%) rotate(360deg); }
+}
+@keyframes fourth {
+  0% { transform: translate(-5%, -5%) rotate(0deg); }
+  50% { transform: translate(10%, -20%) rotate(-180deg); }
+  100% { transform: translate(-5%, -5%) rotate(-360deg); }
+}
+@keyframes fifth {
+  0% { transform: translate(0%, 10%) rotate(0deg); }
+  50% { transform: translate(-10%, 5%) rotate(180deg); }
+  100% { transform: translate(0%, 10%) rotate(360deg); }
+}
+.animate-first { animation: first 8s infinite linear; }
+.animate-second { animation: second 10s infinite linear; }
+.animate-third { animation: third 7s infinite linear; }
+.animate-fourth { animation: fourth 9s infinite linear; }
+.animate-fifth { animation: fifth 11s infinite linear; }

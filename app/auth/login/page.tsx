@@ -5,11 +5,11 @@ export const dynamic = "force-dynamic";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { MapPin } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
 
 export default function LoginPage() {
   return (
@@ -163,48 +163,40 @@ function LoginForm() {
       </div>
 
       {/* Decorative side — LEFT in RTL (desktop only) */}
-      <div
-        className="hidden lg:flex flex-1 items-center justify-center relative overflow-hidden"
-        style={{
-          background: "linear-gradient(135deg, #065F46 0%, #047857 50%, #064E3B 100%)",
-        }}
-      >
-        {/* Subtle geometric pattern overlay */}
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 20% 80%, rgba(255,255,255,0.2) 1px, transparent 1px), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.2) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
-        {/* Soft glowing spheres */}
-        <div className="absolute top-1/4 right-1/4 w-72 h-72 rounded-full bg-[#10B981]/20 blur-[100px]" />
-        <div className="absolute bottom-1/4 left-1/4 w-56 h-56 rounded-full bg-[#A7F3D0]/10 blur-[80px]" />
-
-        <div className="relative z-10 text-white text-center px-12">
-          {/* Glassmorphic Icon Container */}
-          <div className="inline-flex items-center justify-center h-24 w-24 rounded-full bg-white/10 backdrop-blur-xl mb-8 shadow-[0_8px_32px_rgba(0,0,0,0.2)] border border-white/20">
-            <MapPin className="h-10 w-10 fill-[#10B981] text-[#D1FAE5]" />
+      <div className="hidden lg:block flex-1 relative overflow-hidden">
+        <BackgroundGradientAnimation
+          gradientBackgroundStart="rgb(2, 44, 34)"
+          gradientBackgroundEnd="rgb(1, 30, 22)"
+          firstColor="5, 150, 105"
+          secondColor="16, 185, 129"
+          thirdColor="52, 211, 153"
+          fourthColor="6, 95, 70"
+          fifthColor="167, 243, 208"
+          pointerColor="110, 231, 183"
+          blendingValue="screen"
+          containerClassName="h-full w-full"
+          interactive
+        >
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="text-white text-center px-12">
+              <div className="inline-flex items-center justify-center h-24 w-24 rounded-full bg-white/10 backdrop-blur-xl mb-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)] border border-white/20">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo.png" alt="פה קרוב" className="h-14 w-auto brightness-0 invert" />
+              </div>
+              <p className="font-bold text-5xl mb-4 tracking-tight drop-shadow-lg">פה קרוב</p>
+              <p className="text-lg font-medium opacity-80 leading-relaxed max-w-xs mx-auto">
+                גלו עסקים ניידים קרוב אליכם — על המפה, בזמן אמת
+              </p>
+              <div className="mt-10 flex items-center justify-center gap-2.5 text-sm text-white/70 bg-white/5 backdrop-blur-md px-5 py-2.5 rounded-full border border-white/10 w-max mx-auto">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-300" />
+                </span>
+                <span>מאות עסקים ברחבי הארץ</span>
+              </div>
+            </div>
           </div>
-          
-          <p className="font-display font-bold text-5xl mb-6 tracking-tight drop-shadow-sm">פה</p>
-          <div className="space-y-1">
-            <p className="text-xl font-medium opacity-90 leading-relaxed">
-              גלו את העסקים הקטנים
-            </p>
-            <p className="text-xl font-medium opacity-80">
-              הכי קרובים אליכם
-            </p>
-          </div>
-          <div className="mt-12 flex items-center justify-center gap-3 text-sm text-white/70 bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 w-max mx-auto">
-            <span className="relative flex h-2 w-2">
-               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#34D399] opacity-75"></span>
-               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10B981]"></span>
-            </span>
-            <span>מאות עסקים ברחבי הארץ</span>
-          </div>
-        </div>
+        </BackgroundGradientAnimation>
       </div>
     </div>
   );
