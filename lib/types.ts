@@ -90,6 +90,21 @@ export interface WeeklyHours {
   sat?: DayHours;
 }
 
+export interface WeeklyScheduleEntry {
+  id: string;
+  business_id: string;
+  day_of_week: number; // 0=Sun, 6=Sat
+  is_active: boolean;
+  open_time: string | null;
+  close_time: string | null;
+  address: string | null;
+  lat: number | null;
+  lng: number | null;
+  note: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface BusinessWithSchedule extends Business {
   today_schedule?: BusinessSchedule | null;
   photos?: Photo[];
