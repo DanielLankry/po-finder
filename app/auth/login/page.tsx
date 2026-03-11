@@ -18,12 +18,22 @@ export default function LoginPage() {
   );
 }
 
-// Floating business cards for the hero side
-const FLOATING_CARDS = [
-  { emoji: "☕", name: "קפה הפינה", sub: "שוק הכרמל · פתוח עכשיו", color: "#FEF3C7", text: "#92400E", top: "12%", right: "8%", delay: "0s" },
-  { emoji: "🧆", name: "פלאפל אבו חסן", sub: "יפו · ⭐ 4.9", color: "#FFEDD5", text: "#C2410C", top: "38%", right: "18%", delay: "0.4s" },
-  { emoji: "🌸", name: "ורדינה פרחים", sub: "פתח תקווה · פתוח עכשיו", color: "#FDF2F8", text: "#9D174D", top: "62%", right: "6%", delay: "0.8s" },
-  { emoji: "🥐", name: "עוגות של סבתא", sub: "רמת גן · כשר למהדרין", color: "#FCE7F3", text: "#BE185D", top: "82%", right: "20%", delay: "0.2s" },
+// Business cards for marquee rows
+const MARQUEE_ROW1 = [
+  { emoji: "☕", name: "קפה הפינה", sub: "שוק הכרמל · פתוח עכשיו", color: "#FEF3C7", text: "#92400E" },
+  { emoji: "🧆", name: "פלאפל אבו חסן", sub: "יפו · ⭐ 4.9", color: "#FFEDD5", text: "#C2410C" },
+  { emoji: "🌸", name: "ורדינה פרחים", sub: "פתח תקווה · פתוח עכשיו", color: "#FDF2F8", text: "#9D174D" },
+  { emoji: "🥐", name: "עוגות של סבתא", sub: "רמת גן · כשר למהדרין", color: "#FCE7F3", text: "#BE185D" },
+  { emoji: "💎", name: "תכשיטי לאה", sub: "תל אביב · ⭐ 5.0", color: "#EDE9FE", text: "#5B21B6" },
+  { emoji: "🌿", name: "ירוק טבעי", sub: "הרצליה · טבעוני", color: "#DCFCE7", text: "#166534" },
+];
+const MARQUEE_ROW2 = [
+  { emoji: "🍰", name: "מאפיית לילה", sub: "ראשון לציון · ⭐ 4.8", color: "#FCE7F3", text: "#BE185D" },
+  { emoji: "🥩", name: "הבשר שלנו", sub: "בני ברק · כשר", color: "#FEE2E2", text: "#991B1B" },
+  { emoji: "👗", name: "וינטאג׳ by Dana", sub: "פלורנטין · פתוח עכשיו", color: "#F5F0FF", text: "#6D28D9" },
+  { emoji: "☕", name: "אספרסו בר", sub: "נווה צדק · ⭐ 4.7", color: "#FEF3C7", text: "#92400E" },
+  { emoji: "🌾", name: "ללא גלוטן בשבילך", sub: "גבעתיים · ⭐ 4.9", color: "#FEF9C3", text: "#78350F" },
+  { emoji: "🍽️", name: "שולחן משפחתי", sub: "חיפה · פתוח עכשיו", color: "#FFEDD5", text: "#C2410C" },
 ];
 
 function LoginForm() {
@@ -106,26 +116,45 @@ function LoginForm() {
           </div>
         </div>
 
-        {/* Floating business cards */}
-        {FLOATING_CARDS.map((c) => (
-          <div
-            key={c.name}
-            className="absolute flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl shadow-lg border border-white/60"
-            style={{
-              top: c.top,
-              right: c.right,
-              backgroundColor: c.color,
-              animation: `float 4s ease-in-out infinite`,
-              animationDelay: c.delay,
-            }}
-          >
-            <span className="text-2xl">{c.emoji}</span>
-            <div>
-              <div className="text-xs font-bold" style={{ color: c.text }}>{c.name}</div>
-              <div className="text-[10px] opacity-70" style={{ color: c.text }}>{c.sub}</div>
-            </div>
+        {/* Marquee rows */}
+        <style>{`
+          @keyframes marquee-ltr { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+          @keyframes marquee-rtl { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+        `}</style>
+        <div className="absolute inset-x-0 bottom-10 flex flex-col gap-3 pointer-events-none overflow-hidden">
+          {/* Row 1 — left to right */}
+          <div className="flex" style={{ animation: "marquee-ltr 28s linear infinite" }}>
+            {[...MARQUEE_ROW1, ...MARQUEE_ROW1].map((c, i) => (
+              <div
+                key={i}
+                className="flex-shrink-0 flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl shadow-md border border-white/60 mx-2"
+                style={{ backgroundColor: c.color }}
+              >
+                <span className="text-xl">{c.emoji}</span>
+                <div>
+                  <div className="text-xs font-bold whitespace-nowrap" style={{ color: c.text }}>{c.name}</div>
+                  <div className="text-[10px] opacity-70 whitespace-nowrap" style={{ color: c.text }}>{c.sub}</div>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+          {/* Row 2 — right to left (opposite direction) */}
+          <div className="flex" style={{ animation: "marquee-rtl 34s linear infinite" }}>
+            {[...MARQUEE_ROW2, ...MARQUEE_ROW2].map((c, i) => (
+              <div
+                key={i}
+                className="flex-shrink-0 flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl shadow-md border border-white/60 mx-2"
+                style={{ backgroundColor: c.color }}
+              >
+                <span className="text-xl">{c.emoji}</span>
+                <div>
+                  <div className="text-xs font-bold whitespace-nowrap" style={{ color: c.text }}>{c.name}</div>
+                  <div className="text-[10px] opacity-70 whitespace-nowrap" style={{ color: c.text }}>{c.sub}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* ── Form side — RIGHT in RTL ──────────────────────────────────────── */}
