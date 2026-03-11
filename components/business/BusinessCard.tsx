@@ -38,19 +38,23 @@ interface BusinessCardProps {
   business: BusinessWithSchedule;
   isSelected: boolean;
   isHovered?: boolean;
+  isFavorited?: boolean;
   scrollRef?: React.RefObject<HTMLDivElement | null>;
   onClick: () => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
+  onFavoriteToggle?: () => void;
 }
 export default function BusinessCard({
   business,
   isSelected,
   isHovered,
+  isFavorited = false,
   scrollRef,
   onClick,
   onMouseEnter,
   onMouseLeave,
+  onFavoriteToggle,
 }: BusinessCardProps) {
   const schedule = business.today_schedule ?? null;
   const open = isOpenNow(schedule);
@@ -104,17 +108,27 @@ export default function BusinessCard({
               </div>
             )}
             
-            {/* Heart button overlay (top left in RTL, right in visual) */}
-            <div 
-              className={`absolute top-3 left-3 z-10 p-2.5 rounded-full bg-white/10 backdrop-blur-md transition-all duration-300 ${isHovered ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} hover:bg-white/30`}
-               onClick={(e) => {
-                 e.stopPropagation();
-                 // TODO: Save to favorites
-               }}
-               role="button"
-               aria-label="שמור למועדפים"
+            {/* Heart button overlay */}
+            <div
+              className={`absolute top-3 left-3 z-10 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 ${
+                isFavorited
+                  ? "opacity-100 bg-white/90"
+                  : `bg-white/10 hover:bg-white/30 ${isHovered ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onFavoriteToggle?.();
+              }}
+              role="button"
+              aria-label={isFavorited ? "הסר ממועדפים" : "שמור למועדפים"}
             >
-              <Heart className="h-5 w-5 text-white active:scale-90 transition-transform stroke-[2px] drop-shadow-md" />
+              <Heart
+                className={`h-5 w-5 transition-all duration-200 drop-shadow-md ${
+                  isFavorited
+                    ? "fill-rose-500 text-rose-500 scale-110"
+                    : "text-white stroke-[2px]"
+                }`}
+              />
             </div>
 
             {/* Optional "Open Now" badge over image */}
