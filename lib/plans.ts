@@ -1,8 +1,8 @@
 export const PLANS = {
   business: {
     name: "עסק בפה",
-    price: 5, // USD
-    priceDisplay: "$5",
+    price: 25, // ILS
+    priceDisplay: "₪25",
     interval: "month" as const,
     features: [
       "הופעה על המפה",

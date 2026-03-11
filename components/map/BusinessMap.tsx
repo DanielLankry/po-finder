@@ -300,21 +300,23 @@ export default function BusinessMap({
         <OverlayView
           position={userLocation}
           mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-          getPixelPositionOffset={() => ({ x: -12, y: -12 })}
+          getPixelPositionOffset={() => ({ x: -18, y: -18 })}
         >
-          <div
-            style={{ position: "relative", width: 24, height: 24 }}
-            className="flex items-center justify-center"
-          >
-            {/* Pulsing ring */}
+          <div style={{ position: "relative", width: 36, height: 36 }} className="flex items-center justify-center">
+            {/* Outer pulsing halo */}
             <div
-              className="absolute rounded-full bg-red-500/25 animate-ping"
-              style={{ width: 24, height: 24, top: 0, left: 0 }}
+              className="absolute rounded-full animate-ping"
+              style={{ width: 36, height: 36, top: 0, left: 0, backgroundColor: "rgba(66,133,244,0.25)" }}
             />
-            {/* Red dot — centered */}
+            {/* Soft blue aura */}
             <div
-              className="relative w-3 h-3 rounded-full border-[1.5px] border-white shadow-sm"
-              style={{ backgroundColor: "#EF4444" }}
+              className="absolute rounded-full"
+              style={{ width: 28, height: 28, top: 4, left: 4, backgroundColor: "rgba(66,133,244,0.18)" }}
+            />
+            {/* Core blue dot */}
+            <div
+              className="relative rounded-full border-[2.5px] border-white shadow-md"
+              style={{ width: 14, height: 14, backgroundColor: "#4285F4" }}
             />
           </div>
         </OverlayView>
