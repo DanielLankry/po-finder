@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
+
+export const runtime = "nodejs"; // force Node.js — Stripe SDK doesn't work on edge
 import { getSafeOrigin } from "@/lib/get-origin";
 
 export async function POST(req: NextRequest) {
