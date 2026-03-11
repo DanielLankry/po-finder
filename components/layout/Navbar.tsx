@@ -62,7 +62,7 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
             <img src="/logo.png" alt="פה קרוב" className="h-9 w-auto" />
           </Link>
           {/* Typewriter tagline — desktop only */}
-          <div className="hidden md:flex items-center border-r border-[#E5E7EB] pr-3 w-[220px] overflow-hidden">
+          <div className="hidden md:flex items-center border-r border-[#E5E7EB] pr-3 w-[260px] overflow-hidden">
             <Typewriter
               text={[
                 "לעסקים קטנים",
@@ -74,13 +74,13 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
                 "לאופים ביתיים",
                 "לפרחנים",
                 "לסוחרי וינטג׳",
-                "לצלפים",
                 "לקייטרינג",
+                "לישראלים",
               ]}
               speed={60}
               deleteSpeed={35}
               waitTime={2200}
-              className="text-[#059669] font-bold text-[18px] whitespace-nowrap"
+              className="text-[#059669] font-bold text-[22px] whitespace-nowrap"
             />
           </div>
         </div>
