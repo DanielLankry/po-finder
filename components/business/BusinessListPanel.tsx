@@ -33,6 +33,8 @@ interface BusinessListPanelProps {
   onBusinessHover?: (id: string | null) => void;
   loading?: boolean;
   userLocation?: { lat: number; lng: number } | null;
+  favoriteIds?: Set<string>;
+  onFavoriteToggle?: (id: string) => void;
 }
 
 function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -75,6 +77,8 @@ export default function BusinessListPanel({
   onBusinessHover,
   loading = false,
   userLocation,
+  favoriteIds,
+  onFavoriteToggle,
 }: BusinessListPanelProps) {
   const cardRefs = useRef<Map<string, React.RefObject<HTMLDivElement | null>>>(new Map());
 
@@ -247,10 +251,12 @@ export default function BusinessListPanel({
                   business={b}
                   isSelected={selectedBusinessId === b.id}
                   isHovered={hoveredBusinessId === b.id}
+                  isFavorited={favoriteIds?.has(b.id)}
                   scrollRef={cardRefs.current.get(b.id)}
                   onClick={() => onBusinessSelect(b)}
                   onMouseEnter={() => onBusinessHover?.(b.id)}
                   onMouseLeave={() => onBusinessHover?.(null)}
+                  onFavoriteToggle={() => onFavoriteToggle?.(b.id)}
                 />
               </div>
             ))}

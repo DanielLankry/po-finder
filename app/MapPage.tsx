@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { Map as MapIcon, List } from "lucide-react";
+import { Map as MapIcon, List, Heart } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import FilterBar from "@/components/filters/FilterBar";
 import FilterDrawer, { type FilterState } from "@/components/filters/FilterDrawer";
 import BusinessListPanel from "@/components/business/BusinessListPanel";
+import FavoritesPanel from "@/components/business/FavoritesPanel";
+import { useFavorites } from "@/lib/hooks/useFavorites";
 import type { BusinessCategory, BusinessSchedule, WeeklyScheduleEntry, BusinessWithSchedule, Photo } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import type { LocationResult } from "@/components/map/PlacesSearchBar";
@@ -37,6 +39,8 @@ export default function MapPage() {
   const [searchCenter, setSearchCenter] = useState<LocationResult | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [favoritesPanelOpen, setFavoritesPanelOpen] = useState(false);
+  const { favorites, toggle: toggleFavorite, count: favCount } = useFavorites();
 
   useEffect(() => {
     const supabase = createClient();
@@ -97,6 +101,8 @@ export default function MapPage() {
           setSearchCenter(loc);
           setMobileView("map");
         }}
+        favCount={favCount}
+        onFavoritesOpen={() => setFavoritesPanelOpen(true)}
       />
 
       <FilterBar
@@ -131,6 +137,8 @@ export default function MapPage() {
             onBusinessHover={(id) => setHoveredBusinessId(id)}
             loading={loading}
             userLocation={userLocation}
+            favoriteIds={favorites}
+            onFavoriteToggle={toggleFavorite}
           />
         </div>
 
@@ -172,6 +180,16 @@ export default function MapPage() {
         onClose={() => setFilterDrawerOpen(false)}
         filters={filters}
         onFiltersChange={setFilters}
+      />
+
+      <FavoritesPanel
+        open={favoritesPanelOpen}
+        onClose={() => setFavoritesPanelOpen(false)}
+        businesses={businesses}
+        favoriteIds={favorites}
+        onFavoriteToggle={toggleFavorite}
+        onBusinessSelect={(b) => { setSelectedBusinessId(b.id); setMobileView("map"); }}
+        selectedBusinessId={selectedBusinessId}
       />
     </div>
   );

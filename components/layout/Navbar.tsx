@@ -12,9 +12,11 @@ import PlacesSearchBar, { type LocationResult } from "@/components/map/PlacesSea
 
 interface NavbarProps {
   onLocationSelect?: (loc: LocationResult) => void;
+  favCount?: number;
+  onFavoritesOpen?: () => void;
 }
 
-export default function Navbar({ onLocationSelect }: NavbarProps) {
+export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
