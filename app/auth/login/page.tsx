@@ -8,6 +8,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Typewriter } from "@/components/ui/typewriter";
 
 export default function LoginPage() {
   return (
@@ -79,11 +80,19 @@ function LoginForm() {
         <div className="relative z-10 text-center max-w-sm">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="פה קרוב" className="h-20 w-auto mx-auto mb-6 drop-shadow-md" />
-          <h2 className="text-4xl font-black text-[#065F46] mb-3 leading-tight">
-            הפלטפורמה<br/>לעסקים ניידים
+          <h2 className="text-4xl font-black text-[#065F46] mb-2 leading-tight">
+            הפלטפורמה
           </h2>
+          <div className="text-4xl font-black text-[#059669] mb-3 h-12 flex items-center">
+            <Typewriter
+              text={["לעסקים קטנים", "לדוכנים", "לעגלות קפה", "ליוצרים", "לשווקים ניידים", "לאופים ביתיים", "לפרחנים", "לישראלים"]}
+              speed={65}
+              deleteSpeed={35}
+              waitTime={2000}
+            />
+          </div>
           <p className="text-[#047857] text-lg font-medium opacity-80">
-            קפה, פלאפל, פרחים ועוד — על המפה, בזמן אמת
+            על המפה, בזמן אמת
           </p>
 
           {/* Stats row */}
