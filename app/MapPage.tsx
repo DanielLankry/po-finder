@@ -7,7 +7,7 @@ import Navbar from "@/components/layout/Navbar";
 import FilterBar from "@/components/filters/FilterBar";
 import FilterDrawer, { type FilterState } from "@/components/filters/FilterDrawer";
 import BusinessListPanel from "@/components/business/BusinessListPanel";
-import type { BusinessCategory, BusinessSchedule, BusinessWithSchedule, Photo } from "@/lib/types";
+import type { BusinessCategory, BusinessSchedule, WeeklyScheduleEntry, BusinessWithSchedule, Photo } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import type { LocationResult } from "@/components/map/PlacesSearchBar";
 
@@ -40,22 +40,49 @@ export default function MapPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
+    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jerusalem" }));
+    const today = now.toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
+    const todayDow = now.getDay(); // 0=Sun, 6=Sat
 
     async function fetchBusinesses() {
-      const [{ data: bizData }, { data: schedData }] = await Promise.all([
+      const [{ data: bizData }, { data: schedData }, { data: weeklyData }] = await Promise.all([
         supabase.from("businesses").select("*, photos(*)").eq("is_active", true),
         supabase.from("business_schedules").select("*").eq("date", today),
+        supabase.from("business_weekly_schedule").select("*").eq("day_of_week", todayDow).eq("is_active", true),
       ]);
-      const scheduleMap = new Map(
+
+      // Daily overrides take priority; weekly template is fallback
+      const dailyMap = new Map(
         (schedData as BusinessSchedule[] ?? []).map((s) => [s.business_id, s])
       );
+      const weeklyMap = new Map(
+        (weeklyData as WeeklyScheduleEntry[] ?? []).map((w) => [w.business_id, w])
+      );
+
       setBusinesses(
-        (bizData ?? []).map((b) => ({
-          ...b,
-          photos: (b.photos ?? []) as Photo[],
-          today_schedule: scheduleMap.get(b.id) ?? null,
-        }))
+        (bizData ?? []).map((b) => {
+          const daily = dailyMap.get(b.id);
+          const weekly = weeklyMap.get(b.id);
+          // Convert weekly entry to schedule-like object if no daily override
+          const todaySchedule: BusinessSchedule | null = daily ?? (weekly ? {
+            id: weekly.id,
+            business_id: weekly.business_id,
+            date: today,
+            address: weekly.address,
+            lat: weekly.lat,
+            lng: weekly.lng,
+            open_time: weekly.open_time,
+            close_time: weekly.close_time,
+            note: weekly.note,
+            created_at: weekly.created_at,
+          } : null);
+
+          return {
+            ...b,
+            photos: (b.photos ?? []) as Photo[],
+            today_schedule: todaySchedule,
+          };
+        })
       );
       setLoading(false);
     }
