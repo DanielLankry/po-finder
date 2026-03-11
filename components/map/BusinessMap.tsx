@@ -167,20 +167,18 @@ export default function BusinessMap({
         const isHovered = internalHovered || externalHoveredId === business.id;
         const open = isOpenNow(schedule ?? null);
 
-        const CATEGORY_COLORS: Record<string, string> = {
-          coffee:  "#92400E",
-          food:    "#C2410C",
-          sweets:  "#BE185D",
-          meat:    "#991B1B",
-          vegan:   "#166534",
-          celiac:  "#78350F",
-          flowers: "#9D174D",
-          jewelry: "#5B21B6",
-          vintage: "#6D28D9",
+        const CATEGORY_EMOJI: Record<string, string> = {
+          coffee:  "☕",
+          food:    "🍽️",
+          sweets:  "🍰",
+          meat:    "🥩",
+          vegan:   "🌿",
+          celiac:  "🌾",
+          flowers: "🌸",
+          jewelry: "💎",
+          vintage: "👗",
         };
-        const fillColor = open
-          ? (CATEGORY_COLORS[business.category] ?? "#059669")
-          : "#D6D3D1";
+        const emoji = CATEGORY_EMOJI[business.category] ?? "📍";
 
         return (
           <OverlayView
@@ -194,7 +192,7 @@ export default function BusinessMap({
               }`}
               style={{
                 transform: `translate(-50%, -50%)`,
-                filter: isSelected || isHovered ? "drop-shadow(0 4px 12px rgba(239, 68, 68, 0.4))" : "drop-shadow(0 2px 4px rgba(0,0,0,0.15))"
+                filter: isSelected || isHovered ? "drop-shadow(0 4px 12px rgba(0,0,0,0.25))" : "drop-shadow(0 2px 4px rgba(0,0,0,0.12))"
               }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -220,14 +218,11 @@ export default function BusinessMap({
               }}
             >
               <div
-                className={`rounded-full border-[1.5px] border-white transition-all duration-300 shadow-sm relative flex items-center justify-center ${
-                  isSelected || isHovered ? "w-6 h-6" : "w-4 h-4"
-                }`}
-                style={{ backgroundColor: fillColor }}
+                className={`flex items-center justify-center rounded-full border-2 bg-white transition-all duration-300 shadow-md select-none ${
+                  isSelected || isHovered ? "w-10 h-10 text-2xl border-[#059669]" : "w-8 h-8 text-lg border-white/80"
+                } ${!open ? "grayscale opacity-50" : ""}`}
               >
-                {!open && (
-                  <div className={`absolute inset-0 m-auto bg-white/80 rounded-full transition-all duration-300 ${isSelected || isHovered ? "w-2 h-2" : "w-1.5 h-1.5"}`} />
-                )}
+                {emoji}
               </div>
 
               {/* Popup for desktop */}
