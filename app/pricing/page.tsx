@@ -9,21 +9,25 @@ import { PLANS } from "@/lib/plans";
 
 export default function PricingPage() {
   const [loading, setLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const showBanner = typeof window !== "undefined" &&
     new URLSearchParams(window.location.search).get("reason") === "subscription_required";
 
   async function handleSubscribe() {
     setLoading(true);
+    setCheckoutError(null);
     try {
       const res = await fetch("/api/stripe/checkout", { method: "POST" });
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
       } else if (res.status === 401) {
-        window.location.href = "/auth/login?redirect=/pricing";
+        window.location.href = "/auth/login?redirectTo=/pricing";
+      } else {
+        setCheckoutError(data.error ?? "אירעה שגיאה. נסו שוב מאוחר יותר.");
       }
     } catch {
-      alert("אירעה שגיאה. נסו שוב מאוחר יותר.");
+      setCheckoutError("בעיית חיבור. בדקו את החיבור לאינטרנט ונסו שוב.");
     } finally {
       setLoading(false);
     }
@@ -103,6 +107,11 @@ export default function PricingPage() {
                 )}
               </button>
 
+              {checkoutError && (
+                <p role="alert" className="text-red-600 text-sm text-center bg-red-50 rounded-xl px-4 py-2.5 mt-2">
+                  {checkoutError}
+                </p>
+              )}
               <p className="text-center text-stone-400 text-xs mt-3">
                 ניתן לבטל בכל עת. ללא התחייבות.
               </p>

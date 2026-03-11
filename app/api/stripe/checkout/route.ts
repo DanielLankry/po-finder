@@ -32,10 +32,10 @@ export async function POST(req: NextRequest) {
       });
       customerId = customer.id;
 
+      // upsert so it works even if users row doesn't exist yet
       await supabase
         .from("users")
-        .update({ stripe_customer_id: customerId })
-        .eq("id", user.id);
+        .upsert({ id: user.id, email: user.email ?? "", stripe_customer_id: customerId }, { onConflict: "id" });
     }
 
     const session = await getStripe().checkout.sessions.create({
