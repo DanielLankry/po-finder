@@ -9,6 +9,8 @@ export function getStripe(): Stripe {
     }
     _stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       typescript: true,
+      timeout: 30000,   // 30s timeout (default is 80s but serverless cuts it)
+      maxNetworkRetries: 0, // disable retries — fail fast and show real error
     });
   }
   return _stripe;
