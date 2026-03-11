@@ -3,6 +3,7 @@
 import { Coffee, CakeSlice, Beef, UtensilsCrossed, Leaf, Wheat, Flower2, Gem, Shirt, SlidersHorizontal } from "lucide-react";
 import type { BusinessCategory } from "@/lib/types";
 import PlacesSearchBar, { type LocationResult } from "@/components/map/PlacesSearchBar";
+import { Marquee } from "@/components/ui/marquee";
 
 type Category = BusinessCategory | "all";
 
@@ -45,29 +46,38 @@ export default function FilterBar({
       )}
 
       <div className="flex items-center justify-between gap-4 py-3 px-5">
-        {/* Category pills — scroll from right */}
-        <div className="flex-1 overflow-x-auto scrollbar-hide py-2 mask-linear-fade -my-1">
-          <div className="flex gap-2.5 w-max items-center px-1">
+        {/* Category pills — marquee */}
+        <div className="flex-1 overflow-hidden py-1 -my-1" dir="ltr">
+          <Marquee
+            duration={30}
+            pauseOnHover
+            direction="left"
+            fade
+            fadeAmount={8}
+            className="py-1"
+          >
             {CATEGORIES.map(({ value, label, icon }) => (
               <button
                 key={value}
                 onClick={() => onCategoryChange(value)}
                 aria-pressed={activeCategory === value}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-full transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] outline-none ${
+                className={`flex items-center gap-2 mx-1.5 px-4 py-2.5 rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] outline-none whitespace-nowrap ${
                   activeCategory === value
                     ? "bg-[#059669] text-white shadow-[0_2px_8px_rgba(5,150,105,0.45)] scale-105"
-                    : "bg-white/60 text-[#717171] hover:bg-white hover:text-[#222222] hover:shadow-sm border border-black/[0.04] focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2"
+                    : "bg-white/80 text-[#717171] hover:bg-white hover:text-[#222222] hover:shadow-sm border border-black/[0.06] focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2"
                 }`}
               >
-                <div className={`${activeCategory === value ? "opacity-100" : "opacity-70"} transition-opacity duration-300`}>
-                  {icon && <span aria-hidden="true">{icon}</span>}
-                </div>
-                <span className={`text-[14px] whitespace-nowrap ${activeCategory === value ? "font-semibold" : "font-medium"}`}>
+                {icon && (
+                  <span aria-hidden="true" className={activeCategory === value ? "opacity-100" : "opacity-70"}>
+                    {icon}
+                  </span>
+                )}
+                <span className={`text-[14px] ${activeCategory === value ? "font-semibold" : "font-medium"}`}>
                   {label}
                 </span>
               </button>
             ))}
-          </div>
+          </Marquee>
         </div>
 
         {/* Filter button */}
