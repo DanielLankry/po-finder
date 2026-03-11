@@ -62,8 +62,8 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="פה קרוב" className="h-9 w-auto" />
           </Link>
-          {/* Typewriter tagline — desktop: larger, mobile: smaller */}
-          <div className="flex items-center border-r border-[#E5E7EB] pr-3 overflow-hidden w-[160px] md:w-[280px]">
+          {/* Typewriter tagline */}
+          <div className="flex items-center border-r border-[#E5E7EB] pr-3 overflow-hidden w-[175px] md:w-[295px]">
             <Typewriter
               text={[
                 "לעסקים קטנים",
@@ -81,7 +81,9 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
               speed={60}
               deleteSpeed={35}
               waitTime={2200}
-              className="text-[#059669] font-bold text-[17px] md:text-[24px] whitespace-nowrap"
+              className="text-[#059669] font-extrabold text-[20px] md:text-[26px] whitespace-nowrap"
+              glowColor="rgba(5,150,105,0.45)"
+              wordColors={{ "לישראלים": "text-blue-500" }}
             />
           </div>
         </div>

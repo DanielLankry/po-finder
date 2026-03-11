@@ -19,6 +19,10 @@ interface TypewriterProps {
     animate: Variants["animate"]
   }
   cursorClassName?: string
+  /** Map specific words to a Tailwind color class, e.g. { "ישראלים": "text-blue-500" } */
+  wordColors?: Record<string, string>
+  /** CSS text-shadow value for a glow effect */
+  glowColor?: string
 }
 
 const Typewriter = ({
@@ -33,6 +37,8 @@ const Typewriter = ({
   hideCursorOnType = false,
   cursorChar = "|",
   cursorClassName = "ml-1",
+  wordColors = {},
+  glowColor,
   cursorAnimationVariants = {
     initial: { opacity: 0 },
     animate: {
@@ -107,8 +113,12 @@ const Typewriter = ({
     loop,
   ])
 
+  const currentWord = texts[currentTextIndex]
+  const wordColorClass = wordColors[currentWord] ?? ""
+  const glowStyle = glowColor ? { textShadow: `0 0 12px ${glowColor}, 0 0 24px ${glowColor}` } : undefined
+
   return (
-    <div className={`inline whitespace-pre-wrap tracking-tight ${className}`}>
+    <div className={`inline whitespace-pre-wrap tracking-tight ${className} ${wordColorClass}`} style={glowStyle}>
       <span>{displayText}</span>
       {showCursor && (
         <motion.span
