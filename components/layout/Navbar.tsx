@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MapPin, Search, Menu, X, Plus } from "lucide-react";
 import { Typewriter } from "@/components/ui/typewriter";
+import { MagneticButton } from "@/components/ui/magnetic-button";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import PlacesSearchBar, { type LocationResult } from "@/components/map/PlacesSearchBar";
@@ -85,21 +86,17 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
           </div>
         </div>
 
-        {/* Nav links — desktop only, left of search */}
-        <div className="hidden md:flex items-center gap-0.5 flex-shrink-0 mx-2">
-          {[
-            { href: "/about", label: "אודות" },
-            { href: "/contact", label: "צרו קשר" },
-            { href: "/pricing", label: "מחירים" },
-          ].map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className="h-9 px-3.5 rounded-full text-[#717171] font-medium text-sm hover:bg-stone-100 hover:text-[#222222] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] flex items-center whitespace-nowrap"
-            >
-              {label}
-            </Link>
-          ))}
+        {/* Nav links — desktop only, after search bar, pushed left with ms-auto on actions */}
+        <div className="hidden md:flex items-center gap-2 flex-shrink-0 mx-3">
+          <Link href="/about"
+            className="h-8 px-3.5 rounded-full text-[#555] font-medium text-sm border border-stone-200 hover:border-[#059669]/50 hover:bg-[#ECFDF5] hover:text-[#047857] transition-all duration-200 flex items-center whitespace-nowrap"
+          >אודות</Link>
+          <Link href="/contact"
+            className="h-8 px-3.5 rounded-full text-[#555] font-medium text-sm border border-stone-200 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 flex items-center whitespace-nowrap"
+          >צרו קשר</Link>
+          <Link href="/pricing"
+            className="h-8 px-3.5 rounded-full text-[#555] font-medium text-sm border border-stone-200 hover:border-purple-300 hover:bg-purple-50 hover:text-purple-700 transition-all duration-200 flex items-center whitespace-nowrap"
+          >מחירים</Link>
         </div>
 
         {/* Search bar — center (hidden on mobile) */}
@@ -126,8 +123,8 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
           )}
         </div>
 
-        {/* Actions — LEFT in RTL (end) */}
-        <div className="flex items-center gap-1 ms-auto">
+        {/* Actions */}
+        <div className="flex items-center gap-2 ms-auto flex-shrink-0">
           {/* Mobile search icon */}
           <button
             className="md:hidden flex items-center justify-center h-10 w-10 rounded-full hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
@@ -137,13 +134,26 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
             <Search className="h-5 w-5 text-slate-600" />
           </button>
 
-          <Link
-            href="/dashboard"
-            className="hidden md:flex items-center gap-1.5 h-10 px-4 rounded-full text-slate-700 font-medium text-sm hover:bg-[#ECFDF5] hover:text-[#047857] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
-          >
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            הוסיפו עסק
-          </Link>
+          {/* הוסיפו עסק — magnetic + gradient shine */}
+          <div className="hidden md:block">
+            <MagneticButton distance={0.45}>
+              <Link
+                href="/dashboard"
+                className="group relative flex items-center gap-1.5 h-10 px-5 rounded-full font-semibold text-sm text-white overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+                style={{
+                  background: "linear-gradient(135deg,#059669 0%,#047857 100%)",
+                  boxShadow: "0 2px 14px rgba(5,150,105,0.4)",
+                }}
+              >
+                {/* Shine sweep on hover */}
+                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"
+                  style={{ background: "linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.35) 50%,transparent 60%)" }}
+                />
+                <Plus className="h-4 w-4 relative z-10 group-hover:rotate-90 transition-transform duration-300" aria-hidden="true" />
+                <span className="relative z-10">הוסיפו עסק</span>
+              </Link>
+            </MagneticButton>
+          </div>
 
           {user ? (
             <div className="relative group">
