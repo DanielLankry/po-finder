@@ -180,24 +180,42 @@ export default function BusinessMap({
         };
         const emoji = CATEGORY_EMOJI[business.category] ?? "📍";
 
-        const size = isSelected || isHovered ? 40 : 32;
+        // Pin dimensions
+        const pinW = isSelected || isHovered ? 44 : 36;
+        const pinH = Math.round(pinW * 1.35);
+        const circleR = pinW * 0.42;
+
+        // Color by state
+        const pinColor = !open
+          ? "#9CA3AF"
+          : isSelected
+          ? "#047857"
+          : isHovered
+          ? "#059669"
+          : "#10b981";
+
+        const glowColor = !open
+          ? "rgba(156,163,175,0.0)"
+          : isSelected
+          ? "rgba(4,120,87,0.7)"
+          : isHovered
+          ? "rgba(5,150,105,0.55)"
+          : "rgba(16,185,129,0.35)";
 
         return (
           <OverlayView
             key={business.id}
             position={{ lat, lng }}
             mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-            getPixelPositionOffset={() => ({ x: -(size / 2), y: -(size / 2) })}
+            getPixelPositionOffset={() => ({ x: -(pinW / 2), y: -pinH })}
           >
             <div
               style={{
                 position: "relative",
-                width: size,
-                height: size,
+                width: pinW,
+                height: pinH,
                 zIndex: isSelected || isHovered ? 20 : 10,
-                filter: isSelected || isHovered
-                  ? "drop-shadow(0 4px 12px rgba(0,0,0,0.25))"
-                  : "drop-shadow(0 2px 4px rgba(0,0,0,0.12))",
+                filter: `drop-shadow(0 0 6px ${glowColor}) drop-shadow(0 3px 8px rgba(0,0,0,0.22))`,
                 cursor: "pointer",
                 userSelect: "none",
                 transition: "width 0.2s, height 0.2s, filter 0.2s",
@@ -225,19 +243,43 @@ export default function BusinessMap({
                 }
               }}
             >
-              <div
-                style={{
-                  width: size,
-                  height: size,
-                  fontSize: isSelected || isHovered ? "1.4rem" : "1.1rem",
-                  border: `2px solid ${isSelected || isHovered ? "#059669" : "rgba(255,255,255,0.8)"}`,
-                  opacity: open ? 1 : 0.5,
-                  filter: open ? "none" : "grayscale(1)",
-                }}
-                className="flex items-center justify-center rounded-full bg-white shadow-md select-none transition-all duration-200"
+              {/* SVG pin shape */}
+              <svg
+                width={pinW}
+                height={pinH}
+                viewBox={`0 0 ${pinW} ${pinH}`}
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ display: "block" }}
               >
-                {emoji}
-              </div>
+                <defs>
+                  <radialGradient id={`pg-${business.id}`} cx="50%" cy="35%" r="60%">
+                    <stop offset="0%" stopColor={pinColor} stopOpacity="0.85" />
+                    <stop offset="100%" stopColor={pinColor} stopOpacity="1" />
+                  </radialGradient>
+                </defs>
+                {/* Pin teardrop path */}
+                <path
+                  d={`M${pinW / 2} ${pinH - 2}
+                      C${pinW / 2} ${pinH - 2} ${2} ${pinH * 0.52}
+                      ${2} ${circleR + 2}
+                      A${circleR} ${circleR} 0 0 1 ${pinW - 2} ${circleR + 2}
+                      C${pinW - 2} ${pinH * 0.52} ${pinW / 2} ${pinH - 2} ${pinW / 2} ${pinH - 2}Z`}
+                  fill={`url(#pg-${business.id})`}
+                />
+                {/* White inner circle */}
+                <circle cx={pinW / 2} cy={circleR + 2} r={circleR * 0.65} fill="white" fillOpacity="0.92" />
+                {/* Emoji */}
+                <text
+                  x={pinW / 2}
+                  y={circleR + 2 + circleR * 0.23}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontSize={circleR * 0.9}
+                >
+                  {emoji}
+                </text>
+              </svg>
 
               {/* Popup for desktop */}
               {isSelected && !isMobile && (
