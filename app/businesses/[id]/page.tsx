@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessById } from "@/lib/db/businesses";
 import { getTodaySchedule, getWeeklySchedule } from "@/lib/db/schedules";
@@ -17,6 +18,33 @@ import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  let business;
+  try { business = await getBusinessById(id); } catch { return {}; }
+
+  const photo = business.photos?.[0]?.url;
+  const title = `${business.name} — ${CATEGORY_LABELS[business.category as keyof typeof CATEGORY_LABELS] ?? ""}`;
+  const description = business.description
+    ? `${business.description.slice(0, 155)}...`
+    : `${business.name} — עסק נייד בישראל. מצאו אותנו על המפה בפה קרוב.`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `https://pokarov.co.il/businesses/${id}` },
+    openGraph: {
+      title,
+      description,
+      url: `https://pokarov.co.il/businesses/${id}`,
+      type: "website",
+      locale: "he_IL",
+      images: photo ? [{ url: photo, width: 800, height: 600, alt: business.name }] : [],
+    },
+    twitter: { card: "summary_large_image", title, description, images: photo ? [photo] : [] },
+  };
 }
 
 export default async function BusinessPage({ params }: Props) {
@@ -55,8 +83,40 @@ export default async function BusinessPage({ params }: Props) {
   const isLoggedIn = !!authData.user;
   const photos = business.photos ?? [];
 
+  // JSON-LD LocalBusiness schema
+  const localBusinessSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": `https://pokarov.co.il/businesses/${business.id}`,
+    name: business.name,
+    description: business.description ?? undefined,
+    url: `https://pokarov.co.il/businesses/${business.id}`,
+    image: photos[0]?.url ?? undefined,
+    telephone: business.phone ?? undefined,
+    address: business.address ? {
+      "@type": "PostalAddress",
+      streetAddress: business.address,
+      addressCountry: "IL",
+    } : undefined,
+    geo: business.lat && business.lng ? {
+      "@type": "GeoCoordinates",
+      latitude: business.lat,
+      longitude: business.lng,
+    } : undefined,
+    aggregateRating: business.avg_rating > 0 ? {
+      "@type": "AggregateRating",
+      ratingValue: business.avg_rating,
+      reviewCount: business.review_count,
+    } : undefined,
+    sameAs: business.instagram ? [`https://instagram.com/${business.instagram}`] : undefined,
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
       <Navbar />
       <div className="min-h-screen bg-[#FAFAF7]" dir="rtl">
         <div className="max-w-[1280px] mx-auto px-4 pt-[88px] pb-16">
