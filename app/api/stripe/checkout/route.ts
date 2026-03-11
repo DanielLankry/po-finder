@@ -45,12 +45,12 @@ export async function POST(req: NextRequest) {
       line_items: [
         {
           price_data: {
-            currency: "usd",
+            currency: "ils",
             product_data: {
-              name: "עסק בפה — מנוי חודשי",
+              name: "עסק בפה קרוב — מנוי חודשי",
               description: "הופעה על המפה, פרופיל עסק מלא, ניהול שעות ותמונות",
             },
-            unit_amount: 500, // $5.00 in cents
+            unit_amount: 2500, // ₪25.00 in agorot
             recurring: { interval: "month" },
           },
           quantity: 1,
