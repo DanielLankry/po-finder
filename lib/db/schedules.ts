@@ -91,4 +91,16 @@ export async function deleteSchedule(scheduleId: string, businessId: string) {
   revalidatePath(`/businesses/${businessId}`);
 }
 
+export async function getWeeklySchedule(businessId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("business_weekly_schedule")
+    .select("*")
+    .eq("business_id", businessId)
+    .order("day_of_week", { ascending: true });
+
+  if (error) throw error;
+  return data;
+}
+
 // isOpenNow is in lib/utils/schedule.ts (pure function, not a server action)
