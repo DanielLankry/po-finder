@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MapPin, Search, Menu, X, Plus } from "lucide-react";
 import { Typewriter } from "@/components/ui/typewriter";
 import { MagneticButton } from "@/components/ui/magnetic-button";
+import LogoIcon from "@/components/ui/LogoIcon";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import PlacesSearchBar, { type LocationResult } from "@/components/map/PlacesSearchBar";
@@ -59,8 +60,7 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
             className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-lg"
             aria-label="פה קרוב — דף הבית"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="פה קרוב" className="h-9 w-auto" />
+            <LogoIcon size={38} />
           </Link>
           {/* Typewriter tagline */}
           <div className="flex items-center border-r border-[#E5E7EB] pr-3 overflow-hidden w-[175px] md:w-[295px]">
