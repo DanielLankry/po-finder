@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { MapPin, Search, Menu, X, Plus } from "lucide-react";
+import { Search, Menu, X, Plus, Heart } from "lucide-react";
 import { Typewriter } from "@/components/ui/typewriter";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import LogoIcon from "@/components/ui/LogoIcon";
@@ -135,6 +135,20 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
             aria-label="פתיחת חיפוש"
           >
             <Search className="h-5 w-5 text-slate-600" />
+          </button>
+
+          {/* Favorites button */}
+          <button
+            onClick={onFavoritesOpen}
+            className="relative flex items-center justify-center h-10 w-10 rounded-full border border-slate-200 hover:border-rose-300 hover:bg-rose-50 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+            aria-label="מועדפים"
+          >
+            <Heart className={`h-[18px] w-[18px] transition-colors duration-200 ${favCount > 0 ? "fill-rose-500 text-rose-500" : "text-slate-500"}`} />
+            {favCount > 0 && (
+              <span className="absolute -top-1 -left-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-rose-500 text-white text-[10px] font-bold px-1 shadow-sm">
+                {favCount > 99 ? "99+" : favCount}
+              </span>
+            )}
           </button>
 
           {/* הוסיפו עסק — magnetic + gradient shine */}
