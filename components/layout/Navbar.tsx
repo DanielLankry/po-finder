@@ -85,6 +85,23 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
           </div>
         </div>
 
+        {/* Nav links — desktop only, left of search */}
+        <div className="hidden md:flex items-center gap-0.5 flex-shrink-0 mx-2">
+          {[
+            { href: "/about", label: "אודות" },
+            { href: "/contact", label: "צרו קשר" },
+            { href: "/pricing", label: "מחירים" },
+          ].map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="h-9 px-3.5 rounded-full text-[#717171] font-medium text-sm hover:bg-stone-100 hover:text-[#222222] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] flex items-center whitespace-nowrap"
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+
         {/* Search bar — center (hidden on mobile) */}
         <div className="hidden md:flex flex-1 justify-center max-w-[400px] mx-auto">
           {onLocationSelect ? (
@@ -109,30 +126,8 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
           )}
         </div>
 
-        {/* Nav links — desktop only, between search and actions */}
-        <div className="hidden md:flex items-center gap-1 flex-shrink-0">
-          <Link
-            href="/about"
-            className="h-9 px-3.5 rounded-full text-[#717171] font-medium text-sm hover:bg-stone-100 hover:text-[#222222] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] flex items-center"
-          >
-            אודות
-          </Link>
-          <Link
-            href="/contact"
-            className="h-9 px-3.5 rounded-full text-[#717171] font-medium text-sm hover:bg-stone-100 hover:text-[#222222] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] flex items-center"
-          >
-            צרו קשר
-          </Link>
-          <Link
-            href="/pricing"
-            className="h-9 px-3.5 rounded-full text-[#717171] font-medium text-sm hover:bg-stone-100 hover:text-[#222222] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] flex items-center"
-          >
-            מחירים
-          </Link>
-        </div>
-
         {/* Actions — LEFT in RTL (end) */}
-        <div className="flex items-center gap-2 ms-auto">
+        <div className="flex items-center gap-1 ms-auto">
           {/* Mobile search icon */}
           <button
             className="md:hidden flex items-center justify-center h-10 w-10 rounded-full hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
