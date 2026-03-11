@@ -82,7 +82,6 @@ export default function Navbar({ onLocationSelect }: NavbarProps) {
               deleteSpeed={35}
               waitTime={2200}
               className="text-[#059669] font-extrabold text-[20px] md:text-[26px] whitespace-nowrap"
-              glowColor="rgba(5,150,105,0.45)"
               wordColors={{ "לישראלים": "text-blue-500" }}
             />
           </div>
