@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Secular_One } from "next/font/google";
+import { Secular_One, Rubik, M_PLUS_Rounded_1c } from "next/font/google";
 import "./globals.css";
 import "@/lib/env";
 import CookieConsent from "@/components/layout/CookieConsent";
@@ -10,6 +10,20 @@ const secularOne = Secular_One({
   variable: "--font-secular",
   subsets: ["latin", "hebrew"],
   weight: ["400"],
+  display: "swap",
+});
+
+const rubik = Rubik({
+  variable: "--font-rubik",
+  subsets: ["latin", "hebrew"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
+});
+
+const mPlusRounded = M_PLUS_Rounded_1c({
+  variable: "--font-body",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
   display: "swap",
 });
 
@@ -125,7 +139,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
       </head>
-      <body className={`${secularOne.variable} antialiased font-sans`}>
+      <body className={`${secularOne.variable} ${rubik.variable} ${mPlusRounded.variable} antialiased font-sans`}>
         <a href="#main-content" className="skip-to-content">
           דלגו לתוכן הראשי
         </a>
