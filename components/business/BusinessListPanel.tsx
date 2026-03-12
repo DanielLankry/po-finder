@@ -121,7 +121,7 @@ export default function BusinessListPanel({
       return (
         <div className="flex flex-col h-full bg-[#FAFAFA]" dir="rtl">
           {/* Header with back button */}
-          <div className="px-5 py-3.5 border-b border-[#EBEBEB] bg-[#FAFAF7] flex items-center shrink-0 sticky top-0 z-10 shadow-sm">
+          <div className="px-5 py-3.5 border-b border-t border-[#EBEBEB] bg-[#FAFAF7] flex items-center shrink-0 sticky top-0 z-10">
             <button
               onClick={() => onBackToList?.()}
               className="flex items-center gap-1.5 text-[#222222] hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-full px-4 py-2 -mx-4"
