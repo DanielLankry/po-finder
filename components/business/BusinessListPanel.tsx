@@ -192,7 +192,7 @@ export default function BusinessListPanel({
   return (
     <div className="flex flex-col h-full" dir="rtl">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="px-5 pt-5 pb-4 border-b border-[#EBEBEB] bg-white flex-shrink-0 shadow-sm">
+      <div className="px-5 pt-7 pb-4 border-b border-[#EBEBEB] bg-white flex-shrink-0 shadow-sm">
         {loading ? (
           <div className="flex items-center gap-3">
             <div className="h-7 w-20 rounded-lg shimmer" aria-hidden="true" />
