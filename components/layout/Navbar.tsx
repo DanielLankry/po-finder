@@ -304,34 +304,35 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
               </div>
             )}
 
-            <nav className="space-y-1">
+            <nav className="grid grid-cols-2 gap-2.5">
               {[
-                { href: "/dashboard", label: user ? "לוח בקרה" : "הוסיפו עסק", emoji: "🏪" },
-                { href: "/pricing", label: "מחירים", emoji: "💳" },
-                { href: "/about", label: "אודות", emoji: "ℹ️" },
-                { href: "/contact", label: "צרו קשר", emoji: "📬" },
-              ].map(({ href, label, emoji }) => (
+                { href: "/dashboard", label: user ? "לוח בקרה" : "הוסיפו עסק", emoji: "🏪", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
+                { href: "/pricing", label: "מחירים", emoji: "💳", bg: "#EFF6FF", border: "#BFDBFE", text: "#1E40AF" },
+                { href: "/about", label: "אודות", emoji: "ℹ️", bg: "#F5F3FF", border: "#DDD6FE", text: "#5B21B6" },
+                { href: "/contact", label: "צרו קשר", emoji: "📬", bg: "#FFF7ED", border: "#FED7AA", text: "#C2410C" },
+              ].map(({ href, label, emoji, bg, border, text }) => (
                 <Link
                   key={href}
                   href={href}
-                  className="flex items-center gap-3 py-3 px-3 rounded-2xl text-[#374151] font-medium hover:bg-[#F0FDF4] hover:text-[#047857] transition-colors"
+                  className="flex flex-col items-center justify-center gap-1.5 py-4 px-3 rounded-2xl font-semibold text-sm transition-all active:scale-95 border"
+                  style={{ backgroundColor: bg, borderColor: border, color: text }}
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <span className="text-lg">{emoji}</span>
+                  <span className="text-2xl">{emoji}</span>
                   {label}
                 </Link>
               ))}
-
-              {user && (
-                <button
-                  onClick={() => { supabase.auth.signOut(); setMobileMenuOpen(false); }}
-                  className="w-full flex items-center gap-3 py-3 px-3 rounded-2xl text-rose-500 font-medium hover:bg-rose-50 transition-colors"
-                >
-                  <span className="text-lg">🚪</span>
-                  יציאה
-                </button>
-              )}
             </nav>
+
+            {user && (
+              <button
+                onClick={() => { supabase.auth.signOut(); setMobileMenuOpen(false); }}
+                className="mt-2.5 w-full flex items-center justify-center gap-2 py-3 px-3 rounded-2xl text-rose-500 font-semibold text-sm border border-rose-200 bg-rose-50 transition-colors active:scale-95"
+              >
+                <span className="text-lg">🚪</span>
+                יציאה
+              </button>
+            )}
           </div>
         </>
       )}
