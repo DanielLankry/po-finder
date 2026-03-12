@@ -201,7 +201,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
           ) : (
             <Link
               href="/auth/login"
-              className="flex items-center justify-center h-10 px-5 rounded-full bg-[#059669] text-white font-medium text-sm hover:bg-[#047857] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2 shadow-sm btn-press"
+              className="hidden md:flex items-center justify-center h-10 px-5 rounded-full bg-[#059669] text-white font-medium text-sm hover:bg-[#047857] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2 shadow-sm btn-press"
             >
               כניסה
             </Link>
@@ -257,39 +257,91 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
       )}
 
       {/* Mobile menu */}
+      {/* Mobile bottom sheet */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-[72px] z-40 bg-[#FAFAF7] shadow-popup border-t border-slate-100 py-3 px-4 slide-in-right" dir="rtl">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 py-3 text-slate-700 font-medium hover:text-[#047857] transition-colors"
+        <>
+          {/* Backdrop */}
+          <div
+            className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
+          />
+          {/* Sheet */}
+          <div
+            className="md:hidden fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-[28px] shadow-[0_-8px_40px_rgba(0,0,0,0.15)] pt-3 pb-8 px-5"
+            dir="rtl"
+            style={{ animation: "slideUp 0.25s ease-out" }}
           >
-            <Plus className="h-5 w-5" />
-            הוסיפו עסק
-          </Link>
-          <Link
-            href="/pricing"
-            className="block py-3 text-slate-700 font-medium hover:text-[#047857] transition-colors"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            מחירים
-          </Link>
-          <Link
-            href="/about"
-            className="block py-3 text-slate-700 font-medium hover:text-[#047857] transition-colors"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            אודות
-          </Link>
-          <Link
-            href="/contact"
-            className="block py-3 text-slate-700 font-medium hover:text-[#047857] transition-colors"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            צרו קשר
-          </Link>
-        </div>
+            {/* Handle */}
+            <div className="w-10 h-1 rounded-full bg-[#E5E7EB] mx-auto mb-5" />
+
+            {!user && (
+              <div className="flex gap-3 mb-5">
+                <Link
+                  href="/auth/login"
+                  className="flex-1 h-12 flex items-center justify-center rounded-2xl bg-[#059669] text-white font-bold text-sm shadow-md"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  כניסה
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="flex-1 h-12 flex items-center justify-center rounded-2xl border-2 border-[#059669] text-[#059669] font-bold text-sm"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  הרשמה
+                </Link>
+              </div>
+            )}
+
+            {user && (
+              <div className="flex items-center gap-3 mb-5 p-3 bg-[#F0FDF4] rounded-2xl">
+                <div className="h-10 w-10 rounded-full bg-[#059669] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                  {user.email?.[0]?.toUpperCase() ?? "U"}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-[#065F46] truncate">{user.email}</p>
+                </div>
+              </div>
+            )}
+
+            <nav className="space-y-1">
+              {[
+                { href: "/dashboard", label: user ? "לוח בקרה" : "הוסיפו עסק", emoji: "🏪" },
+                { href: "/pricing", label: "מחירים", emoji: "💳" },
+                { href: "/about", label: "אודות", emoji: "ℹ️" },
+                { href: "/contact", label: "צרו קשר", emoji: "📬" },
+              ].map(({ href, label, emoji }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="flex items-center gap-3 py-3 px-3 rounded-2xl text-[#374151] font-medium hover:bg-[#F0FDF4] hover:text-[#047857] transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span className="text-lg">{emoji}</span>
+                  {label}
+                </Link>
+              ))}
+
+              {user && (
+                <button
+                  onClick={() => { supabase.auth.signOut(); setMobileMenuOpen(false); }}
+                  className="w-full flex items-center gap-3 py-3 px-3 rounded-2xl text-rose-500 font-medium hover:bg-rose-50 transition-colors"
+                >
+                  <span className="text-lg">🚪</span>
+                  יציאה
+                </button>
+              )}
+            </nav>
+          </div>
+        </>
       )}
+
+      <style jsx global>{`
+        @keyframes slideUp {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+      `}</style>
     </header>
   );
 }
