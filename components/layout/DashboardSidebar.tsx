@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "סקירה כללית", exact: true },
   { href: "/dashboard/profile", label: "עריכת פרופיל" },
   { href: "/dashboard/schedule", label: "לוח זמנים להיום" },
+  { href: "/dashboard/events", label: "אירועים" },
   { href: "/dashboard/photos", label: "תמונות" },
 ];
 

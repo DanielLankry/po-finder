@@ -6,12 +6,14 @@ import { createClient } from "@/lib/supabase/server";
 import { getBusinessById } from "@/lib/db/businesses";
 import { getTodaySchedule, getWeeklySchedule } from "@/lib/db/schedules";
 import { getReviews } from "@/lib/db/reviews";
+import { getBusinessEvents } from "@/lib/db/events";
 import PhotoGrid from "@/components/business/PhotoGrid";
 import StatusCard from "@/components/business/StatusCard";
 import HoursCard from "@/components/business/HoursCard";
 import ReviewSummary from "@/components/business/ReviewSummary";
 import ReviewsList from "@/components/business/ReviewsList";
 import AddReviewForm from "@/components/business/AddReviewForm";
+import EventsSection from "@/components/business/EventsSection";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
@@ -57,10 +59,11 @@ export default async function BusinessPage({ params }: Props) {
     notFound();
   }
 
-  const [schedule, weeklySchedule, reviews, { data: authData }] = await Promise.all([
+  const [schedule, weeklySchedule, reviews, events, { data: authData }] = await Promise.all([
     getTodaySchedule(id),
     getWeeklySchedule(id),
     getReviews(id),
+    getBusinessEvents(id),
     (await createClient()).auth.getUser(),
   ]);
 
@@ -178,7 +181,15 @@ export default async function BusinessPage({ params }: Props) {
                 </div>
               )}
 
-              <hr className="border-stone-100 mb-6" />
+              {/* Events */}
+              {events.length > 0 && (
+                <>
+                  <div className="mb-6">
+                    <EventsSection events={events} />
+                  </div>
+                  <hr className="border-stone-100 mb-6" />
+                </>
+              )}
 
               {/* Reviews */}
               <div>

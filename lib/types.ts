@@ -128,6 +128,19 @@ export const KASHRUT_LABELS: Record<KashrutStatus, string> = {
   none: "ללא כשרות",
 };
 
+export interface BusinessEvent {
+  id: string;
+  business_id: string;
+  title: string;
+  description: string | null;
+  event_date: string;
+  start_time: string | null;
+  end_time: string | null;
+  price: number | null;
+  image_url: string | null;
+  created_at: string;
+}
+
 export const HEBREW_DAYS: Record<string, string> = {
   sun: "ראשון",
   mon: "שני",
