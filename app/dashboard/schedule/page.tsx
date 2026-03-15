@@ -272,11 +272,11 @@ export default function SchedulePage() {
                     <button
                       type="button"
                       onClick={() => setWeeklyForms((p) => ({ ...p, [dow]: { ...p[dow], is_active: !p[dow].is_active } }))}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${f.is_active ? "bg-[#059669]" : "bg-stone-300"}`}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 flex-shrink-0 ${f.is_active ? "bg-[#059669]" : "bg-stone-300"}`}
                       role="switch"
                       aria-checked={f.is_active}
                     >
-                      <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${f.is_active ? "translate-x-6" : "translate-x-1"}`} />
+                      <span className={`inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${f.is_active ? "ltr:translate-x-[22px] rtl:-translate-x-[22px]" : "ltr:translate-x-[2px] rtl:-translate-x-[2px]"}`} />
                     </button>
                     <span className={`font-bold text-sm w-16 ${f.is_active ? "text-stone-800" : "text-stone-400"}`}>{label}</span>
 
