@@ -44,16 +44,22 @@ export async function getBusinessById(id: string) {
   return data;
 }
 
-export async function getBusinessByOwner(ownerId: string) {
+export async function getBusinessesByOwner(ownerId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("businesses")
     .select("*")
     .eq("owner_id", ownerId)
-    .single();
+    .order("created_at", { ascending: false });
 
-  if (error && error.code !== "PGRST116") throw error;
-  return data;
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** @deprecated Use getBusinessesByOwner instead */
+export async function getBusinessByOwner(ownerId: string) {
+  const businesses = await getBusinessesByOwner(ownerId);
+  return businesses[0] ?? null;
 }
 
 export async function createBusiness(formData: FormData) {

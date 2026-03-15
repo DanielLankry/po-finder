@@ -24,7 +24,9 @@ export default function PhotosPage() {
         .from("businesses")
         .select("id")
         .eq("owner_id", user.id)
-        .single();
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
       if (!biz) { setLoading(false); return; }
       setBusinessId(biz.id);
