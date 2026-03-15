@@ -1,20 +1,25 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { Plus, Clock, Star, Camera, MapPin, MessageCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { getBusinessByOwner } from "@/lib/db/businesses";
+import { getBusinessesByOwner } from "@/lib/db/businesses";
 import { getTodaySchedule } from "@/lib/db/schedules";
 import { isOpenNow } from "@/lib/utils/schedule";
+import type { Business } from "@/lib/types";
+import BusinessSelector from "@/components/dashboard/BusinessSelector";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ businessId?: string }>;
+}) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const business = await getBusinessByOwner(user.id);
-  const schedule = business ? await getTodaySchedule(business.id) : null;
-  const isOpen = isOpenNow(schedule);
+  const businesses = await getBusinessesByOwner(user.id);
+  const params = await searchParams;
 
-  if (!business) {
+  if (businesses.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center shadow-card" dir="rtl">
         <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
@@ -36,8 +41,23 @@ export default async function DashboardPage() {
     );
   }
 
+  // Pick selected business or default to most recent (first in array, sorted by created_at desc)
+  const selectedId = params.businessId;
+  const business = businesses.find((b) => b.id === selectedId) ?? businesses[0];
+
+  const schedule = await getTodaySchedule(business.id);
+  const isOpen = isOpenNow(schedule);
+
   return (
     <div className="space-y-6" dir="rtl">
+      {/* Business selector (only shown when multiple businesses exist) */}
+      {businesses.length > 1 && (
+        <BusinessSelector
+          businesses={businesses}
+          selectedId={business.id}
+        />
+      )}
+
       {/* Header */}
       <div>
         <h1 className="font-display font-bold text-2xl text-stone-900">
