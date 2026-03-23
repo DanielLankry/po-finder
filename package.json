@@ -27,7 +27,7 @@
     "react-dom": "19.2.3",
     "stripe": "^20.4.1",
     "tailwind-merge": "^3.5.0",
-    "@sentry/nextjs": "^9"
+    "@sentry/nextjs": "^10"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
