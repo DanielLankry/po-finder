@@ -32,8 +32,8 @@ const BASE_URL = "https://pokarov.co.il";
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: "פה קרוב — גלו עסקים קטנים וניידים קרוב אליכם",
-    template: "%s | פה קרוב",
+    default: "פוקרוב — גלו עסקים קטנים וניידים קרוב אליכם",
+    template: "%s | פוקרוב",
   },
   description:
     "פה קרוב עוזר לכם למצוא עסקים ניידים קרוב אליכם — קפה, פלאפל, מאפים, פרחים, תכשיטים ועוד. ראו בזמן אמת היכן הם נמצאים היום על המפה.",
@@ -42,10 +42,10 @@ export const metadata: Metadata = {
     "שוק פשפשים", "אוכל רחוב ישראל", "עסק מהבית", "po karov", "פה קרוב",
     "מפת עסקים", "עסקים בשכונה",
   ],
-  authors: [{ name: "פה קרוב", url: BASE_URL }],
-  creator: "פה קרוב",
-  publisher: "פה קרוב",
-  applicationName: "פה קרוב",
+  authors: [{ name: "פוקרוב", url: BASE_URL }],
+  creator: "פוקרוב",
+  publisher: "פוקרוב",
+  applicationName: "פוקרוב",
   alternates: {
     canonical: BASE_URL,
     languages: { "he-IL": BASE_URL },
@@ -54,8 +54,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "he_IL",
     url: BASE_URL,
-    siteName: "פה קרוב",
-    title: "פה קרוב — גלו עסקים קטנים וניידים קרוב אליכם",
+    siteName: "פוקרוב",
+    title: "פוקרוב — גלו עסקים קטנים וניידים קרוב אליכם",
     description:
       "גלו עסקים ניידים קרוב אליכם — ראו בזמן אמת על המפה היכן נמצאים קפה, אוכל, פרחים, תכשיטים ועוד.",
     images: [
@@ -85,7 +85,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "", // הוסף Google Search Console verification token כשיהיה
+    google: "0G-mIJrkD1TvdIPFDKpUnxGEt9lc2HNdEsA8lXDvjTg",
   },
 };
 
@@ -93,7 +93,7 @@ export const metadata: Metadata = {
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "פה קרוב",
+  name: "פוקרוב",
   url: BASE_URL,
   logo: `${BASE_URL}/logo.png`,
   description: "פלטפורמה לגילוי עסקים קטנים וניידים בישראל",
@@ -108,7 +108,7 @@ const organizationSchema = {
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "פה קרוב",
+  name: "פוקרוב",
   url: BASE_URL,
   inLanguage: "he",
   potentialAction: {
