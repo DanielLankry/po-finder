@@ -6,7 +6,12 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/dashboard/", "/api/", "/auth/"],
+        disallow: [
+          "/dashboard/",
+          "/api/",
+          "/auth/",
+          "/admin/",
+        ],
       },
     ],
     sitemap: "https://pokarov.co.il/sitemap.xml",
