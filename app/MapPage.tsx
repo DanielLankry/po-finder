@@ -9,7 +9,7 @@ import FilterDrawer, { type FilterState } from "@/components/filters/FilterDrawe
 import BusinessListPanel from "@/components/business/BusinessListPanel";
 import FavoritesPanel from "@/components/business/FavoritesPanel";
 import { useFavorites } from "@/lib/hooks/useFavorites";
-import type { BusinessCategory, BusinessSchedule, WeeklyScheduleEntry, BusinessWithSchedule, Photo } from "@/lib/types";
+import type { BusinessCategory, BusinessSchedule, WeeklyScheduleEntry, BusinessWithSchedule, Photo, Spot } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import type { LocationResult } from "@/components/map/PlacesSearchBar";
 
@@ -33,6 +33,7 @@ export default function MapPage() {
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({ kashrut: "all", minRating: 0, openNow: false });
   const [businesses, setBusinesses] = useState<BusinessWithSchedule[]>([]);
+  const [spots, setSpots] = useState<Spot[]>([]);
   const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
   const [hoveredBusinessId, setHoveredBusinessId] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
@@ -89,6 +90,15 @@ export default function MapPage() {
         })
       );
       setLoading(false);
+
+      // Fetch active approved spots
+      const { data: spotsData } = await supabase
+        .from("spots")
+        .select("*")
+        .eq("is_approved", true)
+        .eq("is_active", true)
+        .gt("expires_at", new Date().toISOString());
+      setSpots((spotsData ?? []) as Spot[]);
     }
 
     fetchBusinesses();
@@ -128,6 +138,7 @@ export default function MapPage() {
         >
           <BusinessListPanel
             businesses={businesses}
+            spots={spots}
             activeCategory={activeCategory}
             filters={filters}
             selectedBusinessId={selectedBusinessId}
