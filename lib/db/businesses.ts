@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Business, BusinessCategory, KashrutStatus } from "@/lib/types";
 import { revalidatePath } from "next/cache";
+import { sendNewBusinessAlert } from "@/lib/email";
 
 export async function getBusinesses(filters?: {
   category?: BusinessCategory;
@@ -78,6 +79,7 @@ export async function createBusiness(formData: FormData) {
     instagram: formData.get("instagram") as string | null,
     kashrut: (formData.get("kashrut") as KashrutStatus) ?? "none",
     business_number: formData.get("business_number") as string | null,
+    is_active: false, // Requires admin approval before going live
   };
 
   const { data, error } = await supabase
@@ -87,6 +89,20 @@ export async function createBusiness(formData: FormData) {
     .single();
 
   if (error) throw error;
+
+  // Notify admin
+  try {
+    await sendNewBusinessAlert({
+      id: data.id,
+      name: data.name,
+      category: data.category,
+      phone: data.phone,
+      owner_email: user.email ?? "unknown",
+    });
+  } catch (emailErr) {
+    console.error("Failed to send business alert email:", emailErr);
+  }
+
   revalidatePath("/dashboard");
   return data as Business;
 }

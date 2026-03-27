@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sendSpotApprovedEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -26,16 +27,35 @@ export async function POST(req: NextRequest) {
   const now = new Date();
   const expiresAt = new Date(now.getTime() + spot.duration_days * 86400 * 1000);
 
-  const { error } = await supabase
+  const { data: spotData, error } = await supabase
     .from("spots")
     .update({
       is_approved: true,
       starts_at: now.toISOString(),
       expires_at: expiresAt.toISOString(),
     })
-    .eq("id", spotId);
+    .eq("id", spotId)
+    .select("name, owner_id")
+    .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Send approval email to spot owner
+  if (spotData) {
+    const { data: userData } = await supabase
+      .from("users")
+      .select("email")
+      .eq("id", spotData.owner_id)
+      .single();
+
+    if (userData?.email) {
+      try {
+        await sendSpotApprovedEmail(userData.email, spotData.name, expiresAt);
+      } catch (emailErr) {
+        console.error("Failed to send spot approval email:", emailErr);
+      }
+    }
+  }
 
   return NextResponse.json({ ok: true });
 }

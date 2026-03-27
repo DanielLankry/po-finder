@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 import Stripe from "stripe";
+import { sendNewSpotAlert } from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -55,6 +56,22 @@ export async function POST(req: NextRequest) {
     if (error) {
       console.error("spot insert error:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Notify admin
+    try {
+      await sendNewSpotAlert({
+        id: "pending",
+        name: meta.spot_name,
+        category: meta.spot_category,
+        address: meta.spot_address,
+        phone: meta.spot_phone ?? null,
+        duration_days: durationDays,
+        amount_paid: session.amount_total ?? 0,
+        owner_email: meta.user_email,
+      });
+    } catch (emailErr) {
+      console.error("Failed to send spot alert email:", emailErr);
     }
   }
 
