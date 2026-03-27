@@ -16,8 +16,19 @@ export default async function DashboardPage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const businesses = await getBusinessesByOwner(user.id);
+  // Fetch all businesses including inactive (pending approval)
+  const supabaseAdmin = await createClient();
+  const { data: allBusinesses } = await supabaseAdmin
+    .from("businesses")
+    .select("*")
+    .eq("owner_id", user.id)
+    .order("created_at", { ascending: false });
+  const businesses = allBusinesses ?? [];
   const params = await searchParams;
+
+  // Check if any business is pending approval
+  const pendingBusiness = businesses.find((b) => !b.is_active);
+  const activeBusinesses = businesses.filter((b) => b.is_active);
 
   if (businesses.length === 0) {
     return (
@@ -41,9 +52,27 @@ export default async function DashboardPage({
     );
   }
 
-  // Pick selected business or default to most recent (first in array, sorted by created_at desc)
+  // Pick selected business or default to most recent active
   const selectedId = params.businessId;
-  const business = businesses.find((b) => b.id === selectedId) ?? businesses[0];
+  const business = activeBusinesses.find((b) => b.id === selectedId) ?? activeBusinesses[0];
+
+  // Show pending approval banner if no active business
+  if (!business && pendingBusiness) {
+    return (
+      <div className="bg-amber-50 rounded-2xl border border-amber-200 p-8 text-center" dir="rtl">
+        <div className="h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4 text-3xl">
+          ⏳
+        </div>
+        <h2 className="font-bold text-xl text-[#111] mb-2">העסק שלך ממתין לאישור</h2>
+        <p className="text-[#666] text-sm mb-1">
+          <strong>{pendingBusiness.name}</strong> נשלח לאישור.
+        </p>
+        <p className="text-[#888] text-sm">נקבל עדכון במייל ברגע שהעסק יאושר ויעלה למפה.</p>
+      </div>
+    );
+  }
+
+  if (!business) return null;
 
   const schedule = await getTodaySchedule(business.id);
   const isOpen = isOpenNow(schedule);
