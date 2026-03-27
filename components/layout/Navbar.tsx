@@ -172,6 +172,21 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
             </MagneticButton>
           </div>
 
+          {/* Spot button */}
+          <div className="hidden md:block">
+            <Link
+              href="/spot"
+              className="flex items-center gap-1.5 h-10 px-4 rounded-full font-semibold text-sm text-white transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316]"
+              style={{
+                background: "linear-gradient(135deg,#FB923C 0%,#EA580C 100%)",
+                boxShadow: "0 2px 10px rgba(249,115,22,0.35)",
+              }}
+            >
+              <span className="text-xs">✦</span>
+              <span>Spot</span>
+            </Link>
+          </div>
+
           {user ? (
             <div className="relative group">
               <button

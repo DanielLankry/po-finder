@@ -3,8 +3,10 @@
 import { useRef, useEffect, createRef } from "react";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { MapPin, Star } from "lucide-react";
-import type { BusinessWithSchedule, BusinessCategory } from "@/lib/types";
+import type { BusinessWithSchedule, BusinessCategory, Spot } from "@/lib/types";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
+import SpotCard from "./SpotCard";
+import { createClient } from "@/lib/supabase/client";
 import type { FilterState } from "@/components/filters/FilterDrawer";
 import { isOpenNow } from "@/lib/utils/schedule";
 import BusinessCard from "./BusinessCard";
@@ -24,6 +26,7 @@ const CATEGORY_CHIP: Record<string, { bg: string; text: string }> = {
 
 interface BusinessListPanelProps {
   businesses: BusinessWithSchedule[];
+  spots?: Spot[];
   activeCategory: BusinessCategory | "all";
   filters: FilterState;
   selectedBusinessId: string | null;
@@ -68,6 +71,7 @@ function SkeletonCard() {
 
 export default function BusinessListPanel({
   businesses,
+  spots = [],
   activeCategory,
   filters,
   selectedBusinessId,
@@ -245,6 +249,17 @@ export default function BusinessListPanel({
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 p-4 lg:p-6 pb-24">
+            {/* ── Spots at the top ── */}
+            {spots.length > 0 && (
+              <div className="col-span-full mb-2">
+                <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-2 px-1">✦ Spots פעילים</p>
+                <div className="flex flex-col rounded-2xl overflow-hidden border border-amber-200 shadow-sm">
+                  {spots.map((spot) => (
+                    <SpotCard key={spot.id} spot={spot} />
+                  ))}
+                </div>
+              </div>
+            )}
             {filtered.map((b, index) => (
               <div key={b.id} className={`h-full fade-in-up stagger-${(index % 6) + 1}`}>
                 <BusinessCard

@@ -54,7 +54,7 @@ export default function BusinessMap({
     supabase
       .from("spots")
       .select("*")
-      .eq("status", "approved")
+      .eq("is_approved", true)
       .gt("expires_at", new Date().toISOString())
       .then(({ data }) => setSpots((data ?? []) as Spot[]));
   }, []);

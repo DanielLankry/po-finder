@@ -185,3 +185,32 @@ export interface Spot {
   approved_at: string | null;
   created_at: string;
 }
+
+export const SPOT_DURATIONS = [
+  { days: 1,  label: "24 שעות",  price: 1900  },
+  { days: 3,  label: "3 ימים",   price: 3900  },
+  { days: 7,  label: "שבוע",     price: 6900  },
+  { days: 14, label: "שבועיים",  price: 10900 },
+  { days: 30, label: "חודש",     price: 17900 },
+] as const;
+
+export interface Spot {
+  id: string;
+  owner_id: string;
+  name: string;
+  description: string | null;
+  category: BusinessCategory;
+  address: string;
+  lat: number;
+  lng: number;
+  phone: string | null;
+  photo_url: string | null;
+  stripe_payment_id: string | null;
+  duration_days: number;
+  amount_paid: number;
+  starts_at: string | null;
+  expires_at: string | null;
+  is_approved: boolean;
+  is_active: boolean;
+  created_at: string;
+}
