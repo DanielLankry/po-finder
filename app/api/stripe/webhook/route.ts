@@ -29,8 +29,36 @@ export async function POST(req: NextRequest) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      const userId = session.metadata?.supabase_user_id;
+      const meta = session.metadata ?? {};
 
+      // ── Spot one-time payment ──────────────────────────────────────────
+      if (meta.type === "spot" && meta.owner_id) {
+        const durationDays = parseInt(meta.duration_days ?? "1", 10);
+        const startsAt = new Date();
+        const expiresAt = new Date(startsAt.getTime() + durationDays * 24 * 60 * 60 * 1000);
+
+        await supabase.from("spots").insert({
+          owner_id: meta.owner_id,
+          name: meta.name,
+          description: meta.description || null,
+          category: meta.category,
+          address: meta.address,
+          lat: parseFloat(meta.lat),
+          lng: parseFloat(meta.lng),
+          phone: meta.phone || null,
+          photo_url: meta.photo_url || null,
+          duration_days: durationDays,
+          starts_at: startsAt.toISOString(),
+          expires_at: expiresAt.toISOString(),
+          stripe_payment_intent_id: session.payment_intent as string | null,
+          amount_paid: session.amount_total ?? 0,
+          status: "pending", // awaits admin approval
+        });
+        break;
+      }
+
+      // ── Regular subscription ───────────────────────────────────────────
+      const userId = meta.supabase_user_id;
       if (userId && session.subscription) {
         await supabase
           .from("users")
