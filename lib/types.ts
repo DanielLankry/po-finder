@@ -150,3 +150,38 @@ export const HEBREW_DAYS: Record<string, string> = {
   fri: "שישי",
   sat: "שבת",
 };
+
+// ── Spots ──────────────────────────────────────────────────────────────────
+
+export type SpotDuration = 1 | 3 | 7 | 14 | 30;
+export type SpotStatus = "pending" | "approved" | "rejected" | "expired";
+
+export const SPOT_PLANS: { days: SpotDuration; price: number; label: string; sublabel: string }[] = [
+  { days: 1,  price: 1900,  label: "יום אחד",     sublabel: "24 שעות" },
+  { days: 3,  price: 3900,  label: "3 ימים",       sublabel: "סוף שבוע" },
+  { days: 7,  price: 6900,  label: "שבוע",         sublabel: "מומלץ" },
+  { days: 14, price: 10900, label: "שבועיים",      sublabel: "לאירועים" },
+  { days: 30, price: 17900, label: "חודש",         sublabel: "עונתי" },
+];
+
+export interface Spot {
+  id: string;
+  owner_id: string;
+  name: string;
+  description: string | null;
+  category: BusinessCategory;
+  address: string;
+  lat: number;
+  lng: number;
+  phone: string | null;
+  photo_url: string | null;
+  starts_at: string;
+  expires_at: string;
+  duration_days: number;
+  stripe_payment_intent_id: string | null;
+  amount_paid: number;
+  status: SpotStatus;
+  admin_note: string | null;
+  approved_at: string | null;
+  created_at: string;
+}
