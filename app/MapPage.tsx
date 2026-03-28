@@ -97,6 +97,12 @@ export default function MapPage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-[#FAFAF7]" dir="rtl">
+      {/* SEO / Google verification — describes app purpose, visually hidden */}
+      <div className="sr-only">
+        <h1>פה קרוב — פלטפורמה לגילוי עסקים קטנים וניידים בישראל</h1>
+        <p>פה קרוב (Pa Karov) היא אפליקציה לגילוי עסקים ניידים וקטנים קרוב אליכם בזמן אמת — קפה, פלאפל, מאפים, פרחים, תכשיטים ועוד. ראו על המפה היכן הם נמצאים היום.</p>
+        <p>Pa Karov is an Israeli local business discovery platform. Find nearby mobile vendors, pop-up markets, street food, and local artisans on a live map.</p>
+      </div>
       <Navbar
         onLocationSelect={(loc) => {
           setSearchCenter(loc);
@@ -196,7 +202,7 @@ export default function MapPage() {
       {/* Privacy footer — required for Google OAuth verification */}
       <div className="fixed bottom-0 inset-x-0 z-30 pointer-events-none flex justify-center pb-1">
         <div className="pointer-events-auto flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-black/5 text-[11px] text-[#888]">
-          <span>פה קרוב — פלטפורמה לעסקים ניידים בישראל</span>
+          <strong>פה קרוב</strong><span> — פלטפורמה לגילוי עסקים קטנים וניידים בישראל</span>
           <span className="w-px h-3 bg-[#DDD]" />
           <a href="/privacy" className="hover:text-[#059669] transition-colors">מדיניות פרטיות</a>
           <span className="w-px h-3 bg-[#DDD]" />

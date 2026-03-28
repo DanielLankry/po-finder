@@ -34,8 +34,8 @@ const BASE_URL = "https://pokarov.co.il";
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: "פוקרוב — גלו עסקים קטנים וניידים קרוב אליכם",
-    template: "%s | פוקרוב",
+    default: "פה קרוב — גלו עסקים קטנים וניידים קרוב אליכם",
+    template: "%s | פה קרוב",
   },
   description:
     "פה קרוב עוזר לכם למצוא עסקים ניידים קרוב אליכם — קפה, פלאפל, מאפים, פרחים, תכשיטים ועוד. ראו בזמן אמת היכן הם נמצאים היום על המפה.",
