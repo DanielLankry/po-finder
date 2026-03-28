@@ -1,29 +1,35 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { initPostHog, posthog } from "@/lib/posthog";
 
-export default function PostHogProvider({ children }: { children: React.ReactNode }) {
+function PostHogPageView() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const initialized = useRef(false);
 
-  useEffect(() => {
-    if (!initialized.current) {
-      initPostHog();
-      initialized.current = true;
-    }
-  }, []);
-
-  // Track page views on route change
   useEffect(() => {
     if (pathname) {
-      posthog.capture("$pageview", {
-        $current_url: window.location.href,
-      });
+      let url = window.origin + pathname;
+      if (searchParams?.toString()) url += `?${searchParams.toString()}`;
+      posthog.capture("$pageview", { $current_url: url });
     }
   }, [pathname, searchParams]);
 
-  return <>{children}</>;
+  return null;
+}
+
+export default function PostHogProvider({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    initPostHog();
+  }, []);
+
+  return (
+    <>
+      <Suspense fallback={null}>
+        <PostHogPageView />
+      </Suspense>
+      {children}
+    </>
+  );
 }

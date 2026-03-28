@@ -145,11 +145,9 @@ export default function RootLayout({
         <a href="#main-content" className="skip-to-content">
           דלגו לתוכן הראשי
         </a>
-        <Suspense fallback={null}>
-          <PostHogProvider>
-            <main id="main-content">{children}</main>
-          </PostHogProvider>
-        </Suspense>
+        <PostHogProvider>
+          <main id="main-content">{children}</main>
+        </PostHogProvider>
         <AccessibilityWidget />
         <CookieConsent />
         <Analytics />
