@@ -18,12 +18,16 @@ const nextConfig: NextConfig = {
 };
 
 export default withSentryConfig(nextConfig, {
-  org: "pokarov",
-  project: "pokarov-nextjs",
+  org: "daniel-lonkry-software",
+  project: "pokarov",
   silent: !process.env.CI,
-  disableLogger: true,
-  automaticVercelMonitors: true,
   sourcemaps: {
     deleteSourcemapsAfterUpload: true,
+  },
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+    automaticVercelMonitors: true,
   },
 });
