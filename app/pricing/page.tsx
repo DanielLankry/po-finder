@@ -187,7 +187,7 @@ export default function PricingPage() {
                 onPointerDown={handleTrackPointerDown}
               >
                 {/* Track background */}
-                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 rounded-full bg-[#E5E7EB]" />
+                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-3 rounded-full bg-[#D1FAE5]" />
 
                 {/* Filled track with glow */}
                 <motion.div
@@ -210,15 +210,15 @@ export default function PricingPage() {
                   className="absolute top-1/2 z-10"
                   animate={{ left: `${fillPct}%` }}
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  style={{ y: "-50%", x: "-50%" }}
+                  style={{ translateY: "-50%", translateX: "-50%" }}
                 >
                   <motion.div
-                    className="w-7 h-7 rounded-full bg-white border-[3px] border-[#059669]"
+                    className="w-8 h-8 rounded-full bg-white border-[3.5px] border-[#059669]"
                     style={{
-                      boxShadow: "0 2px 10px rgba(5,150,105,0.35)",
+                      boxShadow: "0 0 0 4px rgba(5,150,105,0.18), 0 2px 10px rgba(5,150,105,0.4)",
                     }}
-                    whileHover={{ scale: 1.2 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.25 }}
+                    whileTap={{ scale: 0.9 }}
                   />
                 </motion.div>
 
@@ -235,7 +235,7 @@ export default function PricingPage() {
               </div>
 
               {/* Quick-select pill buttons with spring animation */}
-              <div className="flex justify-between mt-3 px-0" dir="ltr">
+              <div className="relative mt-4 h-9" dir="ltr">
                 {MARKERS.map((m) => {
                   const isActive = planIndex === m.index;
                   return (
@@ -243,13 +243,19 @@ export default function PricingPage() {
                       key={m.index}
                       onClick={() => setPlanIndex(m.index)}
                       animate={{
-                        scale: isActive ? 1.1 : 1,
+                        scale: isActive ? 1.12 : 1,
                         backgroundColor: isActive ? "#059669" : "#F3F4F6",
-                        color: isActive ? "#ffffff" : "#888888",
+                        color: isActive ? "#ffffff" : "#6B7280",
                       }}
-                      whileHover={{ scale: isActive ? 1.1 : 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: isActive ? 1.12 : 1.06 }}
+                      whileTap={{ scale: 0.92 }}
                       transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                      style={{
+                        position: "absolute",
+                        left: `${(m.index / maxIndex) * 100}%`,
+                        transform: "translateX(-50%)",
+                        top: 0,
+                      }}
                       className="text-xs font-semibold px-3 py-1.5 rounded-full flex flex-col items-center whitespace-nowrap"
                     >
                       {m.label}
