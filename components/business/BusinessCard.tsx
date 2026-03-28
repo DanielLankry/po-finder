@@ -7,6 +7,7 @@ import {
 import type { BusinessWithSchedule } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
 import { isOpenNow } from "@/lib/utils/schedule";
+import { BorderRotate } from "@/components/ui/BorderRotate";
 
 // ── SVG icons per category ────────────────────────────────────────────────────
 const CATEGORY_ICON_LG: Record<string, React.ReactNode> = {
@@ -70,9 +71,15 @@ export default function BusinessCard({
       onMouseEnter={onMouseEnter} 
       onMouseLeave={onMouseLeave}
     >
-      {/* Gradient border wrapper */}
-      <div className={`transition-all duration-300 ${isHovered || isSelected ? "card-gradient-border" : "p-[1.5px] rounded-[26px]"}`}>
-
+      <BorderRotate
+        active={isHovered || isSelected}
+        borderRadius={26}
+        borderWidth={2}
+        bg="#ffffff"
+        colors={{ primary: "#059669", secondary: "#34d399", accent: "#a7f3d0" }}
+        speed={3}
+        className="transition-all duration-300"
+      >
       <button
         onClick={onClick}
         className={`w-full text-right cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-[24px] group relative bg-white block p-3.5 ${
@@ -188,7 +195,7 @@ export default function BusinessCard({
           </div>
         </div>
       </button>
-      </div>
+      </BorderRotate>
     </div>
   );
 }
