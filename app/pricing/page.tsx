@@ -179,12 +179,13 @@ export default function PricingPage() {
                 <span>שנה</span>
               </div>
 
-              {/* Slider + markers — single unified container so markers align perfectly */}
-              <div dir="ltr" className="relative" style={{ paddingTop: "20px", paddingBottom: "40px" }}>
-                {/* Track area */}
+              {/* Slider wrapper */}
+              <div dir="ltr" className="relative w-full">
+                {/* Track */}
                 <div
                   ref={trackRef}
                   className="relative h-3 flex items-center cursor-pointer rounded-full bg-[#CCEFEE]"
+                  style={{ overflow: "visible" }}
                   onPointerDown={handleTrackPointerDown}
                 >
                   {/* Filled track */}
@@ -221,41 +222,42 @@ export default function PricingPage() {
                   />
                 </div>
 
-                {/* Markers — positioned relative to same container width as track */}
-                {MARKERS.map((m) => {
-                  const isActive = planIndex === m.index;
-                  const pct = (m.index / maxIndex) * 100;
-                  return (
-                    <motion.button
-                      key={m.index}
-                      onClick={() => setPlanIndex(m.index)}
-                      animate={{
-                        scale: isActive ? 1.1 : 1,
-                        backgroundColor: isActive ? "#1d938d" : "#F3F4F6",
-                        color: isActive ? "#ffffff" : "#6B7280",
-                      }}
-                      whileHover={{ scale: isActive ? 1.1 : 1.05 }}
-                      whileTap={{ scale: 0.92 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                      style={{
-                        position: "absolute",
-                        bottom: 0,
-                        left: `${pct}%`,
-                        transform: m.index === 0
-                          ? "translateX(0%)"
-                          : m.index === maxIndex
-                          ? "translateX(-100%)"
-                          : "translateX(-50%)",
-                      }}
-                      className="text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap"
-                    >
-                      {m.label}
-                      {m.highlight && !isActive && (
-                        <span className="block text-[9px] font-bold text-amber-500 leading-none text-center">מומלץ</span>
-                      )}
-                    </motion.button>
-                  );
-                })}
+                {/* Markers row — separate from track, below it */}
+                <div className="relative mt-3 overflow-hidden" style={{ height: "32px" }}>
+                  {MARKERS.map((m) => {
+                    const isActive = planIndex === m.index;
+                    const pct = (m.index / maxIndex) * 100;
+                    return (
+                      <motion.button
+                        key={m.index}
+                        onClick={() => setPlanIndex(m.index)}
+                        animate={{
+                          scale: isActive ? 1.1 : 1,
+                          backgroundColor: isActive ? "#1d938d" : "#F3F4F6",
+                          color: isActive ? "#ffffff" : "#6B7280",
+                        }}
+                        whileHover={{ scale: isActive ? 1.1 : 1.05 }}
+                        whileTap={{ scale: 0.92 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          ...(m.index === 0
+                            ? { left: 0, transform: "none" }
+                            : m.index === maxIndex
+                            ? { right: 0, left: "auto" }
+                            : { left: `${pct}%`, transform: "translateX(-50%)" }),
+                        }}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap"
+                      >
+                        {m.label}
+                        {m.highlight && !isActive && (
+                          <span className="block text-[9px] font-bold text-amber-500 leading-none text-center">מומלץ</span>
+                        )}
+                      </motion.button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
