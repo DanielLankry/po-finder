@@ -16,12 +16,12 @@ const BENEFITS = [
 ];
 
 // Quick-select markers (index into PLANS array, 0-8)
+// LTR slider: index 0 = left = יום, index 13 = right = שנה
 const MARKERS = [
-  { index: 0, label: "יום" },
-  { index: 2, label: "שבוע" },
-  { index: 3, label: "שבועיים" },
-  { index: 4, label: "חודש", highlight: true },
-  { index: 8, label: "שנה" },
+  { index: 0,  label: "יום" },
+  { index: 4,  label: "שבוע" },
+  { index: 8,  label: "חודש", highlight: true },
+  { index: 13, label: "שנה" },
 ];
 
 function useAnimatedNumber(target: number, duration = 250) {
@@ -56,11 +56,13 @@ export default function PricingPage() {
   const plan = getPlanByIndex(planIndex);
   const maxIndex = getPlanCount() - 1;
 
-  // Price per day
+  // Price per day (in agorot)
   const pricePerDay = Math.round(plan.price / plan.days);
-  // Saving vs base rate (₪20/day)
-  const baseCost = 2900 * plan.days; // ₪20/day in agorot
-  const saving = baseCost > plan.price ? baseCost - plan.price : 0;
+  // Saving vs paying daily (₪20/day)
+  const baseCostAtDaily = 2000 * plan.days; // ₪20/day in agorot
+  const saving = plan.days > 1 && baseCostAtDaily > plan.price
+    ? baseCostAtDaily - plan.price
+    : 0;
 
   const animatedPrice = useAnimatedNumber(Math.round(plan.price / 100));
   const animatedPerDay = useAnimatedNumber(Math.round(pricePerDay / 100));
@@ -117,18 +119,22 @@ export default function PricingPage() {
                 </span>
               </div>
               <p className="text-[#888] text-base">
-                ל-{plan.label} • ₪<span className="font-semibold text-[#059669]">{animatedPerDay}</span> ליום
+                ל-{plan.label}
+                {plan.days > 1 && (
+                  <> • ₪<span className="font-semibold text-[#059669]">{animatedPerDay}</span> ליום</>
+                )}
               </p>
               {saving > 0 && (
                 <div className="inline-flex items-center gap-1 mt-2 bg-[#ECFDF5] text-[#059669] px-3 py-1 rounded-full text-sm font-semibold">
-                  חוסכים ₪{Math.round(saving / 100)} לעומת מחיר יומי
+                  חוסכים ₪{Math.round(saving / 100)} לעומת ₪20 ליום
                 </div>
               )}
             </div>
 
             {/* Slider — dir=ltr to prevent RTL flip */}
             <div className="mb-8">
-              <div className="flex justify-between text-xs text-[#AAA] mb-2 px-1" dir="rtl">
+              {/* Labels: RTL — right=יום (start), left=שנה (end) */}
+              <div className="flex justify-between text-xs text-[#AAA] mb-2 px-1" dir="ltr">
                 <span>יום</span>
                 <span>שנה</span>
               </div>
