@@ -235,7 +235,7 @@ export default function PricingPage() {
               </div>
 
               {/* Quick-select pill buttons with spring animation */}
-              <div className="relative mt-4 h-9 overflow-visible" dir="ltr">
+              <div className="relative mt-4 h-9 overflow-visible pr-1" dir="ltr">
                 {MARKERS.map((m) => {
                   const isActive = planIndex === m.index;
                   return (
@@ -252,8 +252,8 @@ export default function PricingPage() {
                       transition={{ type: "spring", stiffness: 400, damping: 25 }}
                       style={{
                         position: "absolute",
-                        left: `${(m.index / maxIndex) * 100}%`,
-                        transform: m.index === 0 ? "translateX(2px)" : m.index === maxIndex ? "calc(-100% - 2px)" : "translateX(-50%)",
+                        left: m.index === maxIndex ? "calc(100% - 2px)" : `${(m.index / maxIndex) * 100}%`,
+                        transform: m.index === 0 ? "translateX(2px)" : m.index === maxIndex ? "translateX(-100%)" : "translateX(-50%)",
                         top: 0,
                       }}
                       className="text-xs font-semibold px-3 py-1.5 rounded-full flex flex-col items-center whitespace-nowrap"
