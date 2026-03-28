@@ -1,29 +1,37 @@
-export const PRICING_PLANS = [
-  { months: 1,  price: 2900  },
-  { months: 2,  price: 4900  },
-  { months: 3,  price: 6500  },
-  { months: 4,  price: 8400  },
-  { months: 5,  price: 9900  },
-  { months: 6,  price: 11000 },
-  { months: 7,  price: 12500 },
-  { months: 8,  price: 14000 },
-  { months: 9,  price: 14900 },
-  { months: 10, price: 16500 },
-  { months: 11, price: 17800 },
-  { months: 12, price: 18900 },
+export const PLANS = [
+  { days: 1,   label: "יום",       price: 2000  },
+  { days: 2,   label: "יומיים",    price: 3500  },
+  { days: 3,   label: "3 ימים",    price: 4900  },
+  { days: 5,   label: "5 ימים",    price: 7500  },
+  { days: 7,   label: "שבוע",      price: 9900  },
+  { days: 10,  label: "10 ימים",   price: 13000 },
+  { days: 14,  label: "שבועיים",   price: 16900 },
+  { days: 21,  label: "3 שבועות",  price: 22900 },
+  { days: 30,  label: "חודש",      price: 2900  },
+  { days: 60,  label: "חודשיים",   price: 4900  },
+  { days: 90,  label: "3 חודשים",  price: 6500  },
+  { days: 180, label: "חצי שנה",   price: 11000 },
+  { days: 270, label: "9 חודשים",  price: 14900 },
+  { days: 365, label: "שנה",       price: 18900 },
 ] as const;
 
-export type PricingPlan = typeof PRICING_PLANS[number];
+export type Plan = typeof PLANS[number];
 
+export function getPlanByIndex(index: number): Plan {
+  return PLANS[Math.max(0, Math.min(index, PLANS.length - 1))];
+}
+
+export function getPlanCount(): number {
+  return PLANS.length;
+}
+
+// Legacy compatibility for checkout/webhook
 export function getPriceForMonths(months: number): number {
-  const exact = PRICING_PLANS.find(p => p.months === months);
-  if (exact) return exact.price;
-  // Linear interpolation between known points
-  const lower = [...PRICING_PLANS].reverse().find(p => p.months < months);
-  const upper = PRICING_PLANS.find(p => p.months > months);
-  if (!lower || !upper) return PRICING_PLANS[0].price;
-  const ratio = (months - lower.months) / (upper.months - lower.months);
-  return Math.round(lower.price + ratio * (upper.price - lower.price));
+  const days = Math.round(months * 30);
+  const plan = [...PLANS].sort((a, b) =>
+    Math.abs(a.days - days) - Math.abs(b.days - days)
+  )[0];
+  return plan.price;
 }
 
 export function getPricePerMonth(months: number): number {
