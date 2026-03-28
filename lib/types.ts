@@ -208,8 +208,8 @@ export interface Spot {
   stripe_payment_id: string | null;
   duration_days: number;
   amount_paid: number;
-  starts_at: string | null;
-  expires_at: string | null;
+  starts_at: string;
+  expires_at: string;
   is_approved: boolean;
   is_active: boolean;
   created_at: string;
