@@ -1,13 +1,18 @@
 export const PLANS = [
-  { days: 1,   label: "יום",        price: 2900  },
-  { days: 3,   label: "3 ימים",     price: 7900  },
-  { days: 7,   label: "שבוע",       price: 17900 },
-  { days: 14,  label: "שבועיים",    price: 29900 },
-  { days: 30,  label: "חודש",       price: 49900 },
-  { days: 60,  label: "חודשיים",    price: 89900 },
-  { days: 90,  label: "3 חודשים",   price: 119900},
-  { days: 180, label: "חצי שנה",    price: 199900},
-  { days: 365, label: "שנה",        price: 349900},
+  { days: 1,   label: "יום",       price: 2000  },  // ₪20
+  { days: 2,   label: "יומיים",    price: 3500  },  // ₪35
+  { days: 3,   label: "3 ימים",    price: 5000  },  // ₪50
+  { days: 5,   label: "5 ימים",    price: 7500  },  // ₪75
+  { days: 7,   label: "שבוע",      price: 10000 },  // ₪100
+  { days: 10,  label: "10 ימים",   price: 13000 },  // ₪130
+  { days: 14,  label: "שבועיים",   price: 17000 },  // ₪170
+  { days: 21,  label: "3 שבועות",  price: 22000 },  // ₪220
+  { days: 30,  label: "חודש",      price: 2900  },  // ₪29 — monthly base
+  { days: 60,  label: "חודשיים",   price: 5500  },  // ₪55
+  { days: 90,  label: "3 חודשים",  price: 7500  },  // ₪75
+  { days: 180, label: "חצי שנה",   price: 13000 },  // ₪130
+  { days: 270, label: "9 חודשים",  price: 18000 },  // ₪180
+  { days: 365, label: "שנה",       price: 50000 },  // ₪500
 ] as const;
 
 export type Plan = typeof PLANS[number];
@@ -20,13 +25,11 @@ export function getPlanCount(): number {
   return PLANS.length;
 }
 
-// Legacy compatibility for checkout/webhook
 export function getPriceForMonths(months: number): number {
   const days = Math.round(months * 30);
-  const plan = [...PLANS].sort((a, b) =>
+  return [...PLANS].sort((a, b) =>
     Math.abs(a.days - days) - Math.abs(b.days - days)
-  )[0];
-  return plan.price;
+  )[0].price;
 }
 
 export function getPricePerMonth(months: number): number {
