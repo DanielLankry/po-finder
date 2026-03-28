@@ -16,4 +16,4 @@ export function getStripe(): Stripe {
   return _stripe;
 }
 
-export { PLANS } from "./plans";
+export { PRICING_PLANS as PLANS } from "./plans";

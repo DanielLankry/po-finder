@@ -125,19 +125,3 @@ export async function updateBusiness(id: string, formData: FormData) {
   revalidatePath("/dashboard/profile");
   return data as Business;
 }
-) as string | null,
-  };
-
-  const { data, error } = await supabase
-    .from("businesses")
-    .update(updates)
-    .eq("id", id)
-    .eq("owner_id", user.id)
-    .select()
-    .single();
-
-  if (error) throw error;
-  revalidatePath(`/businesses/${id}`);
-  revalidatePath("/dashboard/profile");
-  return data as Business;
-}

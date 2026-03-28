@@ -333,9 +333,3 @@ export default function BusinessMap({
     </GoogleMap>
   );
 }
-
-        </div>
-      )}
-    </GoogleMap>
-  );
-}
