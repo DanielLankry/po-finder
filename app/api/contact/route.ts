@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { contactAutoReplyTemplate } from "@/lib/email-templates";
 
 export const runtime = "nodejs";
 
@@ -55,19 +56,12 @@ export async function POST(req: NextRequest) {
       `,
     });
 
-    // Auto-reply to sender
+    // Auto-reply to sender with beautiful template
     await resend.emails.send({
       from: "פוקרוב <noreply@pokarov.co.il>",
       to: email,
       subject: "קיבלנו את פנייתך — פוקרוב",
-      html: `
-        <div dir="rtl" style="font-family: sans-serif; max-width: 520px; margin: 0 auto; padding: 24px;">
-          <h2 style="color: #059669;">תודה, ${name}!</h2>
-          <p>קיבלנו את פנייתך בנושא <strong>${subjectLabel}</strong>.</p>
-          <p>נשיב אליך תוך 3 ימי עסקים.</p>
-          <p style="color: #888; font-size: 13px; margin-top: 24px;">צוות פוקרוב • support@pokarov.co.il</p>
-        </div>
-      `,
+      html: contactAutoReplyTemplate(name, subjectLabel),
     });
 
     return NextResponse.json({ ok: true });
