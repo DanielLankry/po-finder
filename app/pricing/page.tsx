@@ -15,13 +15,13 @@ const BENEFITS = [
   "סטטיסטיקות צפיות וחיוגים",
 ];
 
-// Quick-select markers (index into PLANS array)
+// Quick-select markers (index into PLANS array, 0-8)
 const MARKERS = [
-  { index: 0,  label: "יום" },
-  { index: 4,  label: "שבוע" },
-  { index: 6,  label: "שבועיים" },
-  { index: 8,  label: "חודש", highlight: true },
-  { index: 13, label: "שנה" },
+  { index: 0, label: "יום" },
+  { index: 2, label: "שבוע" },
+  { index: 3, label: "שבועיים" },
+  { index: 4, label: "חודש", highlight: true },
+  { index: 8, label: "שנה" },
 ];
 
 function useAnimatedNumber(target: number, duration = 250) {
@@ -59,7 +59,7 @@ export default function PricingPage() {
   // Price per day
   const pricePerDay = Math.round(plan.price / plan.days);
   // Saving vs base rate (₪20/day)
-  const baseCost = 2000 * plan.days; // ₪20/day in agorot
+  const baseCost = 2900 * plan.days; // ₪20/day in agorot
   const saving = baseCost > plan.price ? baseCost - plan.price : 0;
 
   const animatedPrice = useAnimatedNumber(Math.round(plan.price / 100));
@@ -121,7 +121,7 @@ export default function PricingPage() {
               </p>
               {saving > 0 && (
                 <div className="inline-flex items-center gap-1 mt-2 bg-[#ECFDF5] text-[#059669] px-3 py-1 rounded-full text-sm font-semibold">
-                  חוסכים ₪{Math.round(saving / 100)} לעומת ₪20 ליום
+                  חוסכים ₪{Math.round(saving / 100)} לעומת מחיר יומי
                 </div>
               )}
             </div>
@@ -148,24 +148,29 @@ export default function PricingPage() {
                 />
               </div>
 
-              {/* Quick-select markers */}
-              <div className="flex justify-between mt-3 px-0.5" dir="ltr">
-                {MARKERS.map((m) => (
-                  <button
-                    key={m.index}
-                    onClick={() => setPlanIndex(m.index)}
-                    className={`text-xs font-semibold px-2 py-1 rounded-full transition-all flex flex-col items-center ${
-                      planIndex === m.index
-                        ? "bg-[#059669] text-white"
-                        : "text-[#888] hover:text-[#059669]"
-                    }`}
-                  >
-                    {m.label}
-                    {m.highlight && planIndex !== m.index && (
-                      <span className="text-[9px] font-bold text-amber-500">מומלץ</span>
-                    )}
-                  </button>
-                ))}
+              {/* Quick-select markers — absolutely positioned under slider */}
+              <div className="relative mt-3 h-8" dir="ltr">
+                {MARKERS.map((m) => {
+                  const pct = (m.index / maxIndex) * 100;
+                  const isActive = planIndex === m.index;
+                  return (
+                    <button
+                      key={m.index}
+                      onClick={() => setPlanIndex(m.index)}
+                      style={{ left: `${pct}%`, transform: "translateX(-50%)" }}
+                      className={`absolute top-0 text-xs font-semibold px-2 py-1 rounded-full transition-all flex flex-col items-center whitespace-nowrap ${
+                        isActive
+                          ? "bg-[#059669] text-white"
+                          : "text-[#888] hover:text-[#059669]"
+                      }`}
+                    >
+                      {m.label}
+                      {m.highlight && !isActive && (
+                        <span className="text-[9px] font-bold text-amber-500 leading-none">מומלץ</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
