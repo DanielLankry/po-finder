@@ -179,88 +179,79 @@ export default function PricingPage() {
                 <span>שנה</span>
               </div>
 
-              {/* Custom slider track */}
-              <div
-                dir="ltr"
-                ref={trackRef}
-                className="relative h-10 flex items-center cursor-pointer"
-                onPointerDown={handleTrackPointerDown}
-              >
-                {/* Track background */}
-                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-3 rounded-full bg-[#CCEFEE]" />
-
-                {/* Filled track with glow */}
-                <motion.div
-                  className="absolute top-1/2 -translate-y-1/2 h-2 rounded-full"
-                  style={{ left: 0 }}
-                  animate={{ width: `${fillPct}%` }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              {/* Slider + markers — single unified container so markers align perfectly */}
+              <div dir="ltr" className="relative" style={{ paddingTop: "20px", paddingBottom: "40px" }}>
+                {/* Track area */}
+                <div
+                  ref={trackRef}
+                  className="relative h-3 flex items-center cursor-pointer rounded-full bg-[#CCEFEE]"
+                  onPointerDown={handleTrackPointerDown}
                 >
-                  <div
-                    className="w-full h-full rounded-full"
+                  {/* Filled track */}
+                  <motion.div
+                    className="absolute top-0 left-0 h-full rounded-full"
+                    animate={{ width: `${fillPct}%` }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     style={{
                       background: "linear-gradient(90deg, #2dd4bf, #1d938d)",
                       boxShadow: "0 0 12px rgba(29,147,141,0.5)",
                     }}
                   />
-                </motion.div>
 
-                {/* Animated thumb */}
-                <motion.div
-                  className="absolute top-1/2 z-10"
-                  animate={{ left: `${fillPct}%` }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  style={{ translateY: "-50%", translateX: "-50%" }}
-                >
+                  {/* Animated thumb */}
                   <motion.div
-                    className="w-8 h-8 rounded-full bg-white border-[3.5px] border-[#1d938d]"
-                    style={{
-                      boxShadow: "0 0 0 5px rgba(29,147,141,0.2), 0 2px 12px rgba(29,147,141,0.45)",
-                    }}
-                    whileHover={{ scale: 1.25 }}
-                    whileTap={{ scale: 0.9 }}
+                    className="absolute top-1/2 z-10"
+                    animate={{ left: `${fillPct}%` }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    style={{ translateY: "-50%", translateX: "-50%" }}
+                  >
+                    <motion.div
+                      className="w-8 h-8 rounded-full bg-white border-[3.5px] border-[#1d938d]"
+                      style={{ boxShadow: "0 0 0 5px rgba(29,147,141,0.2), 0 2px 12px rgba(29,147,141,0.45)" }}
+                      whileHover={{ scale: 1.25 }}
+                      whileTap={{ scale: 0.9 }}
+                    />
+                  </motion.div>
+
+                  {/* Invisible native range */}
+                  <input
+                    type="range" min={0} max={maxIndex} step={1} value={planIndex}
+                    onChange={(e) => setPlanIndex(Number(e.target.value))}
+                    className="absolute inset-0 w-full opacity-0 cursor-pointer z-20 h-full"
                   />
-                </motion.div>
+                </div>
 
-                {/* Invisible native range for accessibility & drag */}
-                <input
-                  type="range"
-                  min={0}
-                  max={maxIndex}
-                  step={1}
-                  value={planIndex}
-                  onChange={(e) => setPlanIndex(Number(e.target.value))}
-                  className="absolute inset-0 w-full opacity-0 cursor-pointer z-20"
-                />
-              </div>
-
-              {/* Quick-select pill buttons with spring animation */}
-              <div className="relative mt-4 h-9 overflow-visible pr-1" dir="ltr">
+                {/* Markers — positioned relative to same container width as track */}
                 {MARKERS.map((m) => {
                   const isActive = planIndex === m.index;
+                  const pct = (m.index / maxIndex) * 100;
                   return (
                     <motion.button
                       key={m.index}
                       onClick={() => setPlanIndex(m.index)}
                       animate={{
-                        scale: isActive ? 1.12 : 1,
+                        scale: isActive ? 1.1 : 1,
                         backgroundColor: isActive ? "#1d938d" : "#F3F4F6",
                         color: isActive ? "#ffffff" : "#6B7280",
                       }}
-                      whileHover={{ scale: isActive ? 1.12 : 1.06 }}
+                      whileHover={{ scale: isActive ? 1.1 : 1.05 }}
                       whileTap={{ scale: 0.92 }}
                       transition={{ type: "spring", stiffness: 400, damping: 25 }}
                       style={{
                         position: "absolute",
-                        left: m.index === maxIndex ? "calc(100% - 2px)" : `${(m.index / maxIndex) * 100}%`,
-                        transform: m.index === 0 ? "translateX(2px)" : m.index === maxIndex ? "translateX(-100%)" : "translateX(-50%)",
-                        top: 0,
+                        bottom: 0,
+                        left: `${pct}%`,
+                        transform: m.index === 0
+                          ? "translateX(0%)"
+                          : m.index === maxIndex
+                          ? "translateX(-100%)"
+                          : "translateX(-50%)",
                       }}
-                      className="text-xs font-semibold px-3 py-1.5 rounded-full flex flex-col items-center whitespace-nowrap"
+                      className="text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap"
                     >
                       {m.label}
                       {m.highlight && !isActive && (
-                        <span className="text-[9px] font-bold text-amber-500 leading-none">מומלץ</span>
+                        <span className="block text-[9px] font-bold text-amber-500 leading-none text-center">מומלץ</span>
                       )}
                     </motion.button>
                   );
