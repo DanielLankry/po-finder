@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PRICING_PLANS, getPriceForMonths, getPricePerMonth } from "@/lib/plans";
 import { Check, Zap } from "lucide-react";
+import Navbar from "@/components/layout/Navbar";
 
 const BENEFITS = [
   "הופעה על המפה בזמן אמת",
@@ -82,7 +83,9 @@ export default function PricingPage() {
   const monthLabel = months === 1 ? "חודש" : months === 2 ? "חודשיים" : `${months} חודשים`;
 
   return (
-    <div className="min-h-screen bg-[#FAFAF7] py-16 px-4" dir="rtl">
+    <div className="min-h-screen bg-[#FAFAF7]" dir="rtl">
+      <Navbar />
+      <div className="py-16 px-4">
       <div className="max-w-lg mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -120,7 +123,7 @@ export default function PricingPage() {
               <span>חודש</span>
               <span>שנה</span>
             </div>
-            <div className="relative">
+            <div className="relative" dir="ltr">
               <input
                 type="range"
                 min={1}
@@ -130,8 +133,9 @@ export default function PricingPage() {
                 onChange={(e) => setMonths(Number(e.target.value))}
                 className="w-full h-2 appearance-none cursor-pointer rounded-full outline-none"
                 style={{
-                  background: `linear-gradient(to left, #E5E7EB ${((12 - months) / 11) * 100}%, #059669 ${((12 - months) / 11) * 100}%)`,
+                  background: `linear-gradient(to right, #059669 ${((months - 1) / 11) * 100}%, #E5E7EB ${((months - 1) / 11) * 100}%)`,
                   WebkitAppearance: "none",
+                  direction: "ltr",
                 }}
               />
             </div>
@@ -211,6 +215,7 @@ export default function PricingPage() {
           cursor: pointer;
         }
       `}</style>
+      </div>
     </div>
   );
 }
