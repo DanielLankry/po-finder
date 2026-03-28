@@ -62,7 +62,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
             className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-lg"
             aria-label="פה קרוב — דף הבית"
           >
-            <Image src="/logo.png" alt="פה קרוב" width={38} height={38} className="rounded-lg" />
+            <Image src="/logo.png" alt="פה קרוב" width={52} height={52} className="rounded-xl" />
           </Link>
           {/* Typewriter tagline */}
           <div className="flex items-center border-r border-[#E5E7EB] pr-3 overflow-hidden w-[175px] md:w-[295px]">
