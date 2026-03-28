@@ -21,13 +21,9 @@ export default withSentryConfig(nextConfig, {
   org: "pokarov",
   project: "pokarov-nextjs",
   silent: !process.env.CI,
+  disableLogger: true,
+  automaticVercelMonitors: true,
   sourcemaps: {
     deleteSourcemapsAfterUpload: true,
-  },
-  webpack: {
-    treeshake: {
-      removeDebugLogging: true,
-    },
-    automaticVercelMonitors: true,
   },
 });
