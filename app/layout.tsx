@@ -5,6 +5,8 @@ import "@/lib/env";
 import CookieConsent from "@/components/layout/CookieConsent";
 import AccessibilityWidget from "@/components/layout/AccessibilityWidget";
 import { Analytics } from "@vercel/analytics/next";
+import { Suspense } from "react";
+import PostHogProvider from "@/components/providers/PostHogProvider";
 
 const secularOne = Secular_One({
   variable: "--font-secular",
@@ -143,7 +145,11 @@ export default function RootLayout({
         <a href="#main-content" className="skip-to-content">
           דלגו לתוכן הראשי
         </a>
-        <main id="main-content">{children}</main>
+        <Suspense fallback={null}>
+          <PostHogProvider>
+            <main id="main-content">{children}</main>
+          </PostHogProvider>
+        </Suspense>
         <AccessibilityWidget />
         <CookieConsent />
         <Analytics />
