@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Spot } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
 
-export default function AdminSpotsPage() {
+function AdminSpotsPageInner() {
   const params = useSearchParams();
   const secret = params.get("secret") ?? "";
   const [spots, setSpots] = useState<Spot[]>([]);
@@ -106,5 +106,13 @@ export default function AdminSpotsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminSpotsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-8 w-8 rounded-full border-4 border-[#D1FAE5] border-t-[#059669] animate-spin" /></div>}>
+      <AdminSpotsPageInner />
+    </Suspense>
   );
 }

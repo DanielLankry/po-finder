@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -21,7 +22,7 @@ interface PendingBusiness {
   created_at: string;
 }
 
-export default function AdminBusinessesPage() {
+function AdminBusinessesPageInner() {
   const params = useSearchParams();
   const secret = params.get("secret") ?? "";
   const [businesses, setBusinesses] = useState<PendingBusiness[]>([]);
@@ -159,5 +160,13 @@ export default function AdminBusinessesPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminBusinessesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-8 w-8 rounded-full border-4 border-[#D1FAE5] border-t-[#059669] animate-spin" /></div>}>
+      <AdminBusinessesPageInner />
+    </Suspense>
   );
 }
