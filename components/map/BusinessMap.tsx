@@ -8,12 +8,10 @@ import {
 } from "@react-google-maps/api";
 import { warmMapStyle, TEL_AVIV_CENTER, DEFAULT_ZOOM } from "@/lib/maps/mapStyle";
 import BusinessPopup from "./BusinessPopup";
-import type { BusinessWithSchedule, BusinessCategory, Spot } from "@/lib/types";
+import type { BusinessWithSchedule, BusinessCategory } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
 import { isOpenNow } from "@/lib/utils/schedule";
 import type { FilterState } from "../filters/FilterDrawer";
-import { createClient } from "@/lib/supabase/client";
-
 interface BusinessMapProps {
   businesses: BusinessWithSchedule[];
   activeCategory: BusinessCategory | "all";
@@ -46,19 +44,6 @@ export default function BusinessMap({
   searchCenter,
   onUserLocationChange,
 }: BusinessMapProps) {
-  const [spots, setSpots] = useState<Spot[]>([]);
-  const [selectedSpot, setSelectedSpot] = useState<Spot | null>(null);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase
-      .from("spots")
-      .select("*")
-      .eq("is_approved", true)
-      .gt("expires_at", new Date().toISOString())
-      .then(({ data }) => setSpots((data ?? []) as Spot[]));
-  }, []);
-
   const [selectedBusiness, setSelectedBusiness] =
     useState<BusinessWithSchedule | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -267,105 +252,6 @@ export default function BusinessMap({
         );
       })}
 
-      {/* ── Spot markers (amber/pulsing) ─────────────────────────── */}
-      {spots.map((spot) => {
-        const isSelected = selectedSpot?.id === spot.id;
-        const size = isSelected ? 44 : 36;
-        const CATEGORY_EMOJI: Record<string, string> = {
-          coffee:"☕", food:"🍽️", sweets:"🍰", meat:"🥩",
-          vegan:"🌿", celiac:"🌾", flowers:"🌸", jewelry:"💎", vintage:"👗",
-        };
-        const emoji = CATEGORY_EMOJI[spot.category] ?? "📍";
-
-        return (
-          <OverlayView
-            key={`spot-${spot.id}`}
-            position={{ lat: spot.lat, lng: spot.lng }}
-            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-            getPixelPositionOffset={() => ({ x: -(size / 2), y: -(size / 2) })}
-          >
-            <div
-              style={{ position: "relative", width: size, height: size, zIndex: 30, cursor: "pointer" }}
-              onClick={(e) => { e.stopPropagation(); setSelectedSpot(isSelected ? null : spot); setSelectedBusiness(null); }}
-            >
-              {/* Pulse ring */}
-              <div style={{
-                position: "absolute", inset: -8,
-                borderRadius: "50%",
-                border: "2px solid rgba(245,158,11,0.5)",
-                animation: "spot-pulse 2s ease-out infinite",
-                pointerEvents: "none",
-              }} />
-              <div style={{
-                position: "absolute", inset: -4,
-                borderRadius: "50%",
-                border: "2px solid rgba(245,158,11,0.3)",
-                animation: "spot-pulse 2s ease-out 0.7s infinite",
-                pointerEvents: "none",
-              }} />
-
-              {/* Main pin */}
-              <div style={{
-                width: size, height: size,
-                fontSize: isSelected ? "1.5rem" : "1.2rem",
-                border: "2.5px solid #f59e0b",
-                background: "linear-gradient(135deg, #fef3c7, #fde68a)",
-                boxShadow: "0 4px 12px rgba(245,158,11,0.45)",
-              }} className="flex items-center justify-center rounded-full select-none transition-all duration-200">
-                {emoji}
-              </div>
-
-              {/* SPOT badge */}
-              <div style={{
-                position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)",
-                background: "linear-gradient(135deg, #f59e0b, #d97706)",
-                color: "white", fontSize: "9px", fontWeight: 800,
-                padding: "1px 5px", borderRadius: "999px",
-                whiteSpace: "nowrap", pointerEvents: "none",
-                boxShadow: "0 2px 6px rgba(245,158,11,0.5)",
-              }}>
-                SPOT
-              </div>
-
-              {/* Popup on select */}
-              {isSelected && !isMobile && (
-                <div style={{ position: "absolute", bottom: "calc(100% + 12px)", left: "50%", transform: "translateX(-50%)", zIndex: 40 }}>
-                  <div dir="rtl" style={{
-                    background: "white", borderRadius: 16, padding: 14,
-                    boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
-                    border: "1.5px solid #fde68a",
-                    minWidth: 200, maxWidth: 260,
-                  }}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-lg">{emoji}</span>
-                      <p className="font-bold text-[#111] text-sm">{spot.name}</p>
-                    </div>
-                    {spot.description && <p className="text-xs text-[#666] mb-1">{spot.description}</p>}
-                    <p className="text-xs text-[#888] flex items-center gap-1">📍 {spot.address}</p>
-                    {spot.phone && <p className="text-xs text-[#888] mt-0.5">📞 {spot.phone}</p>}
-                    <div className="mt-2 pt-2 border-t border-[#FEF3C7] flex items-center gap-1">
-                      <span style={{ background:"linear-gradient(135deg,#f59e0b,#d97706)", color:"white", fontSize:"10px", fontWeight:700, padding:"2px 8px", borderRadius:999 }}>SPOT</span>
-                      <span className="text-[10px] text-amber-600 font-medium">
-                        {(() => { const h = Math.floor((new Date(spot.expires_at).getTime()-Date.now())/3600000); return h<24?`נגמר בעוד ${h}ש`:`${Math.floor(h/24)} ימים`; })()}
-                      </span>
-                    </div>
-                  </div>
-                  {/* Arrow */}
-                  <div style={{ width:0, height:0, borderLeft:"8px solid transparent", borderRight:"8px solid transparent", borderTop:"8px solid white", margin:"0 auto", filter:"drop-shadow(0 2px 2px rgba(0,0,0,0.1))" }} />
-                </div>
-              )}
-            </div>
-          </OverlayView>
-        );
-      })}
-
-      <style>{`
-        @keyframes spot-pulse {
-          0% { transform: scale(1); opacity: 0.8; }
-          100% { transform: scale(2.2); opacity: 0; }
-        }
-      `}</style>
-
       {/* User location dot */}
       {userLocation && (
         <OverlayView
@@ -442,6 +328,12 @@ export default function BusinessMap({
               <line x1="18" y1="12" x2="22" y2="12" />
             </svg>
           </button>
+        </div>
+      )}
+    </GoogleMap>
+  );
+}
+
         </div>
       )}
     </GoogleMap>

@@ -1,189 +1,216 @@
 "use client";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { PRICING_PLANS, getPriceForMonths, getPricePerMonth } from "@/lib/plans";
+import { Check, Zap } from "lucide-react";
 
-import { useState } from "react";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import { Check, MapPin, Camera, Clock, Star, BarChart3, Shield } from "lucide-react";
-import Link from "next/link";
-import { PLANS } from "@/lib/plans";
+const BENEFITS = [
+  "הופעה על המפה בזמן אמת",
+  "פרופיל עסק מלא עם תמונות",
+  "ניהול שעות ומיקום יומי",
+  "קבלת ביקורות מלקוחות",
+  "כפתור התקשרות ישיר",
+  "סטטיסטיקות צפיות וחיוגים",
+];
+
+function useAnimatedNumber(target: number, duration = 300) {
+  const [display, setDisplay] = useState(target);
+  const raf = useRef<number | null>(null);
+  const start = useRef<number | null>(null);
+  const from = useRef(target);
+
+  useEffect(() => {
+    from.current = display;
+    start.current = null;
+    if (raf.current) cancelAnimationFrame(raf.current);
+
+    const animate = (ts: number) => {
+      if (!start.current) start.current = ts;
+      const progress = Math.min((ts - start.current) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(from.current + (target - from.current) * eased));
+      if (progress < 1) raf.current = requestAnimationFrame(animate);
+    };
+    raf.current = requestAnimationFrame(animate);
+    return () => { if (raf.current) cancelAnimationFrame(raf.current); };
+  }, [target]);
+
+  return display;
+}
 
 export default function PricingPage() {
+  const router = useRouter();
+  const [months, setMonths] = useState(3);
   const [loading, setLoading] = useState(false);
-  const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  const showBanner = typeof window !== "undefined" &&
-    new URLSearchParams(window.location.search).get("reason") === "subscription_required";
+  const [checking, setChecking] = useState(true);
 
-  async function handleSubscribe() {
+  const price = getPriceForMonths(months);
+  const perMonth = getPricePerMonth(months);
+  const saving = months > 1 ? (2900 * months - price) : 0;
+
+  const animatedPrice = useAnimatedNumber(Math.round(price / 100));
+  const animatedPerMonth = useAnimatedNumber(Math.round(perMonth / 100));
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setChecking(false);
+    });
+  }, []);
+
+  async function handleCheckout() {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { router.push("/auth/login?redirect=/pricing"); return; }
     setLoading(true);
-    setCheckoutError(null);
     try {
-      const res = await fetch("/api/stripe/checkout", { method: "POST" });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else if (res.status === 401) {
-        window.location.href = "/auth/login?redirectTo=/pricing";
-      } else {
-        setCheckoutError(data.error ?? "אירעה שגיאה. נסו שוב מאוחר יותר.");
-      }
-    } catch {
-      setCheckoutError("בעיית חיבור. בדקו את החיבור לאינטרנט ונסו שוב.");
-    } finally {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ months }),
+      });
+      const { url, error } = await res.json();
+      if (error) throw new Error(error);
+      window.location.href = url;
+    } catch (err) {
+      alert("שגיאה: " + (err instanceof Error ? err.message : String(err)));
       setLoading(false);
     }
   }
 
-  const plan = PLANS.business;
-  const featureIcons = [MapPin, Camera, Clock, Camera, Star, BarChart3];
+  const monthLabel = months === 1 ? "חודש" : months === 2 ? "חודשיים" : `${months} חודשים`;
 
   return (
-    <>
-      <Navbar />
-      <main className="min-h-screen bg-[#FAFAF7] pt-[88px] pb-16" dir="rtl">
-        <div className="max-w-4xl mx-auto px-4">
-          {showBanner && (
-            <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 text-amber-800 text-sm text-center font-medium">
-              ⚡ כדי לגשת ללוח הבקרה ולהופיע על המפה, יש צורך במנוי פעיל
+    <div className="min-h-screen bg-[#FAFAF7] py-16 px-4" dir="rtl">
+      <div className="max-w-lg mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-[#ECFDF5] text-[#059669] px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
+            <Zap className="h-4 w-4" />
+            תשלום חד פעמי — ללא התחייבות
+          </div>
+          <h1 className="text-4xl font-extrabold text-[#111] mb-3">כמה זמן תרצו להופיע?</h1>
+          <p className="text-[#666] text-lg">גררו את הסרגל ובחרו את התקופה המתאימה לכם</p>
+        </div>
+
+        {/* Pricing Card */}
+        <div className="bg-white rounded-3xl shadow-xl border border-[#E5E7EB] p-8 mb-6">
+          {/* Price Display */}
+          <div className="text-center mb-8">
+            <div className="flex items-end justify-center gap-2 mb-1">
+              <span className="text-[#888] text-xl font-medium">₪</span>
+              <span className="text-7xl font-extrabold text-[#111] leading-none tabular-nums" style={{ fontVariantNumeric: "tabular-nums" }}>
+                {animatedPrice}
+              </span>
             </div>
-          )}
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-stone-900 mb-3">
-              הביאו את העסק שלכם למפה
-            </h1>
-            <p className="text-stone-500 text-lg max-w-xl mx-auto">
-              מנוי חודשי פשוט — בלי התחייבות, בלי הפתעות
+            <p className="text-[#888] text-base">
+              ל-{monthLabel} • ₪<span className="font-semibold text-[#059669]">{animatedPerMonth}</span> לחודש
             </p>
+            {saving > 0 && (
+              <div className="inline-flex items-center gap-1 mt-2 bg-[#ECFDF5] text-[#059669] px-3 py-1 rounded-full text-sm font-semibold">
+                חוסכים ₪{Math.round(saving / 100)} לעומת תשלום חודשי
+              </div>
+            )}
           </div>
 
-          {/* Pricing Card */}
-          <div className="max-w-md mx-auto">
-            <div className="bg-white rounded-3xl border-2 border-[#059669] shadow-hover p-8 relative">
-              {/* Badge */}
-              <div className="absolute -top-3.5 inset-x-0 flex justify-center">
-                <span className="bg-[#059669] text-white text-xs font-bold px-4 py-1.5 rounded-full">
-                  מנוי חודשי
-                </span>
-              </div>
-
-              <div className="text-center mt-2 mb-6">
-                <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                  {plan.name}
-                </h2>
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="font-display font-extrabold text-5xl text-stone-900">
-                    {plan.priceDisplay}
-                  </span>
-                  <span className="text-stone-500 text-sm">/חודש</span>
-                </div>
-              </div>
-
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((feature, i) => {
-                  const Icon = featureIcons[i] || Check;
-                  return (
-                    <li key={feature} className="flex items-center gap-3">
-                      <div className="h-6 w-6 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                        <Icon className="h-3.5 w-3.5 text-[#059669]" aria-hidden="true" />
-                      </div>
-                      <span className="text-stone-700 text-sm">{feature}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-
-              <button
-                onClick={handleSubscribe}
-                disabled={loading}
-                className="w-full h-12 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-bold text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed btn-press"
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    מעבד...
-                  </span>
-                ) : (
-                  "התחילו עכשיו"
-                )}
-              </button>
-
-              {checkoutError && (
-                <p role="alert" className="text-red-600 text-sm text-center bg-red-50 rounded-xl px-4 py-2.5 mt-2">
-                  {checkoutError}
-                </p>
-              )}
-              <p className="text-center text-stone-400 text-xs mt-3">
-                ניתן לבטל בכל עת. ללא התחייבות.
-              </p>
+          {/* Slider */}
+          <div className="mb-8">
+            <div className="flex justify-between text-xs text-[#AAA] mb-2 px-1">
+              <span>חודש</span>
+              <span>שנה</span>
             </div>
-          </div>
-
-          {/* Trust section */}
-          <div className="mt-12 text-center">
-            <div className="flex items-center justify-center gap-6 text-stone-400 text-sm">
-              <div className="flex items-center gap-1.5">
-                <Shield className="h-4 w-4" aria-hidden="true" />
-                <span>תשלום מאובטח</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Check className="h-4 w-4" aria-hidden="true" />
-                <span>ביטול בכל עת</span>
-              </div>
+            <div className="relative">
+              <input
+                type="range"
+                min={1}
+                max={12}
+                step={1}
+                value={months}
+                onChange={(e) => setMonths(Number(e.target.value))}
+                className="w-full h-2 appearance-none cursor-pointer rounded-full outline-none"
+                style={{
+                  background: `linear-gradient(to left, #E5E7EB ${((12 - months) / 11) * 100}%, #059669 ${((12 - months) / 11) * 100}%)`,
+                  WebkitAppearance: "none",
+                }}
+              />
             </div>
-          </div>
-
-          {/* FAQ */}
-          <div className="mt-16 max-w-2xl mx-auto">
-            <h2 className="font-display font-bold text-2xl text-stone-900 text-center mb-8">
-              שאלות נפוצות
-            </h2>
-            <div className="space-y-4">
-              <FaqItem
-                question="מה קורה אחרי שאני נרשם?"
-                answer="לאחר הרישום והתשלום, תוכלו ליצור פרופיל עסק מלא, להוסיף תמונות, לנהל שעות פעילות, ולהופיע על המפה מיד."
-              />
-              <FaqItem
-                question="האם אפשר לבטל בכל עת?"
-                answer="כן! אין התחייבות. ניתן לבטל את המנוי בכל עת דרך לוח הבקרה ולא תחויבו שוב."
-              />
-              <FaqItem
-                question="איך מתבצע התשלום?"
-                answer="התשלום מתבצע בצורה מאובטחת דרך Stripe. אנחנו תומכים בכרטיסי אשראי ודביט."
-              />
-              <FaqItem
-                question="האם יש תקופת ניסיון?"
-                answer="כרגע אין תקופת ניסיון חינמית, אבל ניתן לבטל בכל עת בחודש הראשון ולקבל החזר מלא."
-              />
+            {/* Month markers */}
+            <div className="flex justify-between mt-3 px-0.5">
+              {[1, 3, 6, 9, 12].map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setMonths(m)}
+                  className={`text-xs font-semibold px-2 py-1 rounded-full transition-all ${
+                    months === m
+                      ? "bg-[#059669] text-white"
+                      : "text-[#888] hover:text-[#059669]"
+                  }`}
+                >
+                  {m === 12 ? "שנה" : m === 1 ? "חודש" : `${m}M`}
+                  {m === 3 && <div className="text-[9px] font-bold text-amber-500">מומלץ</div>}
+                </button>
+              ))}
             </div>
           </div>
 
           {/* CTA */}
-          <div className="mt-12 text-center">
-            <p className="text-stone-500 mb-3">יש שאלות נוספות?</p>
-            <Link
-              href="/contact"
-              className="text-[#059669] font-medium hover:underline"
-            >
-              צרו קשר
-            </Link>
+          <button
+            onClick={handleCheckout}
+            disabled={loading || checking}
+            className="w-full h-14 rounded-2xl text-white font-bold text-lg transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
+            style={{
+              background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
+              boxShadow: "0 4px 20px rgba(5,150,105,0.4)",
+            }}
+          >
+            {loading ? "מעביר לתשלום..." : `התחילו עכשיו — ₪${Math.round(price / 100)}`}
+          </button>
+          <p className="text-center text-[#AAA] text-xs mt-3">
+            תשלום מאובטח • ללא חיוב חוזר אוטומטי
+          </p>
+        </div>
+
+        {/* Benefits */}
+        <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6">
+          <h3 className="font-bold text-[#111] text-base mb-4">מה כולל הרישום?</h3>
+          <div className="space-y-3">
+            {BENEFITS.map((b) => (
+              <div key={b} className="flex items-center gap-3">
+                <div className="h-5 w-5 rounded-full bg-[#ECFDF5] flex items-center justify-center flex-shrink-0">
+                  <Check className="h-3 w-3 text-[#059669]" />
+                </div>
+                <span className="text-[#444] text-sm">{b}</span>
+              </div>
+            ))}
           </div>
         </div>
-      </main>
-      <Footer />
-    </>
-  );
-}
-
-function FaqItem({ question, answer }: { question: string; answer: string }) {
-  return (
-    <details className="group bg-stone-50 rounded-xl border border-stone-200 overflow-hidden">
-      <summary className="flex items-center justify-between cursor-pointer p-4 text-sm font-medium text-stone-900 hover:bg-stone-100 transition-colors list-none">
-        <span>{question}</span>
-        <span className="text-stone-400 group-open:rotate-45 transition-transform text-lg">+</span>
-      </summary>
-      <div className="px-4 pb-4 text-sm text-stone-600 leading-relaxed">
-        {answer}
       </div>
-    </details>
+
+      <style jsx global>{`
+        input[type='range']::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: white;
+          border: 3px solid #059669;
+          box-shadow: 0 2px 8px rgba(5,150,105,0.3);
+          cursor: pointer;
+          transition: transform 0.15s;
+        }
+        input[type='range']::-webkit-slider-thumb:hover {
+          transform: scale(1.15);
+        }
+        input[type='range']::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: white;
+          border: 3px solid #059669;
+          cursor: pointer;
+        }
+      `}</style>
+    </div>
   );
 }

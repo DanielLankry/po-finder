@@ -79,13 +79,7 @@ function AdminBusinessesPageInner() {
             <h1 className="text-2xl font-extrabold text-[#111]">אישור עסקים</h1>
             <p className="text-[#888] text-sm">{businesses.length} ממתינים לאישור</p>
           </div>
-          <a
-            href={`/admin/spots?secret=${secret}`}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-orange-100 text-orange-700 text-sm font-semibold hover:bg-orange-200 transition-colors"
-          >
-            ✦ Spots
-            <ExternalLink className="h-3.5 w-3.5" />
-          </a>
+
         </div>
 
         {businesses.length === 0 && (
