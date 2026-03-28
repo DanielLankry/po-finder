@@ -187,7 +187,7 @@ export default function PricingPage() {
                 onPointerDown={handleTrackPointerDown}
               >
                 {/* Track background */}
-                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-3 rounded-full bg-[#D1FAE5]" />
+                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-3 rounded-full bg-[#BBF7D0]" />
 
                 {/* Filled track with glow */}
                 <motion.div
@@ -213,9 +213,9 @@ export default function PricingPage() {
                   style={{ translateY: "-50%", translateX: "-50%" }}
                 >
                   <motion.div
-                    className="w-8 h-8 rounded-full bg-white border-[3.5px] border-[#059669]"
+                    className="w-8 h-8 rounded-full bg-white border-[3.5px] border-[#047857]"
                     style={{
-                      boxShadow: "0 0 0 4px rgba(5,150,105,0.18), 0 2px 10px rgba(5,150,105,0.4)",
+                      boxShadow: "0 0 0 5px rgba(4,120,87,0.22), 0 2px 12px rgba(4,120,87,0.5)",
                     }}
                     whileHover={{ scale: 1.25 }}
                     whileTap={{ scale: 0.9 }}
@@ -253,7 +253,7 @@ export default function PricingPage() {
                       style={{
                         position: "absolute",
                         left: `${(m.index / maxIndex) * 100}%`,
-                        transform: "translateX(-50%)",
+                        transform: m.index === 0 ? "translateX(0%)" : m.index === maxIndex ? "translateX(-100%)" : "translateX(-50%)",
                         top: 0,
                       }}
                       className="text-xs font-semibold px-3 py-1.5 rounded-full flex flex-col items-center whitespace-nowrap"
