@@ -1,10 +1,11 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PLANS, getPlanByIndex, getPlanCount } from "@/lib/plans";
 import { Check, Zap } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
+import { motion, AnimatePresence } from "framer-motion";
 
 const BENEFITS = [
   "הופעה על המפה בזמן אמת",
@@ -53,6 +54,8 @@ export default function PricingPage() {
   const [planIndex, setPlanIndex] = useState(8); // default: חודש
   const [loading, setLoading] = useState(false);
 
+  const trackRef = useRef<HTMLDivElement>(null);
+
   const plan = getPlanByIndex(planIndex);
   const maxIndex = getPlanCount() - 1;
 
@@ -69,6 +72,21 @@ export default function PricingPage() {
 
   // Slider fill %
   const fillPct = (planIndex / maxIndex) * 100;
+
+  // Card background shifts from light to deeper green based on plan duration
+  const t = planIndex / maxIndex;
+  const cardBg = `rgb(${Math.round(255 - t * 15)}, ${Math.round(255 - t * 5)}, ${Math.round(247 - t * 10)})`;
+
+  // Click-on-track handler for custom slider
+  const handleTrackPointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!trackRef.current) return;
+      const rect = trackRef.current.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      setPlanIndex(Math.round(pct * maxIndex));
+    },
+    [maxIndex],
+  );
 
   async function handleCheckout() {
     const supabase = createClient();
@@ -105,9 +123,15 @@ export default function PricingPage() {
             <p className="text-[#666] text-lg">גררו את הסרגל ובחרו את התקופה המתאימה לכם</p>
           </div>
 
-          {/* Pricing Card */}
-          <div className="bg-white rounded-3xl shadow-xl border border-[#E5E7EB] p-8 mb-6">
-            {/* Price Display */}
+          {/* Pricing Card — animated background */}
+          <motion.div
+            className="rounded-3xl shadow-xl border border-[#E5E7EB] p-8 mb-6"
+            animate={{
+              backgroundColor: cardBg,
+            }}
+            transition={{ type: "spring", stiffness: 200, damping: 30 }}
+          >
+            {/* Price Display with ticker animation */}
             <div className="text-center mb-8">
               <div className="flex items-end justify-center gap-2 mb-1">
                 <span className="text-[#888] text-xl font-medium">₪</span>
@@ -118,27 +142,87 @@ export default function PricingPage() {
                   {animatedPrice}
                 </span>
               </div>
-              <p className="text-[#888] text-base">
-                ל-{plan.label}
-                {plan.days > 1 && (
-                  <> • ₪<span className="font-semibold text-[#059669]">{animatedPerDay}</span> ליום</>
-                )}
-              </p>
+              {/* Duration label — ticker slide animation */}
+              <div className="overflow-hidden h-7 relative">
+                <AnimatePresence mode="popLayout">
+                  <motion.p
+                    key={plan.label}
+                    className="text-[#888] text-base"
+                    initial={{ y: -28, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 28, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  >
+                    ל-{plan.label}
+                    {plan.days > 1 && (
+                      <> • ₪<span className="font-semibold text-[#059669]">{animatedPerDay}</span> ליום</>
+                    )}
+                  </motion.p>
+                </AnimatePresence>
+              </div>
               {saving > 0 && (
-                <div className="inline-flex items-center gap-1 mt-2 bg-[#ECFDF5] text-[#059669] px-3 py-1 rounded-full text-sm font-semibold">
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="inline-flex items-center gap-1 mt-2 bg-[#ECFDF5] text-[#059669] px-3 py-1 rounded-full text-sm font-semibold"
+                >
                   חוסכים ₪{Math.round(saving / 100)} לעומת ₪20 ליום
-                </div>
+                </motion.div>
               )}
             </div>
 
-            {/* Slider — dir=ltr to prevent RTL flip */}
+            {/* Animated Slider — dir=ltr to prevent RTL flip */}
             <div className="mb-8">
-              {/* Labels: RTL — right=יום (start), left=שנה (end) */}
+              {/* Labels */}
               <div className="flex justify-between text-xs text-[#AAA] mb-2 px-1" dir="ltr">
                 <span>יום</span>
                 <span>שנה</span>
               </div>
-              <div dir="ltr">
+
+              {/* Custom slider track */}
+              <div
+                dir="ltr"
+                ref={trackRef}
+                className="relative h-10 flex items-center cursor-pointer"
+                onPointerDown={handleTrackPointerDown}
+              >
+                {/* Track background */}
+                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 rounded-full bg-[#E5E7EB]" />
+
+                {/* Filled track with glow */}
+                <motion.div
+                  className="absolute top-1/2 -translate-y-1/2 h-2 rounded-full"
+                  style={{ left: 0 }}
+                  animate={{ width: `${fillPct}%` }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                >
+                  <div
+                    className="w-full h-full rounded-full"
+                    style={{
+                      background: "linear-gradient(90deg, #34d399, #059669)",
+                      boxShadow: "0 0 12px rgba(5,150,105,0.5)",
+                    }}
+                  />
+                </motion.div>
+
+                {/* Animated thumb */}
+                <motion.div
+                  className="absolute top-1/2 z-10"
+                  animate={{ left: `${fillPct}%` }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  style={{ y: "-50%", x: "-50%" }}
+                >
+                  <motion.div
+                    className="w-7 h-7 rounded-full bg-white border-[3px] border-[#059669]"
+                    style={{
+                      boxShadow: "0 2px 10px rgba(5,150,105,0.35)",
+                    }}
+                    whileHover={{ scale: 1.2 }}
+                    whileTap={{ scale: 0.95 }}
+                  />
+                </motion.div>
+
+                {/* Invisible native range for accessibility & drag */}
                 <input
                   type="range"
                   min={0}
@@ -146,56 +230,56 @@ export default function PricingPage() {
                   step={1}
                   value={planIndex}
                   onChange={(e) => setPlanIndex(Number(e.target.value))}
-                  className="w-full h-2 appearance-none cursor-pointer rounded-full outline-none"
-                  style={{
-                    background: `linear-gradient(to right, #059669 ${fillPct}%, #E5E7EB ${fillPct}%)`,
-                    WebkitAppearance: "none",
-                  }}
+                  className="absolute inset-0 w-full opacity-0 cursor-pointer z-20"
                 />
               </div>
 
-              {/* Quick-select markers — absolutely positioned under slider */}
-              <div className="relative mt-3 h-8" dir="ltr">
+              {/* Quick-select pill buttons with spring animation */}
+              <div className="flex justify-between mt-3 px-0" dir="ltr">
                 {MARKERS.map((m) => {
-                  const pct = (m.index / maxIndex) * 100;
                   const isActive = planIndex === m.index;
                   return (
-                    <button
+                    <motion.button
                       key={m.index}
                       onClick={() => setPlanIndex(m.index)}
-                      style={{ left: `${pct}%`, transform: "translateX(-50%)" }}
-                      className={`absolute top-0 text-xs font-semibold px-2 py-1 rounded-full transition-all flex flex-col items-center whitespace-nowrap ${
-                        isActive
-                          ? "bg-[#059669] text-white"
-                          : "text-[#888] hover:text-[#059669]"
-                      }`}
+                      animate={{
+                        scale: isActive ? 1.1 : 1,
+                        backgroundColor: isActive ? "#059669" : "#F3F4F6",
+                        color: isActive ? "#ffffff" : "#888888",
+                      }}
+                      whileHover={{ scale: isActive ? 1.1 : 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-full flex flex-col items-center whitespace-nowrap"
                     >
                       {m.label}
                       {m.highlight && !isActive && (
                         <span className="text-[9px] font-bold text-amber-500 leading-none">מומלץ</span>
                       )}
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
             </div>
 
             {/* CTA */}
-            <button
+            <motion.button
               onClick={handleCheckout}
               disabled={loading}
-              className="w-full h-14 rounded-2xl text-white font-bold text-lg transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
+              className="w-full h-14 rounded-2xl text-white font-bold text-lg disabled:opacity-60"
               style={{
                 background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
                 boxShadow: "0 4px 20px rgba(5,150,105,0.4)",
               }}
+              whileHover={{ scale: 1.01, boxShadow: "0 6px 28px rgba(5,150,105,0.5)" }}
+              whileTap={{ scale: 0.99 }}
             >
               {loading ? "מעביר לתשלום..." : `התחילו עכשיו — ₪${Math.round(plan.price / 100)}`}
-            </button>
+            </motion.button>
             <p className="text-center text-[#AAA] text-xs mt-3">
               תשלום מאובטח • ללא חיוב חוזר אוטומטי
             </p>
-          </div>
+          </motion.div>
 
           {/* Benefits */}
           <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6">
@@ -214,30 +298,6 @@ export default function PricingPage() {
         </div>
       </div>
 
-      <style jsx global>{`
-        input[type='range']::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          background: white;
-          border: 3px solid #059669;
-          box-shadow: 0 2px 8px rgba(5,150,105,0.3);
-          cursor: pointer;
-          transition: transform 0.15s;
-        }
-        input[type='range']::-webkit-slider-thumb:hover {
-          transform: scale(1.15);
-        }
-        input[type='range']::-moz-range-thumb {
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          background: white;
-          border: 3px solid #059669;
-          cursor: pointer;
-        }
-      `}</style>
     </div>
   );
 }
