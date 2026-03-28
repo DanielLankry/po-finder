@@ -437,30 +437,7 @@ p, li, span:not([class*="font-bold"]):not([class*="font-semibold"]), td, th, blo
   font-family: var(--font-body), var(--font-rubik), sans-serif;
 }
 
-/* ── Animated gradient border for business cards ─────────────────────── */
-@property --angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
 
-@keyframes spin-angle {
-  to { --angle: 360deg; }
-}
-
-.card-gradient-border {
-  background: conic-gradient(
-    from var(--angle),
-    #059669,
-    #34d399,
-    #a7f3d0,
-    #6ee7b7,
-    #059669
-  );
-  animation: spin-angle 3s linear infinite;
-  padding: 1.5px;
-  border-radius: 26px;
-}
 
 /* ── Glassmorphism Navbar ────────────────────────────────────────────── */
 .navbar-glass {
