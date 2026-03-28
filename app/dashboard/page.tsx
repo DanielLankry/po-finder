@@ -104,7 +104,7 @@ async function DashboardContent({
           <h1 className="font-display font-bold text-2xl text-stone-900">
             שלום! 👋
           </h1>
-          <ExpiryBadge expiresAt={(business as Record<string, unknown>).expires_at as string | null} />
+          <ExpiryBadge expiresAt={(business as unknown as Record<string, unknown>).expires_at as string | null} />
         </div>
         <p className="text-stone-500 text-sm mt-1">
           ברוכים הבאים ללוח הבקרה של{" "}

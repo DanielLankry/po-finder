@@ -266,13 +266,3 @@ export default function BusinessListPanel({
     </div>
   );
 }
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-  );
-}
