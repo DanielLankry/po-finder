@@ -141,10 +141,10 @@ export default function AboutPage() {
                 <li>
                   <strong>דוא&quot;ל:</strong>{" "}
                   <a
-                    href="mailto:support@po.co.il"
+                    href="mailto:support@pokarov.co.il"
                     className="text-[#059669] hover:underline"
                   >
-                    support@po.co.il
+                    support@pokarov.co.il
                   </a>
                 </li>
               </ul>

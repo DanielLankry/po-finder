@@ -43,10 +43,10 @@ export default function ContactPage() {
                     <div>
                       <p className="font-medium text-stone-900 text-sm">דוא&quot;ל</p>
                       <a
-                        href="mailto:support@po.co.il"
+                        href="mailto:support@pokarov.co.il"
                         className="text-[#059669] text-sm hover:underline"
                       >
-                        support@po.co.il
+                        support@pokarov.co.il
                       </a>
                     </div>
                   </li>
