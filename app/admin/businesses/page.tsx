@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import type { BusinessCategory, KashrutStatus } from "@/lib/types";
-import { CheckCircle, XCircle, Phone, ExternalLink, RefreshCw, Plus, X } from "lucide-react";
+import { CheckCircle, XCircle, Phone, ExternalLink, RefreshCw, Plus, X, Pencil } from "lucide-react";
 
 interface Business {
   id: string;
@@ -39,8 +39,10 @@ export default function AdminBusinessesPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editBiz, setEditBiz] = useState<Business | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [addLoading, setAddLoading] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -115,6 +117,40 @@ export default function AdminBusinessesPage() {
       alert("שגיאה: " + (err instanceof Error ? err.message : String(err)));
     }
     setAddLoading(false);
+  }
+
+  async function handleEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editBiz) return;
+    setEditLoading(true);
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("businesses")
+        .update({
+          name: editBiz.name,
+          description: editBiz.description,
+          category: editBiz.category,
+          phone: editBiz.phone,
+          whatsapp: editBiz.whatsapp,
+          website: editBiz.website,
+          instagram: editBiz.instagram,
+          kashrut: editBiz.kashrut,
+          business_number: editBiz.business_number,
+          address: editBiz.address,
+          lat: editBiz.lat,
+          lng: editBiz.lng,
+        })
+        .eq("id", editBiz.id)
+        .select()
+        .single();
+      if (error) throw error;
+      setBusinesses((prev) => prev.map((b) => b.id === editBiz.id ? data as Business : b));
+      setEditBiz(null);
+    } catch (err) {
+      alert("שגיאה: " + (err instanceof Error ? err.message : String(err)));
+    }
+    setEditLoading(false);
   }
 
   const pending = businesses.filter((b) => !b.is_active);
@@ -236,13 +272,100 @@ export default function AdminBusinessesPage() {
         </div>
       )}
 
+      {/* Edit Modal */}
+      {editBiz && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={() => setEditBiz(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-[#E5E7EB]">
+              <h2 className="font-bold text-lg text-[#111]">עריכת עסק — {editBiz.name}</h2>
+              <button onClick={() => setEditBiz(null)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-[#F3F4F6]">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <form onSubmit={handleEdit} className="p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold text-[#111] mb-1">שם העסק *</label>
+                  <input required value={editBiz.name} onChange={(e) => setEditBiz({...editBiz, name: e.target.value})}
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#111] mb-1">קטגוריה</label>
+                  <select value={editBiz.category} onChange={(e) => setEditBiz({...editBiz, category: e.target.value})}
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#059669]">
+                    {Object.entries(CATEGORY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#111] mb-1">כשרות</label>
+                  <select value={editBiz.kashrut} onChange={(e) => setEditBiz({...editBiz, kashrut: e.target.value})}
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#059669]">
+                    {Object.entries(KASHRUT_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#111] mb-1">טלפון</label>
+                  <input value={editBiz.phone ?? ""} onChange={(e) => setEditBiz({...editBiz, phone: e.target.value})}
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#111] mb-1">WhatsApp</label>
+                  <input value={editBiz.whatsapp ?? ""} onChange={(e) => setEditBiz({...editBiz, whatsapp: e.target.value})}
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold text-[#111] mb-1">כתובת</label>
+                  <input value={editBiz.address ?? ""} onChange={(e) => setEditBiz({...editBiz, address: e.target.value})}
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#111] mb-1">קו רוחב (lat)</label>
+                  <input value={editBiz.lat ?? ""} onChange={(e) => setEditBiz({...editBiz, lat: parseFloat(e.target.value) || null})}
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" dir="ltr" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#111] mb-1">קו אורך (lng)</label>
+                  <input value={editBiz.lng ?? ""} onChange={(e) => setEditBiz({...editBiz, lng: parseFloat(e.target.value) || null})}
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" dir="ltr" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#111] mb-1">אתר</label>
+                  <input value={editBiz.website ?? ""} onChange={(e) => setEditBiz({...editBiz, website: e.target.value})}
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" dir="ltr" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#111] mb-1">אינסטגרם</label>
+                  <input value={editBiz.instagram ?? ""} onChange={(e) => setEditBiz({...editBiz, instagram: e.target.value})}
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#111] mb-1">מספר עוסק</label>
+                  <input value={editBiz.business_number ?? ""} onChange={(e) => setEditBiz({...editBiz, business_number: e.target.value})}
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold text-[#111] mb-1">תיאור</label>
+                  <textarea value={editBiz.description ?? ""} onChange={(e) => setEditBiz({...editBiz, description: e.target.value})} rows={3}
+                    className="w-full rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none" />
+                </div>
+              </div>
+              <button type="submit" disabled={editLoading}
+                className="w-full h-12 rounded-xl text-white font-bold text-base disabled:opacity-50"
+                style={{ background: "linear-gradient(135deg, #059669, #047857)" }}>
+                {editLoading ? "שומר..." : "שמור שינויים"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Pending */}
       {pending.length > 0 && (
         <div className="mb-8">
           <h2 className="font-bold text-lg text-[#D97706] mb-3">⏳ ממתינים לאישור ({pending.length})</h2>
           <div className="flex flex-col gap-3">
             {pending.map((biz) => (
-              <BusinessCard key={biz.id} biz={biz} onApprove={approve} onDelete={deleteBiz} actionLoading={actionLoading} />
+              <BusinessCard key={biz.id} biz={biz} onApprove={approve} onDelete={deleteBiz} onEdit={setEditBiz} actionLoading={actionLoading} />
             ))}
           </div>
         </div>
@@ -256,7 +379,7 @@ export default function AdminBusinessesPage() {
         ) : (
           <div className="flex flex-col gap-3">
             {active.map((biz) => (
-              <BusinessCard key={biz.id} biz={biz} onApprove={approve} onDelete={deleteBiz} actionLoading={actionLoading} />
+              <BusinessCard key={biz.id} biz={biz} onApprove={approve} onDelete={deleteBiz} onEdit={setEditBiz} actionLoading={actionLoading} />
             ))}
           </div>
         )}
@@ -265,9 +388,9 @@ export default function AdminBusinessesPage() {
   );
 }
 
-function BusinessCard({ biz, onApprove, onDelete, actionLoading }: {
+function BusinessCard({ biz, onApprove, onDelete, onEdit, actionLoading }: {
   biz: Business; onApprove: (id: string) => void;
-  onDelete: (id: string) => void; actionLoading: string | null;
+  onDelete: (id: string) => void; onEdit: (b: Business) => void; actionLoading: string | null;
 }) {
   const isLoading = actionLoading === biz.id;
   return (
@@ -292,13 +415,17 @@ function BusinessCard({ biz, onApprove, onDelete, actionLoading }: {
           </div>
         </div>
       </div>
-      <div className="flex gap-2 mt-3 pt-3 border-t border-[#F5F5F5]">
+      <div className="flex gap-2 mt-3 pt-3 border-t border-[#F5F5F5] flex-wrap">
         {!biz.is_active && (
           <button onClick={() => onApprove(biz.id)} disabled={isLoading}
             className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#059669] text-white font-semibold text-sm hover:bg-[#047857] transition-colors disabled:opacity-50">
             <CheckCircle className="h-3.5 w-3.5" />{isLoading ? "..." : "אשר"}
           </button>
         )}
+        <button onClick={() => onEdit(biz)} disabled={isLoading}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-semibold text-sm hover:bg-blue-200 transition-colors disabled:opacity-50">
+          <Pencil className="h-3.5 w-3.5" />ערוך
+        </button>
         <button onClick={() => onDelete(biz.id)} disabled={isLoading}
           className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-red-100 text-red-700 font-semibold text-sm hover:bg-red-200 transition-colors disabled:opacity-50">
           <XCircle className="h-3.5 w-3.5" />מחק
