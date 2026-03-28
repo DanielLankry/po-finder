@@ -73,11 +73,6 @@ export default function BusinessCard({
     >
       <BorderRotate
         active={isHovered || isSelected}
-        borderRadius={26}
-        borderWidth={2}
-        bg="#ffffff"
-        colors={{ primary: "#059669", secondary: "#34d399", accent: "#a7f3d0" }}
-        speed={3}
         className="transition-all duration-300"
       >
       <button
