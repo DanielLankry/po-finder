@@ -5,15 +5,14 @@ import { sendBusinessApprovedEmail } from "@/lib/email";
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
-  const { businessId, secret } = await req.json();
-
-  if (!secret || secret !== process.env.ADMIN_SECRET) {
+  const session = req.cookies.get("admin_session")?.value;
+  if (!session || session !== process.env.ADMIN_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const { businessId } = await req.json();
   const supabase = await createClient();
 
-  // Get business details + owner email
   const { data: biz, error: fetchErr } = await supabase
     .from("businesses")
     .select("id, name, owner_id, expires_at")
@@ -24,10 +23,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Business not found" }, { status: 404 });
   }
 
-  // Only set expires_at if not already set (payment sets it, approval activates it)
   const updates: Record<string, unknown> = { is_active: true };
   if (!biz.expires_at) {
-    // Default: 1 month if no payment was made (shouldn't happen but safety)
     const exp = new Date();
     exp.setMonth(exp.getMonth() + 1);
     updates.expires_at = exp.toISOString();
@@ -40,7 +37,6 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Get owner email from auth.users via service role (fallback: users table)
   const { data: userData } = await supabase
     .from("users")
     .select("email")

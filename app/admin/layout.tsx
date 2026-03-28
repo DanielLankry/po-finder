@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, Store, Tag, BarChart3, LogOut, Ticket } from "lucide-react";
 
@@ -10,6 +13,18 @@ const NAV = [
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  // Login page: no sidebar
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
+
+  async function handleLogout() {
+    await fetch("/api/admin/auth", { method: "DELETE" });
+    window.location.href = "/admin/login";
+  }
+
   return (
     <div className="min-h-screen bg-[#F3F4F6] flex" dir="rtl">
       {/* Sidebar */}
@@ -28,19 +43,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
         {/* Nav */}
         <nav className="flex-1 p-4 space-y-1">
-          {NAV.map(({ href, label, icon: Icon }) => (
-            <Link key={href} href={href} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#555] hover:bg-[#ECFDF5] hover:text-[#059669] transition-colors text-sm font-medium">
-              <Icon className="h-4 w-4" />
-              {label}
-            </Link>
-          ))}
+          {NAV.map(({ href, label, icon: Icon }) => {
+            const isActive = pathname === href || (href !== "/admin" && pathname.startsWith(href));
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-[#ECFDF5] text-[#059669]"
+                    : "text-[#555] hover:bg-[#ECFDF5] hover:text-[#059669]"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </Link>
+            );
+          })}
         </nav>
         {/* Logout */}
         <div className="p-4 border-t border-[#E5E7EB]">
-          <a href="/admin/login" onClick={() => fetch("/api/admin/auth", { method: "DELETE" })} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-500 hover:bg-red-50 transition-colors text-sm font-medium">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-500 hover:bg-red-50 transition-colors text-sm font-medium w-full"
+          >
             <LogOut className="h-4 w-4" />
             יציאה
-          </a>
+          </button>
         </div>
       </aside>
       {/* Main */}
