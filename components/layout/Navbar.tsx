@@ -44,10 +44,10 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 z-50 h-[72px] flex items-center transition-all duration-300 ${
+      className={`fixed top-0 inset-x-0 z-50 h-[72px] flex items-center transition-all duration-300 navbar-glass ${
         scrolled
-          ? "bg-[#FAFAF7]/85 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-b border-white/20"
-          : "bg-[#FAFAF7]/98 shadow-[0_1px_0_rgba(0,0,0,0.04)] border-b border-transparent"
+          ? "shadow-[0_4px_24px_rgba(0,0,0,0.08)]"
+          : "shadow-[0_1px_0_rgba(0,0,0,0.04)]"
       }`}
     >
       <nav
