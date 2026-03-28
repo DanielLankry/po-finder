@@ -7,6 +7,37 @@ import { isOpenNow } from "@/lib/utils/schedule";
 import type { Business } from "@/lib/types";
 import BusinessSelector from "@/components/dashboard/BusinessSelector";
 
+function ExpiryBadge({ expiresAt }: { expiresAt: string | null }) {
+  if (!expiresAt) return null;
+  const exp = new Date(expiresAt);
+  const now = new Date();
+  const daysLeft = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const formatted = exp.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" });
+
+  if (daysLeft <= 0) {
+    return (
+      <Link
+        href="/pricing"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+      >
+        תוקף פג — חדשו עכשיו
+      </Link>
+    );
+  }
+  if (daysLeft <= 7) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-100 text-amber-700">
+        פעיל עד {formatted}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-100 text-[#059669]">
+      פעיל עד {formatted}
+    </span>
+  );
+}
+
 export default async function DashboardPage({
   searchParams,
 }: {
@@ -16,82 +47,65 @@ export default async function DashboardPage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  // Fetch all businesses including inactive (pending approval)
-  const supabaseAdmin = await createClient();
-  const { data: allBusinesses } = await supabaseAdmin
-    .from("businesses")
-    .select("*")
-    .eq("owner_id", user.id)
-    .order("created_at", { ascending: false });
-  const businesses = allBusinesses ?? [];
+  const businesses = await getBusinessesByOwner(user.id);
   const params = await searchParams;
 
-  // Check if any business is pending approval
-  const pendingBusiness = businesses.find((b) => !b.is_active);
-  const activeBusinesses = businesses.filter((b) => b.is_active);
-
-  if (businesses.length === 0) {
-    return (
-      <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center shadow-card" dir="rtl">
-        <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
-          <Plus className="h-8 w-8 text-blue-600" aria-hidden="true" />
+  return (
+    <div className="space-y-6" dir="rtl">
+      {businesses.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center shadow-card">
+          <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
+            <Plus className="h-8 w-8 text-blue-600" aria-hidden="true" />
+          </div>
+          <h2 className="font-display font-bold text-xl text-stone-900 mb-2">
+            עדיין אין לכם עסק רשום
+          </h2>
+          <p className="text-stone-500 text-sm mb-6">
+            הוסיפו את העסק שלכם כדי להופיע על המפה
+          </p>
+          <Link
+            href="/dashboard/profile"
+            className="inline-flex items-center justify-center h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+          >
+            יצירת פרופיל עסק
+          </Link>
         </div>
-        <h2 className="font-display font-bold text-xl text-stone-900 mb-2">
-          עדיין אין לכם עסק רשום
-        </h2>
-        <p className="text-stone-500 text-sm mb-6">
-          הוסיפו את העסק שלכם כדי להופיע על המפה
-        </p>
-        <Link
-          href="/dashboard/profile"
-          className="inline-flex items-center justify-center h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
-        >
-          יצירת פרופיל עסק
-        </Link>
-      </div>
-    );
-  }
+      ) : (
+        <DashboardContent
+          businesses={businesses}
+          selectedId={params.businessId}
+        />
+      )}
+    </div>
+  );
+}
 
-  // Pick selected business or default to most recent active
-  const selectedId = params.businessId;
-  const business = activeBusinesses.find((b) => b.id === selectedId) ?? activeBusinesses[0];
-
-  // Show pending approval banner if no active business
-  if (!business && pendingBusiness) {
-    return (
-      <div className="bg-amber-50 rounded-2xl border border-amber-200 p-8 text-center" dir="rtl">
-        <div className="h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4 text-3xl">
-          ⏳
-        </div>
-        <h2 className="font-bold text-xl text-[#111] mb-2">העסק שלך ממתין לאישור</h2>
-        <p className="text-[#666] text-sm mb-1">
-          <strong>{pendingBusiness.name}</strong> נשלח לאישור.
-        </p>
-        <p className="text-[#888] text-sm">נקבל עדכון במייל ברגע שהעסק יאושר ויעלה למפה.</p>
-      </div>
-    );
-  }
-
+async function DashboardContent({
+  businesses,
+  selectedId,
+}: {
+  businesses: Business[];
+  selectedId?: string;
+}) {
+  const business = businesses.find((b) => b.id === selectedId) ?? businesses[0];
   if (!business) return null;
 
   const schedule = await getTodaySchedule(business.id);
   const isOpen = isOpenNow(schedule);
 
   return (
-    <div className="space-y-6" dir="rtl">
-      {/* Business selector (only shown when multiple businesses exist) */}
+    <>
       {businesses.length > 1 && (
-        <BusinessSelector
-          businesses={businesses}
-          selectedId={business.id}
-        />
+        <BusinessSelector businesses={businesses} selectedId={business.id} />
       )}
 
-      {/* Header */}
       <div>
-        <h1 className="font-display font-bold text-2xl text-stone-900">
-          שלום! 👋
-        </h1>
+        <div className="flex items-center gap-3 flex-wrap">
+          <h1 className="font-display font-bold text-2xl text-stone-900">
+            שלום! 👋
+          </h1>
+          <ExpiryBadge expiresAt={(business as Record<string, unknown>).expires_at as string | null} />
+        </div>
         <p className="text-stone-500 text-sm mt-1">
           ברוכים הבאים ללוח הבקרה של{" "}
           <span className="font-medium text-stone-700">{business.name}</span>
@@ -202,7 +216,7 @@ export default async function DashboardPage({
           </Link>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

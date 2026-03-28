@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   // Get business details + owner email
   const { data: biz, error: fetchErr } = await supabase
     .from("businesses")
-    .select("id, name, owner_id")
+    .select("id, name, owner_id, expires_at")
     .eq("id", businessId)
     .single();
 
@@ -24,10 +24,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Business not found" }, { status: 404 });
   }
 
-  // Activate business
+  // Only set expires_at if not already set (payment sets it, approval activates it)
+  const updates: Record<string, unknown> = { is_active: true };
+  if (!biz.expires_at) {
+    // Default: 1 month if no payment was made (shouldn't happen but safety)
+    const exp = new Date();
+    exp.setMonth(exp.getMonth() + 1);
+    updates.expires_at = exp.toISOString();
+  }
+
   const { error } = await supabase
     .from("businesses")
-    .update({ is_active: true })
+    .update(updates)
     .eq("id", businessId);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

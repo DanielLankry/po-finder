@@ -18,18 +18,14 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     redirect("/auth/login?redirectTo=/dashboard");
   }
 
-  // Check subscription status
-  const { data: userData } = await supabase
-    .from("users")
-    .select("subscription_status")
-    .eq("id", user.id)
-    .single();
+  // Check if user has any businesses (active or pending)
+  const { count: bizCount } = await supabase
+    .from("businesses")
+    .select("id", { count: "exact", head: true })
+    .eq("owner_id", user.id);
 
-  const isSubscribed = userData?.subscription_status === "active" || userData?.subscription_status === "past_due";
-
-  if (!isSubscribed) {
-    redirect("/pricing?reason=subscription_required");
-  }
+  // Allow access if user has businesses or is creating one
+  // New users will see the "create business" prompt on the dashboard
 
   return (
     <>
