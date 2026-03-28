@@ -71,20 +71,8 @@ export default function BusinessCard({
       onMouseLeave={onMouseLeave}
     >
       {/* Gradient border wrapper */}
-      <div
-        className={`rounded-[26px] p-[1.5px] transition-all duration-500 ${
-          isSelected
-            ? "gradient-border-active"
-            : isHovered
-              ? "gradient-border-hover"
-              : "gradient-border-idle"
-        }`}
-        style={isHovered || isSelected ? {
-          background: "linear-gradient(var(--angle, 0deg), #059669, #34d399, #a7f3d0, #059669)",
-          backgroundSize: "400% 400%",
-          animation: "gradient-spin 3s linear infinite",
-        } : { background: "transparent" }}
-      >
+      <div className={`transition-all duration-300 ${isHovered || isSelected ? "card-gradient-border" : "p-[1.5px] rounded-[26px]"}`}>
+
       <button
         onClick={onClick}
         className={`w-full text-right cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-[24px] group relative bg-white block p-3.5 ${
@@ -201,14 +189,6 @@ export default function BusinessCard({
         </div>
       </button>
       </div>
-
-      <style jsx global>{`
-        @keyframes gradient-spin {
-          0%   { background-position: 0% 50%; }
-          50%  { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-      `}</style>
     </div>
   );
 }

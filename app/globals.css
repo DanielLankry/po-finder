@@ -436,3 +436,36 @@ h1, h2, h3, h4, h5 {
 p, li, span:not([class*="font-bold"]):not([class*="font-semibold"]), td, th, blockquote {
   font-family: var(--font-body), var(--font-rubik), sans-serif;
 }
+
+/* ── Animated gradient border for business cards ─────────────────────── */
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes spin-angle {
+  to { --angle: 360deg; }
+}
+
+.card-gradient-border {
+  background: conic-gradient(
+    from var(--angle),
+    #059669,
+    #34d399,
+    #a7f3d0,
+    #6ee7b7,
+    #059669
+  );
+  animation: spin-angle 3s linear infinite;
+  padding: 1.5px;
+  border-radius: 26px;
+}
+
+/* ── Glassmorphism Navbar ────────────────────────────────────────────── */
+.navbar-glass {
+  background: rgba(250, 250, 247, 0.75) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}

@@ -115,7 +115,7 @@ export default function PricingPage() {
         <div className="max-w-lg mx-auto">
           {/* Header */}
           <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 bg-[#ECFDF5] text-[#059669] px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 bg-[#ECFDF5] text-[#1d938d] px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
               <Zap className="h-4 w-4" />
               תשלום חד פעמי — ללא התחייבות
             </div>
@@ -155,7 +155,7 @@ export default function PricingPage() {
                   >
                     ל-{plan.label}
                     {plan.days > 1 && (
-                      <> • ₪<span className="font-semibold text-[#059669]">{animatedPerDay}</span> ליום</>
+                      <> • ₪<span className="font-semibold text-[#1d938d]">{animatedPerDay}</span> ליום</>
                     )}
                   </motion.p>
                 </AnimatePresence>
@@ -164,7 +164,7 @@ export default function PricingPage() {
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className="inline-flex items-center gap-1 mt-2 bg-[#ECFDF5] text-[#059669] px-3 py-1 rounded-full text-sm font-semibold"
+                  className="inline-flex items-center gap-1 mt-2 bg-[#ECFDF5] text-[#1d938d] px-3 py-1 rounded-full text-sm font-semibold"
                 >
                   חוסכים ₪{Math.round(saving / 100)} לעומת ₪20 ליום
                 </motion.div>
@@ -187,7 +187,7 @@ export default function PricingPage() {
                 onPointerDown={handleTrackPointerDown}
               >
                 {/* Track background */}
-                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-3 rounded-full bg-[#BBF7D0]" />
+                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-3 rounded-full bg-[#CCEFEE]" />
 
                 {/* Filled track with glow */}
                 <motion.div
@@ -199,8 +199,8 @@ export default function PricingPage() {
                   <div
                     className="w-full h-full rounded-full"
                     style={{
-                      background: "linear-gradient(90deg, #34d399, #059669)",
-                      boxShadow: "0 0 12px rgba(5,150,105,0.5)",
+                      background: "linear-gradient(90deg, #2dd4bf, #1d938d)",
+                      boxShadow: "0 0 12px rgba(29,147,141,0.5)",
                     }}
                   />
                 </motion.div>
@@ -213,9 +213,9 @@ export default function PricingPage() {
                   style={{ translateY: "-50%", translateX: "-50%" }}
                 >
                   <motion.div
-                    className="w-8 h-8 rounded-full bg-white border-[3.5px] border-[#047857]"
+                    className="w-8 h-8 rounded-full bg-white border-[3.5px] border-[#1d938d]"
                     style={{
-                      boxShadow: "0 0 0 5px rgba(4,120,87,0.22), 0 2px 12px rgba(4,120,87,0.5)",
+                      boxShadow: "0 0 0 5px rgba(29,147,141,0.2), 0 2px 12px rgba(29,147,141,0.45)",
                     }}
                     whileHover={{ scale: 1.25 }}
                     whileTap={{ scale: 0.9 }}
@@ -235,7 +235,7 @@ export default function PricingPage() {
               </div>
 
               {/* Quick-select pill buttons with spring animation */}
-              <div className="relative mt-4 h-9" dir="ltr">
+              <div className="relative mt-4 h-9 overflow-visible" dir="ltr">
                 {MARKERS.map((m) => {
                   const isActive = planIndex === m.index;
                   return (
@@ -244,7 +244,7 @@ export default function PricingPage() {
                       onClick={() => setPlanIndex(m.index)}
                       animate={{
                         scale: isActive ? 1.12 : 1,
-                        backgroundColor: isActive ? "#059669" : "#F3F4F6",
+                        backgroundColor: isActive ? "#1d938d" : "#F3F4F6",
                         color: isActive ? "#ffffff" : "#6B7280",
                       }}
                       whileHover={{ scale: isActive ? 1.12 : 1.06 }}
@@ -253,7 +253,7 @@ export default function PricingPage() {
                       style={{
                         position: "absolute",
                         left: `${(m.index / maxIndex) * 100}%`,
-                        transform: m.index === 0 ? "translateX(0%)" : m.index === maxIndex ? "translateX(-100%)" : "translateX(-50%)",
+                        transform: m.index === 0 ? "translateX(2px)" : m.index === maxIndex ? "calc(-100% - 2px)" : "translateX(-50%)",
                         top: 0,
                       }}
                       className="text-xs font-semibold px-3 py-1.5 rounded-full flex flex-col items-center whitespace-nowrap"
@@ -274,10 +274,10 @@ export default function PricingPage() {
               disabled={loading}
               className="w-full h-14 rounded-2xl text-white font-bold text-lg disabled:opacity-60"
               style={{
-                background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
-                boxShadow: "0 4px 20px rgba(5,150,105,0.4)",
+                background: "linear-gradient(135deg, #1d938d 0%, #156460 100%)",
+                boxShadow: "0 4px 20px rgba(29,147,141,0.4)",
               }}
-              whileHover={{ scale: 1.01, boxShadow: "0 6px 28px rgba(5,150,105,0.5)" }}
+              whileHover={{ scale: 1.01, boxShadow: "0 6px 28px rgba(29,147,141,0.5)" }}
               whileTap={{ scale: 0.99 }}
             >
               {loading ? "מעביר לתשלום..." : `התחילו עכשיו — ₪${Math.round(plan.price / 100)}`}
@@ -294,7 +294,7 @@ export default function PricingPage() {
               {BENEFITS.map((b) => (
                 <div key={b} className="flex items-center gap-3">
                   <div className="h-5 w-5 rounded-full bg-[#ECFDF5] flex items-center justify-center flex-shrink-0">
-                    <Check className="h-3 w-3 text-[#059669]" />
+                    <Check className="h-3 w-3 text-[#1d938d]" />
                   </div>
                   <span className="text-[#444] text-sm">{b}</span>
                 </div>
