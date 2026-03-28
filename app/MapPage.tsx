@@ -195,16 +195,3 @@ export default function MapPage() {
     </div>
   );
 }
-    businesses={businesses}
-        favoriteIds={favorites}
-        onFavoriteToggle={toggleFavorite}
-        onBusinessSelect={(b) => { setSelectedBusinessId(b.id); setMobileView("map"); }}
-        selectedBusinessId={selectedBusinessId}
-      />
-    </div>
-  );
-}
->
-    </div>
-  );
-}
