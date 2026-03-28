@@ -70,14 +70,29 @@ export default function BusinessCard({
       onMouseEnter={onMouseEnter} 
       onMouseLeave={onMouseLeave}
     >
+      {/* Gradient border wrapper */}
+      <div
+        className={`rounded-[26px] p-[1.5px] transition-all duration-500 ${
+          isSelected
+            ? "gradient-border-active"
+            : isHovered
+              ? "gradient-border-hover"
+              : "gradient-border-idle"
+        }`}
+        style={isHovered || isSelected ? {
+          background: "linear-gradient(var(--angle, 0deg), #059669, #34d399, #a7f3d0, #059669)",
+          backgroundSize: "400% 400%",
+          animation: "gradient-spin 3s linear infinite",
+        } : { background: "transparent" }}
+      >
       <button
         onClick={onClick}
-        className={`w-full text-right cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-[24px] group relative bg-white block p-3.5 border ${
+        className={`w-full text-right cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-[24px] group relative bg-white block p-3.5 ${
           isSelected 
-            ? "border-[#059669] shadow-[0_8px_24px_rgba(5,150,105,0.25)] ring-1 ring-[#059669] scale-[1.02]" 
+            ? "shadow-[0_8px_24px_rgba(5,150,105,0.25)] scale-[1.02]" 
             : isHovered 
-              ? "border-black/5 shadow-[0_20px_40px_rgba(0,0,0,0.12)] scale-[1.02] transform -translate-y-1"
-              : "border-transparent shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)] hover:border-black/5 transform hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98]"
+              ? "shadow-[0_20px_40px_rgba(0,0,0,0.12)] scale-[1.02] transform -translate-y-1"
+              : "shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)] transform hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98]"
         }`}
         aria-pressed={isSelected}
         aria-label={`${business.name} — ${CATEGORY_LABELS[business.category]}`}
@@ -185,6 +200,15 @@ export default function BusinessCard({
           </div>
         </div>
       </button>
+      </div>
+
+      <style jsx global>{`
+        @keyframes gradient-spin {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+      `}</style>
     </div>
   );
 }
