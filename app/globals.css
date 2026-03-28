@@ -1,4 +1,26 @@
 @import "tailwindcss";
+
+@property --card-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes card-border-spin {
+  to { --card-angle: 360deg; }
+}
+
+.card-border-spinning {
+  background: conic-gradient(
+    from var(--card-angle),
+    #059669 0%,
+    #34d399 25%,
+    #a7f3d0 50%,
+    #34d399 75%,
+    #059669 100%
+  );
+  animation: card-border-spin 3s linear infinite;
+}
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
