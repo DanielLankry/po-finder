@@ -77,8 +77,8 @@ export default function TermsPage() {
               </h2>
               <p>
                 לשאלות ופניות:{" "}
-                <a href="mailto:support@po.co.il" className="text-blue-600 hover:underline">
-                  support@po.co.il
+                <a href="mailto:support@pokarov.co.il" className="text-blue-600 hover:underline">
+                  support@pokarov.co.il
                 </a>
               </p>
             </section>

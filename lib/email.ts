@@ -2,7 +2,7 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export const ADMIN_EMAIL = "support@pokarov.co.il";
+export const ADMIN_EMAIL = "support@pokarov.co.il"; // forwards to support@pokarov.co.il via Cloudflare
 export const FROM_EMAIL = "פוקרוב <noreply@pokarov.co.il>";
 
 // ── Email to Daniel: new business pending approval ──────────────────────────
