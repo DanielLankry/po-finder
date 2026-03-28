@@ -266,16 +266,6 @@ export default function BusinessListPanel({
     </div>
   );
 }
-Id === b.id}
-                  isHovered={hoveredBusinessId === b.id}
-                  isFavorited={favoriteIds?.has(b.id)}
-                  scrollRef={cardRefs.current.get(b.id)}
-                  onClick={() => onBusinessSelect(b)}
-                  onMouseEnter={() => onBusinessHover?.(b.id)}
-                  onMouseLeave={() => onBusinessHover?.(null)}
-                  onFavoriteToggle={() => onFavoriteToggle?.(b.id)}
-                />
-              </div>
             ))}
           </div>
         )}

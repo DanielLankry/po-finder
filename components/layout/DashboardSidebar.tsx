@@ -61,18 +61,3 @@ export default function DashboardSidebar() {
     </aside>
   );
 }
-blue-600 ${
-                spot
-                  ? active ? "text-amber-600 border-b-amber-500" : "text-amber-500 border-b-transparent hover:border-b-amber-400"
-                  : active ? "text-blue-600 border-b-blue-600" : "text-slate-600 hover:text-blue-600 border-b-transparent hover:border-b-blue-600"
-              }`}
-              aria-current={active ? "page" : undefined}
-            >
-              {label}
-            </Link>
-          );
-        })}
-      </nav>
-    </aside>
-  );
-}
