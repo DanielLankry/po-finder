@@ -202,10 +202,10 @@ export default function PricingPage() {
 
                   {/* Animated thumb */}
                   <motion.div
-                    className="absolute top-1/2 z-10"
+                    className="absolute z-10"
                     animate={{ left: `${fillPct}%` }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    style={{ translateY: "-50%", translateX: "-50%" }}
+                    style={{ top: "50%", transform: "translate(-50%, -50%)" }}
                   >
                     <motion.div
                       className="w-8 h-8 rounded-full bg-white border-[3.5px] border-[#1d938d]"
