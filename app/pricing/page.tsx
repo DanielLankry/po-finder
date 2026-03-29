@@ -173,15 +173,8 @@ export default function PricingPage() {
 
             {/* Animated Slider — dir=ltr to prevent RTL flip */}
             <div className="mb-8">
-              {/* Labels */}
-              <div className="flex justify-between text-xs text-[#AAA] mb-2 px-1" dir="ltr">
-                <span>יום</span>
-                <span>שנה</span>
-              </div>
-
               {/* Slider wrapper */}
-              {/* px-4 padding so thumb at edges doesn't overflow and aligns with pill centers */}
-              <div dir="ltr" className="relative w-full px-4">
+              <div dir="ltr" className="relative w-full">
                 {/* Track */}
                 <div
                   ref={trackRef}
@@ -223,11 +216,13 @@ export default function PricingPage() {
                   />
                 </div>
 
-                {/* Markers — same px-4 container as track, all use translateX(-50%) for exact alignment */}
+                {/* Markers — first/last flush to track edges, middle ones centered */}
                 <div className="relative mt-3" style={{ height: "32px" }}>
-                  {MARKERS.map((m) => {
+                  {MARKERS.map((m, i) => {
                     const isActive = planIndex === m.index;
                     const pct = (m.index / maxIndex) * 100;
+                    const isFirst = i === 0;
+                    const isLast = i === MARKERS.length - 1;
                     return (
                       <motion.button
                         key={m.index}
@@ -243,8 +238,11 @@ export default function PricingPage() {
                         style={{
                           position: "absolute",
                           top: 0,
-                          left: `${pct}%`,
-                          transform: "translateX(-50%)",
+                          ...(isFirst
+                            ? { left: 0, transform: "none" }
+                            : isLast
+                              ? { right: 0, left: "auto", transform: "none" }
+                              : { left: `${pct}%`, transform: "translateX(-50%)" }),
                         }}
                         className="text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap"
                       >
