@@ -180,7 +180,8 @@ export default function PricingPage() {
               </div>
 
               {/* Slider wrapper */}
-              <div dir="ltr" className="relative w-full">
+              {/* px-4 padding so thumb at edges doesn't overflow and aligns with pill centers */}
+              <div dir="ltr" className="relative w-full px-4">
                 {/* Track */}
                 <div
                   ref={trackRef}
@@ -222,8 +223,8 @@ export default function PricingPage() {
                   />
                 </div>
 
-                {/* Markers row — separate from track, below it */}
-                <div className="relative mt-3 overflow-hidden" style={{ height: "32px" }}>
+                {/* Markers — same px-4 container as track, all use translateX(-50%) for exact alignment */}
+                <div className="relative mt-3" style={{ height: "32px" }}>
                   {MARKERS.map((m) => {
                     const isActive = planIndex === m.index;
                     const pct = (m.index / maxIndex) * 100;
@@ -242,11 +243,8 @@ export default function PricingPage() {
                         style={{
                           position: "absolute",
                           top: 0,
-                          ...(m.index === 0
-                            ? { left: 0, transform: "none" }
-                            : m.index === maxIndex
-                            ? { right: 0, left: "auto" }
-                            : { left: `${pct}%`, transform: "translateX(-50%)" }),
+                          left: `${pct}%`,
+                          transform: "translateX(-50%)",
                         }}
                         className="text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap"
                       >
