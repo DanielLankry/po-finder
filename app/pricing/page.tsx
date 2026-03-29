@@ -171,83 +171,54 @@ export default function PricingPage() {
               )}
             </div>
 
-            {/* Animated Slider — dir=ltr to prevent RTL flip */}
+            {/* Slider — dir=ltr to prevent RTL flip */}
             <div className="mb-8">
-              {/* Slider wrapper */}
-              {/* Single coordinate space for track + thumb + markers */}
-              <div dir="ltr" className="relative w-full" style={{ paddingBottom: "44px" }}>
+              <div dir="ltr">
+                <input
+                  type="range"
+                  min={0}
+                  max={maxIndex}
+                  step={1}
+                  value={planIndex}
+                  onChange={(e) => setPlanIndex(Number(e.target.value))}
+                  className="w-full h-2 appearance-none cursor-pointer rounded-full outline-none"
+                  style={{
+                    background: `linear-gradient(to right, #1d938d ${fillPct}%, #CCEFEE ${fillPct}%)`,
+                    WebkitAppearance: "none",
+                  }}
+                />
+              </div>
 
-                {/* Track (no overflow children — thumb is a sibling) */}
-                <div
-                  ref={trackRef}
-                  className="relative h-3 rounded-full bg-[#CCEFEE] cursor-pointer"
-                  onPointerDown={handleTrackPointerDown}
-                >
-                  {/* Filled portion */}
-                  <motion.div
-                    className="absolute top-0 left-0 h-full rounded-full pointer-events-none"
-                    animate={{ width: `${fillPct}%` }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    style={{
-                      background: "linear-gradient(90deg, #2dd4bf, #1d938d)",
-                      boxShadow: "0 0 12px rgba(29,147,141,0.5)",
-                    }}
-                  />
-                  {/* Native range — invisible, handles drag */}
-                  <input
-                    type="range" min={0} max={maxIndex} step={1} value={planIndex}
-                    onChange={(e) => setPlanIndex(Number(e.target.value))}
-                    className="absolute inset-0 w-full opacity-0 cursor-pointer z-20 h-full"
-                  />
-                </div>
-
-                {/* Thumb — sibling of track, same parent → same percentage space */}
-                <motion.div
-                  className="absolute z-10 pointer-events-none"
-                  animate={{ left: `${fillPct}%` }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  style={{ top: "6px", transform: "translate(-50%, -50%)" }}
-                >
-                  <motion.div
-                    className="w-8 h-8 rounded-full bg-white border-[3.5px] border-[#1d938d]"
-                    style={{ boxShadow: "0 0 0 5px rgba(29,147,141,0.2), 0 2px 12px rgba(29,147,141,0.45)" }}
-                    whileHover={{ scale: 1.25 }}
-                    whileTap={{ scale: 0.9 }}
-                  />
-                </motion.div>
-
-                {/* Markers — same parent, same percentage space as thumb */}
-                <div className="absolute w-full" style={{ top: "24px" }}>
-                  {MARKERS.map((m) => {
-                    const isActive = planIndex === m.index;
-                    const pct = (m.index / maxIndex) * 100;
-                    return (
-                      <motion.button
-                        key={m.index}
-                        onClick={() => setPlanIndex(m.index)}
-                        animate={{
-                          scale: isActive ? 1.1 : 1,
-                          backgroundColor: isActive ? "#1d938d" : "#F3F4F6",
-                          color: isActive ? "#ffffff" : "#6B7280",
-                        }}
-                        whileHover={{ scale: isActive ? 1.1 : 1.05 }}
-                        whileTap={{ scale: 0.92 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                        style={{
-                          position: "absolute",
-                          left: `${pct}%`,
-                          transform: "translateX(-50%)",
-                        }}
-                        className="text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap"
-                      >
-                        {m.label}
-                        {m.highlight && !isActive && (
-                          <span className="block text-[9px] font-bold text-amber-500 leading-none text-center">מומלץ</span>
-                        )}
-                      </motion.button>
-                    );
-                  })}
-                </div>
+              {/* Quick-select markers */}
+              <div className="relative mt-3" style={{ height: "36px" }} dir="ltr">
+                {MARKERS.map((m) => {
+                  const isActive = planIndex === m.index;
+                  const pct = (m.index / maxIndex) * 100;
+                  return (
+                    <button
+                      key={m.index}
+                      onClick={() => setPlanIndex(m.index)}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: `${pct}%`,
+                        transform: m.index === 0
+                          ? "translateX(0)"
+                          : m.index === maxIndex
+                          ? "translateX(-100%)"
+                          : "translateX(-50%)",
+                      }}
+                      className={`text-xs font-semibold px-2 py-1 rounded-full transition-all flex flex-col items-center whitespace-nowrap ${
+                        isActive ? "bg-[#1d938d] text-white" : "text-[#888] hover:text-[#1d938d]"
+                      }`}
+                    >
+                      {m.label}
+                      {m.highlight && !isActive && (
+                        <span className="text-[9px] font-bold text-amber-500 leading-none">מומלץ</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
