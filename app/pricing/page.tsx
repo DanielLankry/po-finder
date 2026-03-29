@@ -174,17 +174,18 @@ export default function PricingPage() {
             {/* Animated Slider — dir=ltr to prevent RTL flip */}
             <div className="mb-8">
               {/* Slider wrapper */}
-              <div dir="ltr" className="relative w-full">
-                {/* Track */}
+              {/* Single coordinate space for track + thumb + markers */}
+              <div dir="ltr" className="relative w-full" style={{ paddingBottom: "44px" }}>
+
+                {/* Track (no overflow children — thumb is a sibling) */}
                 <div
                   ref={trackRef}
-                  className="relative h-3 flex items-center cursor-pointer rounded-full bg-[#CCEFEE]"
-                  style={{ overflow: "visible" }}
+                  className="relative h-3 rounded-full bg-[#CCEFEE] cursor-pointer"
                   onPointerDown={handleTrackPointerDown}
                 >
-                  {/* Filled track */}
+                  {/* Filled portion */}
                   <motion.div
-                    className="absolute top-0 left-0 h-full rounded-full"
+                    className="absolute top-0 left-0 h-full rounded-full pointer-events-none"
                     animate={{ width: `${fillPct}%` }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     style={{
@@ -192,23 +193,7 @@ export default function PricingPage() {
                       boxShadow: "0 0 12px rgba(29,147,141,0.5)",
                     }}
                   />
-
-                  {/* Animated thumb */}
-                  <motion.div
-                    className="absolute z-10"
-                    animate={{ left: `${fillPct}%` }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    style={{ top: "50%", transform: "translate(-50%, -50%)" }}
-                  >
-                    <motion.div
-                      className="w-8 h-8 rounded-full bg-white border-[3.5px] border-[#1d938d]"
-                      style={{ boxShadow: "0 0 0 5px rgba(29,147,141,0.2), 0 2px 12px rgba(29,147,141,0.45)" }}
-                      whileHover={{ scale: 1.25 }}
-                      whileTap={{ scale: 0.9 }}
-                    />
-                  </motion.div>
-
-                  {/* Invisible native range */}
+                  {/* Native range — invisible, handles drag */}
                   <input
                     type="range" min={0} max={maxIndex} step={1} value={planIndex}
                     onChange={(e) => setPlanIndex(Number(e.target.value))}
@@ -216,13 +201,26 @@ export default function PricingPage() {
                   />
                 </div>
 
-                {/* Markers — first/last flush to track edges, middle ones centered */}
-                <div className="relative mt-3" style={{ height: "32px" }}>
-                  {MARKERS.map((m, i) => {
+                {/* Thumb — sibling of track, same parent → same percentage space */}
+                <motion.div
+                  className="absolute z-10 pointer-events-none"
+                  animate={{ left: `${fillPct}%` }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  style={{ top: "6px", transform: "translate(-50%, -50%)" }}
+                >
+                  <motion.div
+                    className="w-8 h-8 rounded-full bg-white border-[3.5px] border-[#1d938d]"
+                    style={{ boxShadow: "0 0 0 5px rgba(29,147,141,0.2), 0 2px 12px rgba(29,147,141,0.45)" }}
+                    whileHover={{ scale: 1.25 }}
+                    whileTap={{ scale: 0.9 }}
+                  />
+                </motion.div>
+
+                {/* Markers — same parent, same percentage space as thumb */}
+                <div className="absolute w-full" style={{ top: "24px" }}>
+                  {MARKERS.map((m) => {
                     const isActive = planIndex === m.index;
                     const pct = (m.index / maxIndex) * 100;
-                    const isFirst = i === 0;
-                    const isLast = i === MARKERS.length - 1;
                     return (
                       <motion.button
                         key={m.index}
@@ -237,12 +235,8 @@ export default function PricingPage() {
                         transition={{ type: "spring", stiffness: 400, damping: 25 }}
                         style={{
                           position: "absolute",
-                          top: 0,
-                          ...(isFirst
-                            ? { left: 0, transform: "none" }
-                            : isLast
-                              ? { right: 0, left: "auto", transform: "none" }
-                              : { left: `${pct}%`, transform: "translateX(-50%)" }),
+                          left: `${pct}%`,
+                          transform: "translateX(-50%)",
                         }}
                         className="text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap"
                       >
