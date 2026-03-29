@@ -165,8 +165,20 @@ export default function MapPage() {
         </div>
       </div>
 
+      {/* Privacy footer bar */}
+      <div className="fixed bottom-0 inset-x-0 z-10 pointer-events-none flex justify-center pb-1.5">
+        <div className="pointer-events-auto flex items-center gap-3 bg-white/85 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-black/5 text-[11px] text-[#888]">
+          <strong className="text-[#555]">פה קרוב</strong>
+          <span> — פלטפורמה לגילוי עסקים ניידים בישראל</span>
+          <span className="w-px h-3 bg-[#DDD]" />
+          <a href="/privacy" className="hover:text-[#1d938d] transition-colors">פרטיות</a>
+          <span className="w-px h-3 bg-[#DDD]" />
+          <a href="/terms" className="hover:text-[#1d938d] transition-colors">תנאי שימוש</a>
+        </div>
+      </div>
+
       {/* Mobile floating toggle */}
-      <div className="md:hidden fixed bottom-6 inset-x-0 z-20 flex justify-center pointer-events-none fade-in-up stagger-2">
+      <div className="md:hidden fixed bottom-14 inset-x-0 z-20 flex justify-center pointer-events-none fade-in-up stagger-2">
         <button
           onClick={() => setMobileView((v) => (v === "list" ? "map" : "list"))}
           className="pointer-events-auto flex items-center gap-2.5 h-12 px-6 rounded-full bg-black/85 backdrop-blur-xl text-white font-bold text-[15px] shadow-[0_8px_32px_rgba(0,0,0,0.3)] border border-white/10 hover:bg-black hover:scale-105 transition-all duration-300 active:scale-95"
