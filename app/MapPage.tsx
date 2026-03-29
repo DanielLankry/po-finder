@@ -197,16 +197,7 @@ export default function MapPage() {
         selectedBusinessId={selectedBusinessId}
       />
 
-      {/* Privacy footer — required for Google OAuth verification */}
-      <div className="fixed bottom-0 inset-x-0 z-30 pointer-events-none flex justify-center pb-1">
-        <div className="pointer-events-auto flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-black/5 text-[11px] text-[#888]">
-          <strong>פה קרוב</strong><span> — פלטפורמה לגילוי עסקים קטנים וניידים בישראל</span>
-          <span className="w-px h-3 bg-[#DDD]" />
-          <a href="/privacy" className="hover:text-[#059669] transition-colors">מדיניות פרטיות</a>
-          <span className="w-px h-3 bg-[#DDD]" />
-          <a href="/terms" className="hover:text-[#059669] transition-colors">תנאי שימוש</a>
-        </div>
-      </div>
+
     </div>
   );
 }
