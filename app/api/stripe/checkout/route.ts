@@ -2,9 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSafeOrigin } from "@/lib/get-origin";
 import { getPriceForMonths } from "@/lib/plans";
+import { z } from "zod";
 
 export const runtime = "nodejs";
 const STRIPE_SK = process.env.STRIPE_SECRET_KEY!;
+
+const checkoutSchema = z.object({
+  months: z.number().int().min(1).max(24).optional().default(1),
+});
 
 async function stripePost(path: string, body: Record<string, string>) {
   const res = await fetch(`https://api.stripe.com/v1${path}`, {
@@ -23,8 +28,16 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const body = await req.json().catch(() => ({}));
-    const months = Number(body.months) || 1;
+    const rawBody = await req.json().catch(() => ({}));
+    const parsed = checkoutSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const months = parsed.data.months;
     const price = getPriceForMonths(months);
     const origin = getSafeOrigin(req);
 
