@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { z } from "zod";
 import { contactAutoReplyTemplate } from "@/lib/email-templates";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+const VALID_SUBJECTS = [
+  "general",
+  "business",
+  "bug",
+  "privacy",
+  "billing",
+  "other",
+] as const;
 
 const SUBJECT_LABELS: Record<string, string> = {
   general: "שאלה כללית",
@@ -15,14 +26,31 @@ const SUBJECT_LABELS: Record<string, string> = {
   other: "אחר",
 };
 
+const contactSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100),
+  email: z.string().email("Invalid email address"),
+  subject: z.enum(VALID_SUBJECTS, { errorMap: () => ({ message: "Invalid subject" }) }),
+  message: z.string().min(1, "Message is required").max(2000),
+});
+
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, subject, message } = await req.json();
-
-    if (!name || !email || !subject || !message) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    // Rate limit: 5 requests per minute per IP
+    const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+    if (!rateLimit(`contact:${ip}`, 5, 60_000)) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 
+    const body = await req.json();
+    const parsed = contactSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const { name, email, subject, message } = parsed.data;
     const subjectLabel = SUBJECT_LABELS[subject] ?? subject;
 
     // Send to support

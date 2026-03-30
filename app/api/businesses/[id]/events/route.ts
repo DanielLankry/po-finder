@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { z } from "zod";
+
+const eventSchema = z.object({
+  title: z.string().min(1, "Title is required").max(200),
+  description: z.string().max(2000).optional().nullable(),
+  event_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "event_date must be YYYY-MM-DD"),
+  start_time: z.string().regex(/^\d{2}:\d{2}$/, "start_time must be HH:MM").optional().nullable(),
+  end_time: z.string().regex(/^\d{2}:\d{2}$/, "end_time must be HH:MM").optional().nullable(),
+  price: z.number().min(0).optional().nullable(),
+  image_url: z.string().url().optional().nullable(),
+});
 
 export async function GET(
   _req: NextRequest,
@@ -49,23 +60,27 @@ export async function POST(
   }
 
   const body = await req.json();
-  const { title, description, event_date, start_time, end_time, price, image_url } = body;
-
-  if (!title || !event_date) {
-    return NextResponse.json({ error: "title and event_date are required" }, { status: 400 });
+  const parsed = eventSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.flatten() },
+      { status: 400 }
+    );
   }
+
+  const { title, description, event_date, start_time, end_time, price, image_url } = parsed.data;
 
   const { data, error } = await supabase
     .from("business_events")
     .insert({
       business_id: id,
       title,
-      description: description || null,
+      description: description ?? null,
       event_date,
-      start_time: start_time || null,
-      end_time: end_time || null,
+      start_time: start_time ?? null,
+      end_time: end_time ?? null,
       price: price ?? null,
-      image_url: image_url || null,
+      image_url: image_url ?? null,
     })
     .select()
     .single();
