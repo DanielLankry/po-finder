@@ -111,7 +111,7 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-[#FAFAF7]" dir="rtl">
       <Navbar />
-      <div className="py-16 px-4">
+      <div className="pt-24 pb-16 px-4">
         <div className="max-w-lg mx-auto">
           {/* Header */}
           <div className="text-center mb-10">
