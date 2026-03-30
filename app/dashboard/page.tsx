@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Clock, Star, Camera, MapPin, MessageCircle } from "lucide-react";
+import { Plus, Clock, Star, Camera, MapPin, MessageCircle, Eye, Phone } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessesByOwner } from "@/lib/db/businesses";
 import { getTodaySchedule } from "@/lib/db/schedules";
@@ -92,6 +92,19 @@ async function DashboardContent({
 
   const schedule = await getTodaySchedule(business.id);
   const isOpen = isOpenNow(schedule);
+
+  // Analytics: last 30 days
+  const supabase = await createClient();
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: analyticsData } = await supabase
+    .from("business_events")
+    .select("event_type")
+    .eq("business_id", business.id)
+    .gte("created_at", thirtyDaysAgo);
+
+  const viewCount = analyticsData?.filter((e: { event_type: string }) => e.event_type === "view").length ?? 0;
+  const callCount = analyticsData?.filter((e: { event_type: string }) => e.event_type === "call_click").length ?? 0;
+  const whatsappCount = analyticsData?.filter((e: { event_type: string }) => e.event_type === "whatsapp_click").length ?? 0;
 
   return (
     <>
@@ -194,6 +207,39 @@ async function DashboardContent({
           value="הוסיפו תמונות"
           href="/dashboard/photos"
         />
+      </div>
+
+      {/* Analytics widget — last 30 days */}
+      <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-card">
+        <h2 className="font-display font-bold text-base text-stone-900 mb-1">
+          אנליטיקה — 30 הימים האחרונים
+        </h2>
+        <p className="text-stone-400 text-xs mb-4">
+          נתוני ביקורים ופעולות על הדף הציבורי
+        </p>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-1">
+              <Eye className="h-4 w-4 text-blue-500" aria-hidden="true" />
+            </div>
+            <p className="font-display font-bold text-2xl text-stone-900">{viewCount}</p>
+            <p className="text-stone-500 text-xs mt-0.5">צפיות</p>
+          </div>
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-1">
+              <Phone className="h-4 w-4 text-emerald-500" aria-hidden="true" />
+            </div>
+            <p className="font-display font-bold text-2xl text-stone-900">{callCount}</p>
+            <p className="text-stone-500 text-xs mt-0.5">לחיצות שיחה</p>
+          </div>
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-1">
+              <MessageCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
+            </div>
+            <p className="font-display font-bold text-2xl text-stone-900">{whatsappCount}</p>
+            <p className="text-stone-500 text-xs mt-0.5">וואטסאפ</p>
+          </div>
+        </div>
       </div>
 
       {/* Quick links */}
