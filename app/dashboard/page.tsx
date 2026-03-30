@@ -6,6 +6,7 @@ import { getTodaySchedule } from "@/lib/db/schedules";
 import { isOpenNow } from "@/lib/utils/schedule";
 import type { Business } from "@/lib/types";
 import BusinessSelector from "@/components/dashboard/BusinessSelector";
+import ShareButtons from "@/components/business/ShareButtons";
 
 function ExpiryBadge({ expiresAt }: { expiresAt: string | null }) {
   if (!expiresAt) return null;
@@ -240,6 +241,15 @@ async function DashboardContent({
             <p className="text-stone-500 text-xs mt-0.5">וואטסאפ</p>
           </div>
         </div>
+      </div>
+
+      {/* Share section */}
+      <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-card" dir="rtl">
+        <h2 className="font-display font-bold text-base text-stone-900 mb-1">
+          שתף את הדף שלי
+        </h2>
+        <p className="text-xs text-stone-500 mb-4">שלח ללקוחות קישור לדף העסק שלך</p>
+        <ShareButtons businessId={business.id} businessName={business.name} />
       </div>
 
       {/* Quick links */}
