@@ -121,6 +121,9 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
           <Link href="/contact"
             className="h-8 px-3.5 rounded-full text-[#555] font-medium text-sm border border-stone-200 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 flex items-center whitespace-nowrap"
           >צרו קשר</Link>
+          <Link href="/vendors"
+            className="h-8 px-3.5 rounded-full text-[#555] font-medium text-sm border border-stone-200 hover:border-[#059669]/50 hover:bg-[#ECFDF5] hover:text-[#047857] transition-all duration-200 flex items-center whitespace-nowrap"
+          >לרוכלים</Link>
           <Link href="/pricing"
             className="h-8 px-3.5 rounded-full text-[#555] font-medium text-sm border border-stone-200 hover:border-purple-300 hover:bg-purple-50 hover:text-purple-700 transition-all duration-200 flex items-center whitespace-nowrap"
           >מחירים</Link>
@@ -307,6 +310,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
             <nav className="grid grid-cols-2 gap-2.5">
               {[
                 { href: "/dashboard", label: user ? "לוח בקרה" : "הוסיפו עסק", emoji: "🏪", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
+                { href: "/vendors", label: "לרוכלים", emoji: "🛒", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
                 { href: "/pricing", label: "מחירים", emoji: "💳", bg: "#EFF6FF", border: "#BFDBFE", text: "#1E40AF" },
                 { href: "/about", label: "אודות", emoji: "ℹ️", bg: "#F5F3FF", border: "#DDD6FE", text: "#5B21B6" },
                 { href: "/contact", label: "צרו קשר", emoji: "📬", bg: "#FFF7ED", border: "#FED7AA", text: "#C2410C" },
