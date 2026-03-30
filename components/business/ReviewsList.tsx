@@ -55,11 +55,11 @@ export default function ReviewsList({ reviews }: ReviewsListProps) {
           key={review.id}
           className={`flex gap-4 fade-in-up stagger-${Math.min(i + 1, 6)}`}
         >
-          <UserAvatar name={review.user?.name ?? "משתמש"} />
+          <UserAvatar name={review.reviewer_name ?? review.user?.name ?? "משתמש"} />
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
               <span className="font-semibold text-sm text-slate-900">
-                {review.user?.name ?? "משתמש אנונימי"}
+                {review.reviewer_name ?? review.user?.name ?? "משתמש אנונימי"}
               </span>
               <span className="text-slate-400 text-xs tabular-nums">
                 {formatHebrewDate(review.created_at)}

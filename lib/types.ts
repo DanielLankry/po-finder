@@ -60,9 +60,10 @@ export interface BusinessSchedule {
 export interface Review {
   id: string;
   business_id: string;
-  user_id: string;
+  user_id?: string | null;
   rating: number;
   comment: string | null;
+  reviewer_name?: string | null;
   created_at: string;
   user?: Pick<User, "name" | "avatar_url">;
 }
