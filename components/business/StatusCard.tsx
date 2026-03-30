@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import type { Business, BusinessSchedule } from "@/lib/types";
 import { isOpenNow } from "@/lib/utils/schedule";
+import { trackEvent } from "@/lib/analytics";
 
 interface StatusCardProps {
   business: Business;
@@ -87,6 +88,7 @@ export default function StatusCard({ business, schedule }: StatusCardProps) {
             href={`https://wa.me/${waNumber}`}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackEvent(business.id, "whatsapp_click")}
             className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-[#25D366] hover:bg-[#1EB856] text-white font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 shadow-sm btn-press"
           >
             <WhatsAppIcon />
@@ -98,6 +100,7 @@ export default function StatusCard({ business, schedule }: StatusCardProps) {
         {business.phone && (
           <a
             href={`tel:${business.phone}`}
+            onClick={() => trackEvent(business.id, "call_click")}
             className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-slate-200 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 btn-press"
           >
             <Phone className="h-4 w-4" aria-hidden="true" />
@@ -111,6 +114,7 @@ export default function StatusCard({ business, schedule }: StatusCardProps) {
             href={`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackEvent(business.id, "directions_click")}
             className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-slate-200 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 btn-press"
           >
             <Navigation className="h-4 w-4" aria-hidden="true" />

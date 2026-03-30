@@ -239,6 +239,11 @@ export default function PricingPage() {
             <p className="text-center text-[#AAA] text-xs mt-3">
               תשלום מאובטח • ללא חיוב חוזר אוטומטי
             </p>
+            <p className="text-center text-xs mt-1">
+              <a href="/refund" className="text-[#AAA] hover:text-[#059669] underline transition-colors">
+                מדיניות ביטולים והחזרים
+              </a>
+            </p>
           </motion.div>
 
           {/* Benefits */}

@@ -8,6 +8,7 @@ import { getTodaySchedule, getWeeklySchedule } from "@/lib/db/schedules";
 import { getReviews } from "@/lib/db/reviews";
 import { getBusinessEvents } from "@/lib/db/events";
 import PhotoGrid from "@/components/business/PhotoGrid";
+import ViewTracker from "@/components/business/ViewTracker";
 import StatusCard from "@/components/business/StatusCard";
 import HoursCard from "@/components/business/HoursCard";
 import ReviewSummary from "@/components/business/ReviewSummary";
@@ -121,6 +122,7 @@ export default async function BusinessPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
       />
       <Navbar />
+      <ViewTracker businessId={id} />
       <div className="min-h-screen bg-[#FAFAF7]" dir="rtl">
         <div className="max-w-[1280px] mx-auto px-4 pt-[88px] pb-16">
           {/* Breadcrumb */}
