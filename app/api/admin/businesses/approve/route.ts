@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendBusinessApprovedEmail } from "@/lib/email";
+import { z } from "zod";
 
 export const runtime = "nodejs";
+
+const approveSchema = z.object({
+  businessId: z.string().uuid("Invalid business ID"),
+});
 
 export async function POST(req: NextRequest) {
   const session = req.cookies.get("admin_session")?.value;
@@ -10,7 +15,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { businessId } = await req.json();
+  const body = await req.json();
+  const parsed = approveSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.flatten() },
+      { status: 400 }
+    );
+  }
+
+  const { businessId } = parsed.data;
   const supabase = await createClient();
 
   const { data: biz, error: fetchErr } = await supabase

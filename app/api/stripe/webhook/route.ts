@@ -20,12 +20,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
+  const supabase = await createClient();
+
+  // Idempotence: check if this event was already processed
+  const { data: existing } = await supabase
+    .from("processed_webhook_events")
+    .select("event_id")
+    .eq("event_id", event.id)
+    .maybeSingle();
+
+  if (existing) {
+    // Already processed — return 200 to prevent Stripe retries
+    return NextResponse.json({ received: true });
+  }
+
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const meta = session.metadata ?? {};
 
     if (meta.payment_type === "business_listing") {
-      const supabase = await createClient();
       const userId = meta.supabase_user_id;
       const months = parseInt(meta.months ?? "1", 10);
 
@@ -70,6 +83,11 @@ export async function POST(req: NextRequest) {
       }
     }
   }
+
+  // Mark event as processed
+  await supabase
+    .from("processed_webhook_events")
+    .insert({ event_id: event.id });
 
   return NextResponse.json({ ok: true });
 }
