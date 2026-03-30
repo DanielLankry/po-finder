@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useEffect, createRef } from "react";
+import { useRef, useEffect, createRef, useState } from "react";
 import { NumberTicker } from "@/components/ui/number-ticker";
-import { MapPin, Star } from "lucide-react";
+import { MapPin, Star, Search, X } from "lucide-react";
 import type { BusinessWithSchedule, BusinessCategory } from "@/lib/types";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import type { FilterState } from "@/components/filters/FilterDrawer";
@@ -35,6 +35,7 @@ interface BusinessListPanelProps {
   userLocation?: { lat: number; lng: number } | null;
   favoriteIds?: Set<string>;
   onFavoriteToggle?: (id: string) => void;
+  searchQuery?: string;
 }
 
 function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -79,15 +80,23 @@ export default function BusinessListPanel({
   userLocation,
   favoriteIds,
   onFavoriteToggle,
+  searchQuery = "",
 }: BusinessListPanelProps) {
   const cardRefs = useRef<Map<string, React.RefObject<HTMLDivElement | null>>>(new Map());
+  const [localSearch, setLocalSearch] = useState(searchQuery);
 
+  const q = localSearch.trim().toLowerCase();
   const filtered = businesses
     .filter((b) => {
       if (activeCategory !== "all" && b.category !== activeCategory) return false;
       if (filters.kashrut !== "all" && b.kashrut !== filters.kashrut) return false;
       if (filters.minRating > 0 && b.avg_rating < filters.minRating) return false;
       if (filters.openNow && !isOpenNow(b.today_schedule ?? null)) return false;
+      if (q) {
+        const haystack = [b.name, b.description, b.address, b.today_schedule?.address]
+          .filter(Boolean).join(" ").toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
       return true;
     })
     .sort((a, b) => {
@@ -192,7 +201,27 @@ export default function BusinessListPanel({
   return (
     <div className="flex flex-col h-full" dir="rtl">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="px-5 pt-7 pb-4 border-b border-[#EBEBEB] bg-white flex-shrink-0 shadow-sm">
+      <div className="px-5 pt-5 pb-4 border-b border-[#EBEBEB] bg-white flex-shrink-0 shadow-sm">
+        {/* Search input */}
+        <div className="relative mb-3">
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#AAA] pointer-events-none" />
+          <input
+            type="search"
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            placeholder="חפש עסק, שכונה, מוצר..."
+            className="w-full h-10 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] pr-9 pl-9 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] focus:border-transparent transition-all"
+            dir="rtl"
+          />
+          {localSearch && (
+            <button
+              onClick={() => setLocalSearch("")}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#AAA] hover:text-[#555] transition-colors"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
         {loading ? (
           <div className="flex items-center gap-3">
             <div className="h-7 w-20 rounded-lg shimmer" aria-hidden="true" />

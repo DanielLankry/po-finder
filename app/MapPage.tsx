@@ -40,6 +40,7 @@ export default function MapPage() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [favoritesPanelOpen, setFavoritesPanelOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { favorites, toggle: toggleFavorite, count: favCount } = useFavorites();
 
   useEffect(() => {
@@ -144,6 +145,7 @@ export default function MapPage() {
             userLocation={userLocation}
             favoriteIds={favorites}
             onFavoriteToggle={toggleFavorite}
+            searchQuery={searchQuery}
           />
         </div>
 
