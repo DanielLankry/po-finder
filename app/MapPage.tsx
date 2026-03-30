@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { Map as MapIcon, List, Heart } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
@@ -33,6 +33,7 @@ export default function MapPage() {
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({ kashrut: "all", minRating: 0, openNow: false });
   const [businesses, setBusinesses] = useState<BusinessWithSchedule[]>([]);
+  const [allBusinesses, setAllBusinesses] = useState<BusinessWithSchedule[]>([]);
   const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
   const [hoveredBusinessId, setHoveredBusinessId] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
@@ -40,6 +41,9 @@ export default function MapPage() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [favoritesPanelOpen, setFavoritesPanelOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { favorites, toggle: toggleFavorite, count: favCount } = useFavorites();
 
   useEffect(() => {
@@ -63,8 +67,7 @@ export default function MapPage() {
         (weeklyData as WeeklyScheduleEntry[] ?? []).map((w) => [w.business_id, w])
       );
 
-      setBusinesses(
-        (bizData ?? []).map((b) => {
+      const mapped = (bizData ?? []).map((b) => {
           const daily = dailyMap.get(b.id);
           const weekly = weeklyMap.get(b.id);
           // Convert weekly entry to schedule-like object if no daily override
@@ -86,14 +89,52 @@ export default function MapPage() {
             photos: (b.photos ?? []) as Photo[],
             today_schedule: todaySchedule,
           };
-        })
-      );
-      setLoading(false);
+        });
 
+      setAllBusinesses(mapped);
+      setBusinesses(mapped);
+      setLoading(false);
     }
 
     fetchBusinesses();
   }, []);
+
+  // Debounced search — calls /api/businesses?q= and merges schedule data
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+
+    if (!searchQuery.trim()) {
+      setBusinesses(allBusinesses);
+      return;
+    }
+
+    searchTimerRef.current = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const res = await fetch(`/api/businesses?q=${encodeURIComponent(searchQuery.trim())}`);
+        if (!res.ok) throw new Error("search failed");
+        const { businesses: results } = await res.json();
+
+        // Merge in schedule data from allBusinesses (keyed by id)
+        const scheduleMap = new Map(allBusinesses.map((b) => [b.id, b.today_schedule]));
+        const merged = (results ?? []).map((b: BusinessWithSchedule) => ({
+          ...b,
+          today_schedule: scheduleMap.get(b.id) ?? b.today_schedule ?? null,
+        }));
+
+        setBusinesses(merged);
+      } catch {
+        // On error fall back to full list
+        setBusinesses(allBusinesses);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    };
+  }, [searchQuery, allBusinesses]);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-[#FAFAF7]" dir="rtl">
@@ -144,6 +185,9 @@ export default function MapPage() {
             userLocation={userLocation}
             favoriteIds={favorites}
             onFavoriteToggle={toggleFavorite}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchLoading={searchLoading}
           />
         </div>
 
