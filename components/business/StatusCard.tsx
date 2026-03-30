@@ -11,6 +11,7 @@ import {
 import type { Business, BusinessSchedule } from "@/lib/types";
 import { isOpenNow } from "@/lib/utils/schedule";
 import { trackEvent } from "@/lib/analytics";
+import ShareButtons from "./ShareButtons";
 
 interface StatusCardProps {
   business: Business;
@@ -134,6 +135,11 @@ export default function StatusCard({ business, schedule }: StatusCardProps) {
             @{business.instagram}
           </a>
         )}
+
+        {/* Share */}
+        <div className="pt-1">
+          <ShareButtons businessId={business.id} businessName={business.name} />
+        </div>
       </div>
     </div>
   );
