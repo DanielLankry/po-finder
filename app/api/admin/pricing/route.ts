@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writeFile } from "fs/promises";
 import { join } from "path";
+import { z } from "zod";
 
 export const runtime = "nodejs";
+
+const planSchema = z.object({
+  days: z.number().int().positive(),
+  label: z.string().min(1).max(100),
+  price: z.number().int().positive(),
+});
+
+const pricingSchema = z.object({
+  plans: z.array(planSchema).min(1).max(20),
+});
 
 export async function POST(req: NextRequest) {
   const session = req.cookies.get("admin_session")?.value;
@@ -10,13 +21,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { plans } = await req.json() as {
-    plans: Array<{ days: number; label: string; price: number }>;
-  };
-
-  if (!plans || !Array.isArray(plans)) {
-    return NextResponse.json({ error: "Invalid plans" }, { status: 400 });
+  const body = await req.json();
+  const parsed = pricingSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.flatten() },
+      { status: 400 }
+    );
   }
+
+  const { plans } = parsed.data;
 
   // Validate no price drops
   for (let i = 1; i < plans.length; i++) {
