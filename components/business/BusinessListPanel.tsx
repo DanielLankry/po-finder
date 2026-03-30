@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, createRef } from "react";
 import { NumberTicker } from "@/components/ui/number-ticker";
-import { MapPin, Star } from "lucide-react";
+import { MapPin, Star, Search, X } from "lucide-react";
 import type { BusinessWithSchedule, BusinessCategory } from "@/lib/types";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import type { FilterState } from "@/components/filters/FilterDrawer";
@@ -35,6 +35,9 @@ interface BusinessListPanelProps {
   userLocation?: { lat: number; lng: number } | null;
   favoriteIds?: Set<string>;
   onFavoriteToggle?: (id: string) => void;
+  searchQuery?: string;
+  onSearchChange?: (q: string) => void;
+  searchLoading?: boolean;
 }
 
 function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -79,6 +82,9 @@ export default function BusinessListPanel({
   userLocation,
   favoriteIds,
   onFavoriteToggle,
+  searchQuery = "",
+  onSearchChange,
+  searchLoading = false,
 }: BusinessListPanelProps) {
   const cardRefs = useRef<Map<string, React.RefObject<HTMLDivElement | null>>>(new Map());
 
@@ -192,7 +198,35 @@ export default function BusinessListPanel({
   return (
     <div className="flex flex-col h-full" dir="rtl">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="px-5 pt-7 pb-4 border-b border-[#EBEBEB] bg-white flex-shrink-0 shadow-sm">
+      <div className="px-5 pt-5 pb-4 border-b border-[#EBEBEB] bg-white flex-shrink-0 shadow-sm space-y-3">
+        {/* Search input */}
+        {onSearchChange && (
+          <div className="relative" dir="rtl">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#059669] pointer-events-none" aria-hidden="true" />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="חפשו עסק, קטגוריה, כתובת..."
+              className="w-full h-10 rounded-full border border-[#D1FAE5] bg-[#F0FDF4] pe-10 ps-10 text-sm text-[#111] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#059669] focus:border-transparent transition-all"
+              aria-label="חיפוש עסקים"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => onSearchChange("")}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#374151] transition-colors"
+                aria-label="נקה חיפוש"
+              >
+                {searchLoading ? (
+                  <span className="h-4 w-4 block rounded-full border-2 border-[#D1FAE5] border-t-[#059669] animate-spin" />
+                ) : (
+                  <X className="h-4 w-4" />
+                )}
+              </button>
+            )}
+          </div>
+        )}
+
         {loading ? (
           <div className="flex items-center gap-3">
             <div className="h-7 w-20 rounded-lg shimmer" aria-hidden="true" />
@@ -204,6 +238,11 @@ export default function BusinessListPanel({
               <p className="text-xl font-bold text-[#111111] tracking-tight flex items-baseline gap-1">
                 <NumberTicker value={filtered.length} className="text-xl font-bold text-[#111111]" />
                 <span>עסקים</span>
+                {searchQuery && (
+                  <span className="text-sm font-normal text-[#888] mr-1">
+                    עבור &ldquo;{searchQuery}&rdquo;
+                  </span>
+                )}
               </p>
             ) : (
               <p className="text-xl font-bold text-[#111111] tracking-tight">לא נמצאו עסקים</p>
