@@ -12,6 +12,7 @@ import { useFavorites } from "@/lib/hooks/useFavorites";
 import type { BusinessCategory, BusinessSchedule, WeeklyScheduleEntry, BusinessWithSchedule, Photo } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import type { LocationResult } from "@/components/map/PlacesSearchBar";
+import { isOpenNow } from "@/lib/utils/schedule";
 
 const BusinessMap = dynamic(() => import("@/components/map/BusinessMap"), {
   ssr: false,
@@ -96,6 +97,9 @@ export default function MapPage() {
     fetchBusinesses();
   }, []);
 
+  // Count businesses open now
+  const openCount = businesses.filter((b) => isOpenNow(b.today_schedule ?? null)).length;
+
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-[#FAFAF7]" dir="rtl">
       {/* App purpose — visible text required by Google OAuth verification */}
@@ -151,6 +155,18 @@ export default function MapPage() {
 
         {/* Map panel — fills remaining space, floats with rounded corners */}
         <div className={`flex-1 relative p-3 md:p-5 lg:p-6 ${mobileView === "map" ? "block" : "hidden md:block"}`}>
+          {/* Live badge — open now count */}
+          {openCount > 0 && (
+            <div className="absolute top-6 left-6 z-20 fade-in-up">
+              <div className="flex items-center gap-2 h-10 px-4 rounded-full bg-[#ECFDF5] text-[#059669] font-semibold text-sm shadow-md border border-[#A7F3D0]" dir="rtl">
+                <span className="relative flex h-2 w-2 flex-shrink-0" aria-hidden="true">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#059669] opacity-60" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#059669]" />
+                </span>
+                <span>🟢 {openCount} עסקים פתוחים עכשיו</span>
+              </div>
+            </div>
+          )}
           <div className="w-full h-full rounded-[24px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-black/[0.04]" dir="ltr">
           <BusinessMap
             businesses={businesses}
