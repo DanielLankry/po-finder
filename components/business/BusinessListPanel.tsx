@@ -9,6 +9,9 @@ import type { FilterState } from "@/components/filters/FilterDrawer";
 import { isOpenNow } from "@/lib/utils/schedule";
 import BusinessCard from "./BusinessCard";
 import StatusCard from "./StatusCard";
+import ReviewForm from "./ReviewForm";
+import ReviewsList from "./ReviewsList";
+import type { Review } from "@/lib/types";
 
 const CATEGORY_CHIP: Record<string, { bg: string; text: string }> = {
   coffee:  { bg: "#FEF3C7", text: "#92400E" },
@@ -84,6 +87,8 @@ export default function BusinessListPanel({
 }: BusinessListPanelProps) {
   const cardRefs = useRef<Map<string, React.RefObject<HTMLDivElement | null>>>(new Map());
   const [localSearch, setLocalSearch] = useState(searchQuery);
+  const [panelReviews, setPanelReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
   const q = localSearch.trim().toLowerCase();
   const filtered = businesses
@@ -116,6 +121,20 @@ export default function BusinessListPanel({
       cardRefs.current.set(b.id, createRef<HTMLDivElement>());
     }
   });
+
+  // Fetch reviews when a business is selected
+  useEffect(() => {
+    if (!selectedBusinessId) {
+      setPanelReviews([]);
+      return;
+    }
+    setReviewsLoading(true);
+    fetch(`/api/reviews?businessId=${selectedBusinessId}`)
+      .then((r) => r.json())
+      .then((data) => setPanelReviews(data.reviews ?? []))
+      .catch(() => setPanelReviews([]))
+      .finally(() => setReviewsLoading(false));
+  }, [selectedBusinessId]);
 
   // Scroll selected card into view when selection changes (e.g. pin clicked on map)
   useEffect(() => {
@@ -190,6 +209,30 @@ export default function BusinessListPanel({
              )}
 
              <StatusCard business={selectedBusiness} schedule={selectedBusiness.today_schedule ?? null} />
+
+             {/* Reviews section */}
+             <div className="mt-5 border-t border-[#F0F0EC] pt-5">
+               <h3 className="font-bold text-[16px] text-[#111111] mb-4">ביקורות</h3>
+               {reviewsLoading ? (
+                 <div className="flex items-center justify-center py-6">
+                   <div className="h-6 w-6 rounded-full border-2 border-[#D1FAE5] border-t-[#059669] animate-spin" />
+                 </div>
+               ) : (
+                 <>
+                   <ReviewsList reviews={panelReviews} />
+                   {panelReviews.length > 0 && <hr className="border-[#F0F0EC] my-4" />}
+                   <ReviewForm
+                     businessId={selectedBusiness.id}
+                     onSuccess={() => {
+                       // Refresh reviews after submit
+                       fetch(`/api/reviews?businessId=${selectedBusiness.id}`)
+                         .then((r) => r.json())
+                         .then((data) => setPanelReviews(data.reviews ?? []));
+                     }}
+                   />
+                 </>
+               )}
+             </div>
           </div>
         </div>
       );
