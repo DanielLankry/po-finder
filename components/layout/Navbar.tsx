@@ -62,10 +62,10 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
             className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-lg"
             aria-label="פה קרוב — דף הבית"
           >
-            <Image src="/logo.png" alt="פה קרוב" width={52} height={52} className="rounded-xl" />
+            <Image src="/logo.png" alt="פה קרוב" width={52} height={52} className="rounded-xl w-10 h-10 sm:w-[52px] sm:h-[52px]" />
           </Link>
           {/* Typewriter tagline */}
-          <div className="flex items-center border-r border-[#E5E7EB] pr-3 overflow-hidden w-[175px] md:w-[295px]">
+          <div className="hidden xs:flex items-center border-r border-[#E5E7EB] pr-3 overflow-hidden w-[130px] sm:w-[175px] md:w-[295px]">
             <Typewriter
               text={[
                 "לעסקים קטנים",
@@ -83,7 +83,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
               speed={60}
               deleteSpeed={35}
               waitTime={2200}
-              className="text-[#059669] font-extrabold text-[20px] md:text-[26px] whitespace-nowrap"
+              className="text-[#059669] font-extrabold text-[18px] sm:text-[20px] md:text-[26px] whitespace-nowrap"
               wordColors={{ "לישראלים": "text-blue-500" }}
             />
           </div>
@@ -130,20 +130,20 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
           {/* Mobile search icon */}
           <button
-            className="md:hidden flex items-center justify-center h-10 w-10 rounded-full hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+            className="md:hidden flex items-center justify-center h-9 w-9 rounded-full hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
             onClick={() => setMobileSearchOpen(true)}
             aria-label="פתיחת חיפוש"
           >
-            <Search className="h-5 w-5 text-slate-600" />
+            <Search className="h-[18px] w-[18px] text-slate-600" />
           </button>
 
           {/* Favorites button */}
           <button
             onClick={onFavoritesOpen}
-            className="relative flex items-center justify-center h-10 w-10 rounded-full border border-slate-200 hover:border-rose-300 hover:bg-rose-50 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+            className="relative flex items-center justify-center h-9 w-9 rounded-full border border-slate-200 hover:border-rose-300 hover:bg-rose-50 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
             aria-label="מועדפים"
           >
             <Heart className={`h-[18px] w-[18px] transition-colors duration-200 ${favCount > 0 ? "fill-rose-500 text-rose-500" : "text-slate-500"}`} />
@@ -212,7 +212,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
 
           {/* Mobile hamburger */}
           <button
-            className="md:hidden flex items-center justify-center h-10 w-10 rounded-full hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+            className="md:hidden flex items-center justify-center h-9 w-9 rounded-full hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? "סגירת תפריט" : "פתיחת תפריט"}
             aria-expanded={mobileMenuOpen}
