@@ -26,6 +26,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Extra small breakpoint for very small phones */
+@theme {
+  --breakpoint-xs: 390px;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
