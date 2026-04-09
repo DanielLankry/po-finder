@@ -459,7 +459,7 @@ h1, h2, h3, h4, h5 {
   font-family: var(--font-rubik), var(--font-secular), sans-serif;
 }
 
-/* M PLUS Rounded → body copy */
+/* Heebo → body copy */
 p, li, span:not([class*="font-bold"]):not([class*="font-semibold"]), td, th, blockquote {
   font-family: var(--font-body), var(--font-rubik), sans-serif;
 }

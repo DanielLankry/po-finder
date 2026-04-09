@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Secular_One, Rubik, M_PLUS_Rounded_1c } from "next/font/google";
+import { Secular_One, Rubik, Heebo } from "next/font/google";
 import "./globals.css";
 import "@/lib/env";
 import CookieConsent from "@/components/layout/CookieConsent";
@@ -22,9 +22,9 @@ const rubik = Rubik({
   display: "swap",
 });
 
-const mPlusRounded = M_PLUS_Rounded_1c({
+const heebo = Heebo({
   variable: "--font-body",
-  subsets: ["latin"],
+  subsets: ["latin", "hebrew"],
   weight: ["400", "500", "700"],
   display: "swap",
 });
@@ -144,7 +144,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
       </head>
-      <body className={`${secularOne.variable} ${rubik.variable} ${mPlusRounded.variable} antialiased font-sans`}>
+      <body className={`${secularOne.variable} ${rubik.variable} ${heebo.variable} antialiased font-sans`}>
         <a href="#main-content" className="skip-to-content">
           דלגו לתוכן הראשי
         </a>
