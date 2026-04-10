@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>פוקרוב — באנר פרסום</title>
+  <style>
+    body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0; font-family: Arial, sans-serif; }
+    .ad-container { box-shadow: 0 8px 32px rgba(0,0,0,0.12); border-radius: 16px; overflow: hidden; }
+    .download-btn { position: fixed; top: 20px; left: 20px; background: #059669; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <button class="download-btn" onclick="downloadSVG()">הורד SVG</button>
+  <div class="ad-container">
+    <img src="/ads/pokarov-ad.svg" width="1200" height="628" alt="פוקרוב — גלו עסקים לידכם">
+  </div>
+  <script>
+    function downloadSVG() {
+      fetch('/ads/pokarov-ad.svg')
+        .then(r => r.blob())
+        .then(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'pokarov-ad.svg';
+          a.click();
+          URL.revokeObjectURL(url);
+        });
+    }
+  </script>
+</body>
+</html>
