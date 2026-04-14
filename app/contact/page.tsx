@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Mail, Send, MessageCircle, Store, Bug, ShieldCheck, CreditCard, HelpCircle } from "lucide-react";
@@ -170,6 +171,12 @@ export default function ContactPage() {
 
                 <p className="text-center text-[#AAA] text-xs">
                   נשיב תוך 3 ימי עסקים • א׳–ה׳ 9:00–17:00
+                </p>
+                <p className="text-center text-[#BBB] text-xs">
+                  בשליחה אני מאשר/ת את{" "}
+                  <Link href="/privacy" className="text-[#059669] hover:underline">
+                    מדיניות הפרטיות
+                  </Link>
                 </p>
               </form>
             </div>
