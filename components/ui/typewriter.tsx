@@ -19,7 +19,7 @@ interface TypewriterProps {
     animate: Variants["animate"]
   }
   cursorClassName?: string
-  /** Map specific words to a Tailwind color class, e.g. { "ישראלים": "text-blue-500" } */
+  /** Map specific words to a Tailwind color class, e.g. { "ישראלים": "text-[#10B981]" } */
   wordColors?: Record<string, string>
   /** CSS text-shadow value for a glow effect */
   glowColor?: string

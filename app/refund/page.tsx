@@ -40,7 +40,7 @@ export default function RefundPage() {
                 לביטול עסקה, יש לפנות אלינו בדוא"ל:{" "}
                 <a
                   href="mailto:support@pokarov.co.il"
-                  className="text-blue-600 hover:underline"
+                  className="text-[#059669] hover:underline"
                 >
                   support@pokarov.co.il
                 </a>{" "}
@@ -105,7 +105,7 @@ export default function RefundPage() {
                 לשאלות בנושא ביטולים והחזרים:{" "}
                 <a
                   href="mailto:support@pokarov.co.il"
-                  className="text-blue-600 hover:underline"
+                  className="text-[#059669] hover:underline"
                 >
                   support@pokarov.co.il
                 </a>

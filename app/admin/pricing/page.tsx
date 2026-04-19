@@ -57,9 +57,9 @@ export default function AdminPricingPage() {
       </div>
 
       {/* Info banner */}
-      <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-6">
-        <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-        <p className="text-blue-700 text-sm">
+      <div className="flex items-start gap-3 bg-[#ECFDF5] border border-[#A7F3D0] rounded-2xl p-4 mb-6">
+        <Info className="h-5 w-5 text-[#10B981] flex-shrink-0 mt-0.5" />
+        <p className="text-[#047857] text-sm">
           המחירים מוצגים בשקלים. הקפד שהמחיר יעלה בהדרגה ככל שמספר הימים גדל (לא ייתכן שחודש יהיה זול יותר מ-3 שבועות).
         </p>
       </div>

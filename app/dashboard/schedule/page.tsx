@@ -258,7 +258,7 @@ export default function SchedulePage() {
 
       {/* ── WEEKLY TEMPLATE ─────────────────────────────────────────────────── */}
       {tab === "weekly" && (
-        <div className="bg-white rounded-2xl border border-stone-200 p-6">
+        <div className="bg-white rounded-2xl border border-stone-200 p-6" data-tour="schedule-template">
           <h1 className="font-bold text-xl text-stone-900 mb-1">תבנית שבועית</h1>
           <p className="text-stone-500 text-sm mb-6">הגדירו את ימי ושעות הפעילות הקבועים שלכם. ניתן לשנות יום ספציפי בטאב &quot;תיקון להיום&quot;.</p>
 
@@ -365,7 +365,7 @@ export default function SchedulePage() {
           </p>
 
           {!schedule && (
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-5 text-sm text-blue-700">
+            <div className="bg-[#ECFDF5] border border-[#D1FAE5] rounded-xl p-3 mb-5 text-sm text-[#047857]">
               💡 אין תיקון להיום — מוצג לפי התבנית השבועית. מלאו פרטים רק אם צריך לשנות משהו.
             </div>
           )}

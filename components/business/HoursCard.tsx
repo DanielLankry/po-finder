@@ -60,13 +60,13 @@ export default function HoursCard({ weeklyHours, weeklySchedule }: HoursCardProp
               key={day}
               className={`flex items-center justify-between text-sm py-1.5 px-2 rounded-lg transition-colors fade-in-up stagger-${Math.min(i + 1, 6)} ${
                 isToday
-                  ? "font-semibold text-blue-700 bg-blue-50"
+                  ? "font-semibold text-[#047857] bg-[#ECFDF5]"
                   : "text-slate-500 hover:bg-slate-50"
               }`}
             >
               <span className="flex items-center gap-2">
                 {isToday && (
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-600 flex-shrink-0" aria-hidden="true" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#059669] flex-shrink-0" aria-hidden="true" />
                 )}
                 {HEBREW_DAYS[day]}
               </span>

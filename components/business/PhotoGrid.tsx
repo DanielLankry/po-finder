@@ -62,7 +62,7 @@ export default function PhotoGrid({ photos, businessName }: PhotoGridProps) {
         {sorted.length > 3 && (
           <button
             onClick={() => setGalleryOpen(true)}
-            className="absolute bottom-4 left-4 bg-white border border-stone-200 text-stone-700 text-sm font-medium px-4 py-2 rounded-xl hover:bg-stone-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 shadow-card"
+            className="absolute bottom-4 left-4 bg-white border border-stone-200 text-stone-700 text-sm font-medium px-4 py-2 rounded-xl hover:bg-stone-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] shadow-card"
           >
             הצגת כל התמונות ({sorted.length})
           </button>

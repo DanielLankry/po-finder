@@ -147,7 +147,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
+        <div className="h-8 w-8 rounded-full border-4 border-[#A7F3D0] border-t-[#059669] animate-spin" />
       </div>
     );
   }
@@ -159,16 +159,18 @@ export default function ProfilePage() {
       </h1>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        <FormField label="שם העסק" required>
-          <Input
-            value={form.name}
-            onChange={(e) => update("name", e.target.value)}
-            placeholder="קפה של דני"
-            required
-            maxLength={100}
-            className="h-11 rounded-xl border-stone-200 focus-visible:ring-blue-600"
-          />
-        </FormField>
+        <div data-tour="profile-name">
+          <FormField label="שם העסק" required>
+            <Input
+              value={form.name}
+              onChange={(e) => update("name", e.target.value)}
+              placeholder="קפה של דני"
+              required
+              maxLength={100}
+              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
+            />
+          </FormField>
+        </div>
 
         <FormField label="תיאור">
           <Textarea
@@ -177,10 +179,11 @@ export default function ProfilePage() {
             placeholder="ספרו על העסק שלכם..."
             rows={3}
             maxLength={500}
-            className="rounded-xl border-stone-200 focus-visible:ring-blue-600 resize-none"
+            className="rounded-xl border-stone-200 focus-visible:ring-[#059669] resize-none"
           />
         </FormField>
 
+        <div data-tour="profile-address">
         <FormField label="כתובת העסק" hint="חפשו כתובת או בחרו מיקום מהמפה">
           <PlacesSearchBar
             onLocationSelect={(loc: LocationResult) => {
@@ -201,6 +204,7 @@ export default function ProfilePage() {
             </div>
           )}
         </FormField>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField label="קטגוריה" required>
@@ -208,7 +212,7 @@ export default function ProfilePage() {
               value={form.category}
               onValueChange={(v) => update("category", v)}
             >
-              <SelectTrigger className="h-11 rounded-xl border-stone-200 focus:ring-blue-600">
+              <SelectTrigger className="h-11 rounded-xl border-stone-200 focus:ring-[#059669]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -226,7 +230,7 @@ export default function ProfilePage() {
               value={form.kashrut}
               onValueChange={(v) => update("kashrut", v)}
             >
-              <SelectTrigger className="h-11 rounded-xl border-stone-200 focus:ring-blue-600">
+              <SelectTrigger className="h-11 rounded-xl border-stone-200 focus:ring-[#059669]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -247,7 +251,7 @@ export default function ProfilePage() {
               onChange={(e) => update("phone", e.target.value)}
               placeholder="05X-XXXXXXX"
               type="tel"
-              className="h-11 rounded-xl border-stone-200 focus-visible:ring-blue-600"
+              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
               dir="ltr"
             />
           </FormField>
@@ -258,7 +262,7 @@ export default function ProfilePage() {
               onChange={(e) => update("whatsapp", e.target.value)}
               placeholder="972XXXXXXXXX"
               type="tel"
-              className="h-11 rounded-xl border-stone-200 focus-visible:ring-blue-600"
+              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
               dir="ltr"
             />
           </FormField>
@@ -272,7 +276,7 @@ export default function ProfilePage() {
                 value={form.instagram}
                 onChange={(e) => update("instagram", e.target.value)}
                 placeholder="username"
-                className="h-11 rounded-xl border-stone-200 focus-visible:ring-blue-600 pr-8"
+                className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669] pr-8"
                 dir="ltr"
               />
             </div>
@@ -284,7 +288,7 @@ export default function ProfilePage() {
               onChange={(e) => update("website", e.target.value)}
               placeholder="https://..."
               type="url"
-              className="h-11 rounded-xl border-stone-200 focus-visible:ring-blue-600"
+              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
               dir="ltr"
             />
           </FormField>
@@ -295,7 +299,7 @@ export default function ProfilePage() {
             value={form.business_number}
             onChange={(e) => update("business_number", e.target.value)}
             placeholder="אופציונלי"
-            className="h-11 rounded-xl border-stone-200 focus-visible:ring-blue-600"
+            className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
             dir="ltr"
           />
         </FormField>
@@ -310,7 +314,8 @@ export default function ProfilePage() {
         <Button
           type="submit"
           disabled={saving}
-          className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium"
+          data-tour="profile-save"
+          className="w-full h-11 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium"
         >
           {saving ? "...שומר" : business ? "שמירת שינויים" : "יצירת עסק"}
         </Button>

@@ -20,6 +20,7 @@ export interface User {
   name: string;
   avatar_url: string | null;
   created_at: string;
+  onboarding_completed_at?: string | null;
 }
 
 export interface Business {

@@ -39,7 +39,7 @@ export default function ReviewSummary({ avgRating, reviewCount }: ReviewSummaryP
             <span className="w-4 text-left">{star}</span>
             <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-blue-500 rounded-full transition-all duration-700"
+                className="h-full bg-[#ECFDF5]0 rounded-full transition-all duration-700"
                 style={{ width: reviewCount > 0 ? `${(star / 5) * 80}%` : "0%" }}
                 aria-hidden="true"
               />

@@ -410,7 +410,7 @@ function BusinessCard({ biz, onApprove, onDelete, onEdit, actionLoading }: {
           <div className="flex flex-wrap gap-2 text-xs text-[#888] mt-1.5">
             {biz.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{biz.phone}</span>}
             {biz.address && <span>📍 {biz.address}</span>}
-            {biz.website && <a href={biz.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-600"><ExternalLink className="h-3 w-3" />אתר</a>}
+            {biz.website && <a href={biz.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[#059669]"><ExternalLink className="h-3 w-3" />אתר</a>}
             {biz.expires_at && <span>פג: {new Date(biz.expires_at).toLocaleDateString("he-IL")}</span>}
           </div>
         </div>
@@ -423,7 +423,7 @@ function BusinessCard({ biz, onApprove, onDelete, onEdit, actionLoading }: {
           </button>
         )}
         <button onClick={() => onEdit(biz)} disabled={isLoading}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-semibold text-sm hover:bg-blue-200 transition-colors disabled:opacity-50">
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#D1FAE5] text-[#047857] font-semibold text-sm hover:bg-[#A7F3D0] transition-colors disabled:opacity-50">
           <Pencil className="h-3.5 w-3.5" />ערוך
         </button>
         <button onClick={() => onDelete(biz.id)} disabled={isLoading}

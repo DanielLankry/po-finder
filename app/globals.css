@@ -38,6 +38,7 @@
   --font-display: var(--font-rubik);
   --font-rubik: var(--font-rubik);
   --font-body: var(--font-body);
+  --font-brand: 'Secular One', var(--font-rubik), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 
   /* shadcn required mappings */
@@ -71,20 +72,20 @@
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
 
-  /* Design system colors — Green Palette */
+  /* ── Design system — Green scale (brand) ── */
   --color-green-50:  #ECFDF5;
   --color-green-100: #D1FAE5;
   --color-green-200: #A7F3D0;
-  --color-green-500: #10B981;
-  --color-green-600: #059669;
-  --color-green-700: #047857;
+  --color-green-300: #6EE7B7;
+  --color-green-400: #34D399;
+  --color-green-500: #10B981;  /* secondary / accent */
+  --color-green-600: #059669;  /* PRIMARY */
+  --color-green-700: #047857;  /* hover / pressed */
   --color-green-800: #065F46;
-  /* Keep amber for star ratings (gold is universal) */
-  --color-amber-400: #FBBF24;
-  --color-amber-500: #F59E0B;
-  --color-surface: #FAFAF7;
-  --color-kashrut: #047857;
-  --color-verified: #7C3AED;
+  --color-green-900: #064E3B;
+
+  /* Warm neutral stone */
+  --color-stone-50:  #FAFAF7;
   --color-stone-100: #F5F5F4;
   --color-stone-200: #E7E5E4;
   --color-stone-300: #D6D3D1;
@@ -92,29 +93,67 @@
   --color-stone-500: #78716C;
   --color-stone-600: #57534E;
   --color-stone-700: #44403C;
+  --color-stone-800: #292524;
   --color-stone-900: #1C1917;
+
+  /* Cool slate (UI chrome only) */
   --color-slate-100: #F1F5F9;
   --color-slate-200: #E2E8F0;
+  --color-slate-300: #CBD5E1;
   --color-slate-400: #94A3B8;
   --color-slate-500: #64748B;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
   --color-slate-900: #0F172A;
-  --color-purple-100: #EDE9FE;
-  --color-purple-700: #6D28D9;
 
-  /* Radius */
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  /* Semantic accents */
+  --color-amber-400: #FBBF24;  /* star ratings */
+  --color-amber-500: #F59E0B;
+  --color-rose-400:  #FB7185;
+  --color-rose-500:  #F43F5E;  /* favorites heart */
+  --color-red-500:   #EF4444;  /* destructive */
+  --color-purple-100:#EDE9FE;
+  --color-purple-600:#7C3AED;  /* verified badge */
+  --color-purple-700:#6D28D9;
+  --color-whatsapp:  #25D366;
+  --color-whatsapp-hover: #1EB856;
 
-  /* Shadows — green-tinted */
+  /* Category chip palette */
+  --color-cat-coffee-bg:  #FEF3C7; --color-cat-coffee-fg:  #92400E;
+  --color-cat-food-bg:    #FFEDD5; --color-cat-food-fg:    #C2410C;
+  --color-cat-sweets-bg:  #FCE7F3; --color-cat-sweets-fg:  #BE185D;
+  --color-cat-meat-bg:    #FEE2E2; --color-cat-meat-fg:    #991B1B;
+  --color-cat-vegan-bg:   #DCFCE7; --color-cat-vegan-fg:   #166534;
+  --color-cat-celiac-bg:  #FEF9C3; --color-cat-celiac-fg:  #78350F;
+  --color-cat-flowers-bg: #FDF2F8; --color-cat-flowers-fg: #9D174D;
+  --color-cat-jewelry-bg: #EDE9FE; --color-cat-jewelry-fg: #5B21B6;
+  --color-cat-vintage-bg: #F5F0FF; --color-cat-vintage-fg: #6D28D9;
+
+  /* App-level semantic surfaces */
+  --color-surface: #FAFAF7;
+  --color-kashrut: #047857;
+  --color-verified: #7C3AED;
+
+  /* Radius — 10px base scale per design system */
+  --radius-sm:  0.375rem;  /* 6  */
+  --radius-md:  0.5rem;    /* 8  */
+  --radius-lg:  0.625rem;  /* 10 */
+  --radius-xl:  0.875rem;  /* 14 */
+  --radius-2xl: 1rem;      /* 16 */
+  --radius-3xl: 1.5rem;    /* 24 — cards */
+  --radius-4xl: 1.75rem;   /* 28 — bottom sheets */
+  --radius-pill: 9999px;
+
+  /* Shadows — 4-tier, green-tinted brand system */
+  --shadow-xs:     0 1px 2px rgba(0,0,0,0.04);
+  --shadow-sm:     0 1px 2px rgba(0,0,0,0.08);
   --shadow-card:   0 2px 8px rgba(5,150,105,0.08), 0 0 1px rgba(0,0,0,0.04);
   --shadow-hover:  0 8px 24px rgba(5,150,105,0.18), 0 0 1px rgba(0,0,0,0.04);
+  --shadow-lift:   0 20px 40px rgba(0,0,0,0.12);
   --shadow-popup:  0 12px 32px rgba(0,0,0,0.18), 0 0 1px rgba(0,0,0,0.04);
   --shadow-navbar: 0 1px 2px rgba(0,0,0,0.08);
+  --shadow-cta:    0 4px 20px rgba(5,150,105,0.40);
+  --shadow-sheet:  0 -8px 40px rgba(0,0,0,0.15);
 }
 
 :root {
@@ -181,7 +220,22 @@
     font-weight: 400;
     line-height: 1.65;
   }
+
+  /* Per design system: links default to brand green, never blue. Component-level
+     anchors that need different treatment should opt out explicitly. */
+  a { color: #047857; }
+  a:hover { text-decoration: underline; }
+  /* Tailwind-styled links (any class-based color) keep their class color */
+  a[class*="text-"] { color: inherit; }
+  a[class*="text-"]:hover { text-decoration: none; }
 }
+
+/* ── Design-system semantic type utilities ── */
+.ds-eyebrow  { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #047857; }
+.ds-label    { font-family: var(--font-rubik), sans-serif; font-size: 0.875rem; font-weight: 500; }
+.ds-caption  { font-size: 0.75rem; color: #888888; }
+.ds-tabular  { font-variant-numeric: tabular-nums; }
+.brand-wordmark { font-family: 'Secular One', var(--font-rubik), sans-serif; font-weight: 400; letter-spacing: -0.01em; }
 
 /* Skip to content link for accessibility */
 .skip-to-content {
@@ -380,6 +434,61 @@
 .a11y-letter-spacing h2,
 .a11y-letter-spacing h3 {
   letter-spacing: 0.04em;
+}
+
+/* ── driver.js onboarding tour — brand-green theme ── */
+.driver-popover {
+  background: #FFFFFF;
+  color: #0F172A;
+  border-radius: 16px;
+  border: 1px solid #E7E5E4;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  font-family: var(--font-rubik), sans-serif;
+}
+.driver-popover-title {
+  color: #0F172A;
+  font-weight: 700;
+  font-size: 1rem;
+}
+.driver-popover-description {
+  color: #44403C;
+  font-family: var(--font-body), sans-serif;
+  line-height: 1.5;
+}
+.driver-popover-progress-text {
+  color: #059669;
+  font-weight: 600;
+}
+.driver-popover-next-btn,
+.driver-popover-prev-btn,
+.driver-popover-close-btn {
+  font-family: var(--font-rubik), sans-serif;
+}
+.driver-popover-next-btn {
+  background: #059669 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #059669 !important;
+  text-shadow: none !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+}
+.driver-popover-next-btn:hover {
+  background: #047857 !important;
+  border-color: #047857 !important;
+}
+.driver-popover-prev-btn {
+  background: #FFFFFF !important;
+  color: #44403C !important;
+  border: 1px solid #E7E5E4 !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  text-shadow: none !important;
+}
+.driver-popover-prev-btn:hover {
+  background: #FAFAF7 !important;
+}
+.driver-overlay {
+  background: rgba(15, 23, 42, 0.55) !important;
 }
 
 /* Google Maps — hide keyboard shortcuts & minimize attribution bar */

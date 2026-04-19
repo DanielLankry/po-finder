@@ -20,7 +20,7 @@ export default function Footer() {
       <div className="max-w-[1280px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         <Link
           href="/"
-          className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-lg"
+          className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-lg"
           aria-label="פה — דף הבית"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -33,7 +33,7 @@ export default function Footer() {
               <li key={href}>
                 <Link
                   href={href}
-                  className="text-slate-500 text-sm hover:text-blue-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded"
+                  className="text-slate-500 text-sm hover:text-[#059669] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded"
                 >
                   {label}
                 </Link>

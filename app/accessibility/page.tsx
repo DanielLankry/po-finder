@@ -79,7 +79,7 @@ export default function AccessibilityPage() {
               <ul className="list-none space-y-1 mt-2">
                 <li>
                   📧 מייל:{" "}
-                  <a href="mailto:accessibility@po.co.il" className="text-blue-600 hover:underline">
+                  <a href="mailto:accessibility@po.co.il" className="text-[#059669] hover:underline">
                     accessibility@po.co.il
                   </a>
                 </li>

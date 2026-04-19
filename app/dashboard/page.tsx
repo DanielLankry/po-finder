@@ -55,8 +55,8 @@ export default async function DashboardPage({
     <div className="space-y-6" dir="rtl">
       {businesses.length === 0 ? (
         <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center shadow-card">
-          <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
-            <Plus className="h-8 w-8 text-blue-600" aria-hidden="true" />
+          <div className="h-16 w-16 rounded-full bg-[#D1FAE5] flex items-center justify-center mx-auto mb-4">
+            <Plus className="h-8 w-8 text-[#059669]" aria-hidden="true" />
           </div>
           <h2 className="font-display font-bold text-xl text-stone-900 mb-2">
             עדיין אין לכם עסק רשום
@@ -66,7 +66,7 @@ export default async function DashboardPage({
           </p>
           <Link
             href="/dashboard/profile"
-            className="inline-flex items-center justify-center h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+            className="inline-flex items-center justify-center h-11 px-6 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2"
           >
             יצירת פרופיל עסק
           </Link>
@@ -178,7 +178,7 @@ async function DashboardContent({
 
         <Link
           href="/dashboard/schedule"
-          className="inline-flex items-center justify-center h-10 px-5 mt-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+          className="inline-flex items-center justify-center h-10 px-5 mt-4 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2"
         >
           {schedule ? "עריכת לוח הזמנים" : "פרסמו לוח זמנים"}
         </Link>
@@ -187,7 +187,7 @@ async function DashboardContent({
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
-          icon={<Star className="h-5 w-5 text-blue-600" />}
+          icon={<Star className="h-5 w-5 text-[#059669]" />}
           label="דירוג ממוצע"
           value={
             business.avg_rating > 0
@@ -203,7 +203,7 @@ async function DashboardContent({
           href={`/businesses/${business.id}#reviews`}
         />
         <StatCard
-          icon={<Camera className="h-5 w-5 text-blue-500" />}
+          icon={<Camera className="h-5 w-5 text-[#10B981]" />}
           label="ניהול תמונות"
           value="הוסיפו תמונות"
           href="/dashboard/photos"
@@ -221,7 +221,7 @@ async function DashboardContent({
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center">
             <div className="flex items-center justify-center mb-1">
-              <Eye className="h-4 w-4 text-blue-500" aria-hidden="true" />
+              <Eye className="h-4 w-4 text-[#10B981]" aria-hidden="true" />
             </div>
             <p className="font-display font-bold text-2xl text-stone-900">{viewCount}</p>
             <p className="text-stone-500 text-xs mt-0.5">צפיות</p>
@@ -260,13 +260,13 @@ async function DashboardContent({
         <div className="space-y-2">
           <Link
             href={`/businesses/${business.id}`}
-            className="flex items-center gap-2 text-sm text-stone-600 hover:text-blue-600 transition-colors py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded"
+            className="flex items-center gap-2 text-sm text-stone-600 hover:text-[#059669] transition-colors py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded"
           >
             ← צפייה בדף הציבורי של העסק
           </Link>
           <Link
             href="/dashboard/profile"
-            className="flex items-center gap-2 text-sm text-stone-600 hover:text-blue-600 transition-colors py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded"
+            className="flex items-center gap-2 text-sm text-stone-600 hover:text-[#059669] transition-colors py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded"
           >
             ← עריכת פרטי העסק
           </Link>
@@ -290,7 +290,7 @@ function StatCard({
   return (
     <Link
       href={href}
-      className="bg-white rounded-2xl border border-stone-200 p-5 shadow-card hover:shadow-hover transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+      className="bg-white rounded-2xl border border-stone-200 p-5 shadow-card hover:shadow-hover transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
     >
       <div className="flex items-center gap-2 mb-2">{icon}<span className="text-stone-500 text-sm">{label}</span></div>
       <p className="font-display font-bold text-xl text-stone-900">{value}</p>
