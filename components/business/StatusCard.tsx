@@ -50,7 +50,7 @@ export default function StatusCard({ business, schedule }: StatusCardProps) {
       {/* Address */}
       {address && (
         <div className="flex items-start gap-2 text-slate-600 text-sm mb-2">
-          <MapPin className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+          <MapPin className="h-4 w-4 text-stone-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
           <span>{address}</span>
         </div>
       )}
@@ -58,7 +58,7 @@ export default function StatusCard({ business, schedule }: StatusCardProps) {
       {/* Hours */}
       {schedule?.open_time && schedule?.close_time && (
         <div className="flex items-center gap-2 text-slate-600 text-sm mb-5">
-          <Clock className="h-4 w-4 text-blue-400 flex-shrink-0" aria-hidden="true" />
+          <Clock className="h-4 w-4 text-stone-400 flex-shrink-0" aria-hidden="true" />
           <span className="tabular-nums">
             {schedule.open_time.slice(0, 5)} – {schedule.close_time.slice(0, 5)}
           </span>
@@ -67,7 +67,7 @@ export default function StatusCard({ business, schedule }: StatusCardProps) {
 
       {/* Today's note */}
       {schedule?.note && (
-        <p className="text-slate-600 text-sm bg-blue-50 border border-blue-100 rounded-xl p-3 mb-5">
+        <p className="text-slate-600 text-sm bg-[#ECFDF5] border border-[#D1FAE5] rounded-xl p-3 mb-5">
           {schedule.note}
         </p>
       )}
@@ -102,7 +102,7 @@ export default function StatusCard({ business, schedule }: StatusCardProps) {
           <a
             href={`tel:${business.phone}`}
             onClick={() => trackEvent(business.id, "call_click")}
-            className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-slate-200 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 btn-press"
+            className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-slate-200 text-slate-700 hover:bg-[#ECFDF5] hover:border-[#A7F3D0] hover:text-[#047857] font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] btn-press"
           >
             <Phone className="h-4 w-4" aria-hidden="true" />
             התקשרו
@@ -116,7 +116,7 @@ export default function StatusCard({ business, schedule }: StatusCardProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackEvent(business.id, "directions_click")}
-            className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-slate-200 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 btn-press"
+            className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-slate-200 text-slate-700 hover:bg-[#ECFDF5] hover:border-[#A7F3D0] hover:text-[#047857] font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] btn-press"
           >
             <Navigation className="h-4 w-4" aria-hidden="true" />
             קבלת הוראות הגעה
@@ -129,7 +129,7 @@ export default function StatusCard({ business, schedule }: StatusCardProps) {
             href={`https://instagram.com/${business.instagram}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full h-10 text-slate-400 hover:text-blue-600 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-xl"
+            className="flex items-center justify-center gap-2 w-full h-10 text-slate-400 hover:text-[#059669] text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-xl"
           >
             <ExternalLink className="h-4 w-4" aria-hidden="true" />
             @{business.instagram}

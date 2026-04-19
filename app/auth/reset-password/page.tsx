@@ -41,8 +41,8 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8">
           <Link href="/" className="inline-flex items-center gap-2 group">
-            <MapPin className="h-7 w-7 fill-blue-600 text-blue-600" />
-            <span className="font-display font-extrabold text-2xl text-blue-600">פה</span>
+            <MapPin className="h-7 w-7 fill-[#059669] text-[#059669]" />
+            <span className="font-display font-extrabold text-2xl text-[#059669]">פה</span>
           </Link>
         </div>
 
@@ -66,7 +66,7 @@ export default function ResetPasswordPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="h-11 rounded-xl border-stone-200 focus-visible:ring-blue-600"
+              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
               dir="ltr"
             />
           </div>
@@ -83,7 +83,7 @@ export default function ResetPasswordPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               minLength={6}
-              className="h-11 rounded-xl border-stone-200 focus-visible:ring-blue-600"
+              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
               dir="ltr"
             />
           </div>
@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium"
+            className="w-full h-11 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium"
           >
             {loading ? "...מעדכן" : "עדכון סיסמה"}
           </Button>

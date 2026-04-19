@@ -74,7 +74,7 @@ export default function PrivacyPage() {
                 <li>לקבל את המידע שלכם בפורמט נגיש</li>
               </ul>
               <p className="mt-3">
-                לפנייה: <a href="mailto:privacy@po.co.il" className="text-blue-600 hover:underline">privacy@po.co.il</a>
+                לפנייה: <a href="mailto:privacy@po.co.il" className="text-[#059669] hover:underline">privacy@po.co.il</a>
               </p>
             </section>
 

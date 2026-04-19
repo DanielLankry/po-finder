@@ -84,7 +84,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
               deleteSpeed={35}
               waitTime={2200}
               className="text-[#059669] font-extrabold text-[18px] sm:text-[20px] md:text-[26px] whitespace-nowrap"
-              wordColors={{ "לישראלים": "text-blue-500" }}
+              wordColors={{ "לישראלים": "text-[#059669]" }}
             />
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
             className="h-8 px-3.5 rounded-full text-[#555] font-medium text-sm border border-stone-200 hover:border-[#059669]/50 hover:bg-[#ECFDF5] hover:text-[#047857] transition-all duration-200 flex items-center whitespace-nowrap"
           >אודות</Link>
           <Link href="/contact"
-            className="h-8 px-3.5 rounded-full text-[#555] font-medium text-sm border border-stone-200 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 flex items-center whitespace-nowrap"
+            className="h-8 px-3.5 rounded-full text-[#555] font-medium text-sm border border-stone-200 hover:border-[#059669]/50 hover:bg-[#ECFDF5] hover:text-[#047857] transition-all duration-200 flex items-center whitespace-nowrap"
           >צרו קשר</Link>
           <Link href="/vendors"
             className="h-8 px-3.5 rounded-full text-[#555] font-medium text-sm border border-stone-200 hover:border-[#059669]/50 hover:bg-[#ECFDF5] hover:text-[#047857] transition-all duration-200 flex items-center whitespace-nowrap"
@@ -133,7 +133,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
           {/* Mobile search icon */}
           <button
-            className="md:hidden flex items-center justify-center h-9 w-9 rounded-full hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+            className="md:hidden flex items-center justify-center h-9 w-9 rounded-full hover:bg-[#ECFDF5] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
             onClick={() => setMobileSearchOpen(true)}
             aria-label="פתיחת חיפוש"
           >
@@ -212,7 +212,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
 
           {/* Mobile hamburger */}
           <button
-            className="md:hidden flex items-center justify-center h-9 w-9 rounded-full hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+            className="md:hidden flex items-center justify-center h-9 w-9 rounded-full hover:bg-[#ECFDF5] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? "סגירת תפריט" : "פתיחת תפריט"}
             aria-expanded={mobileMenuOpen}
@@ -311,7 +311,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
               {[
                 { href: "/dashboard", label: user ? "לוח בקרה" : "הוסיפו עסק", emoji: "🏪", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
                 { href: "/vendors", label: "לרוכלים", emoji: "🛒", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
-                { href: "/pricing", label: "מחירים", emoji: "💳", bg: "#EFF6FF", border: "#BFDBFE", text: "#1E40AF" },
+                { href: "/pricing", label: "מחירים", emoji: "💳", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
                 { href: "/about", label: "אודות", emoji: "ℹ️", bg: "#F5F3FF", border: "#DDD6FE", text: "#5B21B6" },
                 { href: "/contact", label: "צרו קשר", emoji: "📬", bg: "#FFF7ED", border: "#FED7AA", text: "#C2410C" },
               ].map(({ href, label, emoji, bg, border, text }) => (

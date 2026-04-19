@@ -20,7 +20,7 @@ export default function Error({
         </p>
         <button
           onClick={reset}
-          className="inline-flex items-center justify-center h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+          className="inline-flex items-center justify-center h-11 px-6 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2"
         >
           נסו שוב
         </button>

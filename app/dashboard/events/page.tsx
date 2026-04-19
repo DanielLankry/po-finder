@@ -153,6 +153,7 @@ export default function EventsPage() {
         </div>
         <Button
           onClick={() => { setShowForm(!showForm); setSuccess(null); setError(null); }}
+          data-tour="events-new"
           className="h-10 px-4 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium text-sm"
         >
           <Plus className="h-4 w-4 ml-1" />

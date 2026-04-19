@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
+import TourController from "@/components/onboarding/TourController";
 
 export const metadata = { title: "לוח בקרה — פה" };
 
@@ -24,6 +25,15 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     .select("id", { count: "exact", head: true })
     .eq("owner_id", user.id);
 
+  // Fetch onboarding status — tour runs once, ever, until users.onboarding_completed_at is set.
+  const { data: profile } = await supabase
+    .from("users")
+    .select("onboarding_completed_at")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const shouldRunTour = !profile?.onboarding_completed_at;
+
   // Allow access if user has businesses or is creating one
   // New users will see the "create business" prompt on the dashboard
 
@@ -40,6 +50,7 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
           </div>
         </div>
       </div>
+      <TourController shouldRun={shouldRunTour} />
       <Footer />
     </>
   );

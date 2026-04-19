@@ -125,7 +125,7 @@ export default function PhotosPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
+        <div className="h-8 w-8 rounded-full border-4 border-[#A7F3D0] border-t-[#059669] animate-spin" />
       </div>
     );
   }
@@ -140,10 +140,11 @@ export default function PhotosPage() {
 
         {/* Drag & drop zone */}
         <div
+          data-tour="photos-upload"
           className={`border-2 border-dashed rounded-2xl p-8 text-center transition-colors cursor-pointer ${
             dragOver
-              ? "border-blue-600 bg-blue-50"
-              : "border-stone-300 hover:border-blue-400 hover:bg-blue-50/50"
+              ? "border-[#059669] bg-[#ECFDF5]"
+              : "border-stone-300 hover:border-[#059669]/50 hover:bg-[#ECFDF5]/50"
           }`}
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
@@ -167,7 +168,7 @@ export default function PhotosPage() {
           </p>
           <p className="text-stone-400 text-xs mt-1">PNG, JPG, WEBP עד 10MB</p>
           {uploading && (
-            <p className="text-blue-600 text-sm mt-2 font-medium">...מעלה</p>
+            <p className="text-[#059669] text-sm mt-2 font-medium">...מעלה</p>
           )}
           {uploadError && (
             <p className="text-red-600 text-sm mt-2" role="alert">{uploadError}</p>
@@ -198,7 +199,7 @@ export default function PhotosPage() {
 
                 {/* Primary badge */}
                 {photo.is_primary && (
-                  <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <div className="absolute top-2 right-2 bg-[#059669] text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
                     <Star className="h-3 w-3 fill-white" aria-hidden="true" />
                     ראשית
                   </div>
@@ -209,7 +210,7 @@ export default function PhotosPage() {
                   {!photo.is_primary && (
                     <button
                       onClick={() => setPrimary(photo.id)}
-                      className="bg-white text-stone-700 text-xs font-medium px-2 py-1.5 rounded-lg hover:bg-blue-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                      className="bg-white text-stone-700 text-xs font-medium px-2 py-1.5 rounded-lg hover:bg-[#ECFDF5] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
                       aria-label="הגדרה כתמונה ראשית"
                     >
                       הגדרה כראשית

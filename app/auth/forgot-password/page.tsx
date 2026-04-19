@@ -37,8 +37,8 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8">
           <Link href="/" className="inline-flex items-center gap-2 group">
-            <MapPin className="h-7 w-7 fill-blue-600 text-blue-600" />
-            <span className="font-display font-extrabold text-2xl text-blue-600">פה</span>
+            <MapPin className="h-7 w-7 fill-[#059669] text-[#059669]" />
+            <span className="font-display font-extrabold text-2xl text-[#059669]">פה</span>
           </Link>
         </div>
 
@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
             <p className="text-stone-500 text-sm">
               שלחנו קישור לאיפוס הסיסמה ל-<strong>{email}</strong>.
             </p>
-            <Link href="/auth/login" className="text-blue-600 text-sm font-medium hover:underline mt-4 inline-block">
+            <Link href="/auth/login" className="text-[#059669] text-sm font-medium hover:underline mt-4 inline-block">
               חזרה לכניסה
             </Link>
           </div>
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="h-11 rounded-xl border-stone-200 focus-visible:ring-blue-600"
+                  className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
                   dir="ltr"
                 />
               </div>
@@ -88,14 +88,14 @@ export default function ForgotPasswordPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                className="w-full h-11 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium"
               >
                 {loading ? "...שולח" : "שליחת קישור איפוס"}
               </Button>
             </form>
 
             <p className="text-center mt-6 text-sm text-stone-500">
-              <Link href="/auth/login" className="text-blue-600 font-medium hover:underline">
+              <Link href="/auth/login" className="text-[#059669] font-medium hover:underline">
                 חזרה לכניסה
               </Link>
             </p>
