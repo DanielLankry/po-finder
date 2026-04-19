@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ import type { LocationResult } from "@/components/map/PlacesSearchBar";
 import { MapPin } from "lucide-react";
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -132,8 +134,9 @@ export default function ProfilePage() {
           .select()
           .single();
         if (insertError) throw insertError;
-        // Update local state so next save does UPDATE not INSERT
-        if (inserted) setBusiness(inserted);
+        // New business created — send to pricing to activate listing
+        if (inserted) router.push("/pricing");
+        return;
       }
       setSuccess(true);
     } catch (err: unknown) {
