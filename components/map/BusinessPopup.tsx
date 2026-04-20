@@ -40,24 +40,29 @@ export default function BusinessPopup({
       {/* Photo */}
       <div className="relative h-44 bg-slate-100">
         {primaryPhoto ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={primaryPhoto.url}
-            alt={`תמונה של ${business.name}`}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              const target = e.currentTarget;
-              target.style.display = "none";
-              const placeholder = target.nextElementSibling as HTMLElement | null;
-              if (placeholder) placeholder.style.display = "flex";
-            }}
-          />
-          <div className="w-full h-full flex-col items-center justify-center bg-gradient-to-br from-[#ECFDF5] via-[#D1FAE5] to-[#A7F3D0] hidden">
-            <div className="h-12 w-12 rounded-2xl bg-[#059669] flex items-center justify-center mb-2 shadow-md">
-              <MapPin className="h-6 w-6 text-white" />
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={primaryPhoto.url}
+              alt={`תמונה של ${business.name}`}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.currentTarget;
+                target.style.display = "none";
+                const placeholder = target.nextElementSibling as HTMLElement | null;
+                if (placeholder) placeholder.style.display = "flex";
+              }}
+            />
+            <div
+              className="absolute inset-0 flex-col items-center justify-center bg-gradient-to-br from-[#ECFDF5] via-[#D1FAE5] to-[#A7F3D0]"
+              style={{ display: "none" }}
+            >
+              <div className="h-12 w-12 rounded-2xl bg-[#059669] flex items-center justify-center mb-2 shadow-md">
+                <MapPin className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-[#059669]/70 text-xs font-medium">{CATEGORY_LABELS[business.category]}</span>
             </div>
-            <span className="text-[#059669]/70 text-xs font-medium">{CATEGORY_LABELS[business.category]}</span>
-          </div>
+          </>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#ECFDF5] via-[#D1FAE5] to-[#A7F3D0]">
             <div className="h-12 w-12 rounded-2xl bg-[#059669] flex items-center justify-center mb-2 shadow-md">
