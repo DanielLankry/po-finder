@@ -128,7 +128,7 @@ export default function ProfilePage() {
       } else {
         const { data: inserted, error: insertError } = await supabase
           .from("businesses")
-          .insert({ owner_id: user.id, ...payload })
+          .insert({ owner_id: user.id, is_active: false, ...payload })
           .select()
           .single();
         if (insertError) throw insertError;
