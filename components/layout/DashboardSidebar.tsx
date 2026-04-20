@@ -9,6 +9,7 @@ const NAV_ITEMS: { href: string; label: string; exact?: boolean; spot?: boolean 
   { href: "/dashboard/schedule", label: "לוח זמנים להיום" },
   { href: "/dashboard/events", label: "אירועים" },
   { href: "/dashboard/photos", label: "תמונות" },
+  { href: "/dashboard/billing", label: "חיוב ומנוי" },
 ];
 
 export default function DashboardSidebar() {
