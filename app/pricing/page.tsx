@@ -53,6 +53,15 @@ export default function PricingPage() {
   const router = useRouter();
   const [planIndex, setPlanIndex] = useState(8); // default: חודש
   const [loading, setLoading] = useState(false);
+  const [showCancelBanner, setShowCancelBanner] = useState(false);
+
+  // Detect cancelled payment via URL — avoids useSearchParams (Suspense requirement)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("payment") === "cancelled") setShowCancelBanner(true);
+    }
+  }, []);
 
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -111,6 +120,28 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-[#FAFAF7]" dir="rtl">
       <Navbar />
+      {showCancelBanner && (
+        <div className="mt-[72px] bg-amber-50 border-b border-amber-200">
+          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+            <div className="flex items-start gap-2.5 min-w-0">
+              <span className="text-amber-600 text-lg leading-none mt-0.5">⚠️</span>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-amber-900">התשלום בוטל</p>
+                <p className="text-xs text-amber-700 mt-0.5">
+                  לא חויבת. ניתן לבחור תקופה מחדש ולנסות שוב.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowCancelBanner(false)}
+              aria-label="סגירת ההודעה"
+              className="flex-shrink-0 h-7 w-7 rounded-full text-amber-700 hover:bg-amber-100 flex items-center justify-center text-lg leading-none"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
       <div className="pt-24 pb-16 px-4">
         <div className="max-w-lg mx-auto">
           {/* Header */}

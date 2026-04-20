@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       "line_items[0][price_data][product_data][description]": `הופעה על המפה למשך ${monthLabel}`,
       "line_items[0][price_data][unit_amount]": String(price),
       "line_items[0][quantity]": "1",
-      success_url: `${origin}/dashboard?payment=success`,
+      success_url: `${origin}/dashboard/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing?payment=cancelled`,
       customer_email: user.email ?? "",
       "metadata[supabase_user_id]": user.id,
