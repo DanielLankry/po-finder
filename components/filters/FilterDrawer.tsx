@@ -41,7 +41,7 @@ export default function FilterDrawer({
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent side="right" className="w-80 p-0" dir="rtl">
+      <SheetContent side="right" className="w-80 p-0" dir="rtl" showCloseButton={false}>
         <div className="flex flex-col h-full">
           <SheetHeader className="flex flex-row items-center justify-between p-6 border-b border-stone-200">
             <SheetTitle className="font-display font-bold text-lg text-stone-900">
