@@ -21,7 +21,16 @@ function PostHogPageView() {
 
 export default function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    initPostHog();
+    // Only init PostHog after explicit cookie consent (Amendment 13 compliance)
+    if (localStorage.getItem("po-cookie-consent") === "accepted") {
+      initPostHog();
+    }
+
+    function onConsent() {
+      initPostHog();
+    }
+    window.addEventListener("po-cookie-consent-accepted", onConsent);
+    return () => window.removeEventListener("po-cookie-consent-accepted", onConsent);
   }, []);
 
   return (

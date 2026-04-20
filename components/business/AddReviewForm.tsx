@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Star } from "lucide-react";
+import Link from "next/link";
 import { createReview } from "@/lib/db/reviews";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -122,6 +123,13 @@ export default function AddReviewForm({ businessId, isLoggedIn }: AddReviewFormP
             {error}
           </p>
         )}
+
+        <p className="text-xs text-stone-400 text-center">
+          בשליחה אני מאשר/ת את{" "}
+          <Link href="/privacy" className="text-[#059669] hover:underline">
+            מדיניות הפרטיות
+          </Link>
+        </p>
 
         <Button
           type="submit"
