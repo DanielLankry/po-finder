@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { driver, type Driver } from "driver.js";
 import "driver.js/dist/driver.css";
@@ -54,11 +54,14 @@ function waitForSelector(selector: string, timeoutMs = 2000): Promise<Element | 
 }
 
 async function markComplete() {
-  writeState(null);
+  // Write active:false rather than removing the key entirely.
+  // This prevents the effect from re-starting the tour when shouldRun is still
+  // true from the server but localStorage was already cleared.
+  writeState({ active: false, stepIndex: -1 });
   try {
     await fetch("/api/onboarding/complete", { method: "POST" });
   } catch {
-    // non-fatal — we already cleared localStorage so tour won't re-loop
+    // non-fatal
   }
 }
 
@@ -71,31 +74,35 @@ export default function TourController({ shouldRun }: TourControllerProps) {
   const pathname = usePathname();
   const router = useRouter();
   const driverRef = useRef<Driver | null>(null);
+  const [isActive, setIsActive] = useState(false);
+
+  function handleSkip() {
+    driverRef.current?.destroy();
+    void markComplete();
+    setIsActive(false);
+  }
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Decide whether the tour should be active on this mount.
     const stored = readState();
     let state: TourState | null = stored;
 
     if (!state) {
-      if (!shouldRun) return; // already completed, no stored progress — nothing to do
+      if (!shouldRun) return;
       state = { active: true, stepIndex: 0 };
       writeState(state);
     }
+    // If the stored state explicitly marks the tour inactive, stop here.
     if (!state.active) return;
 
-    // Respect prefers-reduced-motion
     const reduced =
       typeof window.matchMedia === "function" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Find a step on this route to anchor. If none, push to the step's route.
     const currentStep = state.stepIndex;
     const step = TOUR_STEPS[currentStep];
     if (!step) {
-      // Past the last step — mark complete.
       void markComplete();
       return;
     }
@@ -107,20 +114,11 @@ export default function TourController({ shouldRun }: TourControllerProps) {
     let cancelled = false;
 
     (async () => {
-      // If the step has a selector, wait for it. Otherwise fire as centered.
-      let resolvedSteps = TOUR_STEPS.map((s) => ({
-        ...s,
-        element: s.selector,
-      }));
-
       if (step.selector) {
         await waitForSelector(step.selector);
       }
       if (cancelled) return;
 
-      // Build a driver.js step array for this route only, so Next/Prev within the
-      // driver instance never crosses routes. Cross-route moves happen via our
-      // onNextClick handler that writes state + router.push.
       const sameRouteSteps = TOUR_STEPS.map((s, i) => ({
         index: i,
         step: s,
@@ -148,7 +146,6 @@ export default function TourController({ shouldRun }: TourControllerProps) {
           const globalIndex = sameRouteSteps[current]?.index ?? currentStep;
           const nextGlobal = globalIndex + 1;
 
-          // Past the last global step → finish.
           if (nextGlobal >= TOUR_STEPS.length) {
             d.destroy();
             void markComplete();
@@ -159,13 +156,11 @@ export default function TourController({ shouldRun }: TourControllerProps) {
           writeState({ active: true, stepIndex: nextGlobal });
 
           if (nextStep.route !== pathname) {
-            // Cross-route move — tear down & navigate, the next mount picks up from state.
             d.destroy();
             router.push(nextStep.route);
             return;
           }
 
-          // Same-route advance — let driver.js move forward.
           d.moveNext();
         },
         onPrevClick: () => {
@@ -190,10 +185,12 @@ export default function TourController({ shouldRun }: TourControllerProps) {
         },
         onDestroyed: () => {
           driverRef.current = null;
+          setIsActive(false);
         },
       });
 
       driverRef.current = d;
+      setIsActive(true);
       d.drive(Math.max(0, indexInDriver));
     })();
 
@@ -205,5 +202,15 @@ export default function TourController({ shouldRun }: TourControllerProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  return null;
+  if (!isActive) return null;
+
+  return (
+    <button
+      onClick={handleSkip}
+      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] bg-white/90 backdrop-blur-sm border border-stone-200 text-stone-500 text-sm font-medium px-4 py-2 rounded-full shadow-md hover:bg-stone-50 hover:text-stone-700 transition-colors"
+      aria-label="דלג על הסיור"
+    >
+      דלג על הסיור ✕
+    </button>
+  );
 }
