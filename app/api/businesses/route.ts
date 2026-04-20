@@ -13,6 +13,22 @@ export async function GET(req: NextRequest) {
     const category = searchParams.get("category");
     const kashrut = searchParams.get("kashrut");
     const minRating = searchParams.get("minRating");
+    const mine = searchParams.get("mine") === "1";
+
+    // "mine=1" — return ALL of authenticated user's businesses (active + pending)
+    if (mine) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      const { data, error } = await supabase
+        .from("businesses")
+        .select("id, name, expires_at, is_active")
+        .eq("owner_id", user.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return NextResponse.json({ businesses: data ?? [] });
+    }
 
     let query = supabase
       .from("businesses")
