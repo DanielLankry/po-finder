@@ -122,12 +122,6 @@ export default function PrivacyPage() {
                     link: "https://posthog.com/privacy",
                   },
                   {
-                    name: "Stripe",
-                    role: "עיבוד תשלומים (בתוכניות בתשלום)",
-                    location: "ארה&quot;ב / אירופה",
-                    link: "https://stripe.com/privacy",
-                  },
-                  {
                     name: "Google Maps Platform",
                     role: "הצגת מפה וחיפוש מיקומים",
                     location: "גלובלי",
@@ -169,7 +163,7 @@ export default function PrivacyPage() {
                 <li>נתוני חשבון — נשמרים כל עוד החשבון פעיל</li>
                 <li>ביקורות ופעילות עסקית — נשמרות לצורכי שירות; ניתן למחיקה לפי בקשה</li>
                 <li>לוגים ואנליטיקה — עד 12 חודשים</li>
-                <li>נתוני תשלום — Stripe שומר לפי הנדרש בחוק (7 שנים לצורכי מע&quot;מ)</li>
+                <li>נתוני תשלום — נשמרים אצל ספק התשלום בהתאם לדרישות החוק (7 שנים לצורכי מע&quot;מ)</li>
                 <li>לאחר מחיקת חשבון — פרטים אישיים נמחקים תוך 30 ימי עסקים</li>
               </ul>
             </section>

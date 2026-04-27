@@ -3,23 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  CreditCard,
   Receipt,
   RefreshCw,
   Calendar,
   AlertCircle,
-  ExternalLink,
   Plus,
 } from "lucide-react";
-
-interface PastSession {
-  id: string;
-  amount_total: number | null;
-  currency: string;
-  created: number;
-  months: number;
-  payment_intent: string | null;
-}
 
 interface BusinessLite {
   id: string;
@@ -29,39 +18,20 @@ interface BusinessLite {
 }
 
 export default function BillingPage() {
-  const [sessions, setSessions] = useState<PastSession[]>([]);
   const [businesses, setBusinesses] = useState<BusinessLite[]>([]);
   const [loading, setLoading] = useState(true);
-  const [portalLoading, setPortalLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/stripe/invoices").then((r) => r.json()),
-      fetch("/api/businesses?mine=1").then((r) => r.json()).catch(() => ({ businesses: [] })),
-    ])
-      .then(([invoiceData, bizData]) => {
-        if (invoiceData.error) setError(invoiceData.error);
-        else setSessions(invoiceData.sessions ?? []);
-        setBusinesses(bizData.businesses ?? []);
+    fetch("/api/businesses?mine=1")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.error) setError(data.error);
+        else setBusinesses(data.businesses ?? []);
       })
-      .catch((e) => setError(e.message))
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
       .finally(() => setLoading(false));
   }, []);
-
-  async function openStripePortal() {
-    setPortalLoading(true);
-    try {
-      const res = await fetch("/api/stripe/portal", { method: "POST" });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else setError(data.error ?? "לא ניתן לפתוח את פורטל החיוב");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setPortalLoading(false);
-    }
-  }
 
   return (
     <div className="space-y-6" dir="rtl">
@@ -70,7 +40,7 @@ export default function BillingPage() {
           חיוב ומנוי
         </h1>
         <p className="text-stone-500 text-sm mt-1">
-          ניהול הרישום שלך, היסטוריית תשלומים וחשבוניות
+          סטטוס הרישום שלך וחידוש התקופה
         </p>
       </div>
 
@@ -112,8 +82,8 @@ export default function BillingPage() {
         )}
       </section>
 
-      {/* Actions */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {/* Renew action */}
+      <section>
         <Link
           href="/pricing"
           className="flex items-center gap-3 bg-gradient-to-br from-[#059669] to-[#047857] text-white rounded-2xl p-5 hover:shadow-lg transition-all group"
@@ -123,95 +93,30 @@ export default function BillingPage() {
           </div>
           <div>
             <p className="font-bold text-base">חידוש / הארכה</p>
-            <p className="text-white/80 text-xs mt-0.5">בחרו תקופה חדשה ושלמו</p>
+            <p className="text-white/80 text-xs mt-0.5">בחרו תקופה חדשה וצרו קשר להשלמת התשלום</p>
           </div>
         </Link>
-
-        <button
-          onClick={openStripePortal}
-          disabled={portalLoading}
-          className="flex items-center gap-3 bg-white border border-stone-200 rounded-2xl p-5 hover:border-blue-400 hover:shadow-card transition-all group text-right disabled:opacity-60"
-        >
-          <div className="h-11 w-11 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition-colors">
-            <CreditCard className="h-5 w-5 text-blue-600" />
-          </div>
-          <div className="flex-1">
-            <p className="font-bold text-base text-stone-900 flex items-center gap-1.5">
-              ניהול אמצעי תשלום
-              <ExternalLink className="h-3 w-3 opacity-50" />
-            </p>
-            <p className="text-stone-500 text-xs mt-0.5">
-              {portalLoading ? "טוען..." : "Stripe · כרטיסים, חשבוניות PDF"}
-            </p>
-          </div>
-        </button>
       </section>
 
-      {/* Payment history */}
-      <section className="bg-white rounded-2xl border border-stone-200 shadow-card overflow-hidden">
-        <div className="flex items-center gap-2 px-6 py-4 border-b border-stone-100 bg-[#FAFAF7]">
-          <Receipt className="h-5 w-5 text-stone-500" />
-          <h2 className="font-display font-bold text-base text-stone-900">
-            היסטוריית תשלומים
-          </h2>
+      {/* Receipts info */}
+      <section className="bg-white rounded-2xl border border-stone-200 shadow-card p-6">
+        <div className="flex items-start gap-3">
+          <div className="h-10 w-10 rounded-xl bg-stone-100 flex items-center justify-center flex-shrink-0">
+            <Receipt className="h-5 w-5 text-stone-500" />
+          </div>
+          <div className="flex-1">
+            <h2 className="font-display font-bold text-base text-stone-900 mb-1">
+              קבלות וחשבוניות
+            </h2>
+            <p className="text-stone-500 text-sm">
+              קבלות נשלחות אליכם בדוא&quot;ל לאחר השלמת התשלום. לעותק נוסף או שאלות —{" "}
+              <Link href="/contact" className="text-[#059669] hover:underline font-medium">
+                צרו איתנו קשר
+              </Link>
+              .
+            </p>
+          </div>
         </div>
-
-        {loading ? (
-          <div className="p-8 text-center text-stone-400 text-sm">טוען...</div>
-        ) : sessions.length === 0 ? (
-          <div className="p-8 text-center text-stone-400 text-sm">
-            עדיין לא בוצעו תשלומים
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-stone-50 text-stone-500 text-xs">
-                <tr>
-                  <th className="text-right py-3 px-4 font-medium">תאריך</th>
-                  <th className="text-right py-3 px-4 font-medium">תקופה</th>
-                  <th className="text-right py-3 px-4 font-medium">סכום</th>
-                  <th className="text-right py-3 px-4 font-medium">פרטים</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-stone-100">
-                {sessions.map((s) => {
-                  const date = new Date(s.created * 1000);
-                  const amount = s.amount_total ? s.amount_total / 100 : 0;
-                  const planLabel =
-                    s.months === 1
-                      ? "חודש"
-                      : s.months === 12
-                      ? "שנה"
-                      : `${s.months} חודשים`;
-
-                  return (
-                    <tr key={s.id} className="hover:bg-stone-50 transition-colors">
-                      <td className="py-3 px-4 text-stone-700 tabular-nums">
-                        {date.toLocaleDateString("he-IL", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        })}
-                      </td>
-                      <td className="py-3 px-4 text-stone-600">{planLabel}</td>
-                      <td className="py-3 px-4 font-semibold text-stone-900 tabular-nums">
-                        ₪{amount.toFixed(2)}
-                      </td>
-                      <td className="py-3 px-4">
-                        <Link
-                          href={`/dashboard/payment-success?session_id=${s.id}`}
-                          className="text-[#059669] hover:underline text-xs font-medium"
-                        >
-                          צפייה בקבלה ←
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
       </section>
     </div>
   );
