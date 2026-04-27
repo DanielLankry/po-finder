@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { PLANS, getPlanByIndex, getPlanCount } from "@/lib/plans";
 import { Check, Zap } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
@@ -97,24 +96,11 @@ export default function PricingPage() {
     [maxIndex],
   );
 
-  async function handleCheckout() {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push("/auth/login?redirect=/pricing"); return; }
+  function handleCheckout() {
     setLoading(true);
-    try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ days: plan.days, months: Math.ceil(plan.days / 30) }),
-      });
-      const { url, error } = await res.json();
-      if (error) throw new Error(error);
-      window.location.href = url;
-    } catch (err) {
-      alert("שגיאה: " + (err instanceof Error ? err.message : String(err)));
-      setLoading(false);
-    }
+    const days = plan.days;
+    const price = Math.round(plan.price / 100);
+    router.push(`/contact?plan=${days}&price=${price}`);
   }
 
   return (
@@ -265,10 +251,10 @@ export default function PricingPage() {
               whileHover={{ scale: 1.01, boxShadow: "0 6px 28px rgba(29,147,141,0.5)" }}
               whileTap={{ scale: 0.99 }}
             >
-              {loading ? "מעביר לתשלום..." : `התחילו עכשיו — ₪${Math.round(plan.price / 100)}`}
+              {loading ? "מעבירים..." : `התחילו עכשיו — ₪${Math.round(plan.price / 100)}`}
             </motion.button>
             <p className="text-center text-[#AAA] text-xs mt-3">
-              תשלום מאובטח • ללא חיוב חוזר אוטומטי
+              צרו איתנו קשר להשלמת התשלום • ללא חיוב חוזר אוטומטי
             </p>
             <p className="text-center text-xs mt-1">
               <a href="/refund" className="text-[#AAA] hover:text-[#059669] underline transition-colors">
