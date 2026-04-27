@@ -4,6 +4,7 @@ const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? 'https://pokarov.co.il';
 
 export default defineConfig({
   testDir: './tests',
+  globalTeardown: require.resolve('./tests/destructive/global-teardown.ts'),
   fullyParallel: true,
   retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 2 : 4,
