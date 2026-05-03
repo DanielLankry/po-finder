@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
 import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/supabase/admin";
 import { rateLimit } from "@/lib/rate-limit";
@@ -102,11 +103,26 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ id: attempt.id, url });
   } catch (err) {
-    console.error("[/api/payments/checkout] HYP sign failed:", err);
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[/api/payments/checkout] HYP sign failed:", message);
+    Sentry.captureException(err, {
+      tags: { route: "payments-checkout", phase: "hyp-sign" },
+      extra: {
+        hypMasofPresent: !!process.env.HYP_MASOF,
+        hypPasspPresent: !!process.env.HYP_PASSP,
+        hypApiKeyPresent: !!process.env.HYP_API_KEY,
+        siteUrlPresent: !!process.env.NEXT_PUBLIC_SITE_URL,
+      },
+    });
     await admin
       .from("payment_attempts")
       .update({ status: "failed", completed_at: new Date().toISOString() })
       .eq("id", attempt.id);
-    return NextResponse.json({ error: "payment provider error" }, { status: 502 });
+    // Surface the underlying message so the front-end can show something
+    // more specific than "contact us" and so curl-debugging is possible.
+    return NextResponse.json(
+      { error: "payment provider error", detail: message },
+      { status: 502 }
+    );
   }
 }
