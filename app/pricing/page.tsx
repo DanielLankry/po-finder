@@ -96,11 +96,30 @@ export default function PricingPage() {
     [maxIndex],
   );
 
-  function handleCheckout() {
+  async function handleCheckout() {
     setLoading(true);
-    const days = plan.days;
-    const price = Math.round(plan.price / 100);
-    router.push(`/contact?plan=${days}&price=${price}`);
+    try {
+      const res = await fetch("/api/payments/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planDays: plan.days }),
+      });
+      if (res.status === 401) {
+        router.push(`/login?next=/pricing`);
+        return;
+      }
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        alert("שגיאה בהפניה לתשלום. נסו שוב או צרו איתנו קשר.");
+        setLoading(false);
+        return;
+      }
+      window.location.href = data.url;
+    } catch (e) {
+      console.error(e);
+      alert("שגיאה בהפניה לתשלום. נסו שוב או צרו איתנו קשר.");
+      setLoading(false);
+    }
   }
 
   return (
