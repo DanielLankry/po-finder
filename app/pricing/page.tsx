@@ -105,7 +105,7 @@ export default function PricingPage() {
         body: JSON.stringify({ planDays: plan.days }),
       });
       if (res.status === 401) {
-        router.push(`/login?next=/pricing`);
+        router.push(`/auth/login?redirectTo=/pricing`);
         return;
       }
       const data = await res.json();
