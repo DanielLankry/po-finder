@@ -93,7 +93,7 @@ export default function BillingPage() {
           </div>
           <div>
             <p className="font-bold text-base">חידוש / הארכה</p>
-            <p className="text-white/80 text-xs mt-0.5">בחרו תקופה חדשה וצרו קשר להשלמת התשלום</p>
+            <p className="text-white/80 text-xs mt-0.5">בחרו תקופה חדשה והשלימו תשלום מיידי</p>
           </div>
         </Link>
       </section>
