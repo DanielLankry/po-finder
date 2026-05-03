@@ -125,7 +125,8 @@ export default function PricingPage() {
       }
       const data = await res.json();
       if (!res.ok || !data.url) {
-        alert("שגיאה בהפניה לתשלום. נסו שוב או צרו איתנו קשר.");
+        const detail = data?.detail ? `\n\n(${data.detail})` : "";
+        alert(`שגיאה בהפניה לתשלום. נסו שוב או צרו איתנו קשר.${detail}`);
         setLoading(false);
         return;
       }
