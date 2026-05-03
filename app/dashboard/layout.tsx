@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
-import TourController from "@/components/onboarding/TourController";
 
 export const metadata = { title: "לוח בקרה — פה" };
 
@@ -19,23 +18,38 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     redirect("/auth/login?redirectTo=/dashboard");
   }
 
-  // Check if user has any businesses (active or pending)
-  const { count: bizCount } = await supabase
-    .from("businesses")
-    .select("id", { count: "exact", head: true })
-    .eq("owner_id", user.id);
+  // Paywall: dashboard is for paid business owners only.
+  // Access is granted if either:
+  //   (a) they own a business with expires_at > now() (active subscription), OR
+  //   (b) they have a paid-but-unconsumed payment_attempt waiting to be linked
+  //       to a business they're about to create (lib/migrations/017 trigger).
+  const nowIso = new Date().toISOString();
 
-  // Fetch onboarding status — tour runs once, ever, until users.onboarding_completed_at is set.
-  const { data: profile } = await supabase
-    .from("users")
-    .select("onboarding_completed_at")
-    .eq("id", user.id)
+  const { data: activeBiz } = await supabase
+    .from("businesses")
+    .select("id")
+    .eq("owner_id", user.id)
+    .gt("expires_at", nowIso)
+    .limit(1)
     .maybeSingle();
 
-  const shouldRunTour = !profile?.onboarding_completed_at;
+  let hasAccess = !!activeBiz;
 
-  // Allow access if user has businesses or is creating one
-  // New users will see the "create business" prompt on the dashboard
+  if (!hasAccess) {
+    const { data: unconsumed } = await supabase
+      .from("payment_attempts")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("status", "succeeded")
+      .is("business_id", null)
+      .limit(1)
+      .maybeSingle();
+    hasAccess = !!unconsumed;
+  }
+
+  if (!hasAccess) {
+    redirect("/pricing?reason=no_subscription");
+  }
 
   return (
     <>
@@ -50,7 +64,6 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
           </div>
         </div>
       </div>
-      <TourController shouldRun={shouldRunTour} />
       <Footer />
     </>
   );
