@@ -2,8 +2,8 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Store, ShoppingCart } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -20,7 +20,19 @@ const FLOATING_CARDS = [
 ];
 
 export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#FAFAF7]" />}>
+      <RegisterForm />
+    </Suspense>
+  );
+}
+
+function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // /pricing pushes new visitors here with ?redirectTo=/pricing so they land
+  // back on checkout the moment their session exists.
+  const redirectTo = searchParams.get("redirectTo");
   const [role, setRole] = useState<UserRole>("customer");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -32,17 +44,26 @@ export default function RegisterPage() {
 
   const supabase = createClient();
 
+  function defaultRoute() {
+    if (redirectTo) return redirectTo;
+    return role === "business_owner" ? "/dashboard" : "/";
+  }
+
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    const callbackUrl = redirectTo
+      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`
+      : `${window.location.origin}/auth/callback`;
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { name, role },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: callbackUrl,
       },
     });
 
@@ -52,7 +73,7 @@ export default function RegisterPage() {
 
     if (data.user && data.session) {
       await supabase.from("users").insert({ id: data.user.id, email, role, name });
-      router.push(role === "business_owner" ? "/dashboard" : "/");
+      router.push(defaultRoute());
       router.refresh();
     }
     setLoading(false);
@@ -60,9 +81,12 @@ export default function RegisterPage() {
 
   async function handleGoogleRegister() {
     setLoading(true);
+    const callbackUrl = redirectTo
+      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`
+      : `${window.location.origin}/auth/callback`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback`, queryParams: { role } },
+      options: { redirectTo: callbackUrl, queryParams: { role } },
     });
     if (error) setError("שגיאה בהרשמה עם גוגל.");
     setLoading(false);
@@ -158,7 +182,10 @@ export default function RegisterPage() {
               <h1 className="text-[32px] font-black text-[#111111] mb-1.5 leading-tight">יצירת חשבון חדש 🎉</h1>
               <p className="text-[#6B7280] text-sm mb-6">
                 כבר יש לכם חשבון?{" "}
-                <Link href="/auth/login" className="text-[#059669] font-semibold hover:underline">כניסה כאן</Link>
+                <Link
+                  href={redirectTo ? `/auth/login?redirectTo=${encodeURIComponent(redirectTo)}` : "/auth/login"}
+                  className="text-[#059669] font-semibold hover:underline"
+                >כניסה כאן</Link>
               </p>
 
               {/* Role selector */}

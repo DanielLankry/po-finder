@@ -5,6 +5,7 @@ import { PLANS, getPlanByIndex, getPlanCount } from "@/lib/plans";
 import { Check, Zap } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import { motion, AnimatePresence } from "framer-motion";
+import { createClient } from "@/lib/supabase/client";
 
 const BENEFITS = [
   "הופעה על המפה בזמן אמת",
@@ -53,12 +54,15 @@ export default function PricingPage() {
   const [planIndex, setPlanIndex] = useState(8); // default: חודש
   const [loading, setLoading] = useState(false);
   const [showCancelBanner, setShowCancelBanner] = useState(false);
+  const [showPaywallBanner, setShowPaywallBanner] = useState(false);
 
-  // Detect cancelled payment via URL — avoids useSearchParams (Suspense requirement)
+  // Detect cancelled payment / paywall redirect via URL —
+  // avoids useSearchParams (Suspense requirement)
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       if (params.get("payment") === "cancelled") setShowCancelBanner(true);
+      if (params.get("reason") === "no_subscription") setShowPaywallBanner(true);
     }
   }, []);
 
@@ -99,13 +103,24 @@ export default function PricingPage() {
   async function handleCheckout() {
     setLoading(true);
     try {
+      // Gate payment on having an account first. If the visitor isn't signed
+      // in, push them to /auth/register (which has a "Login" link for users
+      // who already have an account) and bring them back to /pricing after.
+      const supabase = createClient();
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) {
+        router.push(`/auth/register?redirectTo=/pricing`);
+        return;
+      }
+
       const res = await fetch("/api/payments/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ planDays: plan.days }),
       });
       if (res.status === 401) {
-        router.push(`/auth/login?redirectTo=/pricing`);
+        // Defensive: token expired between getUser() and POST.
+        router.push(`/auth/register?redirectTo=/pricing`);
         return;
       }
       const data = await res.json();
@@ -125,8 +140,30 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-[#FAFAF7]" dir="rtl">
       <Navbar />
+      {showPaywallBanner && (
+        <div className="mt-[72px] bg-emerald-50 border-b border-emerald-200">
+          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+            <div className="flex items-start gap-2.5 min-w-0">
+              <span className="text-emerald-600 text-lg leading-none mt-0.5">🔒</span>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-emerald-900">לוח הבקרה זמין רק למנויים פעילים</p>
+                <p className="text-xs text-emerald-700 mt-0.5">
+                  בחרו תקופה והוסיפו את העסק שלכם למפה כדי להתחיל.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowPaywallBanner(false)}
+              aria-label="סגירת ההודעה"
+              className="flex-shrink-0 h-7 w-7 rounded-full text-emerald-700 hover:bg-emerald-100 flex items-center justify-center text-lg leading-none"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
       {showCancelBanner && (
-        <div className="mt-[72px] bg-amber-50 border-b border-amber-200">
+        <div className={`${showPaywallBanner ? "" : "mt-[72px]"} bg-amber-50 border-b border-amber-200`}>
           <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
             <div className="flex items-start gap-2.5 min-w-0">
               <span className="text-amber-600 text-lg leading-none mt-0.5">⚠️</span>

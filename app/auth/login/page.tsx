@@ -154,7 +154,10 @@ function LoginForm() {
           </h1>
           <p className="text-[#6B7280] text-sm mb-8">
             אין לכם חשבון?{" "}
-            <Link href="/auth/register" className="text-[#059669] font-semibold hover:underline">
+            <Link
+              href={redirectTo && redirectTo !== "/" ? `/auth/register?redirectTo=${encodeURIComponent(redirectTo)}` : "/auth/register"}
+              className="text-[#059669] font-semibold hover:underline"
+            >
               הירשמו בחינם
             </Link>
           </p>

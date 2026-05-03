@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Menu, X, Plus, Heart } from "lucide-react";
+import { Search, Menu, X, Plus, Heart, LayoutDashboard } from "lucide-react";
 import { Typewriter } from "@/components/ui/typewriter";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import Image from "next/image";
@@ -21,6 +21,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [hasActiveBiz, setHasActiveBiz] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -36,6 +37,28 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
     });
     return () => subscription.unsubscribe();
   }, [supabase.auth]);
+
+  // Determine if the logged-in user owns an active (paid) business so the
+  // top-right CTA can swap "הוסיפו עסק" → "לוח בקרה" once the user has access.
+  useEffect(() => {
+    if (!user) {
+      setHasActiveBiz(false);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const nowIso = new Date().toISOString();
+      const { data } = await supabase
+        .from("businesses")
+        .select("id")
+        .eq("owner_id", user.id)
+        .gt("expires_at", nowIso)
+        .limit(1)
+        .maybeSingle();
+      if (!cancelled) setHasActiveBiz(!!data);
+    })();
+    return () => { cancelled = true; };
+  }, [user, supabase]);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -154,11 +177,12 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
             )}
           </button>
 
-          {/* הוסיפו עסק — magnetic + gradient shine */}
+          {/* CTA — swaps to "לוח בקרה" once the user owns an active paid business.
+              Otherwise routes to /pricing where they pay (and create an account if needed). */}
           <div className="hidden md:block">
             <MagneticButton distance={0.45}>
               <Link
-                href="/dashboard"
+                href={hasActiveBiz ? "/dashboard" : "/pricing"}
                 className="group relative flex items-center gap-1.5 h-10 px-5 rounded-full font-semibold text-sm text-white overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
                 style={{
                   background: "linear-gradient(135deg,#059669 0%,#047857 100%)",
@@ -169,8 +193,12 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"
                   style={{ background: "linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.35) 50%,transparent 60%)" }}
                 />
-                <Plus className="h-4 w-4 relative z-10 group-hover:rotate-90 transition-transform duration-300" aria-hidden="true" />
-                <span className="relative z-10">הוסיפו עסק</span>
+                {hasActiveBiz ? (
+                  <LayoutDashboard className="h-4 w-4 relative z-10" aria-hidden="true" />
+                ) : (
+                  <Plus className="h-4 w-4 relative z-10 group-hover:rotate-90 transition-transform duration-300" aria-hidden="true" />
+                )}
+                <span className="relative z-10">{hasActiveBiz ? "לוח בקרה" : "הוסיפו עסק"}</span>
               </Link>
             </MagneticButton>
           </div>
@@ -187,10 +215,10 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
               <div className="absolute left-0 top-full pt-1.5 w-44 z-50">
                 <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 py-1.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-left -translate-y-2 group-hover:translate-y-0">
                   <Link
-                    href="/dashboard"
+                    href={hasActiveBiz ? "/dashboard" : "/pricing"}
                     className="block px-4 py-2 text-sm text-slate-700 hover:bg-[#ECFDF5] hover:text-[#047857] transition-colors rounded-lg mx-1 font-medium"
                   >
-                    לוח בקרה
+                    {hasActiveBiz ? "לוח בקרה" : "הוסיפו עסק"}
                   </Link>
                   <button
                     onClick={handleSignOut}
@@ -309,7 +337,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
 
             <nav className="grid grid-cols-2 gap-2.5">
               {[
-                { href: "/dashboard", label: user ? "לוח בקרה" : "הוסיפו עסק", emoji: "🏪", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
+                { href: hasActiveBiz ? "/dashboard" : "/pricing", label: hasActiveBiz ? "לוח בקרה" : "הוסיפו עסק", emoji: "🏪", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
                 { href: "/vendors", label: "לרוכלים", emoji: "🛒", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
                 { href: "/pricing", label: "מחירים", emoji: "💳", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
                 { href: "/about", label: "אודות", emoji: "ℹ️", bg: "#F5F3FF", border: "#DDD6FE", text: "#5B21B6" },
