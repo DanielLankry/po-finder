@@ -123,9 +123,19 @@ export default function PricingPage() {
         router.push(`/auth/register?redirectTo=/pricing`);
         return;
       }
-      const data = await res.json();
-      if (!res.ok || !data.url) {
-        const detail = data?.detail ? `\n\n(${data.detail})` : "";
+      // Read body as text first — if a proxy (Cloudflare) replaced the JSON
+      // with an HTML error page, JSON.parse would throw and we'd lose the
+      // status code. This way the alert always carries something useful.
+      const raw = await res.text();
+      let data: { ok?: boolean; url?: string; detail?: string; error?: string } = {};
+      try { data = JSON.parse(raw); } catch { /* not JSON */ }
+
+      if (!res.ok || data.ok === false || !data.url) {
+        const detail = data.detail
+          ? `\n\n(${data.detail})`
+          : raw && !data.url
+            ? `\n\n(HTTP ${res.status}: ${raw.slice(0, 200)})`
+            : "";
         alert(`שגיאה בהפניה לתשלום. נסו שוב או צרו איתנו קשר.${detail}`);
         setLoading(false);
         return;
@@ -133,7 +143,8 @@ export default function PricingPage() {
       window.location.href = data.url;
     } catch (e) {
       console.error(e);
-      alert("שגיאה בהפניה לתשלום. נסו שוב או צרו איתנו קשר.");
+      const msg = e instanceof Error ? e.message : String(e);
+      alert(`שגיאה בהפניה לתשלום. נסו שוב או צרו איתנו קשר.\n\n(${msg})`);
       setLoading(false);
     }
   }
