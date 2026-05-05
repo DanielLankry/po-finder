@@ -22,7 +22,8 @@ const HYP_ENDPOINT = "https://icom.yaad.net/p/";
 function requireEnv(name: string): string {
   const v = process.env[name];
   if (!v) throw new Error(`Missing env: ${name}`);
-  return v;
+  // Trim — pasted-from-PDF newlines silently break HYP auth.
+  return v.trim();
 }
 
 function getCreds() {
@@ -31,6 +32,45 @@ function getCreds() {
     passp: requireEnv("HYP_PASSP"),
     apiKey: requireEnv("HYP_API_KEY"),
   };
+}
+
+/**
+ * Headers HYP perimeter check expects on server-to-server APISign calls.
+ * Some merchant terminals reject requests with empty Referer / Origin
+ * (HTML response titled "Hyp" with "HTTP REFERER:" / "REMOTE HOST:" empty).
+ */
+function hypHeaders(): Record<string, string> {
+  const origin =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://pokarov.co.il";
+  return {
+    "Content-Type": "application/x-www-form-urlencoded",
+    Referer: `${origin}/`,
+    Origin: origin,
+    "User-Agent": "pokarov.co.il/1.0 (+server-checkout)",
+  };
+}
+
+/**
+ * If HYP rejects before authentication (IP/Referer perimeter), it returns an
+ * HTML page (charset windows-1255) titled "Hyp" with empty REFERER / REMOTE
+ * HOST fields. Detect that and throw a clear, actionable error instead of
+ * dumping ~10KB of HTML into Sentry.
+ */
+function describeNoSignatureBody(body: string): string {
+  const looksLikeHtml = /^\s*<(!doctype|html)/i.test(body);
+  if (looksLikeHtml) {
+    if (/HTTP\s*REFERER/i.test(body) || /REMOTE\s*HOST/i.test(body)) {
+      return "HYP perimeter rejected request (empty Referer/Remote-Host). Merchant terminal needs Referer/IP allowlist disabled or pokarov.co.il whitelisted.";
+    }
+    return "HYP returned HTML instead of signed querystring (likely auth/perimeter block).";
+  }
+  // HYP returned a flat querystring with CCode but no signature — auth/CCode failure.
+  const parsed = new URLSearchParams(body);
+  const ccode = parsed.get("CCode");
+  if (ccode) {
+    return `HYP rejected sign request (CCode=${ccode}). 902=KEY/PassP mismatch; 901=Masof not API-permitted.`;
+  }
+  return `HYP APISign returned no signature. Body: ${body.slice(0, 300)}`;
 }
 
 export interface CheckoutParams {
@@ -109,23 +149,94 @@ export async function createSignedCheckoutUrl(p: CheckoutParams): Promise<string
 
   const res = await fetch(HYP_ENDPOINT, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: hypHeaders(),
     body: signParams.toString(),
   });
 
   if (!res.ok) {
-    throw new Error(`HYP APISign HTTP ${res.status}: ${await res.text()}`);
+    throw new Error(`HYP APISign HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
   }
 
   const body = (await res.text()).trim();
-  // HYP returns a flat querystring; if KEY/PassP/Masof are wrong it returns
-  // `CCode=<error>&...` with no `signature`.
   const parsed = new URLSearchParams(body);
   if (!parsed.get("signature")) {
-    throw new Error(`HYP APISign returned no signature. Body: ${body}`);
+    throw new Error(describeNoSignatureBody(body));
   }
 
   return `${HYP_ENDPOINT}?${body}`;
+}
+
+/**
+ * Diagnostic helper for the admin debug route. Runs APISign and returns
+ * raw HYP response without throwing, so the operator can see the actual
+ * body when debugging credential / perimeter issues.
+ */
+export async function debugSignCheckoutRaw(): Promise<{
+  ok: boolean;
+  status: number;
+  signature: string | null;
+  ccode: string | null;
+  bodyExcerpt: string;
+  bodyIsHtml: boolean;
+  envFlags: { masof: boolean; passp: boolean; apiKey: boolean; siteUrl: boolean };
+}> {
+  const envFlags = {
+    masof: !!process.env.HYP_MASOF?.trim(),
+    passp: !!process.env.HYP_PASSP?.trim(),
+    apiKey: !!process.env.HYP_API_KEY?.trim(),
+    siteUrl: !!process.env.NEXT_PUBLIC_SITE_URL?.trim(),
+  };
+  if (!envFlags.masof || !envFlags.passp || !envFlags.apiKey) {
+    return {
+      ok: false,
+      status: 0,
+      signature: null,
+      ccode: null,
+      bodyExcerpt: "missing one of HYP_MASOF / HYP_PASSP / HYP_API_KEY",
+      bodyIsHtml: false,
+      envFlags,
+    };
+  }
+  const { masof, passp, apiKey } = getCreds();
+  const params = buildPayParams(
+    {
+      amount: 10,
+      info: "debug",
+      order: "debug-" + Date.now(),
+      email: "debug@pokarov.co.il",
+      firstName: "Debug",
+      lastName: "Probe",
+      phone: "",
+      successUrl: "https://pokarov.co.il/api/payments/return",
+      errorUrl: "https://pokarov.co.il/api/payments/return",
+      cancelUrl: "https://pokarov.co.il/api/payments/cancel",
+    },
+    masof,
+    passp,
+  );
+  const signParams = new URLSearchParams({
+    action: "APISign",
+    What: "SIGN",
+    KEY: apiKey,
+    ...params,
+  });
+  const res = await fetch(HYP_ENDPOINT, {
+    method: "POST",
+    headers: hypHeaders(),
+    body: signParams.toString(),
+  });
+  const body = (await res.text()).trim();
+  const bodyIsHtml = /^\s*<(!doctype|html)/i.test(body);
+  const parsed = bodyIsHtml ? null : new URLSearchParams(body);
+  return {
+    ok: res.ok && !!parsed?.get("signature"),
+    status: res.status,
+    signature: parsed?.get("signature") ?? null,
+    ccode: parsed?.get("CCode") ?? null,
+    bodyExcerpt: body.slice(0, 600),
+    bodyIsHtml,
+    envFlags,
+  };
 }
 
 /**
@@ -148,7 +259,7 @@ export async function verifyReturnSignature(returnQuery: URLSearchParams): Promi
 
   const res = await fetch(HYP_ENDPOINT, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: hypHeaders(),
     body: verifyParams.toString(),
   });
 
@@ -183,7 +294,7 @@ export async function refundTransaction(transId: string): Promise<{
 
   const res = await fetch(HYP_ENDPOINT, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: hypHeaders(),
     body: params.toString(),
   });
 

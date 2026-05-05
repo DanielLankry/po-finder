@@ -82,7 +82,13 @@ export async function POST(req: NextRequest) {
 
   if (insertErr || !attempt) {
     console.error("[/api/payments/checkout] insert failed:", insertErr);
-    return NextResponse.json({ error: "internal error" }, { status: 500 });
+    // 200 + ok:false so a Cloudflare/edge proxy in front of the origin
+    // doesn't replace our JSON with its own 5xx HTML page (which the FE
+    // would then fail to JSON.parse and surface as a content-free alert).
+    return NextResponse.json(
+      { ok: false, error: "internal error", detail: insertErr?.message ?? "could not record attempt" },
+      { status: 200 }
+    );
   }
 
   const origin =
@@ -101,7 +107,7 @@ export async function POST(req: NextRequest) {
       cancelUrl: `${origin}/api/payments/cancel`,
     });
 
-    return NextResponse.json({ id: attempt.id, url });
+    return NextResponse.json({ ok: true, id: attempt.id, url });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[/api/payments/checkout] HYP sign failed:", message);
@@ -118,11 +124,12 @@ export async function POST(req: NextRequest) {
       .from("payment_attempts")
       .update({ status: "failed", completed_at: new Date().toISOString() })
       .eq("id", attempt.id);
-    // Surface the underlying message so the front-end can show something
-    // more specific than "contact us" and so curl-debugging is possible.
+    // 200 + ok:false — see comment above. Real-world: Cloudflare in front
+    // of pokarov.co.il was rewriting our 502 JSON to its own HTML page,
+    // breaking the FE's res.json() and producing a detail-less alert.
     return NextResponse.json(
-      { error: "payment provider error", detail: message },
-      { status: 502 }
+      { ok: false, error: "payment provider error", detail: message },
+      { status: 200 }
     );
   }
 }
