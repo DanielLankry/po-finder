@@ -176,6 +176,13 @@ export async function debugSignCheckoutRaw(): Promise<{
   bodyExcerpt: string;
   bodyIsHtml: boolean;
   envFlags: { masof: boolean; passp: boolean; apiKey: boolean; siteUrl: boolean };
+  /** What we actually sent — useful for confirming Referer/Origin are reaching HYP. */
+  sentRequest: { url: string; headers: Record<string, string> };
+  /** HYP response headers (look for ICOM/Set-Cookie hints). */
+  responseHeaders: Record<string, string>;
+  /** Echo of what httpbin.org saw — confirms whether Node's fetch in this runtime
+   *  preserves Referer/Origin or strips them. */
+  outboundHeadersAsSeenByEcho: Record<string, string> | null;
 }> {
   const envFlags = {
     masof: !!process.env.HYP_MASOF?.trim(),
@@ -192,6 +199,9 @@ export async function debugSignCheckoutRaw(): Promise<{
       bodyExcerpt: "missing one of HYP_MASOF / HYP_PASSP / HYP_API_KEY",
       bodyIsHtml: false,
       envFlags,
+      sentRequest: { url: "", headers: {} },
+      responseHeaders: {},
+      outboundHeadersAsSeenByEcho: null,
     };
   }
   const { masof, passp, apiKey } = getCreds();
@@ -217,21 +227,46 @@ export async function debugSignCheckoutRaw(): Promise<{
     KEY: apiKey,
     ...params,
   });
-  const res = await fetch(`${HYP_ENDPOINT}?${signParams.toString()}`, {
-    method: "GET",
-    headers: hypHeaders(),
-  });
+  const headers = hypHeaders();
+  const fullUrl = `${HYP_ENDPOINT}?${signParams.toString()}`;
+  // Redact secrets from the URL we report back.
+  const redactedUrl = fullUrl
+    .replace(/KEY=[^&]+/, "KEY=<redacted>")
+    .replace(/PassP=[^&]+/, "PassP=<redacted>");
+
+  const res = await fetch(fullUrl, { method: "GET", headers });
   const body = (await res.text()).trim();
   const bodyIsHtml = /^\s*<(!doctype|html)/i.test(body);
   const parsed = bodyIsHtml ? null : new URLSearchParams(body);
+
+  const responseHeaders: Record<string, string> = {};
+  res.headers.forEach((v, k) => { responseHeaders[k] = v; });
+
+  // Independently confirm what headers Node's fetch is actually emitting on
+  // outbound requests in this runtime — httpbin echoes back the headers it
+  // received. If "Referer" is missing here, the runtime is stripping it.
+  let outboundHeadersAsSeenByEcho: Record<string, string> | null = null;
+  try {
+    const echoRes = await fetch("https://httpbin.org/anything", { method: "GET", headers });
+    if (echoRes.ok) {
+      const echoJson = (await echoRes.json()) as { headers?: Record<string, string> };
+      outboundHeadersAsSeenByEcho = echoJson.headers ?? null;
+    }
+  } catch {
+    outboundHeadersAsSeenByEcho = null;
+  }
+
   return {
     ok: res.ok && !!parsed?.get("signature"),
     status: res.status,
     signature: parsed?.get("signature") ?? null,
     ccode: parsed?.get("CCode") ?? null,
-    bodyExcerpt: body.slice(0, 600),
+    bodyExcerpt: body.slice(0, 4000),
     bodyIsHtml,
     envFlags,
+    sentRequest: { url: redactedUrl, headers },
+    responseHeaders,
+    outboundHeadersAsSeenByEcho,
   };
 }
 
