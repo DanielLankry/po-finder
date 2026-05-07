@@ -29,7 +29,7 @@ const FLOATING_CARDS = [
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") ?? "/";
+  const explicitRedirect = searchParams.get("redirectTo");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,21 +39,40 @@ function LoginForm() {
 
   const supabase = createClient();
 
+  // Business owners land on /dashboard (which guards to /pricing if no
+  // active sub) so signin and signup converge on the same paid-setup flow.
+  // Customers go home.
+  async function postLoginDestination(userId: string): Promise<string> {
+    if (explicitRedirect) return explicitRedirect;
+    const { data } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle();
+    return data?.role === "business_owner" ? "/dashboard" : "/";
+  }
+
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) setError("כתובת מייל או סיסמה שגויים. נסו שוב.");
-    else { router.push(redirectTo); router.refresh(); }
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error || !data.user) {
+      setError("כתובת מייל או סיסמה שגויים. נסו שוב.");
+    } else {
+      const dest = await postLoginDestination(data.user.id);
+      router.push(dest);
+      router.refresh();
+    }
     setLoading(false);
   }
 
   async function handleGoogleLogin() {
     setLoading(true);
+    const next = explicitRedirect ?? "/dashboard"; // role-based redirect happens server-side in /auth/callback
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=${redirectTo}` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
     });
     if (error) setError("שגיאה בכניסה עם גוגל.");
     setLoading(false);
@@ -155,7 +174,7 @@ function LoginForm() {
           <p className="text-[#6B7280] text-sm mb-8">
             אין לכם חשבון?{" "}
             <Link
-              href={redirectTo && redirectTo !== "/" ? `/auth/register?redirectTo=${encodeURIComponent(redirectTo)}` : "/auth/register"}
+              href={explicitRedirect && explicitRedirect !== "/" ? `/auth/register?redirectTo=${encodeURIComponent(explicitRedirect)}` : "/auth/register"}
               className="text-[#059669] font-semibold hover:underline"
             >
               הירשמו בחינם
