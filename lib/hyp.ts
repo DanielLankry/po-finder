@@ -1,23 +1,21 @@
 /**
- * HYP / YaadPay client.
+ * HYP Pay Protocol client.
  *
- * Endpoint: https://icom.yaad.net/p/
- * Flow:
- *   1. Build payment params (Masof, PassP, Amount, ...).
- *   2. POST with action=APISign&What=SIGN&KEY=<api key>&<params> →
- *      response body is the same querystring with `signature=<hex>` appended.
- *   3. Redirect user to https://icom.yaad.net/p/?<signed querystring>.
- *      HYP shows the hosted card-entry page, processes the charge, and
- *      redirects back to our successUrl with payment results.
- *   4. Return handler POSTs return params back with What=VERIFY&KEY=<api key>
- *      to confirm authenticity; CCode=0 means charged.
+ * Endpoint: https://pay.hyp.co.il/p/  (official, per https://hypay.docs.apiary.io/)
  *
- * Discovery / signing semantics confirmed against:
- *   - https://www.npmjs.com/package/yaadpaysimplifier (official-style sample)
- *   - Production signed URLs in HYP merchant emails
+ * Flow (4 steps from the spec):
+ *   1. GET /p/?action=APISign&What=SIGN&KEY=<api>&PassP=<pass>&Masof=<masof>&<pay params>
+ *      → response body is the same querystring (with `action=pay`) plus
+ *      `signature=<hex>` appended.
+ *   2. Redirect the buyer to https://pay.hyp.co.il/p/?<signed querystring>.
+ *      HYP shows the hosted card-entry page and charges the card.
+ *   3. HYP redirects back to our success/error URL with Id, CCode, ACode,
+ *      Order, Sign, etc.
+ *   4. We verify by GETting /p/?action=APISign&What=VERIFY&KEY=<api>&PassP=<pass>&
+ *      Masof=<masof>&<all return params>. CCode=0 means HYP confirms authenticity.
  */
 
-const HYP_ENDPOINT = "https://icom.yaad.net/p/";
+const HYP_ENDPOINT = "https://pay.hyp.co.il/p/";
 
 function requireEnv(name: string): string {
   const v = process.env[name];
@@ -43,7 +41,6 @@ function hypHeaders(): Record<string, string> {
   const origin =
     process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://pokarov.co.il";
   return {
-    "Content-Type": "application/x-www-form-urlencoded",
     Referer: `${origin}/`,
     Origin: origin,
     "User-Agent": "pokarov.co.il/1.0 (+server-checkout)",
@@ -147,10 +144,10 @@ export async function createSignedCheckoutUrl(p: CheckoutParams): Promise<string
     ...payParams,
   });
 
-  const res = await fetch(HYP_ENDPOINT, {
-    method: "POST",
+  // Per the HYP Pay Protocol spec the SIGN call is a GET to /p/?...
+  const res = await fetch(`${HYP_ENDPOINT}?${signParams.toString()}`, {
+    method: "GET",
     headers: hypHeaders(),
-    body: signParams.toString(),
   });
 
   if (!res.ok) {
@@ -220,10 +217,9 @@ export async function debugSignCheckoutRaw(): Promise<{
     KEY: apiKey,
     ...params,
   });
-  const res = await fetch(HYP_ENDPOINT, {
-    method: "POST",
+  const res = await fetch(`${HYP_ENDPOINT}?${signParams.toString()}`, {
+    method: "GET",
     headers: hypHeaders(),
-    body: signParams.toString(),
   });
   const body = (await res.text()).trim();
   const bodyIsHtml = /^\s*<(!doctype|html)/i.test(body);
@@ -244,23 +240,25 @@ export async function debugSignCheckoutRaw(): Promise<{
  * Returns true if HYP confirms authenticity (CCode=0 in verify response).
  */
 export async function verifyReturnSignature(returnQuery: URLSearchParams): Promise<boolean> {
-  const { apiKey } = getCreds();
+  const { masof, passp, apiKey } = getCreds();
 
+  // Per the spec, the verify URL is:
+  //   /p/?action=APISign&What=VERIFY&KEY=<api>&PassP=<pass>&Masof=<masof>&<all return params>
+  // PassP/Masof aren't in the return redirect, so add them explicitly.
   const verifyParams = new URLSearchParams();
   verifyParams.set("action", "APISign");
   verifyParams.set("What", "VERIFY");
   verifyParams.set("KEY", apiKey);
-  // Forward every return param except our own routing concerns. HYP needs the
-  // exact set it originally signed.
+  verifyParams.set("PassP", passp);
+  verifyParams.set("Masof", masof);
   for (const [k, v] of returnQuery.entries()) {
-    if (k === "action" || k === "What" || k === "KEY") continue;
+    if (k === "action" || k === "What" || k === "KEY" || k === "PassP" || k === "Masof") continue;
     verifyParams.append(k, v);
   }
 
-  const res = await fetch(HYP_ENDPOINT, {
-    method: "POST",
+  const res = await fetch(`${HYP_ENDPOINT}?${verifyParams.toString()}`, {
+    method: "GET",
     headers: hypHeaders(),
-    body: verifyParams.toString(),
   });
 
   if (!res.ok) return false;
@@ -271,13 +269,11 @@ export async function verifyReturnSignature(returnQuery: URLSearchParams): Promi
 }
 
 /**
- * Issues a refund for a previously successful transaction.
- * `transId` is the HYP `Id` returned in the success redirect.
- *
- * HYP exposes refunds via action=APISign&What=PAY with negative-amount
- * + Sign5 patterns, but the simpler path that works for one-shot Masof
- * accounts is action=cancelTrans. If your Masof isn't enabled for it, this
- * returns false and you cancel manually in the HYP merchant console.
+ * Cancels a transaction same-day (action=CancelTrans, per HYP Pay Protocol).
+ * `transId` is the HYP `Id` returned in the success redirect. Only works
+ * before the deal is settled (~23:30 same day). Returns CCode=920 if the
+ * transaction doesn't exist or is already settled — fall back to action=zikoyAPI
+ * (refund by trans #) or to a manual refund in the merchant console.
  */
 export async function refundTransaction(transId: string): Promise<{
   ok: boolean;
@@ -286,16 +282,15 @@ export async function refundTransaction(transId: string): Promise<{
   const { masof, passp } = getCreds();
 
   const params = new URLSearchParams({
-    action: "cancelTrans",
+    action: "CancelTrans",
     Masof: masof,
     PassP: passp,
     TransId: transId,
   });
 
-  const res = await fetch(HYP_ENDPOINT, {
-    method: "POST",
+  const res = await fetch(`${HYP_ENDPOINT}?${params.toString()}`, {
+    method: "GET",
     headers: hypHeaders(),
-    body: params.toString(),
   });
 
   const raw = (await res.text()).trim();
