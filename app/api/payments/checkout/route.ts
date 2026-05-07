@@ -42,18 +42,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid plan" }, { status: 400 });
   }
 
-  // Read profile for receipt details. The RLS policy on `users` lets owners
-  // read their own row.
-  const { data: profile } = await supabase
-    .from("users")
-    .select("name, email")
-    .eq("id", user.id)
-    .single();
-
-  const fullName = (profile?.name ?? "").trim();
-  const [firstName, ...rest] = fullName.split(/\s+/);
-  const lastName = rest.join(" ");
-
   // If renewing, verify the business belongs to the user.
   if (parsed.data.businessId) {
     const { data: biz } = await supabase
@@ -101,9 +89,9 @@ export async function POST(req: NextRequest) {
       // and renders an em-dash as "?" on the hosted payment page.
       info: `Pokarov - ${plan.label}`,
       order: attempt.id,
-      email: profile?.email ?? user.email ?? "",
-      firstName: firstName || "Customer",
-      lastName: lastName || "Pokarov",
+      email: "",
+      firstName: "",
+      lastName: "",
       successUrl: `${origin}/api/payments/return`,
       errorUrl: `${origin}/api/payments/return`,
       cancelUrl: `${origin}/api/payments/cancel`,
