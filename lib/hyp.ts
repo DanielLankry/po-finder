@@ -137,11 +137,13 @@ export async function createSignedCheckoutUrl(p: CheckoutParams): Promise<string
   const { masof, passp, apiKey } = getCreds();
   const payParams = buildPayParams(p, masof, passp);
 
+  // Spread first, then set action/What/KEY so the sign-protocol values aren't
+  // overwritten by `action: "pay"` from buildPayParams.
   const signParams = new URLSearchParams({
+    ...payParams,
     action: "APISign",
     What: "SIGN",
     KEY: apiKey,
-    ...payParams,
   });
 
   // Per the HYP Pay Protocol spec the SIGN call is a GET to /p/?...
@@ -222,10 +224,10 @@ export async function debugSignCheckoutRaw(): Promise<{
     passp,
   );
   const signParams = new URLSearchParams({
+    ...params,
     action: "APISign",
     What: "SIGN",
     KEY: apiKey,
-    ...params,
   });
   const headers = hypHeaders();
   const fullUrl = `${HYP_ENDPOINT}?${signParams.toString()}`;
