@@ -97,7 +97,9 @@ export async function POST(req: NextRequest) {
   try {
     const url = await createSignedCheckoutUrl({
       amount: Math.round(plan.price / 100), // HYP expects whole shekels
-      info: `Pokarov — ${plan.label}`,
+      // Plain hyphen — HYP's downstream description field uses windows-1255
+      // and renders an em-dash as "?" on the hosted payment page.
+      info: `Pokarov - ${plan.label}`,
       order: attempt.id,
       email: profile?.email ?? user.email ?? "",
       firstName: firstName || "Customer",
