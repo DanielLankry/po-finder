@@ -39,12 +39,14 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
   }, [supabase.auth]);
 
   // Determine if the logged-in user has dashboard access so the CTA can swap
-  // "הצטרפו במחיר השקה" → "לוח בקרה". Mirrors the paywall in app/dashboard/layout.tsx:
-  //   (a) owns a business with expires_at > now()  — already paying customer
+  // "הצטרפו במחיר השקה" → "לוח בקרה". The CTA points to /dashboard whenever
+  // the user has any meaningful relationship to the paid side of the product:
+  //   (a) owns a business with expires_at > now()  — actively paying customer
   //   (b) has a succeeded payment_attempt with business_id IS NULL — just paid,
-  //       hasn't created their business yet. Without checking (b), a freshly-
-  //       paying user is bounced back to /pricing from the navbar CTA and has
-  //       no obvious way into the dashboard to create their listing.
+  //       hasn't created their business yet
+  //   (c) owns any business at all — already an owner; even if the period is
+  //       expired or the listing is still pending admin approval, the dashboard
+  //       is where they renew or finish setup, not /pricing
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
@@ -72,7 +74,19 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
         .limit(1)
         .maybeSingle();
 
-      if (!cancelled) setHasActiveBiz(!!unconsumed);
+      if (unconsumed) {
+        if (!cancelled) setHasActiveBiz(true);
+        return;
+      }
+
+      const { data: anyBiz } = await supabase
+        .from("businesses")
+        .select("id")
+        .eq("owner_id", user.id)
+        .limit(1)
+        .maybeSingle();
+
+      if (!cancelled) setHasActiveBiz(!!anyBiz);
     })();
     return () => { cancelled = true; };
   }, [user, supabase]);
