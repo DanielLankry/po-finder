@@ -5,15 +5,18 @@ import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Mail, Send, MessageCircle, Store, Bug, ShieldCheck, CreditCard, HelpCircle } from "lucide-react";
+import { BUSINESS_INFO, getWhatsAppHref } from "@/lib/site-config";
 
 const SUBJECTS = [
-  { value: "general",      label: "שאלה כללית",          icon: HelpCircle },
-  { value: "business",     label: "הוספת עסק",            icon: Store },
-  { value: "bug",          label: "דיווח על תקלה",        icon: Bug },
-  { value: "privacy",      label: "פרטיות ומידע",         icon: ShieldCheck },
-  { value: "billing",      label: "חיוב ותשלומים",        icon: CreditCard },
-  { value: "other",        label: "אחר",                  icon: MessageCircle },
+  { value: "general", label: "שאלה כללית", icon: HelpCircle },
+  { value: "business", label: "הצטרפות עסק", icon: Store },
+  { value: "bug", label: "דיווח על תקלה", icon: Bug },
+  { value: "privacy", label: "פרטיות ומידע", icon: ShieldCheck },
+  { value: "billing", label: "חיוב ותשלומים", icon: CreditCard },
+  { value: "other", label: "אחר", icon: MessageCircle },
 ];
+
+const whatsappHref = getWhatsAppHref();
 
 export default function ContactPage() {
   const [formState, setFormState] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -39,45 +42,62 @@ export default function ContactPage() {
       <Navbar />
       <main className="min-h-screen bg-[#FAFAF7] pt-[88px] pb-20" dir="rtl">
         <div className="max-w-2xl mx-auto px-4">
-
-          {/* Header */}
           <div className="text-center mb-10">
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ECFDF5] mb-4">
               <Mail className="h-7 w-7 text-[#059669]" />
             </div>
             <h1 className="font-extrabold text-3xl text-[#111] mb-2">צרו קשר</h1>
-            <p className="text-[#888] text-base">נשמח לשמוע מכם — שאלות, הצעות, או בעיות</p>
+            <p className="text-[#888] text-base">שאלות, הצטרפות לעסק או בירור על השירות מתחילים כאן.</p>
           </div>
 
-          {formState === "sent" ? (
-            <div className="bg-white rounded-3xl border border-[#E5E7EB] p-12 text-center shadow-sm">
-              <div className="h-16 w-16 rounded-full bg-[#ECFDF5] flex items-center justify-center mx-auto mb-4">
-                <Send className="h-8 w-8 text-[#059669]" />
-              </div>
-              <h2 className="font-bold text-xl text-[#111] mb-2">ההודעה נשלחה!</h2>
-              <p className="text-[#888]">נחזור אליכם תוך 3 ימי עסקים.</p>
-              <button
-                onClick={() => { setFormState("idle"); setForm({ name: "", email: "", subject: "", message: "" }); }}
-                className="mt-6 text-[#059669] text-sm font-semibold hover:underline"
-              >
-                שלח הודעה נוספת
-              </button>
-            </div>
-          ) : (
-            <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-              {/* Email direct link banner */}
-              <div className="bg-[#ECFDF5] border-b border-[#D1FAE5] px-8 py-4 flex items-center gap-3">
-                <Mail className="h-4 w-4 text-[#059669] flex-shrink-0" />
-                <p className="text-sm text-[#065F46]">
-                  מעדיפים לשלוח מייל ישירות?{" "}
-                  <a href="mailto:support@pokarov.co.il" className="font-semibold hover:underline">
-                    support@pokarov.co.il
+          <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden mb-6">
+            <div className="bg-[#ECFDF5] border-b border-[#D1FAE5] px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <p className="text-sm text-[#065F46]">
+                {whatsappHref
+                  ? "לפרטים, הצטרפות או שאלות לגבי השירות ניתן לפנות אלינו בוואטסאפ או במייל."
+                  : "לפרטים, הצטרפות או שאלות לגבי השירות ניתן לפנות אלינו במייל."}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {whatsappHref ? (
+                  <a
+                    href={whatsappHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-full bg-[#25D366] text-white text-sm font-semibold hover:bg-[#1EB856] transition-colors"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    דברו איתנו בוואטסאפ
                   </a>
-                </p>
+                ) : null}
+                <a
+                  href={`mailto:${BUSINESS_INFO.contactEmail}`}
+                  className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-full border border-[#A7F3D0] bg-white text-[#065F46] text-sm font-semibold hover:bg-[#F9FFF9] transition-colors"
+                >
+                  <Mail className="h-4 w-4" />
+                  {BUSINESS_INFO.contactEmail}
+                </a>
               </div>
+            </div>
 
+            {formState === "sent" ? (
+              <div className="p-12 text-center">
+                <div className="h-16 w-16 rounded-full bg-[#ECFDF5] flex items-center justify-center mx-auto mb-4">
+                  <Send className="h-8 w-8 text-[#059669]" />
+                </div>
+                <h2 className="font-bold text-xl text-[#111] mb-2">ההודעה נשלחה</h2>
+                <p className="text-[#888]">נחזור אליכם תוך 3 ימי עסקים.</p>
+                <button
+                  onClick={() => {
+                    setFormState("idle");
+                    setForm({ name: "", email: "", subject: "", message: "" });
+                  }}
+                  className="mt-6 text-[#059669] text-sm font-semibold hover:underline"
+                >
+                  שלחו הודעה נוספת
+                </button>
+              </div>
+            ) : (
               <form onSubmit={handleSubmit} className="p-8 space-y-5">
-                {/* Name + Email */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="name" className="block text-sm font-semibold text-[#111] mb-1.5">
@@ -110,7 +130,6 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                {/* Subject — pill selector */}
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-2">
                     נושא <span className="text-red-400">*</span>
@@ -135,11 +154,9 @@ export default function ContactPage() {
                       );
                     })}
                   </div>
-                  {/* Hidden required input */}
                   <input type="text" required value={form.subject} onChange={() => {}} className="sr-only" />
                 </div>
 
-                {/* Message */}
                 <div>
                   <label htmlFor="message" className="block text-sm font-semibold text-[#111] mb-1.5">
                     הודעה <span className="text-red-400">*</span>
@@ -155,7 +172,6 @@ export default function ContactPage() {
                   />
                 </div>
 
-                {/* Submit */}
                 <button
                   type="submit"
                   disabled={formState === "sending" || !form.subject}
@@ -179,8 +195,8 @@ export default function ContactPage() {
                   </Link>
                 </p>
               </form>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </main>
       <Footer />

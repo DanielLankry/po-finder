@@ -29,16 +29,6 @@ export default function AccessibilityWidget() {
   const offset = useRef({ x: 0, y: 0 });
   const btnRef = useRef<HTMLButtonElement>(null);
 
-  // Load saved settings + saved position
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("po-a11y");
-      if (saved) { const p = JSON.parse(saved) as A11ySettings; setSettings(p); applySettings(p); }
-      const savedPos = localStorage.getItem("po-a11y-pos");
-      if (savedPos) setPos(JSON.parse(savedPos));
-    } catch { /* ignore */ }
-  }, []);
-
   const applySettings = useCallback((s: A11ySettings) => {
     const root = document.documentElement;
     root.style.fontSize = ["100%", "115%", "130%"][s.fontSize] || "100%";
@@ -47,6 +37,26 @@ export default function AccessibilityWidget() {
     root.classList.toggle("a11y-highlight-links", s.highlightLinks);
     root.classList.toggle("a11y-letter-spacing", s.letterSpacing);
   }, []);
+
+  // Load saved settings + saved position
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("po-a11y");
+      const savedSettings = saved ? (JSON.parse(saved) as A11ySettings) : null;
+      const savedPos = localStorage.getItem("po-a11y-pos");
+      const savedPosition = savedPos ? (JSON.parse(savedPos) as { x: number; y: number }) : null;
+
+      if (savedSettings || savedPosition) {
+        queueMicrotask(() => {
+          if (savedSettings) {
+            setSettings(savedSettings);
+            applySettings(savedSettings);
+          }
+          if (savedPosition) setPos(savedPosition);
+        });
+      }
+    } catch { /* ignore */ }
+  }, [applySettings]);
 
   function update(partial: Partial<A11ySettings>) {
     const next = { ...settings, ...partial };

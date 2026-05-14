@@ -9,7 +9,7 @@ import {
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const ADMIN_EMAIL = "support@pokarov.co.il";
-export const FROM_EMAIL = "פוקרוב <noreply@pokarov.co.il>";
+export const FROM_EMAIL = "פה קרוב <noreply@pokarov.co.il>";
 
 // ── Admin alert: new business pending approval ────────────────────────────────
 export async function sendNewBusinessAlert(business: {
@@ -49,7 +49,7 @@ export async function sendContactAutoReply(to: string, name: string, subjectLabe
   await resend.emails.send({
     from: FROM_EMAIL,
     to,
-    subject: `קיבלנו את פנייתך — פוקרוב`,
+    subject: `קיבלנו את פנייתך — פה קרוב`,
     html: contactAutoReplyTemplate(name, subjectLabel),
   });
 }

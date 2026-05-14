@@ -1,4 +1,4 @@
-// High-quality HTML email templates for Pokarov
+// High-quality HTML email templates for Pah Karov
 // Uses Google Fonts (Rubik), inline CSS for email client compatibility
 
 const BASE_STYLES = `
@@ -7,7 +7,7 @@ const BASE_STYLES = `
   body { font-family: 'Rubik', Arial, sans-serif; background: #F3F4F6; direction: rtl; }
 `;
 
-// Pokarov logo as inline SVG (works in all email clients)
+// Brand logo as inline SVG (works in all email clients)
 const LOGO_SVG = `
 <table cellpadding="0" cellspacing="0" border="0" width="100%">
   <tr>
@@ -27,7 +27,7 @@ const LOGO_SVG = `
             </svg>
           </td>
           <td style="padding-right: 10px; vertical-align: middle;">
-            <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #059669; letter-spacing: -0.5px;">פוקרוב</span>
+            <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #059669; letter-spacing: -0.5px;">פה קרוב</span>
           </td>
         </tr>
       </table>
@@ -41,7 +41,7 @@ const FOOTER_HTML = `
   <tr>
     <td align="center" style="padding: 32px 24px 24px; border-top: 1px solid #E5E7EB; margin-top: 32px;">
       <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 13px; color: #9CA3AF; margin-bottom: 6px;">
-        פוקרוב — גלו עסקים קטנים וניידים קרוב אליכם
+        פה קרוב — גלו עסקים קטנים וניידים קרוב אליכם
       </p>
       <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 12px; color: #D1D5DB;">
         <a href="https://pokarov.co.il" style="color: #059669; text-decoration: none;">pokarov.co.il</a>
@@ -107,7 +107,7 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
                     </svg>
                   </td>
                   <td style="padding-right: 10px; vertical-align: middle;">
-                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 22px; font-weight: 800; color: white; letter-spacing: -0.5px;">פוקרוב</span>
+                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 22px; font-weight: 800; color: white; letter-spacing: -0.5px;">פה קרוב</span>
                   </td>
                 </tr>
               </table>
@@ -130,7 +130,7 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
       <td style="padding: 36px 32px 20px;">
         <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 16px; color: #374151; line-height: 1.7; margin-bottom: 24px;">
           שלום! 👋<br><br>
-          אנחנו שמחים לבשר שהעסק <strong style="color: #111827;">${businessName}</strong> עבר את תהליך האישור ועלה לאוויר בפוקרוב.
+          אנחנו שמחים לבשר שהעסק <strong style="color: #111827;">${businessName}</strong> עבר את תהליך האישור ועלה לאוויר בפה קרוב.
           <br><br>
           לקוחות בסביבתך יוכלו למצוא אותך עכשיו על המפה בזמן אמת.
         </p>
@@ -169,7 +169,7 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
           <tr>
             <td align="center" style="padding-bottom: 8px;">
               <a href="https://pokarov.co.il" style="display: inline-block; background: linear-gradient(135deg, #059669, #047857); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 40px; border-radius: 50px; box-shadow: 0 4px 16px rgba(5,150,105,0.35);">
-                צפה בפוקרוב ←
+                צפה בפה קרוב ←
               </a>
             </td>
           </tr>
@@ -198,7 +198,7 @@ export function newBusinessAlertTemplate(business: {
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
             <td style="background: linear-gradient(135deg, #1E3A5F 0%, #1E40AF 100%); padding: 32px; text-align: center; border-radius: 20px 20px 0 0;">
-              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;">לוח ניהול פוקרוב</p>
+              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;">לוח ניהול פה קרוב</p>
               <h1 style="font-family: 'Rubik', Arial, sans-serif; font-size: 24px; font-weight: 800; color: white; margin: 0;">🏪 עסק חדש ממתין לאישור</h1>
             </td>
           </tr>
@@ -273,7 +273,7 @@ export function contactAutoReplyTemplate(name: string, subjectLabel: string): st
                     </svg>
                   </td>
                   <td style="padding-right: 10px; vertical-align: middle;">
-                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #059669;">פוקרוב</span>
+                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #059669;">פה קרוב</span>
                   </td>
                 </tr>
               </table>
@@ -329,7 +329,7 @@ export function contactAutoReplyTemplate(name: string, subjectLabel: string): st
           <tr>
             <td align="center">
               <a href="https://pokarov.co.il" style="display: inline-block; background: linear-gradient(135deg, #059669, #047857); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 15px; font-weight: 700; text-decoration: none; padding: 13px 36px; border-radius: 50px; box-shadow: 0 4px 14px rgba(5,150,105,0.3);">
-                בחזרה לפוקרוב ←
+                בחזרה לפה קרוב ←
               </a>
             </td>
           </tr>
@@ -363,7 +363,7 @@ export function expiryReminderTemplate(businessName: string, expiresAt: Date, re
     <tr>
       <td style="padding: 32px 32px 24px;">
         <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: #374151; line-height: 1.7; margin-bottom: 24px;">
-          הרישום של <strong>${businessName}</strong> בפוקרוב יפוג בתאריך <strong>${expiryStr}</strong>.
+          הרישום של <strong>${businessName}</strong> בפה קרוב יפוג בתאריך <strong>${expiryStr}</strong>.
           <br><br>
           לאחר מכן העסק שלך לא יופיע יותר על המפה ולקוחות לא יוכלו למצוא אותך.
         </p>

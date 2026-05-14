@@ -35,7 +35,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     window.location.href = "/admin/login";
   }
 
-  const NavLinks = () => (
+  const navLinks = (
     <nav className="flex-1 p-4 space-y-1">
       {NAV.map(({ href, label, icon: Icon }) => {
         const active = pathname === href;
@@ -64,7 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="md:hidden fixed top-0 inset-x-0 z-50 bg-white border-b border-[#E5E7EB] flex items-center justify-between px-4 h-14 shadow-sm">
         <div className="flex items-center gap-2">
           {LOGO}
-          <span className="font-bold text-[#111] text-sm">פוקרוב — ניהול</span>
+          <span className="font-bold text-[#111] text-sm">פה קרוב — ניהול</span>
         </div>
         <button onClick={() => setSidebarOpen(!sidebarOpen)} className="h-9 w-9 flex items-center justify-center rounded-xl hover:bg-[#F3F4F6] transition-colors">
           {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -89,7 +89,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {LOGO}
           </div>
           <div>
-            <p className="font-bold text-[#111] text-sm">פוקרוב</p>
+            <p className="font-bold text-[#111] text-sm">פה קרוב</p>
             <p className="text-[#888] text-xs">לוח ניהול</p>
           </div>
         </div>
@@ -105,7 +105,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
 
-        <NavLinks />
+        {navLinks}
 
         {/* Logout */}
         <div className="p-4 border-t border-[#E5E7EB]">

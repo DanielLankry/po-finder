@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
     // Send to support
     await resend.emails.send({
-      from: "פוקרוב <noreply@pokarov.co.il>",
+      from: "פה קרוב <noreply@pokarov.co.il>",
       to: "support@pokarov.co.il",
       replyTo: email,
       subject: `[פנייה חדשה] ${subjectLabel} — ${name}`,
@@ -86,9 +86,9 @@ export async function POST(req: NextRequest) {
 
     // Auto-reply to sender with beautiful template
     await resend.emails.send({
-      from: "פוקרוב <noreply@pokarov.co.il>",
+      from: "פה קרוב <noreply@pokarov.co.il>",
       to: email,
-      subject: "קיבלנו את פנייתך — פוקרוב",
+      subject: "קיבלנו את פנייתך — פה קרוב",
       html: contactAutoReplyTemplate(name, subjectLabel),
     });
 

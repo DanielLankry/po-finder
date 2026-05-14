@@ -1,8 +1,9 @@
-﻿import Navbar from "@/components/layout/Navbar";
+import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { BRAND_NAME, BUSINESS_INFO } from "@/lib/site-config";
 
 export const metadata = {
-  title: "תנאי שימוש — פה",
+  title: "תנאי שימוש",
 };
 
 export default function TermsPage() {
@@ -22,7 +23,7 @@ export default function TermsPage() {
                 1. הסכמה לתנאים
               </h2>
               <p>
-                השימוש בפלטפורמת <strong>פה</strong> מהווה הסכמה מלאה לתנאי שימוש אלה.
+                השימוש בפלטפורמת <strong>{BRAND_NAME}</strong> מהווה הסכמה מלאה לתנאי שימוש אלה.
                 אם אינכם מסכימים לתנאים, נא הימנעו מהשימוש.
               </p>
             </section>
@@ -41,9 +42,7 @@ export default function TermsPage() {
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
                 3. מדיניות ביקורות
               </h2>
-              <p>
-                ביקורות חייבות לשקף חוויה אמיתית. אסור לפרסם:
-              </p>
+              <p>ביקורות חייבות לשקף חוויה אמיתית. אסור לפרסם:</p>
               <ul className="list-disc list-inside space-y-1 text-stone-600 mt-2">
                 <li>ביקורות כוזבות או ספאם</li>
                 <li>תוכן פוגעני, מסית, או מאיים</li>
@@ -56,7 +55,7 @@ export default function TermsPage() {
                 4. הגבלת אחריות
               </h2>
               <p>
-                הפלטפורמה מסופקת "כפי שהיא" ללא אחריות מפורשת או מרומזת. אנו לא
+                הפלטפורמה מסופקת &quot;כפי שהיא&quot; ללא אחריות מפורשת או מרומזת. אנו לא
                 נישא באחריות לנזקים ישירים, עקיפים, או נסיבתיים.
               </p>
             </section>
@@ -67,7 +66,7 @@ export default function TermsPage() {
               </h2>
               <p>
                 אנו שומרים לעצמנו את הזכות לעדכן תנאים אלה. הודעה תשלח למשתמשים
-                רשומים בדוא"ל 14 ימים לפני כניסת השינויים לתוקף.
+                רשומים בדוא״ל 14 ימים לפני כניסת השינויים לתוקף.
               </p>
             </section>
 
@@ -77,8 +76,8 @@ export default function TermsPage() {
               </h2>
               <p>
                 לשאלות ופניות:{" "}
-                <a href="mailto:support@pokarov.co.il" className="text-[#059669] hover:underline">
-                  support@pokarov.co.il
+                <a href={`mailto:${BUSINESS_INFO.contactEmail}`} className="text-[#059669] hover:underline">
+                  {BUSINESS_INFO.contactEmail}
                 </a>
               </p>
             </section>

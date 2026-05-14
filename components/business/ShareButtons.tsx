@@ -13,8 +13,8 @@ export default function ShareButtons({ businessId, businessName }: ShareButtonsP
   const [showQR, setShowQR] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
 
-  const businessUrl = `https://pokarov.co.il/business/${businessId}`;
-  const waMessage = `היי! מצאתי את ${businessName} בפוקרוב 🗺️ תבדוק אותם: ${businessUrl}`;
+  const businessUrl = `https://pokarov.co.il/businesses/${businessId}`;
+  const waMessage = `היי! מצאתי את ${businessName} בפה קרוב 🗺️ תבדוק אותם: ${businessUrl}`;
   const waUrl = `https://wa.me/?text=${encodeURIComponent(waMessage)}`;
 
   const downloadQR = () => {

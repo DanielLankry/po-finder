@@ -2,7 +2,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
 export const metadata = {
-  title: "מדיניות פרטיות — פה קרוב",
+  title: "מדיניות פרטיות",
+  description: "מדיניות הפרטיות של פה קרוב: איזה מידע נאסף, איך משתמשים בו ואיך אפשר לפנות אלינו.",
 };
 
 export default function PrivacyPage() {
@@ -26,7 +27,7 @@ export default function PrivacyPage() {
                 1. מיהו בעל מאגר המידע?
               </h2>
               <p>
-                פלטפורמת <strong>פה קרוב</strong> (להלן: "השירות" או "אנחנו") מופעלת תחת הדומיין{" "}
+                פלטפורמת <strong>פה קרוב</strong> (להלן: &quot;השירות&quot; או &quot;אנחנו&quot;) מופעלת תחת הדומיין{" "}
                 <span className="font-mono text-sm">pokarov.co.il</span>.
                 לפניות בנושא פרטיות:{" "}
                 <a href="mailto:privacy@pokarov.co.il" className="text-[#059669] hover:underline">

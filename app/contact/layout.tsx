@@ -3,9 +3,9 @@
 // and description so search engines and the browser tab show the right text.
 
 export const metadata = {
-  title: "צרו קשר — פה קרוב",
+  title: "צרו קשר",
   description:
-    "צרו קשר עם פוקרוב — שאלות כלליות, הוספת עסק למפה, דיווח על תקלה, פרטיות, חיוב ותשלומים.",
+    "צרו קשר עם פה קרוב — שאלות כלליות, הצטרפות עסקים, דיווח על תקלה, פרטיות, חיוב ותשלומים.",
 };
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {

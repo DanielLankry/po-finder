@@ -82,7 +82,7 @@ export default function BusinessPopup({
                 : "bg-black/50 text-white/80"
             }`}
           >
-            {open ? "● פתוח עכשיו" : schedule ? "סגור היום" : 'אין לו"ז'}
+            {open ? "● פתוח עכשיו" : schedule ? "סגור היום" : "שעות לא עודכנו"}
           </span>
         </div>
       </div>
