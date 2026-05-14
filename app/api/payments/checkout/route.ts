@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/supabase/admin";
 import { rateLimit } from "@/lib/rate-limit";
-import { PLANS } from "@/lib/plans";
+import { getPlanByDays } from "@/lib/plans-server";
 import { createSignedCheckoutUrl } from "@/lib/hyp";
 
 export const runtime = "nodejs";
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const plan = PLANS.find((p) => p.days === parsed.data.planDays);
+  const plan = await getPlanByDays(parsed.data.planDays);
   if (!plan) {
     return NextResponse.json({ error: "invalid plan" }, { status: 400 });
   }
