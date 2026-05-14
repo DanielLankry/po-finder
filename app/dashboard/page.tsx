@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Clock, Star, Camera, MapPin, MessageCircle, Eye, Phone } from "lucide-react";
+import { Plus, Clock, Star, Camera, MapPin, MessageCircle, Eye, Phone, Clock3 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessesByOwner } from "@/lib/db/businesses";
 import { getTodaySchedule } from "@/lib/db/schedules";
@@ -125,6 +125,22 @@ async function DashboardContent({
           <span className="font-medium text-stone-700">{business.name}</span>
         </p>
       </div>
+
+      {/* Pending approval banner — shown until admin approves the business */}
+      {!business.is_active && (
+        <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-5">
+          <div className="h-10 w-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+            <Clock3 className="h-5 w-5 text-amber-600" aria-hidden="true" />
+          </div>
+          <div>
+            <p className="font-semibold text-amber-900 text-sm">העסק ממתין לאישור</p>
+            <p className="text-amber-700 text-xs mt-1 leading-relaxed">
+              התשלום התקבל ופרטי העסק נשמרו. הצוות שלנו יאשר את הרישום בקרוב ואז העסק יופיע על המפה.
+              תקבלו הודעה במייל לאחר האישור.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Today's status card */}
       <div

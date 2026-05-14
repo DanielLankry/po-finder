@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import type { BusinessCategory, KashrutStatus } from "@/lib/types";
 import { CheckCircle, XCircle, Phone, ExternalLink, RefreshCw, Plus, X, Pencil } from "lucide-react";
@@ -27,6 +26,7 @@ interface Business {
 }
 
 const EMPTY_FORM = {
+  owner_id: "",
   name: "", description: "", category: "food" as BusinessCategory,
   phone: "", whatsapp: "", website: "", instagram: "",
   kashrut: "none" as KashrutStatus, business_number: "",
@@ -46,13 +46,11 @@ export default function AdminBusinessesPage() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("businesses")
-      .select("*")
-      .order("is_active", { ascending: true })
-      .order("created_at", { ascending: false });
-    setBusinesses(data ?? []);
+    const res = await fetch("/api/admin/businesses");
+    if (res.ok) {
+      const data = await res.json();
+      setBusinesses(data.businesses ?? []);
+    }
     setLoading(false);
   }, []);
 
@@ -83,34 +81,14 @@ export default function AdminBusinessesPage() {
     e.preventDefault();
     setAddLoading(true);
     try {
-      const supabase = createClient();
-      const months = parseInt(form.duration_months) || 1;
-      const expires = new Date();
-      expires.setMonth(expires.getMonth() + months);
-
-      // Use a system owner_id (admin placeholder)
-      const { data: { user } } = await supabase.auth.getUser();
-
-      const { data, error } = await supabase.from("businesses").insert({
-        owner_id: user?.id ?? "00000000-0000-0000-0000-000000000000",
-        name: form.name,
-        description: form.description || null,
-        category: form.category,
-        phone: form.phone || null,
-        whatsapp: form.whatsapp || null,
-        website: form.website || null,
-        instagram: form.instagram || null,
-        kashrut: form.kashrut,
-        business_number: form.business_number || null,
-        address: form.address || null,
-        lat: parseFloat(form.lat) || 32.0853,
-        lng: parseFloat(form.lng) || 34.7818,
-        is_active: true,
-        expires_at: expires.toISOString(),
-      }).select().single();
-
-      if (error) throw error;
-      setBusinesses((prev) => [data as Business, ...prev]);
+      const res = await fetch("/api/admin/businesses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "שגיאה לא ידועה");
+      setBusinesses((prev) => [data.business as Business, ...prev]);
       setForm(EMPTY_FORM);
       setShowAddForm(false);
     } catch (err) {
@@ -124,10 +102,10 @@ export default function AdminBusinessesPage() {
     if (!editBiz) return;
     setEditLoading(true);
     try {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("businesses")
-        .update({
+      const res = await fetch(`/api/admin/businesses/${editBiz.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           name: editBiz.name,
           description: editBiz.description,
           category: editBiz.category,
@@ -140,12 +118,11 @@ export default function AdminBusinessesPage() {
           address: editBiz.address,
           lat: editBiz.lat,
           lng: editBiz.lng,
-        })
-        .eq("id", editBiz.id)
-        .select()
-        .single();
-      if (error) throw error;
-      setBusinesses((prev) => prev.map((b) => b.id === editBiz.id ? data as Business : b));
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "שגיאה לא ידועה");
+      setBusinesses((prev) => prev.map((b) => b.id === editBiz.id ? data.business as Business : b));
       setEditBiz(null);
     } catch (err) {
       alert("שגיאה: " + (err instanceof Error ? err.message : String(err)));
@@ -198,6 +175,11 @@ export default function AdminBusinessesPage() {
             </div>
             <form onSubmit={handleAdd} className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold text-[#111] mb-1">מזהה בעל העסק (UUID) *</label>
+                  <input required value={form.owner_id} onChange={(e) => setForm({...form, owner_id: e.target.value})}
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" dir="ltr" />
+                </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-semibold text-[#111] mb-1">שם העסק *</label>
                   <input required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})}
@@ -262,7 +244,7 @@ export default function AdminBusinessesPage() {
                   </select>
                 </div>
               </div>
-              <button type="submit" disabled={addLoading || !form.name}
+              <button type="submit" disabled={addLoading || !form.name || !form.owner_id}
                 className="w-full h-12 rounded-xl text-white font-bold text-base disabled:opacity-50 transition-all"
                 style={{ background: "linear-gradient(135deg, #059669, #047857)" }}>
                 {addLoading ? "מוסיף..." : "הוסף עסק לאתר"}

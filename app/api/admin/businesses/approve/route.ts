@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { adminClient } from "@/lib/supabase/admin";
 import { sendBusinessApprovedEmail } from "@/lib/email";
 import { z } from "zod";
 
@@ -25,9 +25,9 @@ export async function POST(req: NextRequest) {
   }
 
   const { businessId } = parsed.data;
-  const supabase = await createClient();
+  const admin = adminClient();
 
-  const { data: biz, error: fetchErr } = await supabase
+  const { data: biz, error: fetchErr } = await admin
     .from("businesses")
     .select("id, name, owner_id, expires_at")
     .eq("id", businessId)
@@ -44,14 +44,14 @@ export async function POST(req: NextRequest) {
     updates.expires_at = exp.toISOString();
   }
 
-  const { error } = await supabase
+  const { error } = await admin
     .from("businesses")
     .update(updates)
     .eq("id", businessId);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const { data: userData } = await supabase
+  const { data: userData } = await admin
     .from("users")
     .select("email")
     .eq("id", biz.owner_id)
