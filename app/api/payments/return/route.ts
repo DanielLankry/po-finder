@@ -90,10 +90,20 @@ export async function GET(req: NextRequest) {
     })
     .eq("id", attempt.id);
 
+  // Upsert (not update) — if the public.users row is missing for any reason
+  // (auth callback hadn't run, OAuth edge case, etc.) a plain update would
+  // silently affect 0 rows and leave subscription_status='none', which the
+  // businesses INSERT RLS policy then rejects. Migration 019 also makes the
+  // RLS predicate accept the payment_attempts ledger as a fallback signal.
   await admin
     .from("users")
-    .update({ subscription_status: "active" })
-    .eq("id", attempt.user_id);
+    .upsert(
+      {
+        id: attempt.user_id,
+        subscription_status: "active",
+      },
+      { onConflict: "id" }
+    );
 
   if (attempt.business_id) {
     // Renewal — extend from now() OR existing expires_at (whichever is later).
