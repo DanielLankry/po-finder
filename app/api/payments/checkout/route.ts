@@ -6,6 +6,7 @@ import { adminClient } from "@/lib/supabase/admin";
 import { rateLimit } from "@/lib/rate-limit";
 import { getPlanByDays } from "@/lib/plans-server";
 import { createSignedCheckoutUrl } from "@/lib/hyp";
+import { BRAND_NAME } from "@/lib/site-config";
 
 export const runtime = "nodejs";
 
@@ -87,7 +88,7 @@ export async function POST(req: NextRequest) {
       amount: Math.round(plan.price / 100), // HYP expects whole shekels
       // Plain hyphen — HYP's downstream description field uses windows-1255
       // and renders an em-dash as "?" on the hosted payment page.
-      info: `Pokarov - ${plan.label}`,
+      info: `${BRAND_NAME} - ${plan.label}`,
       order: attempt.id,
       email: "",
       firstName: "",
