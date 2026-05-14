@@ -131,7 +131,7 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
               הצטרפות עסקים
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-[#111] mb-4">
-              מחיר השקה ברור, בלי סתירות
+              הצטרפות לעסקים במחיר השקה
             </h1>
             <p className="text-[#555] text-lg max-w-3xl mx-auto leading-relaxed">
               {LAUNCH_OFFER.pricingSummary}
