@@ -18,11 +18,15 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     redirect("/auth/login?redirectTo=/dashboard");
   }
 
-  // Paywall: dashboard is for paid business owners only.
-  // Access is granted if either:
-  //   (a) they own a business with expires_at > now() (active subscription), OR
+  // Paywall: dashboard is for users with any meaningful relationship to the
+  // paid side of the product. Access is granted if any of:
+  //   (a) they own a business with expires_at > now() (active subscription)
   //   (b) they have a paid-but-unconsumed payment_attempt waiting to be linked
-  //       to a business they're about to create (lib/migrations/017 trigger).
+  //       to a business they're about to create (lib/migrations/017 trigger)
+  //   (c) they own any business at all — even if the period expired or the
+  //       listing is still pending admin approval. /dashboard/billing is where
+  //       they renew; locking them out of their own dashboard would force them
+  //       to re-pay before they can even see the renewal screen.
   const nowIso = new Date().toISOString();
 
   const { data: activeBiz } = await supabase
@@ -45,6 +49,16 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
       .limit(1)
       .maybeSingle();
     hasAccess = !!unconsumed;
+  }
+
+  if (!hasAccess) {
+    const { data: anyBiz } = await supabase
+      .from("businesses")
+      .select("id")
+      .eq("owner_id", user.id)
+      .limit(1)
+      .maybeSingle();
+    hasAccess = !!anyBiz;
   }
 
   if (!hasAccess) {
