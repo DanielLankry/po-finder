@@ -38,21 +38,41 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
     return () => subscription.unsubscribe();
   }, [supabase.auth]);
 
-  // Determine if the logged-in user owns an active (paid) business so the
-  // top-right CTA can swap "הוסיפו עסק" → "לוח בקרה" once the user has access.
+  // Determine if the logged-in user has dashboard access so the CTA can swap
+  // "הצטרפו במחיר השקה" → "לוח בקרה". Mirrors the paywall in app/dashboard/layout.tsx:
+  //   (a) owns a business with expires_at > now()  — already paying customer
+  //   (b) has a succeeded payment_attempt with business_id IS NULL — just paid,
+  //       hasn't created their business yet. Without checking (b), a freshly-
+  //       paying user is bounced back to /pricing from the navbar CTA and has
+  //       no obvious way into the dashboard to create their listing.
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     (async () => {
       const nowIso = new Date().toISOString();
-      const { data } = await supabase
+      const { data: activeBiz } = await supabase
         .from("businesses")
         .select("id")
         .eq("owner_id", user.id)
         .gt("expires_at", nowIso)
         .limit(1)
         .maybeSingle();
-      if (!cancelled) setHasActiveBiz(!!data);
+
+      if (activeBiz) {
+        if (!cancelled) setHasActiveBiz(true);
+        return;
+      }
+
+      const { data: unconsumed } = await supabase
+        .from("payment_attempts")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "succeeded")
+        .is("business_id", null)
+        .limit(1)
+        .maybeSingle();
+
+      if (!cancelled) setHasActiveBiz(!!unconsumed);
     })();
     return () => { cancelled = true; };
   }, [user, supabase]);
