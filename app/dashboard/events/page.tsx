@@ -306,7 +306,7 @@ export default function EventsPage() {
                     {event.price != null && (
                       <span className="flex items-center gap-1">
                         <Tag className="h-3.5 w-3.5 text-[#059669]" />
-                        {event.price === 0 ? "חינם" : `₪${event.price}`}
+                        {event.price === 0 ? "ללא עלות" : `₪${event.price}`}
                       </span>
                     )}
                   </div>

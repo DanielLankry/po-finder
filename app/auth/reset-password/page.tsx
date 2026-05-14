@@ -42,7 +42,7 @@ export default function ResetPasswordPage() {
         <div className="mb-8">
           <Link href="/" className="inline-flex items-center gap-2 group">
             <MapPin className="h-7 w-7 fill-[#059669] text-[#059669]" />
-            <span className="font-display font-extrabold text-2xl text-[#059669]">פה</span>
+            <span className="font-display font-extrabold text-2xl text-[#059669]">פה קרוב</span>
           </Link>
         </div>
 

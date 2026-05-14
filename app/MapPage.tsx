@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { Map as MapIcon, List, Heart } from "lucide-react";
+import { Map as MapIcon, List } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import FilterBar from "@/components/filters/FilterBar";
 import FilterDrawer, { type FilterState } from "@/components/filters/FilterDrawer";
@@ -25,9 +25,17 @@ const BusinessMap = dynamic(() => import("@/components/map/BusinessMap"), {
 
 const NAVBAR_H = 72;
 const FILTERBAR_H = 64;
-const MOBILE_SEARCH_H = 52; // extra search row on mobile
 const CONTENT_TOP = NAVBAR_H + FILTERBAR_H;
-const CONTENT_TOP_MOBILE = NAVBAR_H + FILTERBAR_H + MOBILE_SEARCH_H;
+const DEMO_BUSINESS_NAME_PATTERN = /(בדיקה|דמו|טסט|demo|test)/i;
+
+function isPublicReadyBusiness(business: BusinessWithSchedule) {
+  return (
+    !DEMO_BUSINESS_NAME_PATTERN.test(business.name) &&
+    Boolean(business.today_schedule?.lat ?? business.lat) &&
+    Boolean(business.today_schedule?.lng ?? business.lng) &&
+    Boolean(business.today_schedule?.open_time && business.today_schedule?.close_time)
+  );
+}
 
 export default function MapPage() {
   const [activeCategory, setActiveCategory] = useState<BusinessCategory | "all">("all");
@@ -41,7 +49,7 @@ export default function MapPage() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [favoritesPanelOpen, setFavoritesPanelOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchQuery = "";
   const { favorites, toggle: toggleFavorite, count: favCount } = useFavorites();
 
   useEffect(() => {
@@ -65,31 +73,32 @@ export default function MapPage() {
         (weeklyData as WeeklyScheduleEntry[] ?? []).map((w) => [w.business_id, w])
       );
 
-      setBusinesses(
-        (bizData ?? []).map((b) => {
-          const daily = dailyMap.get(b.id);
-          const weekly = weeklyMap.get(b.id);
-          // Convert weekly entry to schedule-like object if no daily override
-          const todaySchedule: BusinessSchedule | null = daily ?? (weekly ? {
-            id: weekly.id,
-            business_id: weekly.business_id,
-            date: today,
-            address: weekly.address,
-            lat: weekly.lat,
-            lng: weekly.lng,
-            open_time: weekly.open_time,
-            close_time: weekly.close_time,
-            note: weekly.note,
-            created_at: weekly.created_at,
-          } : null);
+      const publicBusinesses: BusinessWithSchedule[] = (bizData ?? []).map((b) => {
+        const daily = dailyMap.get(b.id);
+        const weekly = weeklyMap.get(b.id);
+        // Convert weekly entry to schedule-like object if no daily override
+        const todaySchedule: BusinessSchedule | null = daily ?? (weekly ? {
+          id: weekly.id,
+          business_id: weekly.business_id,
+          date: today,
+          address: weekly.address,
+          lat: weekly.lat,
+          lng: weekly.lng,
+          open_time: weekly.open_time,
+          close_time: weekly.close_time,
+          note: weekly.note,
+          created_at: weekly.created_at,
+        } : null);
 
-          return {
-            ...b,
-            photos: (b.photos ?? []) as Photo[],
-            today_schedule: todaySchedule,
-          };
-        })
-      );
+        return {
+          ...b,
+          photos: (b.photos ?? []) as Photo[],
+          today_schedule: todaySchedule,
+        };
+      })
+        .filter(isPublicReadyBusiness);
+
+      setBusinesses(publicBusinesses);
       setLoading(false);
 
     }

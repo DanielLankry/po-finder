@@ -21,10 +21,10 @@ export default function Footer() {
         <Link
           href="/"
           className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-lg"
-          aria-label="פה — דף הבית"
+          aria-label="פה קרוב — דף הבית"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="פה" className="h-7 w-auto" />
+          <img src="/logo.png" alt="פה קרוב" className="h-7 w-auto" />
         </Link>
 
         <nav aria-label="קישורי תחתית">
@@ -43,7 +43,7 @@ export default function Footer() {
         </nav>
 
         <p className="text-slate-400 text-xs">
-          © 2026 פה. כל הזכויות שמורות.
+          © 2026 פה קרוב. כל הזכויות שמורות.
         </p>
       </div>
     </footer>

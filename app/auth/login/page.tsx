@@ -18,14 +18,6 @@ export default function LoginPage() {
   );
 }
 
-// Floating business cards for the hero side
-const FLOATING_CARDS = [
-  { emoji: "☕", name: "קפה הפינה", sub: "שוק הכרמל · פתוח עכשיו", color: "#FEF3C7", text: "#92400E", top: "12%", right: "8%", delay: "0s" },
-  { emoji: "🧆", name: "פלאפל אבו חסן", sub: "יפו · ⭐ 4.9", color: "#FFEDD5", text: "#C2410C", top: "38%", right: "18%", delay: "0.4s" },
-  { emoji: "🌸", name: "ורדינה פרחים", sub: "פתח תקווה · פתוח עכשיו", color: "#FDF2F8", text: "#9D174D", top: "62%", right: "6%", delay: "0.8s" },
-  { emoji: "🥐", name: "עוגות של סבתא", sub: "רמת גן · כשר למהדרין", color: "#FCE7F3", text: "#BE185D", top: "82%", right: "20%", delay: "0.2s" },
-];
-
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -104,7 +96,7 @@ function LoginForm() {
           </h2>
           <div className="text-4xl font-black text-[#059669] mb-3 h-12 flex items-center">
             <Typewriter
-              text={["לעסקים קטנים", "לדוכנים", "לעגלות קפה", "ליוצרים", "לשווקים ניידים", "לאופים ביתיים", "לפרחנים", "לישראלים"]}
+              text={["לעסקים קטנים", "לדוכנים", "לעגלות קפה", "ליוצרים", "לשווקים ניידים", "לאופים ביתיים", "למוכרי פרחים", "לישראלים"]}
               speed={65}
               deleteSpeed={35}
               waitTime={2000}
@@ -113,38 +105,13 @@ function LoginForm() {
           <p className="text-[#047857] text-lg font-medium opacity-80">
             על המפה, בזמן אמת
           </p>
-
-          {/* Stats row */}
-          <div className="flex items-center justify-center gap-6 mt-8">
-            {[["500+", "עסקים"], ["10K+", "משתמשים"], ["כל יום", "מתעדכן"]].map(([num, label]) => (
-              <div key={label} className="text-center">
-                <div className="text-2xl font-black text-[#059669]">{num}</div>
-                <div className="text-xs text-[#065F46]/70 font-medium">{label}</div>
-              </div>
-            ))}
+          <div className="mt-8 rounded-3xl border border-white/60 bg-white/55 p-5 text-right shadow-sm backdrop-blur">
+            <p className="text-sm font-bold text-[#065F46] mb-2">כניסה לחשבון</p>
+            <p className="text-sm text-[#047857] leading-relaxed">
+              ניהול פרופיל עסק, שעות פעילות ותמונות או חזרה לחיפוש עסקים קרובים.
+            </p>
           </div>
         </div>
-
-        {/* Floating business cards */}
-        {FLOATING_CARDS.map((c) => (
-          <div
-            key={c.name}
-            className="absolute flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl shadow-lg border border-white/60"
-            style={{
-              top: c.top,
-              right: c.right,
-              backgroundColor: c.color,
-              animation: `float 4s ease-in-out infinite`,
-              animationDelay: c.delay,
-            }}
-          >
-            <span className="text-2xl">{c.emoji}</span>
-            <div>
-              <div className="text-xs font-bold" style={{ color: c.text }}>{c.name}</div>
-              <div className="text-[10px] opacity-70" style={{ color: c.text }}>{c.sub}</div>
-            </div>
-          </div>
-        ))}
       </div>
 
       {/* ── Form side — RIGHT in RTL ──────────────────────────────────────── */}
@@ -177,7 +144,7 @@ function LoginForm() {
               href={explicitRedirect && explicitRedirect !== "/" ? `/auth/register?redirectTo=${encodeURIComponent(explicitRedirect)}` : "/auth/register"}
               className="text-[#059669] font-semibold hover:underline"
             >
-              הירשמו בחינם
+              צרו חשבון
             </Link>
           </p>
 
@@ -266,13 +233,6 @@ function LoginForm() {
           </p>
         </div>
       </div>
-
-      <style jsx global>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-8px); }
-        }
-      `}</style>
     </div>
   );
 }

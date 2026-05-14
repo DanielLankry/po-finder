@@ -4,7 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
 
-export const metadata = { title: "לוח בקרה — פה" };
+export const metadata = { title: "לוח בקרה" };
 
 interface DashboardLayoutProps {
   children: React.ReactNode;

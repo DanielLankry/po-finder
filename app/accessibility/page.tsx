@@ -1,8 +1,10 @@
-﻿import Navbar from "@/components/layout/Navbar";
+import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { BRAND_NAME, BUSINESS_INFO } from "@/lib/site-config";
 
 export const metadata = {
-  title: "הצהרת נגישות — פה",
+  title: "הצהרת נגישות",
+  description: "הצהרת הנגישות של פה קרוב ודרכי יצירת קשר בנושא נגישות.",
 };
 
 export default function AccessibilityPage() {
@@ -24,7 +26,7 @@ export default function AccessibilityPage() {
                 מחויבות לנגישות
               </h2>
               <p>
-                פלטפורמת <strong>פה</strong> מחויבת להנגשת שירותיה לכלל המשתמשים,
+                פלטפורמת <strong>{BRAND_NAME}</strong> מחויבת להנגשת שירותיה לכלל המשתמשים,
                 לרבות בעלי מוגבלויות, בהתאם לחוק שוויון זכויות לאנשים עם מוגבלות
                 ולתקן ישראלי 5568.
               </p>
@@ -39,12 +41,12 @@ export default function AccessibilityPage() {
               </p>
               <ul className="list-disc list-inside space-y-2 text-stone-600 mt-2">
                 <li>ניגודיות צבעים מינימלית של 4.5:1 לכל הטקסט</li>
-                <li>ניווט מלא במקלדת — כולל מיקוד גלוי על כל אלמנט אינטראקטיבי</li>
+                <li>ניווט מלא במקלדת כולל מיקוד גלוי על כל אלמנט אינטראקטיבי</li>
                 <li>תמיכה בקוראי מסך עם תגי ARIA בעברית</li>
                 <li>טקסט חלופי (alt) לכל התמונות</li>
                 <li>גודל מגע מינימלי של 44×44 פיקסלים</li>
                 <li>כבוד להעדפת תנועה מופחתת (prefers-reduced-motion)</li>
-                <li>קישור "דלגו לתוכן הראשי" בראש כל עמוד</li>
+                <li>קישור &quot;דלגו לתוכן הראשי&quot; בראש כל עמוד</li>
               </ul>
             </section>
 
@@ -73,17 +75,14 @@ export default function AccessibilityPage() {
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
                 פנייה בנושא נגישות
               </h2>
-              <p>
-                נתקלתם בבעיית נגישות? נשמח לשמוע ולתקן:
-              </p>
+              <p>נתקלתם בבעיית נגישות? נשמח לשמוע ולתקן:</p>
               <ul className="list-none space-y-1 mt-2">
                 <li>
                   📧 מייל:{" "}
-                  <a href="mailto:accessibility@po.co.il" className="text-[#059669] hover:underline">
-                    accessibility@po.co.il
+                  <a href={`mailto:${BUSINESS_INFO.contactEmail}`} className="text-[#059669] hover:underline">
+                    {BUSINESS_INFO.contactEmail}
                   </a>
                 </li>
-                <li>📞 טלפון: 03-XXXXXXX (א׳–ה׳, 9:00–17:00)</li>
               </ul>
               <p className="mt-3 text-stone-500 text-sm">
                 אנו מתחייבים להשיב תוך 5 ימי עסקים.

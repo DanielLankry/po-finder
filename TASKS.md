@@ -1,7 +1,7 @@
-# Po-Finder (פה) - Tasks
+# Po-Finder (פה קרוב) - Tasks
 
 > Small business discovery app (Next.js 16 + Supabase + Google Maps)
-> Last updated: 2026-03-08
+> Last updated: 2026-05-14
 
 ---
 
@@ -9,7 +9,7 @@
 
 ### Authentication & Users
 - [x] Supabase Auth integration (email/password + Google OAuth)
-- [x] Auth middleware - session refresh on every request (`middleware.ts`)
+- [x] Auth proxy - session refresh on every request (`proxy.ts`)
 - [x] Auth callback - auto-creates user row after OAuth/email confirmation
 - [x] Login page
 - [x] Registration page
@@ -60,6 +60,16 @@
 - [x] Privacy policy page
 - [x] Terms of service page
 - [x] Accessibility statement page
+- [x] About, contact, pricing, and vendor launch pages
+- [x] Dynamic SEO metadata for business pages
+
+### Launch Readiness
+- [x] Hebrew visible brand standardized to "פה קרוב"
+- [x] Business-owner CTA standardized around the ₪99 launch offer
+- [x] About/contact trust copy uses configured business contact info without public placeholders
+- [x] Vendor and pricing FAQ sections added
+- [x] Demo/test businesses filtered from the public map
+- [x] Sentry test route removed from public routing
 
 ### Infrastructure
 - [x] Environment variable validation (`lib/env.ts`)
@@ -68,6 +78,8 @@
 - [x] `next.config.ts` image optimization config
 - [x] Dynamic import for map component (SSR disabled)
 - [x] SEO metadata on auth & dashboard pages
+- [x] Next.js 16 `proxy.ts` convention adopted
+- [x] Sentry instrumentation updated for request errors and router transitions
 
 ---
 
@@ -79,12 +91,11 @@
   - `components/business/PhotoGrid.tsx`
   - `components/business/BusinessListPanel.tsx`
   - `app/dashboard/photos/page.tsx`
-- [ ] **Dynamic SEO metadata for business pages** - Add `generateMetadata()` to `app/businesses/[id]/page.tsx` to generate title/description from business data
-- [ ] **Expand mobile menu** - Currently only shows "Add Business"; needs Home, Login/Logout, Dashboard links
 
 ### Medium Priority
 - [ ] **Fix search on non-homepage** - Navbar search input on other pages doesn't navigate back to map with search params
 - [ ] **Verify storage bucket migration** - Confirm `002_storage_bucket.sql` has been applied to production Supabase
+- [ ] **Resolve remaining repo-wide ESLint debt** - Full `npm run lint` still reports pre-existing React Compiler issues in admin, map, cookie, and UI utility files.
 
 ### Low Priority
 - [ ] **Image fill parent styling** - Some `<Image fill>` usage may need explicit `position: relative` on parent
@@ -103,6 +114,6 @@
 | Reviews | Done |
 | RTL / i18n | Done |
 | Image Optimization | ~70% (config done, components need `<Image>`) |
-| SEO | ~80% (static pages done, dynamic pages need work) |
-| Mobile Nav | ~50% (exists but incomplete) |
-| **Overall** | **~85% complete** |
+| SEO | ~90% (static + business metadata done, content should be rechecked after real inventory) |
+| Mobile Nav | Done |
+| **Overall** | **~90% complete** |

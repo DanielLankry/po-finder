@@ -37,7 +37,7 @@ export default function StatusCard({ business, schedule }: StatusCardProps) {
             open ? "text-emerald-600" : "text-slate-600"
           }`}
         >
-          {open ? "פתוח עכשיו" : schedule ? "סגור היום" : "אין לוח זמנים להיום"}
+          {open ? "פתוח עכשיו" : schedule ? "סגור היום" : "שעות פעילות לא עודכנו"}
         </span>
         {open && (
           <span className="relative flex h-3 w-3 flex-shrink-0" aria-hidden="true">

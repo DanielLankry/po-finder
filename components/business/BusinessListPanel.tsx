@@ -278,7 +278,7 @@ export default function BusinessListPanel({
                 <span>עסקים</span>
               </p>
             ) : (
-              <p className="text-xl font-bold text-[#111111] tracking-tight">לא נמצאו עסקים</p>
+              <p className="text-xl font-bold text-[#111111] tracking-tight">לא נמצאו עסקים זמינים כרגע</p>
             )}
             {openCount > 0 && (
               <span className="inline-flex items-center gap-2 text-sm font-semibold px-3.5 py-1.5 rounded-full bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0]">
@@ -306,12 +306,12 @@ export default function BusinessListPanel({
             </div>
             <div>
               <p className="text-[#222222] font-semibold text-sm mb-1">
-                לא נמצאו עסקים
+                לא נמצאו עסקים זמינים כרגע
               </p>
               <p className="text-[#717171] text-xs leading-relaxed">
                 נסו לשנות את הפילטרים
                 <br />
-                או לגלול למיקום אחר במפה
+                או לחזור מאוחר יותר
               </p>
             </div>
           </div>

@@ -41,10 +41,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
   // Determine if the logged-in user owns an active (paid) business so the
   // top-right CTA can swap "הוסיפו עסק" → "לוח בקרה" once the user has access.
   useEffect(() => {
-    if (!user) {
-      setHasActiveBiz(false);
-      return;
-    }
+    if (!user) return;
     let cancelled = false;
     (async () => {
       const nowIso = new Date().toISOString();
@@ -98,7 +95,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
                 "לשווקים ניידים",
                 "לבעלי קיוסקים",
                 "לאופים ביתיים",
-                "לפרחנים",
+                "למוכרי פרחים",
                 "לסוחרי וינטג׳",
                 "לקייטרינג",
                 "לישראלים",
@@ -146,9 +143,9 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
           >צרו קשר</Link>
           <Link href="/vendors"
             className="h-8 px-3.5 rounded-full text-[#555] font-medium text-sm border border-stone-200 hover:border-[#059669]/50 hover:bg-[#ECFDF5] hover:text-[#047857] transition-all duration-200 flex items-center whitespace-nowrap"
-          >לרוכלים</Link>
+          >לעסקים</Link>
           <Link href="/pricing"
-            className="h-8 px-3.5 rounded-full text-[#555] font-medium text-sm border border-stone-200 hover:border-purple-300 hover:bg-purple-50 hover:text-purple-700 transition-all duration-200 flex items-center whitespace-nowrap"
+            className="h-8 px-3.5 rounded-full text-[#555] font-medium text-sm border border-stone-200 hover:border-[#059669]/50 hover:bg-[#ECFDF5] hover:text-[#047857] transition-all duration-200 flex items-center whitespace-nowrap"
           >מחירים</Link>
         </div>
 
@@ -178,7 +175,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
           </button>
 
           {/* CTA — swaps to "לוח בקרה" once the user owns an active paid business.
-              Otherwise routes to /pricing where they pay (and create an account if needed). */}
+              Otherwise routes to /pricing where they start with the launch offer. */}
           <div className="hidden md:block">
             <MagneticButton distance={0.45}>
               <Link
@@ -198,7 +195,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
                 ) : (
                   <Plus className="h-4 w-4 relative z-10 group-hover:rotate-90 transition-transform duration-300" aria-hidden="true" />
                 )}
-                <span className="relative z-10">{hasActiveBiz ? "לוח בקרה" : "הוסיפו עסק"}</span>
+                <span className="relative z-10">{user && hasActiveBiz ? "לוח בקרה" : "הצטרפו במחיר השקה"}</span>
               </Link>
             </MagneticButton>
           </div>
@@ -218,7 +215,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
                     href={hasActiveBiz ? "/dashboard" : "/pricing"}
                     className="block px-4 py-2 text-sm text-slate-700 hover:bg-[#ECFDF5] hover:text-[#047857] transition-colors rounded-lg mx-1 font-medium"
                   >
-                    {hasActiveBiz ? "לוח בקרה" : "הוסיפו עסק"}
+                    {user && hasActiveBiz ? "לוח בקרה" : "הצטרפו במחיר השקה"}
                   </Link>
                   <button
                     onClick={handleSignOut}
@@ -337,8 +334,8 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
 
             <nav className="grid grid-cols-2 gap-2.5">
               {[
-                { href: hasActiveBiz ? "/dashboard" : "/pricing", label: hasActiveBiz ? "לוח בקרה" : "הוסיפו עסק", emoji: "🏪", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
-                { href: "/vendors", label: "לרוכלים", emoji: "🛒", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
+                { href: user && hasActiveBiz ? "/dashboard" : "/pricing", label: user && hasActiveBiz ? "לוח בקרה" : "הצטרפו במחיר השקה", emoji: "🏪", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
+                { href: "/vendors", label: "לעסקים", emoji: "🛒", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
                 { href: "/pricing", label: "מחירים", emoji: "💳", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
                 { href: "/about", label: "אודות", emoji: "ℹ️", bg: "#F5F3FF", border: "#DDD6FE", text: "#5B21B6" },
                 { href: "/contact", label: "צרו קשר", emoji: "📬", bg: "#FFF7ED", border: "#FED7AA", text: "#C2410C" },
@@ -376,23 +373,5 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
         }
       `}</style>
     </header>
-  );
-}
-
-function PinIcon() {
-  return (
-    <svg
-      width="28"
-      height="35"
-      viewBox="0 0 28 35"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M14 0C6.268 0 0 6.268 0 14c0 9.625 12.6 20.125 13.125 20.562a1.313 1.313 0 0 0 1.75 0C15.4 34.125 28 23.625 28 14 28 6.268 21.732 0 14 0z"
-        fill="#059669"
-      />
-      <circle cx="14" cy="14" r="6" fill="white" />
-    </svg>
   );
 }

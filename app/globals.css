@@ -157,6 +157,10 @@
 }
 
 :root {
+  --font-body: "Heebo", "Rubik", "Noto Sans Hebrew", "Segoe UI", Arial, sans-serif;
+  --font-rubik: "Rubik", "Heebo", "Noto Sans Hebrew", "Segoe UI", Arial, sans-serif;
+  --font-secular: "Secular One", "Rubik", "Heebo", "Noto Sans Hebrew", sans-serif;
+  --font-geist-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --radius: 0.625rem;
   --background: #FFFFFF;
   --foreground: #0A0A0A;
@@ -572,7 +576,6 @@ h1, h2, h3, h4, h5 {
 p, li, span:not([class*="font-bold"]):not([class*="font-semibold"]), td, th, blockquote {
   font-family: var(--font-body), var(--font-rubik), sans-serif;
 }
-
 
 
 

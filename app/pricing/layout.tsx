@@ -3,9 +3,9 @@
 // and description.
 
 export const metadata = {
-  title: "מחירים — פה קרוב",
+  title: "הצטרפות עסקים",
   description:
-    "תשלום חד פעמי לפי תקופה — ללא חיוב חוזר. בחרו כמה זמן תרצו להופיע על המפה והתחילו להשיג לקוחות.",
+    "הצטרפו לפה קרוב והופיעו על מפה בזמן אמת עם פרופיל עסק, תמונות, שעות פעילות, מיקום וכפתור התקשרות.",
 };
 
 export default function PricingLayout({ children }: { children: React.ReactNode }) {

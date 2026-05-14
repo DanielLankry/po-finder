@@ -32,7 +32,7 @@ export default function AdminLogin() {
           <div className="h-14 w-14 rounded-2xl bg-[#ECFDF5] flex items-center justify-center mx-auto mb-4">
             <svg width="28" height="35" viewBox="0 0 40 50" fill="none"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#34d399"/><stop offset="100%" stopColor="#059669"/></linearGradient></defs><path d="M20 0C9.507 0 1 8.507 1 19c0 13.255 17.5 29.5 18.25 30.188a1.125 1.125 0 0 0 1.5 0C21.5 48.5 39 32.255 39 19 39 8.507 30.493 0 20 0z" fill="url(#g)"/><text x="20" y="26" textAnchor="middle" fontFamily="sans-serif" fontWeight="800" fontSize="20" fill="white">פ</text></svg>
           </div>
-          <h1 className="font-extrabold text-xl text-[#111]">לוח ניהול פוקרוב</h1>
+          <h1 className="font-extrabold text-xl text-[#111]">לוח ניהול פה קרוב</h1>
           <p className="text-[#888] text-sm mt-1">כניסה מוגבלת לצוות בלבד</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">

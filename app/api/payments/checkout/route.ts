@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     console.error("[/api/payments/checkout] insert failed:", insertErr);
     // 200 + ok:false so a Cloudflare/edge proxy in front of the origin
     // doesn't replace our JSON with its own 5xx HTML page (which the FE
-    // would then fail to JSON.parse and surface as a content-free alert).
+    // would then fail to JSON.parse and surface as an empty alert).
     return NextResponse.json(
       { ok: false, error: "internal error", detail: insertErr?.message ?? "could not record attempt" },
       { status: 200 }

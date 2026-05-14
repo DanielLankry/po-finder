@@ -1,8 +1,10 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { BRAND_NAME, BUSINESS_INFO } from "@/lib/site-config";
 
 export const metadata = {
-  title: "מדיניות ביטולים והחזרים — פה",
+  title: "מדיניות ביטולים והחזרים",
+  description: "מדיניות הביטולים וההחזרים לשירותי ההצטרפות העסקית של פה קרוב.",
 };
 
 export default function RefundPage() {
@@ -22,8 +24,8 @@ export default function RefundPage() {
                 1. זכות ביטול
               </h2>
               <p>
-                בהתאם לחוק הגנת הצרכן, התשמ"א–1981, וכן לתקנות הגנת הצרכן (ביטול עסקה),
-                התשע"א–2010, ניתן לבטל רכישה של מנוי בפלטפורמת <strong>פה</strong> תוך{" "}
+                בהתאם לחוק הגנת הצרכן, התשמ״א-1981, וכן לתקנות הגנת הצרכן (ביטול עסקה),
+                התשע״א-2010, ניתן לבטל רכישה של מנוי בפלטפורמת <strong>{BRAND_NAME}</strong> תוך{" "}
                 <strong>14 ימים</strong> מיום ביצוע העסקה.
               </p>
               <p className="mt-2">
@@ -37,24 +39,19 @@ export default function RefundPage() {
                 2. תהליך ביטול
               </h2>
               <p>
-                לביטול עסקה, יש לפנות אלינו בדוא"ל:{" "}
-                <a
-                  href="mailto:support@pokarov.co.il"
-                  className="text-[#059669] hover:underline"
-                >
-                  support@pokarov.co.il
+                לביטול עסקה, יש לפנות אלינו בדוא״ל:{" "}
+                <a href={`mailto:${BUSINESS_INFO.contactEmail}`} className="text-[#059669] hover:underline">
+                  {BUSINESS_INFO.contactEmail}
                 </a>{" "}
                 ולציין את פרטי הבקשה הבאים:
               </p>
               <ul className="list-disc list-inside space-y-1 text-stone-600 mt-2">
                 <li>שם מלא</li>
-                <li>כתובת דוא"ל בה בוצע הרישום</li>
-                <li>מספר הזמנה (מופיע בדוא"ל האישור)</li>
+                <li>כתובת דוא״ל בה בוצע הרישום</li>
+                <li>מספר הזמנה (מופיע בדוא״ל האישור)</li>
                 <li>סיבת הביטול (אופציונלי, אך מסייע לשיפור השירות)</li>
               </ul>
-              <p className="mt-2">
-                נשיב לפנייתכם בתוך יום עסקים אחד.
-              </p>
+              <p className="mt-2">נשיב לפנייתכם בתוך יום עסקים אחד.</p>
             </section>
 
             <section>
@@ -62,12 +59,12 @@ export default function RefundPage() {
                 3. החזר כספי
               </h2>
               <p>
-                לאחר אישור הביטול, ההחזר הכספי יבוצע תוך{" "}
-                <strong>14 ימי עסקים</strong> לכרטיס האשראי המקורי בו בוצעה הרכישה.
+                לאחר אישור הביטול, ההחזר הכספי יבוצע תוך <strong>14 ימי עסקים</strong> לכרטיס האשראי
+                המקורי בו בוצעה הרכישה.
               </p>
               <p className="mt-2">
                 ההחזר יופיע בחשבון הבנק שלכם בהתאם למחזור החיוב של חברת האשראי, ועשוי
-                להופיע בפירוט הכרטיס כ-"POKAROV" או "פה קרוב".
+                להופיע בפירוט הכרטיס לפי שם השירות או שם הספק כפי שיופיע אצל חברת האשראי.
               </p>
             </section>
 
@@ -80,16 +77,9 @@ export default function RefundPage() {
                 יחושבו באופן יחסי:
               </p>
               <ul className="list-disc list-inside space-y-1 text-stone-600 mt-2">
-                <li>
-                  ימים שחלפו מתחילת תקופת המנוי יחויבו בהתאם לחלקם היחסי מסכום העסקה
-                </li>
-                <li>
-                  ימים שטרם חלפו יוחזרו במלואם
-                </li>
-                <li>
-                  ביטול לאחר תום 14 ימים מיום הרכישה אינו זכאי להחזר, אלא אם קיים פגם
-                  בשירות
-                </li>
+                <li>ימים שחלפו מתחילת תקופת המנוי יחויבו בהתאם לחלקם היחסי מסכום העסקה</li>
+                <li>ימים שטרם חלפו יוחזרו במלואם</li>
+                <li>ביטול לאחר תום 14 ימים מיום הרכישה אינו זכאי להחזר, אלא אם קיים פגם בשירות</li>
               </ul>
               <p className="mt-2">
                 דמי ביטול כמפורט בחוק (עד 5% ממחיר העסקה, ולא יותר מ-100 ₪) עשויים
@@ -103,11 +93,8 @@ export default function RefundPage() {
               </h2>
               <p>
                 לשאלות בנושא ביטולים והחזרים:{" "}
-                <a
-                  href="mailto:support@pokarov.co.il"
-                  className="text-[#059669] hover:underline"
-                >
-                  support@pokarov.co.il
+                <a href={`mailto:${BUSINESS_INFO.contactEmail}`} className="text-[#059669] hover:underline">
+                  {BUSINESS_INFO.contactEmail}
                 </a>
               </p>
             </section>

@@ -12,13 +12,6 @@ import { Label } from "@/components/ui/label";
 import { Typewriter } from "@/components/ui/typewriter";
 import type { UserRole } from "@/lib/types";
 
-const FLOATING_CARDS = [
-  { emoji: "☕", name: "קפה הפינה", sub: "שוק הכרמל · פתוח עכשיו", color: "#FEF3C7", text: "#92400E", top: "12%", right: "8%", delay: "0s" },
-  { emoji: "🧆", name: "פלאפל אבו חסן", sub: "יפו · ⭐ 4.9", color: "#FFEDD5", text: "#C2410C", top: "38%", right: "18%", delay: "0.4s" },
-  { emoji: "🌸", name: "ורדינה פרחים", sub: "פתח תקווה · פתוח עכשיו", color: "#FDF2F8", text: "#9D174D", top: "62%", right: "6%", delay: "0.8s" },
-  { emoji: "🥐", name: "עוגות של סבתא", sub: "רמת גן · כשר למהדרין", color: "#FCE7F3", text: "#BE185D", top: "82%", right: "20%", delay: "0.2s" },
-];
-
 export default function RegisterPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#FAFAF7]" />}>
@@ -33,7 +26,8 @@ function RegisterForm() {
   // /pricing pushes new visitors here with ?redirectTo=/pricing so they land
   // back on checkout the moment their session exists.
   const redirectTo = searchParams.get("redirectTo");
-  const [role, setRole] = useState<UserRole>("customer");
+  const isPricingSignup = redirectTo?.startsWith("/pricing") ?? false;
+  const [role, setRole] = useState<UserRole>(() => (isPricingSignup ? "business_owner" : "customer"));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -120,28 +114,13 @@ function RegisterForm() {
             />
           </div>
           <p className="text-[#047857] text-lg font-medium opacity-80">על המפה, בזמן אמת</p>
-          <div className="flex items-center justify-center gap-6 mt-8">
-            {[["500+", "עסקים"], ["10K+", "משתמשים"], ["כל יום", "מתעדכן"]].map(([num, label]) => (
-              <div key={label} className="text-center">
-                <div className="text-2xl font-black text-[#059669]">{num}</div>
-                <div className="text-xs text-[#065F46]/70 font-medium">{label}</div>
-              </div>
-            ))}
+          <div className="mt-8 rounded-3xl border border-white/60 bg-white/55 p-5 text-right shadow-sm backdrop-blur">
+            <p className="text-sm font-bold text-[#065F46] mb-2">מה מקבלים?</p>
+            <p className="text-sm text-[#047857] leading-relaxed">
+              פרופיל עסק, מיקום, שעות פעילות, תמונות וכפתור התקשרות במקום אחד.
+            </p>
           </div>
         </div>
-        {FLOATING_CARDS.map((c) => (
-          <div
-            key={c.name}
-            className="absolute flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl shadow-lg border border-white/60"
-            style={{ top: c.top, right: c.right, backgroundColor: c.color, animation: `float 4s ease-in-out infinite`, animationDelay: c.delay }}
-          >
-            <span className="text-2xl">{c.emoji}</span>
-            <div>
-              <div className="text-xs font-bold" style={{ color: c.text }}>{c.name}</div>
-              <div className="text-[10px] opacity-70" style={{ color: c.text }}>{c.sub}</div>
-            </div>
-          </div>
-        ))}
       </div>
 
       {/* ── Form side — RIGHT in RTL ──────────────────────────────────────── */}
@@ -176,10 +155,12 @@ function RegisterForm() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#059669] opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[#059669]" />
                 </span>
-                הצטרפות חינמית
+                {isPricingSignup ? "המשך להצטרפות במחיר השקה" : "פתיחת חשבון לעסקים ולקוחות"}
               </div>
 
-              <h1 className="text-[32px] font-black text-[#111111] mb-1.5 leading-tight">יצירת חשבון חדש 🎉</h1>
+              <h1 className="text-[32px] font-black text-[#111111] mb-1.5 leading-tight">
+                {isPricingSignup ? "כמעט סיימנו: פתחו חשבון להצטרפות" : "יצירת חשבון חדש"}
+              </h1>
               <p className="text-[#6B7280] text-sm mb-6">
                 כבר יש לכם חשבון?{" "}
                 <Link
@@ -193,7 +174,7 @@ function RegisterForm() {
                 <p className="text-[#374151] font-semibold text-sm mb-3">אני מצטרף/ת בתור:</p>
                 <div className="grid grid-cols-2 gap-3">
                   <RoleCard active={role === "business_owner"} onClick={() => setRole("business_owner")}
-                    icon={<Store className="h-5 w-5" />} title="בעל עסק" description="הוסיפו את העסק שלכם" />
+                    icon={<Store className="h-5 w-5" />} title="בעל עסק" description="הצטרפו במחיר השקה" />
                   <RoleCard active={role === "customer"} onClick={() => setRole("customer")}
                     icon={<ShoppingCart className="h-5 w-5" />} title="לקוח" description="גלשו והשאירו ביקורת" />
                 </div>
@@ -241,7 +222,7 @@ function RegisterForm() {
 
                 <button type="submit" disabled={loading}
                   className="w-full h-12 rounded-2xl bg-[#059669] hover:bg-[#047857] active:scale-[0.98] text-white font-bold text-[15px] transition-all shadow-[0_4px_20px_rgba(5,150,105,0.3)] disabled:opacity-60">
-                  {loading ? "...נרשמים" : "יצירת חשבון"}
+                  {loading ? "...נרשמים" : isPricingSignup ? "יצירת חשבון והמשך לתשלום" : "יצירת חשבון"}
                 </button>
               </form>
 
@@ -253,13 +234,6 @@ function RegisterForm() {
           )}
         </div>
       </div>
-
-      <style jsx global>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-8px); }
-        }
-      `}</style>
     </div>
   );
 }

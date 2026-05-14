@@ -1,53 +1,31 @@
 import type { Metadata } from "next";
-import { Secular_One, Rubik, Heebo } from "next/font/google";
 import "./globals.css";
 import "@/lib/env";
 import CookieConsent from "@/components/layout/CookieConsent";
 import AccessibilityWidget from "@/components/layout/AccessibilityWidget";
 import { Analytics } from "@vercel/analytics/next";
-import { Suspense } from "react";
 import PostHogProvider from "@/components/providers/PostHogProvider";
+import { BRAND_NAME, SITE_URL } from "@/lib/site-config";
 
-const secularOne = Secular_One({
-  variable: "--font-secular",
-  subsets: ["latin", "hebrew"],
-  weight: ["400"],
-  display: "swap",
-});
-
-const rubik = Rubik({
-  variable: "--font-rubik",
-  subsets: ["latin", "hebrew"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-  display: "swap",
-});
-
-const heebo = Heebo({
-  variable: "--font-body",
-  subsets: ["latin", "hebrew"],
-  weight: ["400", "500", "700"],
-  display: "swap",
-});
-
-const BASE_URL = "https://pokarov.co.il";
+const BASE_URL = SITE_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: "פה קרוב — גלו עסקים קטנים וניידים קרוב אליכם",
-    template: "%s | פה קרוב",
+    default: "פה קרוב | עסקים קטנים ודוכנים על מפה בזמן אמת",
+    template: `%s | ${BRAND_NAME}`,
   },
   description:
-    "פה קרוב עוזר לכם למצוא עסקים ניידים קרוב אליכם — קפה, פלאפל, מאפים, פרחים, תכשיטים ועוד. ראו בזמן אמת היכן הם נמצאים היום על המפה.",
+    "פה קרוב עוזרת לאנשים למצוא דוכנים, עגלות קפה, עסקים ניידים ועסקים קטנים קרוב אליהם לפי מיקום, קטגוריה ושעות פעילות.",
   keywords: [
     "עסקים ניידים", "עסקים קטנים ישראל", "קפה נייד", "פלאפל נייד",
     "שוק פשפשים", "אוכל רחוב ישראל", "עסק מהבית", "po karov", "פה קרוב",
     "מפת עסקים", "עסקים בשכונה",
   ],
-  authors: [{ name: "פוקרוב", url: BASE_URL }],
-  creator: "פוקרוב",
-  publisher: "פוקרוב",
-  applicationName: "פוקרוב",
+  authors: [{ name: BRAND_NAME, url: BASE_URL }],
+  creator: BRAND_NAME,
+  publisher: BRAND_NAME,
+  applicationName: BRAND_NAME,
   alternates: {
     canonical: BASE_URL,
     languages: { "he-IL": BASE_URL },
@@ -56,10 +34,10 @@ export const metadata: Metadata = {
     type: "website",
     locale: "he_IL",
     url: BASE_URL,
-    siteName: "פוקרוב",
-    title: "פוקרוב — גלו עסקים קטנים וניידים קרוב אליכם",
+    siteName: BRAND_NAME,
+    title: "פה קרוב | עסקים קטנים ודוכנים על מפה בזמן אמת",
     description:
-      "גלו עסקים ניידים קרוב אליכם — ראו בזמן אמת על המפה היכן נמצאים קפה, אוכל, פרחים, תכשיטים ועוד.",
+      "פה קרוב עוזרת לאנשים למצוא דוכנים, עגלות קפה, עסקים ניידים ועסקים קטנים קרוב אליהם לפי מיקום, קטגוריה ושעות פעילות.",
     images: [
       {
         url: "/og-image.png",
@@ -71,8 +49,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "פה קרוב — גלו עסקים קטנים וניידים",
-    description: "גלו עסקים ניידים קרוב אליכם בזמן אמת על המפה.",
+    title: "פה קרוב | עסקים קטנים ודוכנים על מפה בזמן אמת",
+    description: "פה קרוב עוזרת למצוא עסקים קטנים ועסקים ניידים קרוב אליכם בזמן אמת.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -95,7 +73,7 @@ export const metadata: Metadata = {
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "פוקרוב",
+  name: BRAND_NAME,
   url: BASE_URL,
   logo: `${BASE_URL}/logo.png`,
   description: "פלטפורמה לגילוי עסקים קטנים וניידים בישראל",
@@ -110,7 +88,7 @@ const organizationSchema = {
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "פוקרוב",
+  name: BRAND_NAME,
   url: BASE_URL,
   inLanguage: "he",
   potentialAction: {
@@ -144,7 +122,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
       </head>
-      <body className={`${secularOne.variable} ${rubik.variable} ${heebo.variable} antialiased font-sans`}>
+      <body className="antialiased font-sans">
         <a href="#main-content" className="skip-to-content">
           דלגו לתוכן הראשי
         </a>
