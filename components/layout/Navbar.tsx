@@ -22,11 +22,11 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [hasDashboardAccess, setHasDashboardAccess] = useState(false);
+  const [hasDashboardAccess, setHasDashboardAccess] = useState<boolean | null>(null);
   const supabase = useMemo(() => createClient(), []);
   const pathname = usePathname();
   const isDashboardRoute = pathname?.startsWith("/dashboard") ?? false;
-  const showDashboardCta = !!user && (isDashboardRoute || hasDashboardAccess);
+  const showDashboardCta = !!user && (isDashboardRoute || hasDashboardAccess !== false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 8);
@@ -48,12 +48,14 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
     let cancelled = false;
     (async () => {
       if (!user) {
-        if (!cancelled) setHasDashboardAccess(false);
+        if (!cancelled) setHasDashboardAccess(null);
         return;
       }
 
       if (isDashboardRoute) {
         setHasDashboardAccess(true);
+      } else {
+        setHasDashboardAccess(null);
       }
 
       try {
