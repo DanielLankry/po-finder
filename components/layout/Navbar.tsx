@@ -22,11 +22,12 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [hasDashboardAccess, setHasDashboardAccess] = useState<boolean | null>(null);
   const supabase = useMemo(() => createClient(), []);
   const pathname = usePathname();
   const isDashboardRoute = pathname?.startsWith("/dashboard") ?? false;
-  const showDashboardCta = !!user && (isDashboardRoute || hasDashboardAccess !== false);
+  const showDashboardCta = authChecked && !!user && (isDashboardRoute || hasDashboardAccess !== false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 8);
@@ -35,11 +36,22 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
   }, []);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    let cancelled = false;
+    supabase.auth.getUser().then(({ data }) => {
+      if (cancelled) return;
+      setUser(data.user);
+      setAuthChecked(true);
+    }).catch(() => {
+      if (!cancelled) setAuthChecked(true);
+    });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setAuthChecked(true);
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, [supabase.auth]);
 
   // Ask the server for the same dashboard-access decision used by the paywall.
@@ -196,27 +208,31 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
           {/* CTA — swaps to "לוח בקרה" once the user owns an active paid business.
               Otherwise routes to /pricing where they start with the launch offer. */}
           <div className="hidden md:block">
-            <MagneticButton distance={0.45}>
-              <Link
-                href={showDashboardCta ? "/dashboard" : "/pricing"}
-                className="group relative flex items-center gap-1.5 h-10 px-5 rounded-full font-semibold text-sm text-white overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
-                style={{
-                  background: "linear-gradient(135deg,#059669 0%,#047857 100%)",
-                  boxShadow: "0 2px 14px rgba(5,150,105,0.4)",
-                }}
-              >
-                {/* Shine sweep on hover */}
-                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"
-                  style={{ background: "linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.35) 50%,transparent 60%)" }}
-                />
-                {showDashboardCta ? (
-                  <LayoutDashboard className="h-4 w-4 relative z-10" aria-hidden="true" />
-                ) : (
-                  <Plus className="h-4 w-4 relative z-10 group-hover:rotate-90 transition-transform duration-300" aria-hidden="true" />
-                )}
-                <span className="relative z-10">{showDashboardCta ? "לוח בקרה" : "הצטרפו במחיר השקה"}</span>
-              </Link>
-            </MagneticButton>
+            {authChecked ? (
+              <MagneticButton distance={0.45}>
+                <Link
+                  href={showDashboardCta ? "/dashboard" : "/pricing"}
+                  className="group relative flex items-center gap-1.5 h-10 px-5 rounded-full font-semibold text-sm text-white overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+                  style={{
+                    background: "linear-gradient(135deg,#059669 0%,#047857 100%)",
+                    boxShadow: "0 2px 14px rgba(5,150,105,0.4)",
+                  }}
+                >
+                  {/* Shine sweep on hover */}
+                  <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"
+                    style={{ background: "linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.35) 50%,transparent 60%)" }}
+                  />
+                  {showDashboardCta ? (
+                    <LayoutDashboard className="h-4 w-4 relative z-10" aria-hidden="true" />
+                  ) : (
+                    <Plus className="h-4 w-4 relative z-10 group-hover:rotate-90 transition-transform duration-300" aria-hidden="true" />
+                  )}
+                  <span className="relative z-10">{showDashboardCta ? "לוח בקרה" : "הצטרפו במחיר השקה"}</span>
+                </Link>
+              </MagneticButton>
+            ) : (
+              <div className="h-10 w-[170px]" aria-hidden="true" />
+            )}
           </div>
 
           {user ? (
