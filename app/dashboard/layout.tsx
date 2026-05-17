@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
-import { hasPaidSubscriptionStatus } from "@/lib/payment-state";
+import { getDashboardAccessForUser } from "@/lib/dashboard-access";
 
 export const metadata = { title: "לוח בקרה" };
 
@@ -29,45 +29,7 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
   //       listing is still pending admin approval. /dashboard/billing is where
   //       they renew; locking them out of their own dashboard would force them
   //       to re-pay before they can even see the renewal screen.
-  const nowIso = new Date().toISOString();
-
-  const { data: profile } = await supabase
-    .from("users")
-    .select("subscription_status")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const { data: activeBiz } = await supabase
-    .from("businesses")
-    .select("id")
-    .eq("owner_id", user.id)
-    .gt("expires_at", nowIso)
-    .limit(1)
-    .maybeSingle();
-
-  let hasAccess = hasPaidSubscriptionStatus(profile?.subscription_status) || !!activeBiz;
-
-  if (!hasAccess) {
-    const { data: unconsumed } = await supabase
-      .from("payment_attempts")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("status", "succeeded")
-      .is("business_id", null)
-      .limit(1)
-      .maybeSingle();
-    hasAccess = !!unconsumed;
-  }
-
-  if (!hasAccess) {
-    const { data: anyBiz } = await supabase
-      .from("businesses")
-      .select("id")
-      .eq("owner_id", user.id)
-      .limit(1)
-      .maybeSingle();
-    hasAccess = !!anyBiz;
-  }
+  const { hasAccess } = await getDashboardAccessForUser(user.id);
 
   if (!hasAccess) {
     redirect("/pricing?reason=no_subscription");
