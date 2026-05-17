@@ -13,6 +13,7 @@ import type { BusinessCategory, BusinessSchedule, WeeklyScheduleEntry, BusinessW
 import { createClient } from "@/lib/supabase/client";
 import type { LocationResult } from "@/components/map/PlacesSearchBar";
 import { isOpenNow } from "@/lib/utils/schedule";
+import { isPublicReadyBusiness } from "@/lib/public-business";
 
 const BusinessMap = dynamic(() => import("@/components/map/BusinessMap"), {
   ssr: false,
@@ -26,16 +27,6 @@ const BusinessMap = dynamic(() => import("@/components/map/BusinessMap"), {
 const NAVBAR_H = 72;
 const FILTERBAR_H = 64;
 const CONTENT_TOP = NAVBAR_H + FILTERBAR_H;
-const DEMO_BUSINESS_NAME_PATTERN = /(בדיקה|דמו|טסט|demo|test)/i;
-
-function isPublicReadyBusiness(business: BusinessWithSchedule) {
-  return (
-    !DEMO_BUSINESS_NAME_PATTERN.test(business.name) &&
-    Boolean(business.today_schedule?.lat ?? business.lat) &&
-    Boolean(business.today_schedule?.lng ?? business.lng) &&
-    Boolean(business.today_schedule?.open_time && business.today_schedule?.close_time)
-  );
-}
 
 export default function MapPage() {
   const [activeCategory, setActiveCategory] = useState<BusinessCategory | "all">("all");
