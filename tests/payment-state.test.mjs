@@ -8,6 +8,7 @@ import {
   getHypResponseCode,
   getHypTransactionId,
   hasPaidSubscriptionStatus,
+  hasHypPaymentReturnParams,
   isSuccessfulHypReturn,
   toHypVerificationParams,
 } from "../lib/payment-state.ts";
@@ -26,6 +27,19 @@ test("payment return attempt id can come from our callback URL or HYP aliases", 
   assert.equal(getPaymentAttemptId(new URLSearchParams("order=lower-order")), "lower-order");
   assert.equal(getPaymentAttemptId(new URLSearchParams("uniqueid=hyp-unique")), "hyp-unique");
   assert.equal(getPaymentAttemptId(new URLSearchParams("uniqueID=hyp-modern")), "hyp-modern");
+});
+
+test("HYP completion redirects can be detected when they land on a page route", () => {
+  assert.equal(
+    hasHypPaymentReturnParams(new URLSearchParams("uniqueID=attempt-1&responseMac=mac&txId=tx-1")),
+    true,
+  );
+  assert.equal(
+    hasHypPaymentReturnParams(new URLSearchParams("Order=attempt-2&CCode=0&Id=legacy-1")),
+    true,
+  );
+  assert.equal(hasHypPaymentReturnParams(new URLSearchParams("reason=no_subscription")), false);
+  assert.equal(hasHypPaymentReturnParams(new URLSearchParams("Order=sort-value")), false);
 });
 
 test("HYP verification params exclude local-only callback params", () => {

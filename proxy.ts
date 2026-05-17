@@ -1,8 +1,22 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { hasHypPaymentReturnParams } from "@/lib/payment-state";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (
+    !pathname.startsWith("/api/payments/") &&
+    hasHypPaymentReturnParams(request.nextUrl.searchParams)
+  ) {
+    // HYP terminal-level success URLs can land on /pricing; settle them before
+    // a static page can render and leave the payment_attempt pending.
+    const settleUrl = new URL("/api/payments/return", request.url);
+    request.nextUrl.searchParams.forEach((value, key) => {
+      settleUrl.searchParams.append(key, value);
+    });
+    return NextResponse.redirect(settleUrl);
+  }
 
   // Admin routes: check admin_session cookie.
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {

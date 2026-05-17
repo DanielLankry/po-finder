@@ -18,6 +18,30 @@ const LOCAL_ONLY_RETURN_PARAMS = new Set([
   "payment_attempt",
 ]);
 
+const HYP_RETURN_SIGNAL_PARAM_NAMES = [
+  "CCode",
+  "ccode",
+  "errorCode",
+  "errorcode",
+  "status",
+  "result",
+  "responseMac",
+  "Id",
+  "id",
+  "txId",
+  "txid",
+  "cgUid",
+  "cguid",
+  "tranId",
+  "transactionId",
+  "ACode",
+  "authNumber",
+  "authNo",
+  "L4digit",
+  "cardMask",
+  "cardmask",
+];
+
 export function hasPaidSubscriptionStatus(status: string | null | undefined): boolean {
   return PAID_SUBSCRIPTION_STATUSES.has(status ?? "");
 }
@@ -28,6 +52,15 @@ export function getPaymentAttemptId(params: URLSearchParams): string | null {
     if (value) return value;
   }
   return null;
+}
+
+/**
+ * Detects HYP completion redirects that landed on a page route instead of the
+ * payment API so proxy.ts can forward them into the normal settlement handler.
+ */
+export function hasHypPaymentReturnParams(params: URLSearchParams): boolean {
+  if (!getPaymentAttemptId(params)) return false;
+  return HYP_RETURN_SIGNAL_PARAM_NAMES.some((name) => params.has(name));
 }
 
 function firstParam(params: URLSearchParams, names: string[]): string | null {
