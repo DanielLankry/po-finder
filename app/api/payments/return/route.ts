@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminClient } from "@/lib/supabase/admin";
 import { verifyReturnSignature } from "@/lib/hyp";
+import { getPaymentAttemptId } from "@/lib/payment-state";
 
 export const runtime = "nodejs";
 
@@ -13,8 +14,45 @@ export const runtime = "nodejs";
  * succeeded/failed and apply the plan_days to the user's business.
  */
 export async function GET(req: NextRequest) {
-  const params = req.nextUrl.searchParams;
-  const order = params.get("Order");
+  return settlePaymentReturn(req, req.nextUrl.searchParams);
+}
+
+export async function POST(req: NextRequest) {
+  return settlePaymentReturn(req, await readPostReturnParams(req));
+}
+
+async function readPostReturnParams(req: NextRequest): Promise<URLSearchParams> {
+  const params = new URLSearchParams(req.nextUrl.searchParams);
+  const contentType = req.headers.get("content-type") ?? "";
+
+  if (contentType.includes("application/x-www-form-urlencoded")) {
+    const bodyParams = new URLSearchParams(await req.text());
+    for (const [key, value] of bodyParams.entries()) params.append(key, value);
+    return params;
+  }
+
+  if (contentType.includes("multipart/form-data")) {
+    const form = await req.formData();
+    for (const [key, value] of form.entries()) {
+      if (typeof value === "string") params.append(key, value);
+    }
+    return params;
+  }
+
+  if (contentType.includes("application/json")) {
+    const body = await req.json().catch(() => null) as Record<string, unknown> | null;
+    if (body) {
+      for (const [key, value] of Object.entries(body)) {
+        if (typeof value === "string") params.append(key, value);
+      }
+    }
+  }
+
+  return params;
+}
+
+async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
+  const order = getPaymentAttemptId(params);
   const ccode = params.get("CCode");
   const origin = process.env.NEXT_PUBLIC_SITE_URL ?? req.nextUrl.origin;
 
@@ -51,7 +89,7 @@ export async function GET(req: NextRequest) {
   for (const [k, v] of params.entries()) rawReturn[k] = v;
 
   if (!verified) {
-    await admin
+    const { error } = await admin
       .from("payment_attempts")
       .update({
         status: "failed",
@@ -60,11 +98,14 @@ export async function GET(req: NextRequest) {
         completed_at: new Date().toISOString(),
       })
       .eq("id", attempt.id);
+    if (error) {
+      console.error("[/api/payments/return] failed to record verify failure:", error);
+    }
     return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
   }
 
   if (ccode !== "0") {
-    await admin
+    const { error } = await admin
       .from("payment_attempts")
       .update({
         status: "failed",
@@ -73,11 +114,14 @@ export async function GET(req: NextRequest) {
         completed_at: new Date().toISOString(),
       })
       .eq("id", attempt.id);
+    if (error) {
+      console.error("[/api/payments/return] failed to record declined payment:", error);
+    }
     return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
   }
 
   // Success — settle the attempt, flip subscription, bump expires_at.
-  await admin
+  const { error: settleError } = await admin
     .from("payment_attempts")
     .update({
       status: "succeeded",
@@ -89,13 +133,16 @@ export async function GET(req: NextRequest) {
       completed_at: new Date().toISOString(),
     })
     .eq("id", attempt.id);
+  if (settleError) {
+    console.error("[/api/payments/return] failed to mark attempt succeeded:", settleError);
+  }
 
   // Upsert (not update) — if the public.users row is missing for any reason
   // (auth callback hadn't run, OAuth edge case, etc.) a plain update would
   // silently affect 0 rows and leave subscription_status='none', which the
   // businesses INSERT RLS policy then rejects. Migration 019 also makes the
   // RLS predicate accept the payment_attempts ledger as a fallback signal.
-  await admin
+  const { error: userError } = await admin
     .from("users")
     .upsert(
       {
@@ -104,6 +151,9 @@ export async function GET(req: NextRequest) {
       },
       { onConflict: "id" }
     );
+  if (userError) {
+    console.error("[/api/payments/return] failed to mark user subscription active:", userError);
+  }
 
   if (attempt.business_id) {
     // Renewal — extend from now() OR existing expires_at (whichever is later).
@@ -120,10 +170,13 @@ export async function GET(req: NextRequest) {
       baseMs + attempt.plan_days * 24 * 60 * 60 * 1000
     ).toISOString();
 
-    await admin
+    const { error: businessError } = await admin
       .from("businesses")
       .update({ expires_at: newExpiry })
       .eq("id", attempt.business_id);
+    if (businessError) {
+      console.error("[/api/payments/return] failed to extend business expiry:", businessError);
+    }
   }
   // If no business_id, the trigger consume_payment_for_business() in
   // migration 017 will pick this credit up when the user creates their
