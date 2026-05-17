@@ -6,6 +6,7 @@ import {
   hasPaidSubscriptionStatus,
   toHypVerificationParams,
 } from "../lib/payment-state.ts";
+import { publicUserInsertFromAuthUser } from "../lib/user-profile.ts";
 
 test("active and past_due subscription statuses grant paid access", () => {
   assert.equal(hasPaidSubscriptionStatus("active"), true);
@@ -29,4 +30,24 @@ test("HYP verification params exclude local-only callback params", () => {
   assert.equal(verifiable.get("Order"), "hyp-order");
   assert.equal(verifiable.get("CCode"), "0");
   assert.equal(verifiable.get("signature"), "abc");
+});
+
+test("missing public profile can be created from an authenticated checkout user", () => {
+  const row = publicUserInsertFromAuthUser(
+    {
+      id: "user-123",
+      email: "owner@example.com",
+      user_metadata: {
+        full_name: "Owner Name",
+      },
+    },
+    "business_owner",
+  );
+
+  assert.deepEqual(row, {
+    id: "user-123",
+    email: "owner@example.com",
+    role: "business_owner",
+    name: "Owner Name",
+  });
 });
