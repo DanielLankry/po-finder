@@ -23,6 +23,7 @@ Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do
 
 ## Project Patterns
 - HYP checkout keeps the legacy `/p/` APISign flow but sends both legacy (`SuccessUrl`, `Order`) and CreditGuard-style (`successUrl`, `uniqueid`, `returnUrl`) return fields.
+- HYP completion redirects may arrive on page routes such as `/pricing`; `proxy.ts` detects HYP return parameters and redirects them to `/api/payments/return` for settlement.
 - Public map/list readiness lives in `lib/public-business.ts`; schedules should affect open-now/hours only, not whether an active business card exists.
 
 ## Known Issues
