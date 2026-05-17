@@ -1,4 +1,5 @@
 import { toHypVerificationParams } from "@/lib/payment-state";
+import { verifyCreditGuardResponseMac } from "@/lib/hyp-verification";
 
 /**
  * HYP Pay Protocol client.
@@ -105,6 +106,7 @@ function buildPayParams(p: CheckoutParams, masof: string, passp: string): Record
     Amount: String(p.amount),
     Info: p.info,
     Order: p.order,
+    uniqueid: p.order,
     Coin: "1",
     UTF8: "True",
     UTF8out: "True",
@@ -128,6 +130,10 @@ function buildPayParams(p: CheckoutParams, masof: string, passp: string): Record
     SuccessUrl: p.successUrl,
     ErrorUrl: p.errorUrl,
     CancelUrl: p.cancelUrl,
+    successUrl: p.successUrl,
+    errorUrl: p.errorUrl,
+    cancelUrl: p.cancelUrl,
+    returnUrl: p.successUrl,
   };
 }
 
@@ -280,6 +286,11 @@ export async function debugSignCheckoutRaw(): Promise<{
  */
 export async function verifyReturnSignature(returnQuery: URLSearchParams): Promise<boolean> {
   const { masof, passp, apiKey } = getCreds();
+
+  if (returnQuery.has("responseMac")) {
+    return verifyCreditGuardResponseMac(returnQuery, passp);
+  }
+
   const verifiableReturnQuery = toHypVerificationParams(returnQuery);
 
   // Per the spec, the verify URL is:
