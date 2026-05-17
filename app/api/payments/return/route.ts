@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminClient } from "@/lib/supabase/admin";
 import { verifyReturnSignature } from "@/lib/hyp";
-import { getPaymentAttemptId } from "@/lib/payment-state";
+import {
+  getHypAuthCode,
+  getHypCardMask,
+  getHypResponseCode,
+  getHypTransactionId,
+  getPaymentAttemptId,
+  isSuccessfulHypReturn,
+} from "@/lib/payment-state";
 
 export const runtime = "nodejs";
 
@@ -53,7 +60,7 @@ async function readPostReturnParams(req: NextRequest): Promise<URLSearchParams> 
 
 async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
   const order = getPaymentAttemptId(params);
-  const ccode = params.get("CCode");
+  const responseCode = getHypResponseCode(params);
   const origin = process.env.NEXT_PUBLIC_SITE_URL ?? req.nextUrl.origin;
 
   if (!order) {
@@ -93,7 +100,7 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
       .from("payment_attempts")
       .update({
         status: "failed",
-        hyp_response_code: ccode ?? "verify_failed",
+        hyp_response_code: responseCode ?? "verify_failed",
         raw_return: rawReturn,
         completed_at: new Date().toISOString(),
       })
@@ -104,12 +111,12 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
   }
 
-  if (ccode !== "0") {
+  if (!isSuccessfulHypReturn(params)) {
     const { error } = await admin
       .from("payment_attempts")
       .update({
         status: "failed",
-        hyp_response_code: ccode ?? "unknown",
+        hyp_response_code: responseCode ?? "unknown",
         raw_return: rawReturn,
         completed_at: new Date().toISOString(),
       })
@@ -125,10 +132,10 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     .from("payment_attempts")
     .update({
       status: "succeeded",
-      hyp_transaction_id: params.get("Id"),
-      hyp_auth_code: params.get("ACode"),
-      hyp_card_mask: params.get("L4digit"),
-      hyp_response_code: ccode,
+      hyp_transaction_id: getHypTransactionId(params),
+      hyp_auth_code: getHypAuthCode(params),
+      hyp_card_mask: getHypCardMask(params),
+      hyp_response_code: responseCode,
       raw_return: rawReturn,
       completed_at: new Date().toISOString(),
     })
