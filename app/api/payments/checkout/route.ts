@@ -7,6 +7,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { getPlanByDays } from "@/lib/plans-server";
 import { createSignedCheckoutUrl } from "@/lib/hyp";
 import { BRAND_NAME } from "@/lib/site-config";
+import { ensurePublicUser } from "@/lib/user-profile";
 
 export const runtime = "nodejs";
 
@@ -57,6 +58,17 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = adminClient();
+  try {
+    await ensurePublicUser(admin, user, "business_owner");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[/api/payments/checkout] ensure public user failed:", err);
+    return NextResponse.json(
+      { ok: false, error: "internal error", detail: message },
+      { status: 200 }
+    );
+  }
+
   const { data: attempt, error: insertErr } = await admin
     .from("payment_attempts")
     .insert({
