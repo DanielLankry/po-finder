@@ -73,6 +73,7 @@
 - [x] HYP payment return handling accepts legacy Pay Protocol and CreditGuard callback shapes
 - [x] Public business cards render for active businesses even when no same-day schedule row exists
 - [x] HYP payment completion redirects are captured from page routes and forwarded into settlement
+- [x] Navbar CTA uses server dashboard-access status so paid users see לוח בקרה after payment
 
 ### Infrastructure
 - [x] Environment variable validation (`lib/env.ts`)

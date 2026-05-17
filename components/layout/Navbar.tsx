@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Search, Menu, X, Plus, Heart, LayoutDashboard } from "lucide-react";
 import { Typewriter } from "@/components/ui/typewriter";
 import { MagneticButton } from "@/components/ui/magnetic-button";
@@ -9,7 +10,6 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import PlacesSearchBar, { type LocationResult } from "@/components/map/PlacesSearchBar";
-import { hasPaidSubscriptionStatus } from "@/lib/payment-state";
 
 interface NavbarProps {
   onLocationSelect?: (loc: LocationResult) => void;
@@ -22,8 +22,11 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [hasActiveBiz, setHasActiveBiz] = useState(false);
-  const supabase = createClient();
+  const [hasDashboardAccess, setHasDashboardAccess] = useState(false);
+  const supabase = useMemo(() => createClient(), []);
+  const pathname = usePathname();
+  const isDashboardRoute = pathname?.startsWith("/dashboard") ?? false;
+  const showDashboardCta = !!user && (isDashboardRoute || hasDashboardAccess);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 8);
@@ -39,74 +42,37 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
     return () => subscription.unsubscribe();
   }, [supabase.auth]);
 
-  // Determine if the logged-in user has dashboard access so the CTA can swap
-  // "הצטרפו במחיר השקה" → "לוח בקרה". The CTA points to /dashboard whenever
-  // the user has any meaningful relationship to the paid side of the product:
-  //   (a) has an active/past_due subscription status
-  //   (b) owns a business with expires_at > now()  — actively paying customer
-  //   (c) has a succeeded payment_attempt with business_id IS NULL — just paid,
-  //       hasn't created their business yet
-  //   (d) owns any business at all — already an owner; even if the period is
-  //       expired or the listing is still pending admin approval, the dashboard
-  //       is where they renew or finish setup, not /pricing
+  // Ask the server for the same dashboard-access decision used by the paywall.
+  // This avoids client-side RLS/timing gaps after returning from HYP payment.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       if (!user) {
-        if (!cancelled) setHasActiveBiz(false);
+        if (!cancelled) setHasDashboardAccess(false);
         return;
       }
 
-      const { data: profile } = await supabase
-        .from("users")
-        .select("subscription_status")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (hasPaidSubscriptionStatus(profile?.subscription_status)) {
-        if (!cancelled) setHasActiveBiz(true);
-        return;
+      if (isDashboardRoute) {
+        setHasDashboardAccess(true);
       }
 
-      const nowIso = new Date().toISOString();
-      const { data: activeBiz } = await supabase
-        .from("businesses")
-        .select("id")
-        .eq("owner_id", user.id)
-        .gt("expires_at", nowIso)
-        .limit(1)
-        .maybeSingle();
-
-      if (activeBiz) {
-        if (!cancelled) setHasActiveBiz(true);
-        return;
+      try {
+        const response = await fetch("/api/account/status", {
+          cache: "no-store",
+          credentials: "same-origin",
+        });
+        if (!response.ok) {
+          if (!cancelled) setHasDashboardAccess(isDashboardRoute);
+          return;
+        }
+        const data = await response.json() as { dashboardAccess?: boolean };
+        if (!cancelled) setHasDashboardAccess(Boolean(data.dashboardAccess));
+      } catch {
+        if (!cancelled) setHasDashboardAccess(isDashboardRoute);
       }
-
-      const { data: unconsumed } = await supabase
-        .from("payment_attempts")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("status", "succeeded")
-        .is("business_id", null)
-        .limit(1)
-        .maybeSingle();
-
-      if (unconsumed) {
-        if (!cancelled) setHasActiveBiz(true);
-        return;
-      }
-
-      const { data: anyBiz } = await supabase
-        .from("businesses")
-        .select("id")
-        .eq("owner_id", user.id)
-        .limit(1)
-        .maybeSingle();
-
-      if (!cancelled) setHasActiveBiz(!!anyBiz);
     })();
     return () => { cancelled = true; };
-  }, [user, supabase]);
+  }, [user, isDashboardRoute, pathname]);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -230,7 +196,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
           <div className="hidden md:block">
             <MagneticButton distance={0.45}>
               <Link
-                href={hasActiveBiz ? "/dashboard" : "/pricing"}
+                href={showDashboardCta ? "/dashboard" : "/pricing"}
                 className="group relative flex items-center gap-1.5 h-10 px-5 rounded-full font-semibold text-sm text-white overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
                 style={{
                   background: "linear-gradient(135deg,#059669 0%,#047857 100%)",
@@ -241,12 +207,12 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"
                   style={{ background: "linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.35) 50%,transparent 60%)" }}
                 />
-                {hasActiveBiz ? (
+                {showDashboardCta ? (
                   <LayoutDashboard className="h-4 w-4 relative z-10" aria-hidden="true" />
                 ) : (
                   <Plus className="h-4 w-4 relative z-10 group-hover:rotate-90 transition-transform duration-300" aria-hidden="true" />
                 )}
-                <span className="relative z-10">{user && hasActiveBiz ? "לוח בקרה" : "הצטרפו במחיר השקה"}</span>
+                <span className="relative z-10">{showDashboardCta ? "לוח בקרה" : "הצטרפו במחיר השקה"}</span>
               </Link>
             </MagneticButton>
           </div>
@@ -263,10 +229,10 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
               <div className="absolute left-0 top-full pt-1.5 w-44 z-50">
                 <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 py-1.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-left -translate-y-2 group-hover:translate-y-0">
                   <Link
-                    href={hasActiveBiz ? "/dashboard" : "/pricing"}
+                    href={showDashboardCta ? "/dashboard" : "/pricing"}
                     className="block px-4 py-2 text-sm text-slate-700 hover:bg-[#ECFDF5] hover:text-[#047857] transition-colors rounded-lg mx-1 font-medium"
                   >
-                    {user && hasActiveBiz ? "לוח בקרה" : "הצטרפו במחיר השקה"}
+                    {showDashboardCta ? "לוח בקרה" : "הצטרפו במחיר השקה"}
                   </Link>
                   <button
                     onClick={handleSignOut}
@@ -385,7 +351,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
 
             <nav className="grid grid-cols-2 gap-2.5">
               {[
-                { href: user && hasActiveBiz ? "/dashboard" : "/pricing", label: user && hasActiveBiz ? "לוח בקרה" : "הצטרפו במחיר השקה", emoji: "🏪", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
+                { href: showDashboardCta ? "/dashboard" : "/pricing", label: showDashboardCta ? "לוח בקרה" : "הצטרפו במחיר השקה", emoji: "🏪", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
                 { href: "/vendors", label: "לעסקים", emoji: "🛒", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
                 { href: "/pricing", label: "מחירים", emoji: "💳", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
                 { href: "/about", label: "אודות", emoji: "ℹ️", bg: "#F5F3FF", border: "#DDD6FE", text: "#5B21B6" },
