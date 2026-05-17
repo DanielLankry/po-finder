@@ -9,6 +9,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import PlacesSearchBar, { type LocationResult } from "@/components/map/PlacesSearchBar";
+import { hasPaidSubscriptionStatus } from "@/lib/payment-state";
 
 interface NavbarProps {
   onLocationSelect?: (loc: LocationResult) => void;
@@ -41,16 +42,32 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
   // Determine if the logged-in user has dashboard access so the CTA can swap
   // "הצטרפו במחיר השקה" → "לוח בקרה". The CTA points to /dashboard whenever
   // the user has any meaningful relationship to the paid side of the product:
-  //   (a) owns a business with expires_at > now()  — actively paying customer
-  //   (b) has a succeeded payment_attempt with business_id IS NULL — just paid,
+  //   (a) has an active/past_due subscription status
+  //   (b) owns a business with expires_at > now()  — actively paying customer
+  //   (c) has a succeeded payment_attempt with business_id IS NULL — just paid,
   //       hasn't created their business yet
-  //   (c) owns any business at all — already an owner; even if the period is
+  //   (d) owns any business at all — already an owner; even if the period is
   //       expired or the listing is still pending admin approval, the dashboard
   //       is where they renew or finish setup, not /pricing
   useEffect(() => {
-    if (!user) return;
     let cancelled = false;
     (async () => {
+      if (!user) {
+        if (!cancelled) setHasActiveBiz(false);
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("users")
+        .select("subscription_status")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (hasPaidSubscriptionStatus(profile?.subscription_status)) {
+        if (!cancelled) setHasActiveBiz(true);
+        return;
+      }
+
       const nowIso = new Date().toISOString();
       const { data: activeBiz } = await supabase
         .from("businesses")

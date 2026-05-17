@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
+import { hasPaidSubscriptionStatus } from "@/lib/payment-state";
 
 export const metadata = { title: "לוח בקרה" };
 
@@ -20,14 +21,21 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
 
   // Paywall: dashboard is for users with any meaningful relationship to the
   // paid side of the product. Access is granted if any of:
-  //   (a) they own a business with expires_at > now() (active subscription)
-  //   (b) they have a paid-but-unconsumed payment_attempt waiting to be linked
+  //   (a) their user row has active/past_due subscription status
+  //   (b) they own a business with expires_at > now() (active subscription)
+  //   (c) they have a paid-but-unconsumed payment_attempt waiting to be linked
   //       to a business they're about to create (lib/migrations/017 trigger)
-  //   (c) they own any business at all — even if the period expired or the
+  //   (d) they own any business at all — even if the period expired or the
   //       listing is still pending admin approval. /dashboard/billing is where
   //       they renew; locking them out of their own dashboard would force them
   //       to re-pay before they can even see the renewal screen.
   const nowIso = new Date().toISOString();
+
+  const { data: profile } = await supabase
+    .from("users")
+    .select("subscription_status")
+    .eq("id", user.id)
+    .maybeSingle();
 
   const { data: activeBiz } = await supabase
     .from("businesses")
@@ -37,7 +45,7 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     .limit(1)
     .maybeSingle();
 
-  let hasAccess = !!activeBiz;
+  let hasAccess = hasPaidSubscriptionStatus(profile?.subscription_status) || !!activeBiz;
 
   if (!hasAccess) {
     const { data: unconsumed } = await supabase

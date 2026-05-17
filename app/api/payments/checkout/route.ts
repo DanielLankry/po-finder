@@ -82,6 +82,10 @@ export async function POST(req: NextRequest) {
 
   const origin =
     process.env.NEXT_PUBLIC_SITE_URL ?? req.nextUrl.origin;
+  const returnUrl = new URL("/api/payments/return", origin);
+  returnUrl.searchParams.set("attempt", attempt.id);
+  const cancelUrl = new URL("/api/payments/cancel", origin);
+  cancelUrl.searchParams.set("attempt", attempt.id);
 
   try {
     const url = await createSignedCheckoutUrl({
@@ -93,9 +97,9 @@ export async function POST(req: NextRequest) {
       email: "",
       firstName: "",
       lastName: "",
-      successUrl: `${origin}/api/payments/return`,
-      errorUrl: `${origin}/api/payments/return`,
-      cancelUrl: `${origin}/api/payments/cancel`,
+      successUrl: returnUrl.toString(),
+      errorUrl: returnUrl.toString(),
+      cancelUrl: cancelUrl.toString(),
     });
 
     return NextResponse.json({ ok: true, id: attempt.id, url });

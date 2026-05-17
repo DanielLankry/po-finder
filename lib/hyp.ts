@@ -1,3 +1,5 @@
+import { toHypVerificationParams } from "@/lib/payment-state";
+
 /**
  * HYP Pay Protocol client.
  *
@@ -278,6 +280,7 @@ export async function debugSignCheckoutRaw(): Promise<{
  */
 export async function verifyReturnSignature(returnQuery: URLSearchParams): Promise<boolean> {
   const { masof, passp, apiKey } = getCreds();
+  const verifiableReturnQuery = toHypVerificationParams(returnQuery);
 
   // Per the spec, the verify URL is:
   //   /p/?action=APISign&What=VERIFY&KEY=<api>&PassP=<pass>&Masof=<masof>&<all return params>
@@ -288,7 +291,7 @@ export async function verifyReturnSignature(returnQuery: URLSearchParams): Promi
   verifyParams.set("KEY", apiKey);
   verifyParams.set("PassP", passp);
   verifyParams.set("Masof", masof);
-  for (const [k, v] of returnQuery.entries()) {
+  for (const [k, v] of verifiableReturnQuery.entries()) {
     if (k === "action" || k === "What" || k === "KEY" || k === "PassP" || k === "Masof") continue;
     verifyParams.append(k, v);
   }
