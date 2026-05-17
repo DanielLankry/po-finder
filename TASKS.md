@@ -1,7 +1,7 @@
 # Po-Finder (פה קרוב) - Tasks
 
 > Small business discovery app (Next.js 16 + Supabase + Google Maps)
-> Last updated: 2026-05-14
+> Last updated: 2026-05-17
 
 ---
 
@@ -70,6 +70,7 @@
 - [x] Vendor and pricing FAQ sections added
 - [x] Demo/test businesses filtered from the public map
 - [x] Sentry test route removed from public routing
+- [x] HYP payment return handling accepts legacy Pay Protocol and CreditGuard callback shapes
 
 ### Infrastructure
 - [x] Environment variable validation (`lib/env.ts`)
