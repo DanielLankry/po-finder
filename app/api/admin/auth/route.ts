@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { ADMIN_SESSION_COOKIE, ADMIN_SESSION_MAX_AGE, createAdminSessionValue } from "@/lib/admin-session";
 import { rateLimit } from "@/lib/rate-limit";
 
 const loginSchema = z.object({
@@ -27,11 +28,11 @@ export async function POST(req: NextRequest) {
   }
 
   const res = NextResponse.json({ ok: true });
-  res.cookies.set("admin_session", process.env.ADMIN_SECRET!, {
+  res.cookies.set(ADMIN_SESSION_COOKIE, await createAdminSessionValue(), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: ADMIN_SESSION_MAX_AGE,
     path: "/",
   });
   return res;
@@ -39,6 +40,6 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE() {
   const res = NextResponse.json({ ok: true });
-  res.cookies.delete("admin_session");
+  res.cookies.delete(ADMIN_SESSION_COOKIE);
   return res;
 }

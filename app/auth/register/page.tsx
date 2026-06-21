@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Store, ShoppingCart } from "lucide-react";
+import { Eye, EyeOff, Store, ShoppingCart } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -107,10 +107,11 @@ function RegisterForm() {
           <h2 className="text-4xl font-black text-[#065F46] mb-2 leading-tight">הפלטפורמה</h2>
           <div className="text-4xl font-black text-[#059669] mb-3 h-12 flex items-center justify-center">
             <Typewriter
-              text={["לעסקים קטנים", "לדוכנים", "לעגלות קפה", "ליוצרים", "לשווקים ניידים", "לאופים ביתיים", "לישראלים"]}
+              text={["לעסקים קטנים", "לדוכנים", "לעגלות קפה", "ליוצרים", "לשווקים ניידים", "לאופים ביתיים", "לחקלאים", "לישראלים"]}
               speed={65}
               deleteSpeed={35}
               waitTime={2000}
+              wordColors={{ "לישראלים": "text-[#2563EB]" }}
             />
           </div>
           <p className="text-[#047857] text-lg font-medium opacity-80">על המפה, בזמן אמת</p>
@@ -212,8 +213,9 @@ function RegisterForm() {
                       onChange={(e) => setPassword(e.target.value)} required minLength={6} dir="ltr"
                       className="h-12 rounded-2xl border-2 border-[#E5E7EB] focus-visible:border-[#059669] focus-visible:ring-0 bg-white text-sm pr-12" />
                     <button type="button" onClick={() => setShowPass(!showPass)}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#059669] text-xs font-medium transition-colors">
-                      {showPass ? "הסתר" : "הצג"}
+                      className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#9CA3AF] hover:bg-[#ECFDF5] hover:text-[#059669] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+                      aria-label={showPass ? "הסתרת סיסמה" : "הצגת סיסמה"}>
+                      {showPass ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                     </button>
                   </div>
                 </div>

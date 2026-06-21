@@ -20,17 +20,24 @@ const whatsappHref = getWhatsAppHref();
 
 export default function ContactPage() {
   const [formState, setFormState] = useState<"idle" | "sending" | "sent" | "error">("idle");
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+    privacyAccepted: false,
+  });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormState("sending");
     try {
-      await fetch("/api/contact", {
+      const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+      if (!res.ok) throw new Error("Failed to send contact form");
       setFormState("sent");
     } catch {
       setFormState("error");
@@ -89,7 +96,7 @@ export default function ContactPage() {
                 <button
                   onClick={() => {
                     setFormState("idle");
-                    setForm({ name: "", email: "", subject: "", message: "" });
+                    setForm({ name: "", email: "", subject: "", message: "", privacyAccepted: false });
                   }}
                   className="mt-6 text-[#059669] text-sm font-semibold hover:underline"
                 >
@@ -172,9 +179,26 @@ export default function ContactPage() {
                   />
                 </div>
 
+                <label className="flex items-start gap-3 rounded-xl border border-[#E5E7EB] bg-[#FAFAF7] p-3 text-xs text-[#666]">
+                  <input
+                    type="checkbox"
+                    required
+                    checked={form.privacyAccepted}
+                    onChange={(e) => setForm({ ...form, privacyAccepted: e.target.checked })}
+                    className="mt-0.5 h-4 w-4 rounded border-[#D1D5DB] accent-[#059669]"
+                  />
+                  <span>
+                    אני מאשר/ת שהפרטים יישמרו וישמשו לטיפול בפנייה, בהתאם{" "}
+                    <Link href="/privacy" className="text-[#059669] hover:underline">
+                      למדיניות הפרטיות
+                    </Link>
+                    .
+                  </span>
+                </label>
+
                 <button
                   type="submit"
-                  disabled={formState === "sending" || !form.subject}
+                  disabled={formState === "sending" || !form.subject || !form.privacyAccepted}
                   className="w-full h-12 rounded-2xl text-white font-bold text-base flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ background: "linear-gradient(135deg, #059669 0%, #047857 100%)", boxShadow: "0 4px 16px rgba(5,150,105,0.3)" }}
                 >
@@ -188,12 +212,11 @@ export default function ContactPage() {
                 <p className="text-center text-[#AAA] text-xs">
                   נשיב תוך 3 ימי עסקים • א׳–ה׳ 9:00–17:00
                 </p>
-                <p className="text-center text-[#BBB] text-xs">
-                  בשליחה אני מאשר/ת את{" "}
-                  <Link href="/privacy" className="text-[#059669] hover:underline">
-                    מדיניות הפרטיות
-                  </Link>
-                </p>
+                {formState === "error" && (
+                  <p role="alert" className="text-center text-red-600 text-sm">
+                    לא הצלחנו לשלוח את הפנייה. בדקו את הפרטים ונסו שוב.
+                  </p>
+                )}
               </form>
             )}
           </div>

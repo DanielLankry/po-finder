@@ -118,7 +118,7 @@ const Typewriter = ({
   const glowStyle = glowColor ? { textShadow: `0 0 12px ${glowColor}, 0 0 24px ${glowColor}` } : undefined
 
   return (
-    <div className={`inline whitespace-pre-wrap tracking-tight ${className} ${wordColorClass}`} style={glowStyle}>
+    <div className={`inline whitespace-pre-wrap ${className} ${wordColorClass}`} style={glowStyle}>
       <span>{displayText}</span>
       {showCursor && (
         <motion.span

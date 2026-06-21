@@ -1,9 +1,13 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import LegalIdentity from "@/components/legal/LegalIdentity";
+import { BRAND_NAME, BUSINESS_INFO, SITE_DOMAIN } from "@/lib/site-config";
+
+const contactEmail = BUSINESS_INFO.contactEmail;
 
 export const metadata = {
   title: "מדיניות פרטיות",
-  description: "מדיניות הפרטיות של פה קרוב: איזה מידע נאסף, איך משתמשים בו ואיך אפשר לפנות אלינו.",
+  description: "מדיניות הפרטיות של פה קרוב: איזה מידע נאסף, לאילו מטרות, למי הוא נמסר ואיך אפשר לממש זכויות.",
 };
 
 export default function PrivacyPage() {
@@ -16,271 +20,195 @@ export default function PrivacyPage() {
             מדיניות פרטיות
           </h1>
           <p className="text-stone-500 text-sm mb-8">
-            עדכון אחרון: אפריל 2026 · בתוקף מיום פרסומה · מסמך זה עומד בדרישות תיקון 13 לחוק הגנת הפרטיות, התשמ&quot;א–1981
+            עדכון אחרון: מאי 2026 · בתוקף מיום פרסומה
           </p>
 
           <div className="space-y-8 text-stone-700 leading-relaxed">
-
-            {/* 1 */}
             <section>
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                1. מיהו בעל מאגר המידע?
+                1. מי מפעיל את השירות?
               </h2>
-              <p>
-                פלטפורמת <strong>פה קרוב</strong> (להלן: &quot;השירות&quot; או &quot;אנחנו&quot;) מופעלת תחת הדומיין{" "}
-                <span className="font-mono text-sm">pokarov.co.il</span>.
-                לפניות בנושא פרטיות:{" "}
-                <a href="mailto:privacy@pokarov.co.il" className="text-[#059669] hover:underline">
-                  privacy@pokarov.co.il
-                </a>
+              <p className="mb-3">
+                פלטפורמת <strong>{BRAND_NAME}</strong> פועלת בדומיין{" "}
+                <span className="font-mono text-sm" dir="ltr">{SITE_DOMAIN}</span>. לפניות בנושא פרטיות,
+                אבטחת מידע או מימוש זכויות אפשר לפנות אל{" "}
+                <a href={`mailto:${contactEmail}`} className="text-[#059669] hover:underline">
+                  {contactEmail}
+                </a>.
               </p>
+              <LegalIdentity />
             </section>
 
-            {/* 2 */}
             <section>
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                2. מידע שאנו אוספים
+                2. איזה מידע נאסף?
               </h2>
-              <p className="mb-2">
-                השירות אוסף מידע בשתי דרכים:
-              </p>
-              <p className="font-semibold text-stone-800 mb-1">מידע שמסרתם ישירות:</p>
-              <ul className="list-disc list-inside space-y-1 text-stone-600 mb-3">
-                <li>שם מלא, כתובת דוא&quot;ל, סיסמה מוצפנת (בהרשמה)</li>
-                <li>פרטי העסק: שם, כתובת, שעות, תמונות, טלפון (לבעלי עסקים)</li>
-                <li>ביקורות ודירוגים שפרסמתם</li>
-                <li>פניות שיצרתם דרך טופס יצירת קשר</li>
-              </ul>
-              <p className="font-semibold text-stone-800 mb-1">מידע שנאסף אוטומטית (בהסכמה בלבד):</p>
-              <ul className="list-disc list-inside space-y-1 text-stone-600">
-                <li>נתוני גלישה ואנליטיקה — רק לאחר הסכמה מפורשת לעוגיות</li>
-                <li>מיקום גיאוגרפי — רק אם הרשיתם גישה מפורשת בדפדפן</li>
-                <li>כתובת IP, סוג מכשיר, דפדפן — לצורכי אבטחה ואנליטיקה</li>
+              <ul className="list-disc list-inside space-y-2 text-stone-600">
+                <li>פרטי חשבון: שם, דוא&quot;ל, תפקיד משתמש ונתוני התחברות המנוהלים ב-Supabase Auth.</li>
+                <li>פרטי עסק שמוזנים על ידי בעל העסק: שם, תיאור, קטגוריה, כתובת, מיקום, שעות פעילות, תמונות, טלפון, WhatsApp, אתר, Instagram, כשרות ומספר עוסק אם נמסר.</li>
+                <li>תוכן משתמשים: ביקורות, דירוגים, מועד פרסום ופעולות מועדפים.</li>
+                <li>פניות שירות: שם, דוא&quot;ל, נושא הפנייה ותוכן ההודעה בטופס יצירת קשר.</li>
+                <li>נתוני תשלום מוגבלים: מזהה ניסיון תשלום, סכום, תקופה, סטטוס, מזהה עסקה, קוד אישור ומספר כרטיס מוסווה אם הוחזר מספק התשלום. איננו שומרים מספר כרטיס מלא או CVV.</li>
+                <li>נתוני שימוש ואבטחה: כתובת IP, סוג דפדפן, עמודים שנצפו, אירועי לחיצה בסיסיים ולוגים הנדרשים להפעלה, אבטחה ומניעת ניצול לרעה.</li>
+                <li>נתוני מיקום דפדפן נאספים רק אם המשתמש אישר זאת בדפדפן. אפשר להשתמש באתר גם ללא הרשאת מיקום.</li>
               </ul>
             </section>
 
-            {/* 3 */}
             <section>
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                3. מטרות עיבוד המידע והבסיס החוקי
+                3. מטרות השימוש במידע
               </h2>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
+                <table className="w-full border-collapse text-sm">
                   <thead>
                     <tr className="bg-stone-100 text-stone-800">
-                      <th className="text-right p-3 border border-stone-200 font-semibold">מטרה</th>
-                      <th className="text-right p-3 border border-stone-200 font-semibold">בסיס חוקי</th>
+                      <th className="border border-stone-200 p-3 text-right font-semibold">מטרה</th>
+                      <th className="border border-stone-200 p-3 text-right font-semibold">דוגמאות שימוש</th>
                     </tr>
                   </thead>
                   <tbody>
                     {[
-                      ["הפעלת השירות ואימות זהות", "הסכם (תנאי שימוש)"],
-                      ["הצגת עסקים על המפה", "הסכם"],
-                      ["שמירת ביקורות", "הסכם + הסכמה"],
-                      ["שליחת הודעות שירות חיוניות (אימות, שחזור סיסמה)", "הסכם"],
-                      ["אנליטיקה ושיפור השירות", "הסכמה (ניתנת דרך בנאר העוגיות)"],
-                      ["עמידה בחובות חוקיות ורגולטוריות", "חובה חוקית"],
-                    ].map(([purpose, basis]) => (
+                      ["הפעלת השירות", "יצירת חשבון, הצגת עסקים, שמירת שעות, תמונות וביקורות"],
+                      ["תשלומים וחיוב", "הפניה לדף תשלום מאובטח, בדיקת סטטוס עסקה, החזרים ותיעוד חשבונאי"],
+                      ["שירות לקוחות", "מענה לפניות, טיפול בבקשות פרטיות, נגישות, חיוב ותמיכה"],
+                      ["אבטחה ומניעת שימוש לרעה", "הגבלת קצב, לוגים, איתור תקלות ושמירה על תקינות השירות"],
+                      ["אנליטיקה ושיפור", "מדידת שימוש באתר רק לאחר הסכמה לעוגיות אנליטיקה"],
+                      ["חובות חוקיות", "שמירת רשומות תשלום וחשבונאות, מענה לרשות מוסמכת לפי דין"],
+                    ].map(([purpose, examples]) => (
                       <tr key={purpose} className="even:bg-stone-50">
-                        <td className="p-3 border border-stone-200">{purpose}</td>
-                        <td className="p-3 border border-stone-200 text-stone-500">{basis}</td>
+                        <td className="border border-stone-200 p-3 font-medium text-stone-800">{purpose}</td>
+                        <td className="border border-stone-200 p-3 text-stone-600">{examples}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-              <p className="text-stone-500 text-sm mt-3">
-                <strong>אין אנו משתמשים במידע לצורכי שיווק ואין אנו מוכרים מידע לצדדים שלישיים.</strong>
+              <p className="mt-3 text-sm text-stone-500">
+                איננו מוכרים מידע אישי. דיוור שיווקי, אם יופעל בעתיד, יישלח רק בהתאם להסכמה
+                נפרדת ולכללי הסרה מדיוור.
               </p>
             </section>
 
-            {/* 4 */}
             <section>
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                4. מעבדי נתונים צד שלישי
+                4. מידע ציבורי בפלטפורמה
+              </h2>
+              <p>
+                פרטי עסק שבעל העסק מזין לצורך פרסום, כגון שם העסק, תיאור, מיקום, שעות,
+                תמונות, קישורי קשר וביקורות, מיועדים להצגה לציבור. יש להימנע מהזנת מידע
+                אישי שאינכם רוצים שיופיע באתר.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
+                5. ספקים חיצוניים
               </h2>
               <p className="mb-3">
-                אנו משתמשים בספקים חיצוניים לצורך הפעלת השירות. כל ספק מחויב לעיבוד המידע בהתאם למדיניות הפרטיות שלו:
+                אנו משתמשים בספקים חיצוניים להפעלת השירות. העברת מידע אליהם נעשית לפי
+                הצורך התפעולי והחוזי של השירות:
               </p>
               <div className="space-y-3">
                 {[
-                  {
-                    name: "Supabase",
-                    role: "מסד נתונים, אימות, אחסון תמונות",
-                    location: "ארה&quot;ב / AWS (eu-west-1)",
-                    link: "https://supabase.com/privacy",
-                  },
-                  {
-                    name: "Vercel",
-                    role: "אחסון ופריסה של השירות, אנליטיקה אנונימית",
-                    location: "ארה&quot;ב / רשת גלובלית",
-                    link: "https://vercel.com/legal/privacy-policy",
-                  },
-                  {
-                    name: "PostHog",
-                    role: "אנליטיקה התנהגותית — רק בהסכמה מפורשת",
-                    location: "שרתים אירופאיים (eu.i.posthog.com)",
-                    link: "https://posthog.com/privacy",
-                  },
-                  {
-                    name: "Google Maps Platform",
-                    role: "הצגת מפה וחיפוש מיקומים",
-                    location: "גלובלי",
-                    link: "https://policies.google.com/privacy",
-                  },
-                  {
-                    name: "Resend",
-                    role: "שליחת מיילים עסקיים (אימות, איפוס סיסמה)",
-                    location: "ארה&quot;ב",
-                    link: "https://resend.com/privacy",
-                  },
-                ].map((p) => (
-                  <div key={p.name} className="bg-stone-50 border border-stone-200 rounded-xl p-4">
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <span className="font-semibold text-stone-900">{p.name}</span>
-                      <span className="text-xs text-stone-400">·</span>
-                      <span className="text-xs text-stone-500">{p.location}</span>
-                    </div>
-                    <p className="text-sm text-stone-600 mb-1">{p.role}</p>
+                  ["Supabase", "מסד נתונים, אימות משתמשים ואחסון תמונות", "https://supabase.com/privacy"],
+                  ["Vercel", "אחסון, פריסה, תשתית אתר ואנליטיקה לאחר הסכמה", "https://vercel.com/legal/privacy-policy"],
+                  ["PostHog", "אנליטיקה התנהגותית לאחר הסכמה", "https://posthog.com/privacy"],
+                  ["Google Maps Platform", "מפה, חיפוש כתובות ותצוגת מיקומים", "https://policies.google.com/privacy"],
+                  ["Resend", "שליחת הודעות שירות ודוא\"ל תמיכה", "https://resend.com/privacy"],
+                  ["HYP / YaadPay", "דף תשלום מאובטח, אימות עסקה, ביטול והחזר", "https://yaadpay.co.il"],
+                  ["Sentry", "ניטור שגיאות ותקלות תוכנה", "https://sentry.io/privacy/"],
+                ].map(([name, role, href]) => (
+                  <div key={name} className="rounded-xl border border-stone-200 bg-stone-50 p-4">
+                    <p className="font-semibold text-stone-900">{name}</p>
+                    <p className="text-sm text-stone-600">{role}</p>
                     <a
-                      href={p.link}
+                      href={href}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-[#059669] hover:underline"
                     >
-                      מדיניות פרטיות של {p.name} ←
+                      מידע נוסף על {name}
                     </a>
                   </div>
                 ))}
               </div>
             </section>
 
-            {/* 5 */}
+            <section id="cookies">
+              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
+                6. עוגיות ואחסון מקומי
+              </h2>
+              <ul className="list-disc list-inside space-y-2 text-stone-600">
+                <li>עוגיות הכרחיות: סשן התחברות, אבטחה ותפעול בסיסי. לא ניתן לספק חשבון משתמש בלעדיהן.</li>
+                <li>אחסון מקומי הכרחי/פונקציונלי: העדפות נגישות, מועדפים לאורחים, מצב סיור והעדפת עוגיות.</li>
+                <li>אנליטיקה: PostHog ו-Vercel Analytics מופעלים רק לאחר לחיצה על &quot;אישור&quot; בבאנר העוגיות.</li>
+              </ul>
+              <p className="mt-3 text-sm text-stone-500">
+                אפשר לפתוח מחדש את בחירת העוגיות דרך הקישור &quot;העדפות עוגיות&quot; בתחתית האתר.
+              </p>
+            </section>
+
             <section>
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                5. שמירת מידע
+                7. שמירת מידע
               </h2>
-              <ul className="list-disc list-inside space-y-1 text-stone-600">
-                <li>נתוני חשבון — נשמרים כל עוד החשבון פעיל</li>
-                <li>ביקורות ופעילות עסקית — נשמרות לצורכי שירות; ניתן למחיקה לפי בקשה</li>
-                <li>לוגים ואנליטיקה — עד 12 חודשים</li>
-                <li>נתוני תשלום — נשמרים אצל ספק התשלום בהתאם לדרישות החוק (7 שנים לצורכי מע&quot;מ)</li>
-                <li>לאחר מחיקת חשבון — פרטים אישיים נמחקים תוך 30 ימי עסקים</li>
+              <ul className="list-disc list-inside space-y-2 text-stone-600">
+                <li>חשבון משתמש נשמר כל עוד החשבון פעיל, אלא אם נדרשת שמירה נוספת לפי דין.</li>
+                <li>פרטי עסקים ותוכן ציבורי נשמרים כל עוד העסק פעיל או נדרש לתיעוד השירות.</li>
+                <li>פניות שירות נשמרות בדרך כלל עד 24 חודשים, אלא אם נדרש אחרת לצורך טיפול במחלוקת.</li>
+                <li>רשומות תשלום וחשבונאות נשמרות לפי דרישות הדין החלות על מס, הנהלת חשבונות ומחלוקות.</li>
+                <li>אנליטיקה ולוגים תפעוליים נשמרים לתקופה מוגבלת בהתאם להגדרות הספקים ולצורך אבטחה ותפעול.</li>
               </ul>
             </section>
 
-            {/* 6 */}
             <section>
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                6. זכויות הנושא לפי חוק הגנת הפרטיות (תיקון 13)
+                8. זכויות משתמשים
               </h2>
               <p className="mb-3">
-                בהתאם לתיקון 13 לחוק הגנת הפרטיות (התשמ&quot;א–1981), יש לכם הזכויות הבאות:
+                בהתאם לדין החל, ניתן לבקש לעיין במידע אישי שמוחזק עליכם, לתקן מידע שאינו
+                נכון, למחוק חשבון או להסיר מידע שאינו דרוש עוד לשירות, בכפוף לחובות שמירה
+                ולחריגים בדין.
               </p>
-              <ul className="list-disc list-inside space-y-2 text-stone-600">
-                <li>
-                  <strong>עיון:</strong> לקבל עותק של המידע האישי שמצוי אצלנו אודותיכם
-                </li>
-                <li>
-                  <strong>תיקון:</strong> לתקן מידע שגוי, לא מדויק, או מיושן
-                </li>
-                <li>
-                  <strong>מחיקה:</strong> לבקש מחיקת חשבונכם וכל המידע האישי הקשור אליו
-                </li>
-                <li>
-                  <strong>התנגדות:</strong> להתנגד לעיבוד מידע לצורכי שיווק (לא רלוונטי כיום — אנו אינם משווקים)
-                </li>
-                <li>
-                  <strong>ניידות:</strong> לקבל את המידע שלכם בפורמט נגיש (JSON / CSV)
-                </li>
-              </ul>
-              <div className="mt-4 bg-[#ECFDF5] border border-[#D1FAE5] rounded-xl p-4">
-                <p className="text-[#065F46] text-sm font-medium mb-1">כיצד לממש את זכויותיכם?</p>
-                <p className="text-[#047857] text-sm">
-                  שלחו מייל ל-{" "}
-                  <a href="mailto:privacy@pokarov.co.il" className="font-semibold hover:underline">
-                    privacy@pokarov.co.il
-                  </a>{" "}
-                  עם בקשתכם. <strong>נענה תוך 30 ימים</strong> ממועד קבלת הבקשה,
-                  כנדרש בתיקון 13 לחוק הגנת הפרטיות.
+              <div className="rounded-xl border border-[#D1FAE5] bg-[#ECFDF5] p-4">
+                <p className="text-sm text-[#065F46]">
+                  למימוש זכויות שלחו בקשה אל{" "}
+                  <a href={`mailto:${contactEmail}`} className="font-semibold hover:underline">
+                    {contactEmail}
+                  </a>. ייתכן שנבקש מידע נוסף לאימות זהות לפני טיפול בבקשה.
                 </p>
               </div>
-              <p className="text-stone-500 text-sm mt-3">
-                אם אינכם מרוצים מהטיפול בפנייתכם, תוכלו להגיש תלונה ל
+            </section>
+
+            <section>
+              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
+                9. אבטחת מידע
+              </h2>
+              <ul className="list-disc list-inside space-y-2 text-stone-600">
+                <li>האתר מוגש ב-HTTPS.</li>
+                <li>סיסמאות מנוהלות על ידי Supabase Auth ואינן נשמרות אצלנו בטקסט גלוי.</li>
+                <li>מסד הנתונים מוגן באמצעות Row Level Security והרשאות שירות מוגבלות.</li>
+                <li>גישה ניהולית למידע מיועדת למורשים בלבד ולצורכי תפעול, תמיכה, חיוב ואבטחה.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
+                10. שינויים ופניות לרשות
+              </h2>
+              <p>
+                נעדכן מדיניות זו מעת לעת. שינוי מהותי יפורסם באתר, ובמקרים מתאימים נמסור
+                הודעה למשתמשים רשומים. אם אינכם מרוצים מהטיפול בבקשת פרטיות, ניתן לפנות אל{" "}
                 <a
                   href="https://www.gov.il/he/departments/the-privacy-protection-authority"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#059669] hover:underline mx-1"
+                  className="text-[#059669] hover:underline"
                 >
                   הרשות להגנת הפרטיות
-                </a>
-                (ממשל זמין).
+                </a>.
               </p>
             </section>
-
-            {/* 7 */}
-            <section>
-              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                7. עוגיות (Cookies)
-              </h2>
-              <p className="mb-3">
-                אנו משתמשים בשתי קטגוריות עוגיות:
-              </p>
-              <div className="space-y-2">
-                <div className="border border-stone-200 rounded-xl p-4">
-                  <p className="font-semibold text-stone-800 mb-1">עוגיות הכרחיות</p>
-                  <p className="text-sm text-stone-600">
-                    ניהול סשן (Supabase Auth) — נדרשות לפעולת השירות. לא ניתן לבטל.
-                  </p>
-                </div>
-                <div className="border border-stone-200 rounded-xl p-4">
-                  <p className="font-semibold text-stone-800 mb-1">עוגיות אנליטיקה (PostHog, Vercel Analytics)</p>
-                  <p className="text-sm text-stone-600">
-                    פועלות <strong>רק לאחר הסכמתכם</strong> דרך בנאר העוגיות שמוצג בכניסה הראשונה.
-                    ניתן לשנות את ההסכמה בכל עת על ידי מחיקת נתוני הגלישה או פנייה אלינו.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* 8 */}
-            <section>
-              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                8. אבטחת מידע
-              </h2>
-              <ul className="list-disc list-inside space-y-1 text-stone-600">
-                <li>כל התקשורת מוצפנת ב-TLS/HTTPS</li>
-                <li>הסיסמאות מוצפנות עם bcrypt (לא נשמרות בטקסט גלוי)</li>
-                <li>מסד הנתונים מוגן עם Row Level Security (RLS) ב-Supabase</li>
-                <li>גישה למידע מוגבלת לעובדים מורשים בלבד</li>
-              </ul>
-            </section>
-
-            {/* 9 */}
-            <section>
-              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                9. שינויים במדיניות
-              </h2>
-              <p>
-                שינויים מהותיים יפורסמו בדף זה ויישלח עדכון בדוא&quot;ל לכל המשתמשים הרשומים
-                לפחות <strong>14 ימים לפני כניסתם לתוקף</strong>.
-              </p>
-            </section>
-
-            {/* 10 */}
-            <section>
-              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                10. יצירת קשר
-              </h2>
-              <p>
-                לכל שאלה, בקשה, או תלונה הנוגעת לפרטיות:{" "}
-                <a href="mailto:privacy@pokarov.co.il" className="text-[#059669] hover:underline">
-                  privacy@pokarov.co.il
-                </a>
-              </p>
-            </section>
-
           </div>
         </div>
       </main>

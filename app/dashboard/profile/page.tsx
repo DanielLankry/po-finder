@@ -157,6 +157,10 @@ export default function ProfilePage() {
       <h1 className="font-display font-bold text-xl text-stone-900 mb-6">
         {business ? "עריכת פרטי העסק" : "יצירת פרופיל עסק"}
       </h1>
+      <p className="mb-5 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+        פרטי העסק שתשמרו כאן מיועדים להצגה ציבורית לאחר אישור העסק. אל תזינו מידע
+        שאינכם רוצים שיופיע באתר.
+      </p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div data-tour="profile-name">

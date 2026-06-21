@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ reviews: data });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -34,10 +34,13 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { business_id, rating, comment, reviewer_name } = body;
+    const { business_id, rating, comment, reviewer_name, privacyAccepted } = body;
 
     if (!business_id || !rating) {
       return NextResponse.json({ error: "business_id and rating are required" }, { status: 400 });
+    }
+    if (privacyAccepted !== true) {
+      return NextResponse.json({ error: "privacyAccepted is required" }, { status: 400 });
     }
 
     if (typeof rating !== "number" || rating < 1 || rating > 5) {
@@ -74,7 +77,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ review: data }, { status: 201 });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

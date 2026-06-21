@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAdminRequest } from "@/lib/admin-session";
 import { adminClient } from "@/lib/supabase/admin";
 import { refundTransaction } from "@/lib/hyp";
 
@@ -8,8 +9,7 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = req.cookies.get("admin_session")?.value;
-  if (session !== process.env.ADMIN_SECRET) {
+  if (!(await isAdminRequest(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

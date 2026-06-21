@@ -1,6 +1,19 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isAdminRequest } from "@/lib/admin-session";
 import { hasHypPaymentReturnParams } from "@/lib/payment-state";
+
+const PUBLIC_PAGE_ROUTES = new Set([
+  "/",
+  "/about",
+  "/accessibility",
+  "/contact",
+  "/pricing",
+  "/privacy",
+  "/refund",
+  "/terms",
+  "/vendors",
+]);
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -20,10 +33,20 @@ export async function proxy(request: NextRequest) {
 
   // Admin routes: check admin_session cookie.
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    const session = request.cookies.get("admin_session")?.value;
-    if (!session || session !== process.env.ADMIN_SECRET) {
+    if (!(await isAdminRequest(request))) {
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
+  }
+
+  if (
+    request.method === "GET" &&
+    (PUBLIC_PAGE_ROUTES.has(pathname) ||
+      pathname === "/api/businesses" ||
+      pathname === "/api/reviews" ||
+      pathname === "/robots.txt" ||
+      pathname === "/sitemap.xml")
+  ) {
+    return NextResponse.next();
   }
 
   // Supabase session refresh for all other routes.

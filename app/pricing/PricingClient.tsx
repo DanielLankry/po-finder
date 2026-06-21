@@ -188,6 +188,12 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
               <p className="text-center text-[#888] text-xs mt-3">
                 בחירת מסלול נוכחי: {plan.label} • {LAUNCH_OFFER.noCommitmentText}
               </p>
+              <p className="text-center text-[#888] text-xs mt-2 leading-relaxed">
+                בהמשך לתשלום אתם מאשרים שקראתם את{" "}
+                <Link href="/terms" className="text-[#059669] hover:underline">תנאי השימוש</Link>,{" "}
+                <Link href="/refund" className="text-[#059669] hover:underline">מדיניות הביטולים וההחזרים</Link>{" "}
+                ואת <Link href="/privacy" className="text-[#059669] hover:underline">מדיניות הפרטיות</Link>.
+              </p>
             </div>
 
             <div className="bg-white rounded-3xl border border-[#E5E7EB] p-8 shadow-sm">

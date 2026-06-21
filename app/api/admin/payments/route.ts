@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAdminRequest } from "@/lib/admin-session";
 import { adminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
-  const session = req.cookies.get("admin_session")?.value;
-  if (session !== process.env.ADMIN_SECRET) {
+  if (!(await isAdminRequest(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

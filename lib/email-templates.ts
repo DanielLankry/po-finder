@@ -7,34 +7,14 @@ const BASE_STYLES = `
   body { font-family: 'Rubik', Arial, sans-serif; background: #F3F4F6; direction: rtl; }
 `;
 
-// Brand logo as inline SVG (works in all email clients)
-const LOGO_SVG = `
-<table cellpadding="0" cellspacing="0" border="0" width="100%">
-  <tr>
-    <td align="center" style="padding: 32px 0 24px;">
-      <table cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td>
-            <svg width="44" height="55" viewBox="0 0 40 50" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
-              <defs>
-                <linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#34d399"/>
-                  <stop offset="100%" stop-color="#059669"/>
-                </linearGradient>
-              </defs>
-              <path d="M20 0C9.507 0 1 8.507 1 19c0 13.255 17.5 29.5 18.25 30.188a1.125 1.125 0 0 0 1.5 0C21.5 48.5 39 32.255 39 19 39 8.507 30.493 0 20 0z" fill="url(#pg)"/>
-              <text x="20" y="26" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="20" fill="white">פ</text>
-            </svg>
-          </td>
-          <td style="padding-right: 10px; vertical-align: middle;">
-            <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #059669; letter-spacing: -0.5px;">פה קרוב</span>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
-`;
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 const FOOTER_HTML = `
 <table cellpadding="0" cellspacing="0" border="0" width="100%">
@@ -86,6 +66,7 @@ function wrapper(content: string): string {
 
 // ── 1. Business Approved Email ───────────────────────────────────────────────
 export function businessApprovedTemplate(businessName: string, expiresAt?: Date): string {
+  const safeBusinessName = escapeHtml(businessName);
   const expiryStr = expiresAt
     ? expiresAt.toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" })
     : null;
@@ -118,7 +99,7 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
                 </table>
               </div>
               <h1 style="font-family: 'Rubik', Arial, sans-serif; font-size: 26px; font-weight: 800; color: white; margin: 0 0 8px;">העסק שלך אושר! 🎉</h1>
-              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: rgba(255,255,255,0.85); margin: 0;">${businessName} עכשיו על המפה</p>
+              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: rgba(255,255,255,0.85); margin: 0;">${safeBusinessName} עכשיו על המפה</p>
             </td>
           </tr>
         </table>
@@ -130,7 +111,7 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
       <td style="padding: 36px 32px 20px;">
         <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 16px; color: #374151; line-height: 1.7; margin-bottom: 24px;">
           שלום! 👋<br><br>
-          אנחנו שמחים לבשר שהעסק <strong style="color: #111827;">${businessName}</strong> עבר את תהליך האישור ועלה לאוויר בפה קרוב.
+          אנחנו שמחים לבשר שהעסק <strong style="color: #111827;">${safeBusinessName}</strong> עבר את תהליך האישור ועלה לאוויר בפה קרוב.
           <br><br>
           לקוחות בסביבתך יוכלו למצוא אותך עכשיו על המפה בזמן אמת.
         </p>
@@ -191,6 +172,14 @@ export function newBusinessAlertTemplate(business: {
   owner_email: string;
   adminUrl: string;
 }): string {
+  const safeBusiness = {
+    name: escapeHtml(business.name),
+    category: escapeHtml(business.category),
+    phone: business.phone ? escapeHtml(business.phone) : "—",
+    owner_email: escapeHtml(business.owner_email),
+    adminUrl: escapeHtml(business.adminUrl),
+  };
+
   return wrapper(`
     <!-- Header -->
     <tr>
@@ -215,22 +204,22 @@ export function newBusinessAlertTemplate(business: {
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr style="border-bottom: 1px solid #E2E8F0;">
                   <td style="padding: 14px 20px; background: #F1F5F9; font-family: 'Rubik', Arial, sans-serif; font-size: 12px; font-weight: 600; color: #64748B; width: 110px;">שם העסק</td>
-                  <td style="padding: 14px 20px; font-family: 'Rubik', Arial, sans-serif; font-size: 15px; font-weight: 700; color: #0F172A;">${business.name}</td>
+                  <td style="padding: 14px 20px; font-family: 'Rubik', Arial, sans-serif; font-size: 15px; font-weight: 700; color: #0F172A;">${safeBusiness.name}</td>
                 </tr>
                 <tr style="border-bottom: 1px solid #E2E8F0;">
                   <td style="padding: 14px 20px; background: #F1F5F9; font-family: 'Rubik', Arial, sans-serif; font-size: 12px; font-weight: 600; color: #64748B;">קטגוריה</td>
                   <td style="padding: 14px 20px; font-family: 'Rubik', Arial, sans-serif; font-size: 14px; color: #374151;">
-                    <span style="background: #DCFCE7; color: #166534; padding: 3px 10px; border-radius: 20px; font-size: 13px; font-weight: 600;">${business.category}</span>
+                    <span style="background: #DCFCE7; color: #166534; padding: 3px 10px; border-radius: 20px; font-size: 13px; font-weight: 600;">${safeBusiness.category}</span>
                   </td>
                 </tr>
                 <tr style="border-bottom: 1px solid #E2E8F0;">
                   <td style="padding: 14px 20px; background: #F1F5F9; font-family: 'Rubik', Arial, sans-serif; font-size: 12px; font-weight: 600; color: #64748B;">טלפון</td>
-                  <td style="padding: 14px 20px; font-family: 'Rubik', Arial, sans-serif; font-size: 14px; color: #374151;">${business.phone ?? "—"}</td>
+                  <td style="padding: 14px 20px; font-family: 'Rubik', Arial, sans-serif; font-size: 14px; color: #374151;">${safeBusiness.phone}</td>
                 </tr>
                 <tr>
                   <td style="padding: 14px 20px; background: #F1F5F9; font-family: 'Rubik', Arial, sans-serif; font-size: 12px; font-weight: 600; color: #64748B;">מייל בעלים</td>
                   <td style="padding: 14px 20px; font-family: 'Rubik', Arial, sans-serif; font-size: 14px; color: #374151;">
-                    <a href="mailto:${business.owner_email}" style="color: #2563EB; text-decoration: none;">${business.owner_email}</a>
+                    <a href="mailto:${safeBusiness.owner_email}" style="color: #2563EB; text-decoration: none;">${safeBusiness.owner_email}</a>
                   </td>
                 </tr>
               </table>
@@ -242,7 +231,7 @@ export function newBusinessAlertTemplate(business: {
         <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 24px;">
           <tr>
             <td align="center">
-              <a href="${business.adminUrl}" style="display: inline-block; background: linear-gradient(135deg, #1E40AF, #1E3A5F); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 15px; font-weight: 700; text-decoration: none; padding: 13px 36px; border-radius: 50px;">
+              <a href="${safeBusiness.adminUrl}" style="display: inline-block; background: linear-gradient(135deg, #1E40AF, #1E3A5F); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 15px; font-weight: 700; text-decoration: none; padding: 13px 36px; border-radius: 50px;">
                 עבור לאישור ←
               </a>
             </td>
@@ -255,6 +244,9 @@ export function newBusinessAlertTemplate(business: {
 
 // ── 3. Contact Form Auto-Reply ────────────────────────────────────────────────
 export function contactAutoReplyTemplate(name: string, subjectLabel: string): string {
+  const safeName = escapeHtml(name);
+  const safeSubjectLabel = escapeHtml(subjectLabel);
+
   return wrapper(`
     <!-- Header -->
     <tr>
@@ -278,7 +270,7 @@ export function contactAutoReplyTemplate(name: string, subjectLabel: string): st
                 </tr>
               </table>
               <h1 style="font-family: 'Rubik', Arial, sans-serif; font-size: 24px; font-weight: 800; color: #111827; margin: 0 0 8px;">קיבלנו את פנייתך 📬</h1>
-              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: #6B7280; margin: 0;">תודה על פנייתך, ${name}</p>
+              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: #6B7280; margin: 0;">תודה על פנייתך, ${safeName}</p>
             </td>
           </tr>
         </table>
@@ -292,7 +284,7 @@ export function contactAutoReplyTemplate(name: string, subjectLabel: string): st
     <tr>
       <td style="padding: 28px 32px 24px;">
         <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: #374151; line-height: 1.7; margin-bottom: 20px;">
-          קיבלנו את פנייתך בנושא <strong style="color: #111827;">${subjectLabel}</strong> ונשיב אליך בהקדם האפשרי.
+          קיבלנו את פנייתך בנושא <strong style="color: #111827;">${safeSubjectLabel}</strong> ונשיב אליך בהקדם האפשרי.
         </p>
 
         <!-- Timeline -->
@@ -341,6 +333,8 @@ export function contactAutoReplyTemplate(name: string, subjectLabel: string): st
 
 // ── 4. Expiry Reminder ────────────────────────────────────────────────────────
 export function expiryReminderTemplate(businessName: string, expiresAt: Date, renewUrl: string): string {
+  const safeBusinessName = escapeHtml(businessName);
+  const safeRenewUrl = escapeHtml(renewUrl);
   const expiryStr = expiresAt.toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" });
   const daysLeft = Math.ceil((expiresAt.getTime() - Date.now()) / 86400000);
 
@@ -353,7 +347,7 @@ export function expiryReminderTemplate(businessName: string, expiresAt: Date, re
             <td style="background: linear-gradient(135deg, #D97706 0%, #B45309 100%); padding: 36px 32px; text-align: center; border-radius: 20px 20px 0 0;">
               <p style="font-size: 40px; margin-bottom: 12px;">⏰</p>
               <h1 style="font-family: 'Rubik', Arial, sans-serif; font-size: 22px; font-weight: 800; color: white; margin: 0 0 6px;">הרישום שלך עומד לפוג</h1>
-              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: rgba(255,255,255,0.85); margin: 0;">נשארו <strong>${daysLeft} ימים</strong> לרישום ${businessName}</p>
+              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: rgba(255,255,255,0.85); margin: 0;">נשארו <strong>${daysLeft} ימים</strong> לרישום ${safeBusinessName}</p>
             </td>
           </tr>
         </table>
@@ -363,7 +357,7 @@ export function expiryReminderTemplate(businessName: string, expiresAt: Date, re
     <tr>
       <td style="padding: 32px 32px 24px;">
         <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: #374151; line-height: 1.7; margin-bottom: 24px;">
-          הרישום של <strong>${businessName}</strong> בפה קרוב יפוג בתאריך <strong>${expiryStr}</strong>.
+          הרישום של <strong>${safeBusinessName}</strong> בפה קרוב יפוג בתאריך <strong>${expiryStr}</strong>.
           <br><br>
           לאחר מכן העסק שלך לא יופיע יותר על המפה ולקוחות לא יוכלו למצוא אותך.
         </p>
@@ -383,7 +377,7 @@ export function expiryReminderTemplate(businessName: string, expiresAt: Date, re
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
             <td align="center">
-              <a href="${renewUrl}" style="display: inline-block; background: linear-gradient(135deg, #D97706, #B45309); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 40px; border-radius: 50px; box-shadow: 0 4px 14px rgba(217,119,6,0.35);">
+              <a href="${safeRenewUrl}" style="display: inline-block; background: linear-gradient(135deg, #D97706, #B45309); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 40px; border-radius: 50px; box-shadow: 0 4px 14px rgba(217,119,6,0.35);">
                 חדשו את הרישום ←
               </a>
             </td>

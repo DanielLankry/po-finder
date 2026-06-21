@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAdminRequest } from "@/lib/admin-session";
 import { adminClient } from "@/lib/supabase/admin";
 import { sendBusinessApprovedEmail } from "@/lib/email";
 import { z } from "zod";
@@ -10,8 +11,7 @@ const approveSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const session = req.cookies.get("admin_session")?.value;
-  if (!session || session !== process.env.ADMIN_SECRET) {
+  if (!(await isAdminRequest(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

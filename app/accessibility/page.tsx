@@ -17,57 +17,57 @@ export default function AccessibilityPage() {
             הצהרת נגישות
           </h1>
           <p className="text-stone-500 text-sm mb-8">
-            בהתאם לתקן ישראלי 5568 (WCAG 2.1 AA) | עדכון: ינואר 2026
+            עדכון אחרון: מאי 2026 · האתר מכוון לתאימות תקן ישראלי 5568 ו-WCAG ברמה AA
           </p>
 
-          <div className="space-y-6 text-stone-700 leading-relaxed">
+          <div className="space-y-8 text-stone-700 leading-relaxed">
             <section>
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
                 מחויבות לנגישות
               </h2>
               <p>
-                פלטפורמת <strong>{BRAND_NAME}</strong> מחויבת להנגשת שירותיה לכלל המשתמשים,
-                לרבות בעלי מוגבלויות, בהתאם לחוק שוויון זכויות לאנשים עם מוגבלות
-                ולתקן ישראלי 5568.
+                פלטפורמת <strong>{BRAND_NAME}</strong> מיועדת לשימוש כלל הציבור, לרבות
+                אנשים עם מוגבלות. אנו פועלים לשפר את נגישות האתר בהתאם לחוק שוויון זכויות
+                לאנשים עם מוגבלות, תקנות הנגישות הרלוונטיות ותקן ישראלי 5568.
               </p>
             </section>
 
             <section>
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                רמת הנגישות
+                פעולות נגישות באתר
               </h2>
-              <p>
-                האתר עומד ברמת תאימות <strong>AA</strong> של WCAG 2.1. בין היתר:
+              <ul className="list-disc list-inside space-y-2 text-stone-600">
+                <li>מבנה עמודים סמנטי וכותרות היררכיות.</li>
+                <li>ניווט מקלדת, מיקוד נראה וקישור &quot;דלגו לתוכן הראשי&quot;.</li>
+                <li>תמיכה בכיוון כתיבה עברי ובתוויות ARIA לרכיבים אינטראקטיביים.</li>
+                <li>ניגודיות צבעים משופרת ברכיבי פעולה וטקסט מרכזיים.</li>
+                <li>תפריט נגישות לשינוי גודל טקסט, ניגודיות, הדגשת קישורים וסמן מוגדל.</li>
+                <li>התחשבות בהעדפת תנועה מופחתת כאשר היא מוגדרת בדפדפן.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
+                טכנולוגיות שנבדקות
+              </h2>
+              <ul className="list-disc list-inside space-y-2 text-stone-600">
+                <li>Chrome ו-Edge במחשב שולחני.</li>
+                <li>Safari ו-Chrome במובייל.</li>
+                <li>קוראי מסך נפוצים כגון NVDA, VoiceOver ו-TalkBack לפי זמינות בדיקה.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
+                מגבלות ידועות וחלופות
+              </h2>
+              <p className="mb-2">
+                רכיבי צד שלישי, ובמיוחד מפות Google, עשויים שלא להיות נגישים באופן מלא בכל
+                מצב או טכנולוגיה מסייעת. לכן האתר מציג גם רשימת עסקים לצד המפה, כך שניתן
+                להגיע למידע המרכזי ללא שימוש במפה בלבד.
               </p>
-              <ul className="list-disc list-inside space-y-2 text-stone-600 mt-2">
-                <li>ניגודיות צבעים מינימלית של 4.5:1 לכל הטקסט</li>
-                <li>ניווט מלא במקלדת כולל מיקוד גלוי על כל אלמנט אינטראקטיבי</li>
-                <li>תמיכה בקוראי מסך עם תגי ARIA בעברית</li>
-                <li>טקסט חלופי (alt) לכל התמונות</li>
-                <li>גודל מגע מינימלי של 44×44 פיקסלים</li>
-                <li>כבוד להעדפת תנועה מופחתת (prefers-reduced-motion)</li>
-                <li>קישור &quot;דלגו לתוכן הראשי&quot; בראש כל עמוד</li>
-              </ul>
-            </section>
-
-            <section>
-              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                טכנולוגיות נגישות נתמכות
-              </h2>
-              <ul className="list-disc list-inside space-y-1 text-stone-600">
-                <li>NVDA + Chrome (Windows)</li>
-                <li>VoiceOver + Safari (macOS / iOS)</li>
-                <li>TalkBack (Android)</li>
-              </ul>
-            </section>
-
-            <section>
-              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                מגבלות ידועות
-              </h2>
               <p>
-                מפת גוגל המוטמעת עשויה להגביל נגישות מלאה. אנו עובדים על פתרונות
-                חלופיים לגישה לרשימת עסקים ללא מפה.
+                אם נתקלתם במידע שאינו נגיש, ננסה לספק חלופה סבירה ולתקן את הבעיה.
               </p>
             </section>
 
@@ -75,17 +75,16 @@ export default function AccessibilityPage() {
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
                 פנייה בנושא נגישות
               </h2>
-              <p>נתקלתם בבעיית נגישות? נשמח לשמוע ולתקן:</p>
-              <ul className="list-none space-y-1 mt-2">
-                <li>
-                  📧 מייל:{" "}
-                  <a href={`mailto:${BUSINESS_INFO.contactEmail}`} className="text-[#059669] hover:underline">
-                    {BUSINESS_INFO.contactEmail}
-                  </a>
-                </li>
-              </ul>
-              <p className="mt-3 text-stone-500 text-sm">
-                אנו מתחייבים להשיב תוך 5 ימי עסקים.
+              <p>
+                לפניות, בקשות התאמה או דיווח על תקלה בנגישות אפשר לפנות אל{" "}
+                <a href={`mailto:${BUSINESS_INFO.contactEmail}`} className="text-[#059669] hover:underline">
+                  {BUSINESS_INFO.contactEmail}
+                </a>{" "}
+                או דרך <a href="/contact" className="text-[#059669] hover:underline">טופס יצירת קשר</a>.
+              </p>
+              <p className="mt-3 text-sm text-stone-500">
+                כדי שנוכל לטפל מהר, ציינו את כתובת העמוד, תיאור הבעיה, סוג המכשיר,
+                הדפדפן וטכנולוגיית העזר שבה השתמשתם אם קיימת.
               </p>
             </section>
           </div>
