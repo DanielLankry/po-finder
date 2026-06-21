@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useEffect, createRef, useState } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
+import Image from "next/image";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { MapPin, Star, Search, X } from "lucide-react";
 import type { BusinessWithSchedule, BusinessCategory } from "@/lib/types";
@@ -85,7 +86,7 @@ export default function BusinessListPanel({
   onFavoriteToggle,
   searchQuery = "",
 }: BusinessListPanelProps) {
-  const cardRefs = useRef<Map<string, React.RefObject<HTMLDivElement | null>>>(new Map());
+  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const [panelReviews, setPanelReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -115,32 +116,45 @@ export default function BusinessListPanel({
       return dA - dB;
     });
 
-  // Ensure refs map is populated
-  filtered.forEach((b) => {
-    if (!cardRefs.current.has(b.id)) {
-      cardRefs.current.set(b.id, createRef<HTMLDivElement>());
+  const setCardRef = useCallback((businessId: string, node: HTMLDivElement | null) => {
+    if (node) {
+      cardRefs.current.set(businessId, node);
+    } else {
+      cardRefs.current.delete(businessId);
     }
-  });
+  }, []);
 
   // Fetch reviews when a business is selected
   useEffect(() => {
-    if (!selectedBusinessId) {
-      setPanelReviews([]);
-      return;
-    }
-    setReviewsLoading(true);
+    if (!selectedBusinessId) return;
+    let cancelled = false;
+    const loadingTimer = setTimeout(() => {
+      if (!cancelled) setReviewsLoading(true);
+    }, 0);
+
     fetch(`/api/reviews?businessId=${selectedBusinessId}`)
       .then((r) => r.json())
-      .then((data) => setPanelReviews(data.reviews ?? []))
-      .catch(() => setPanelReviews([]))
-      .finally(() => setReviewsLoading(false));
+      .then((data) => {
+        if (!cancelled) setPanelReviews(data.reviews ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setPanelReviews([]);
+      })
+      .finally(() => {
+        if (!cancelled) setReviewsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(loadingTimer);
+    };
   }, [selectedBusinessId]);
 
   // Scroll selected card into view when selection changes (e.g. pin clicked on map)
   useEffect(() => {
     if (!selectedBusinessId) return;
-    const ref = cardRefs.current.get(selectedBusinessId);
-    ref?.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    const node = cardRefs.current.get(selectedBusinessId);
+    node?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [selectedBusinessId]);
 
   if (selectedBusinessId && !loading) {
@@ -162,10 +176,16 @@ export default function BusinessListPanel({
           {/* Detail content */}
           <div className="flex-1 overflow-y-auto p-5 scrollbar-thin">
              {/* Large photo */}
-             <div className="w-full h-56 rounded-2xl overflow-hidden mb-5 bg-slate-100 shadow-sm relative isolate">
-               {selectedBusiness.photos?.[0] ? (
-                 <img src={selectedBusiness.photos[0].url} className="w-full h-full object-cover" alt={selectedBusiness.name} />
-               ) : (
+              <div className="w-full h-56 rounded-2xl overflow-hidden mb-5 bg-slate-100 shadow-sm relative isolate">
+                {selectedBusiness.photos?.[0] ? (
+                  <Image
+                    src={selectedBusiness.photos[0].url}
+                    className="object-cover"
+                    alt={selectedBusiness.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 420px"
+                  />
+                ) : (
                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#ECFDF5] via-[#D1FAE5] to-[#A7F3D0]">
                     <div className="h-12 w-12 rounded-2xl bg-[#059669] flex items-center justify-center shadow-md">
                       <MapPin className="h-6 w-6 text-white" />
@@ -247,19 +267,19 @@ export default function BusinessListPanel({
       <div className="px-5 pt-5 pb-4 border-b border-[#EBEBEB] bg-white flex-shrink-0 shadow-sm">
         {/* Search input */}
         <div className="relative mb-3">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#AAA] pointer-events-none" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#AAA] pointer-events-none" />
           <input
             type="search"
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
             placeholder="חפש עסק, שכונה, מוצר..."
-            className="w-full h-10 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] pr-9 pl-9 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] focus:border-transparent transition-all"
+            className="w-full h-10 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] ps-9 pe-9 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] focus:border-transparent transition-all"
             dir="rtl"
           />
           {localSearch && (
             <button
               onClick={() => setLocalSearch("")}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#AAA] hover:text-[#555] transition-colors"
+              className="absolute end-3 top-1/2 -translate-y-1/2 text-[#AAA] hover:text-[#555] transition-colors"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -316,7 +336,7 @@ export default function BusinessListPanel({
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 p-4 lg:p-6 pb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 lg:p-6 pb-24">
             {filtered.map((b, index) => (
               <div key={b.id} className={`h-full fade-in-up stagger-${(index % 6) + 1}`}>
                 <BusinessCard
@@ -324,7 +344,7 @@ export default function BusinessListPanel({
                   isSelected={selectedBusinessId === b.id}
                   isHovered={hoveredBusinessId === b.id}
                   isFavorited={favoriteIds?.has(b.id)}
-                  scrollRef={cardRefs.current.get(b.id)}
+                  scrollRef={(node) => setCardRef(b.id, node)}
                   onClick={() => onBusinessSelect(b)}
                   onMouseEnter={() => onBusinessHover?.(b.id)}
                   onMouseLeave={() => onBusinessHover?.(null)}

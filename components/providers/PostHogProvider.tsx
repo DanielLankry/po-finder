@@ -2,14 +2,14 @@
 
 import { useEffect, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { initPostHog, posthog } from "@/lib/posthog";
+import { disablePostHog, initPostHog, isPostHogEnabled, posthog } from "@/lib/posthog";
 
 function PostHogPageView() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (pathname) {
+    if (pathname && isPostHogEnabled()) {
       let url = window.origin + pathname;
       if (searchParams?.toString()) url += `?${searchParams.toString()}`;
       posthog.capture("$pageview", { $current_url: url });
@@ -29,8 +29,15 @@ export default function PostHogProvider({ children }: { children: React.ReactNod
     function onConsent() {
       initPostHog();
     }
+    function onDecline() {
+      disablePostHog();
+    }
     window.addEventListener("po-cookie-consent-accepted", onConsent);
-    return () => window.removeEventListener("po-cookie-consent-accepted", onConsent);
+    window.addEventListener("po-cookie-consent-declined", onDecline);
+    return () => {
+      window.removeEventListener("po-cookie-consent-accepted", onConsent);
+      window.removeEventListener("po-cookie-consent-declined", onDecline);
+    };
   }, []);
 
   return (

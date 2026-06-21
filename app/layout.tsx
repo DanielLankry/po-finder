@@ -1,13 +1,33 @@
 import type { Metadata } from "next";
+import { Heebo, Rubik, Secular_One } from "next/font/google";
 import "./globals.css";
 import "@/lib/env";
 import CookieConsent from "@/components/layout/CookieConsent";
 import AccessibilityWidget from "@/components/layout/AccessibilityWidget";
-import { Analytics } from "@vercel/analytics/next";
 import PostHogProvider from "@/components/providers/PostHogProvider";
+import ConsentAnalytics from "@/components/providers/ConsentAnalytics";
 import { BRAND_NAME, SITE_URL } from "@/lib/site-config";
 
 const BASE_URL = SITE_URL;
+
+const heebo = Heebo({
+  subsets: ["hebrew", "latin"],
+  display: "swap",
+  variable: "--font-heebo",
+});
+
+const rubik = Rubik({
+  subsets: ["hebrew", "latin"],
+  display: "swap",
+  variable: "--font-rubik-next",
+});
+
+const secularOne = Secular_One({
+  subsets: ["hebrew", "latin"],
+  weight: "400",
+  display: "swap",
+  variable: "--font-secular-next",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -107,7 +127,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" dir="rtl">
+    <html lang="he" dir="rtl" className={`${heebo.variable} ${rubik.variable} ${secularOne.variable}`}>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="32x32" />
         <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
@@ -131,7 +151,7 @@ export default function RootLayout({
         </PostHogProvider>
         <AccessibilityWidget />
         <CookieConsent />
-        <Analytics />
+        <ConsentAnalytics />
       </body>
     </html>
   );

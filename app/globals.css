@@ -1,26 +1,5 @@
 @import "tailwindcss";
 
-@property --card-angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@keyframes card-border-spin {
-  to { --card-angle: 360deg; }
-}
-
-.card-border-spinning {
-  background: conic-gradient(
-    from var(--card-angle),
-    #059669 0%,
-    #34d399 25%,
-    #a7f3d0 50%,
-    #34d399 75%,
-    #059669 100%
-  );
-  animation: card-border-spin 3s linear infinite;
-}
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -157,9 +136,9 @@
 }
 
 :root {
-  --font-body: "Heebo", "Rubik", "Noto Sans Hebrew", "Segoe UI", Arial, sans-serif;
-  --font-rubik: "Rubik", "Heebo", "Noto Sans Hebrew", "Segoe UI", Arial, sans-serif;
-  --font-secular: "Secular One", "Rubik", "Heebo", "Noto Sans Hebrew", sans-serif;
+  --font-body: var(--font-heebo), "Heebo", "Rubik", "Noto Sans Hebrew", "Segoe UI", Arial, sans-serif;
+  --font-rubik: var(--font-rubik-next), "Rubik", "Heebo", "Noto Sans Hebrew", "Segoe UI", Arial, sans-serif;
+  --font-secular: var(--font-secular-next), "Secular One", "Rubik", "Heebo", "Noto Sans Hebrew", sans-serif;
   --font-geist-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --radius: 0.625rem;
   --background: #FFFFFF;
@@ -209,14 +188,14 @@
 
   /* Hebrew-specific: tighter letter spacing, better line height */
   :lang(he), [dir="rtl"] {
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
     line-height: 1.65;
     word-spacing: 0.02em;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
     line-height: 1.2;
   }
 
@@ -576,6 +555,4 @@ h1, h2, h3, h4, h5 {
 p, li, span:not([class*="font-bold"]):not([class*="font-semibold"]), td, th, blockquote {
   font-family: var(--font-body), var(--font-rubik), sans-serif;
 }
-
-
 

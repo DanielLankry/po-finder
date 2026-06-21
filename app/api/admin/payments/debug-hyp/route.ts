@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAdminRequest } from "@/lib/admin-session";
 import { debugSignCheckoutRaw } from "@/lib/hyp";
 
 export const runtime = "nodejs";
@@ -9,11 +10,10 @@ export const runtime = "nodejs";
  * having to do a fake purchase.
  *
  *   GET /api/admin/payments/debug-hyp
- *   Cookie: admin_session=<ADMIN_SECRET>
+ *   Cookie: admin_session=<signed admin session>
  */
 export async function GET(req: NextRequest) {
-  const session = req.cookies.get("admin_session")?.value;
-  if (session !== process.env.ADMIN_SECRET) {
+  if (!(await isAdminRequest(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, Menu, X, Plus, Heart, LayoutDashboard } from "lucide-react";
@@ -21,10 +21,12 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
   const [scrolled, setScrolled] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [hasDashboardAccess, setHasDashboardAccess] = useState<boolean | null>(null);
   const supabase = useMemo(() => createClient(), []);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const isDashboardRoute = pathname?.startsWith("/dashboard") ?? false;
   const showDashboardCta = authChecked && !!user && (isDashboardRoute || hasDashboardAccess !== false);
@@ -88,6 +90,17 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
     return () => { cancelled = true; };
   }, [user, isDashboardRoute, pathname]);
 
+  useEffect(() => {
+    function closeUserMenu(event: MouseEvent) {
+      if (!userMenuRef.current?.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", closeUserMenu);
+    return () => document.removeEventListener("mousedown", closeUserMenu);
+  }, []);
+
   async function handleSignOut() {
     await supabase.auth.signOut();
     window.location.href = "/";
@@ -95,7 +108,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 z-50 h-[72px] flex items-center transition-all duration-300 bg-[#FAFAF7] ${
+      className={`fixed top-0 inset-x-0 ${mobileMenuOpen || mobileSearchOpen ? "z-[70]" : "z-50"} h-[72px] flex items-center transition-all duration-300 bg-[#FAFAF7] ${
         scrolled
           ? "shadow-[0_4px_24px_rgba(0,0,0,0.08)] border-b border-black/5"
           : "shadow-[0_1px_0_rgba(0,0,0,0.04)] border-b border-transparent"
@@ -129,19 +142,20 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
                 "למוכרי פרחים",
                 "לסוחרי וינטג׳",
                 "לקייטרינג",
+                "לחקלאים",
                 "לישראלים",
               ]}
               speed={60}
               deleteSpeed={35}
               waitTime={2200}
               className="text-[#059669] font-extrabold text-[18px] sm:text-[20px] md:text-[26px] whitespace-nowrap"
-              wordColors={{ "לישראלים": "text-[#059669]" }}
+              wordColors={{ "לישראלים": "text-[#2563EB]" }}
             />
           </div>
         </div>
 
-        {/* Search bar — center (hidden on mobile) */}
-        <div className="hidden md:flex flex-1 justify-center max-w-[400px] mx-auto">
+        {/* Search bar — uses the available top-bar width on tablet and desktop */}
+        <div className="hidden md:flex flex-1 min-w-0 justify-center max-w-[720px] min-[1440px]:max-w-[420px] mx-0 min-[1440px]:mx-auto">
           {onLocationSelect ? (
             <div className="w-full">
                <PlacesSearchBar onLocationSelect={onLocationSelect} />
@@ -165,7 +179,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
         </div>
 
         {/* Nav links — desktop only, LEFT of search bar (after it in RTL flow) */}
-        <div className="hidden md:flex items-center gap-3 flex-shrink-0 mx-2">
+        <div className="hidden min-[1440px]:flex items-center gap-3 flex-shrink-0 mx-2">
           <Link href="/about"
             className="h-8 px-3.5 rounded-full text-[#555] font-medium text-sm border border-stone-200 hover:border-[#059669]/50 hover:bg-[#ECFDF5] hover:text-[#047857] transition-all duration-200 flex items-center whitespace-nowrap"
           >אודות</Link>
@@ -182,7 +196,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
 
         {/* Actions */}
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-          {/* Mobile search icon */}
+          {/* Small-phone search icon. Tablet and desktop use the real search bar above. */}
           <button
             className="md:hidden flex items-center justify-center h-9 w-9 rounded-full hover:bg-[#ECFDF5] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
             onClick={() => setMobileSearchOpen(true)}
@@ -207,7 +221,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
 
           {/* CTA — swaps to "לוח בקרה" once the user owns an active paid business.
               Otherwise routes to /pricing where they start with the launch offer. */}
-          <div className="hidden md:block">
+          <div className="hidden min-[1440px]:block">
             {authChecked ? (
               <MagneticButton distance={0.45}>
                 <Link
@@ -236,35 +250,44 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
           </div>
 
           {user ? (
-            <div className="relative group">
+            <div className="relative" ref={userMenuRef}>
               <button
                 className="flex items-center justify-center h-10 w-10 rounded-full bg-[#059669] text-white font-medium text-sm hover:bg-[#047857] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2 shadow-sm"
                 aria-label="תפריט משתמש"
                 aria-haspopup="true"
+                aria-expanded={userMenuOpen}
+                onClick={() => setUserMenuOpen((open) => !open)}
               >
                 {user.email?.[0]?.toUpperCase() ?? "U"}
               </button>
-              <div className="absolute left-0 top-full pt-1.5 w-44 z-50">
-                <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 py-1.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-left -translate-y-2 group-hover:translate-y-0">
-                  <Link
-                    href={showDashboardCta ? "/dashboard" : "/pricing"}
-                    className="block px-4 py-2 text-sm text-slate-700 hover:bg-[#ECFDF5] hover:text-[#047857] transition-colors rounded-lg mx-1 font-medium"
-                  >
-                    {showDashboardCta ? "לוח בקרה" : "הצטרפו במחיר השקה"}
-                  </Link>
-                  <button
-                    onClick={handleSignOut}
-                    className="w-full text-right px-4 py-2 text-sm text-slate-700 hover:bg-rose-50 hover:text-rose-600 transition-colors rounded-lg mx-1 block font-medium"
-                  >
-                    יציאה
-                  </button>
+              <div className={`absolute left-0 top-full pt-1.5 w-44 z-50 ${userMenuOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
+                <div className={`bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 py-1.5 transition-all duration-200 origin-top-left ${
+                  userMenuOpen
+                    ? "opacity-100 visible translate-y-0"
+                    : "opacity-0 invisible -translate-y-2"
+                }`}>
+                  <div className="px-1">
+                    <Link
+                      href={showDashboardCta ? "/dashboard" : "/pricing"}
+                      className="block rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-[#ECFDF5] hover:text-[#047857]"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      {showDashboardCta ? "לוח בקרה" : "הצטרפו במחיר השקה"}
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="block w-full rounded-lg px-3 py-2 text-right text-sm font-medium text-slate-700 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                    >
+                      יציאה
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           ) : (
             <Link
               href="/auth/login"
-              className="hidden md:flex items-center justify-center h-10 px-5 rounded-full bg-[#059669] text-white font-medium text-sm hover:bg-[#047857] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2 shadow-sm btn-press"
+              className="hidden min-[1440px]:flex items-center justify-center h-10 px-5 rounded-full bg-[#059669] text-white font-medium text-sm hover:bg-[#047857] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2 shadow-sm btn-press"
             >
               כניסה
             </Link>
@@ -272,7 +295,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
 
           {/* Mobile hamburger */}
           <button
-            className="md:hidden flex items-center justify-center h-9 w-9 rounded-full hover:bg-[#ECFDF5] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+            className="min-[1440px]:hidden flex items-center justify-center h-9 w-9 rounded-full hover:bg-[#ECFDF5] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? "סגירת תפריט" : "פתיחת תפריט"}
             aria-expanded={mobileMenuOpen}
@@ -325,12 +348,12 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
         <>
           {/* Backdrop */}
           <div
-            className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            className="min-[1440px]:hidden fixed inset-x-0 bottom-0 top-[72px] z-40 bg-black/40 backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
           />
           {/* Sheet */}
           <div
-            className="md:hidden fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-[28px] shadow-[0_-8px_40px_rgba(0,0,0,0.15)] pt-3 pb-8 px-5"
+            className="min-[1440px]:hidden fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-[28px] shadow-[0_-8px_40px_rgba(0,0,0,0.15)] pt-3 pb-8 px-5"
             dir="rtl"
             style={{ animation: "slideUp 0.25s ease-out" }}
           >
@@ -369,14 +392,14 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
 
             <nav className="grid grid-cols-2 gap-2.5">
               {[
-                { href: showDashboardCta ? "/dashboard" : "/pricing", label: showDashboardCta ? "לוח בקרה" : "הצטרפו במחיר השקה", emoji: "🏪", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
-                { href: "/vendors", label: "לעסקים", emoji: "🛒", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
-                { href: "/pricing", label: "מחירים", emoji: "💳", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
-                { href: "/about", label: "אודות", emoji: "ℹ️", bg: "#F5F3FF", border: "#DDD6FE", text: "#5B21B6" },
-                { href: "/contact", label: "צרו קשר", emoji: "📬", bg: "#FFF7ED", border: "#FED7AA", text: "#C2410C" },
-              ].map(({ href, label, emoji, bg, border, text }) => (
+                { id: "primary-cta", href: showDashboardCta ? "/dashboard" : "/pricing", label: showDashboardCta ? "לוח בקרה" : "הצטרפו במחיר השקה", emoji: "🏪", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
+                { id: "vendors", href: "/vendors", label: "לעסקים", emoji: "🛒", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
+                { id: "pricing", href: "/pricing", label: "מחירים", emoji: "💳", bg: "#F0FDF4", border: "#A7F3D0", text: "#065F46" },
+                { id: "about", href: "/about", label: "אודות", emoji: "ℹ️", bg: "#F5F3FF", border: "#DDD6FE", text: "#5B21B6" },
+                { id: "contact", href: "/contact", label: "צרו קשר", emoji: "📬", bg: "#FFF7ED", border: "#FED7AA", text: "#C2410C" },
+              ].map(({ id, href, label, emoji, bg, border, text }) => (
                 <Link
-                  key={href}
+                  key={id}
                   href={href}
                   className="flex flex-col items-center justify-center gap-1.5 py-4 px-3 rounded-2xl font-semibold text-sm transition-all active:scale-95 border"
                   style={{ backgroundColor: bg, borderColor: border, color: text }}

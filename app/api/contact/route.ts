@@ -8,15 +8,6 @@ export const runtime = "nodejs";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const VALID_SUBJECTS = [
-  "general",
-  "business",
-  "bug",
-  "privacy",
-  "billing",
-  "other",
-] as const;
-
 const SUBJECT_LABELS: Record<string, string> = {
   general: "שאלה כללית",
   business: "הוספת עסק",
@@ -26,11 +17,21 @@ const SUBJECT_LABELS: Record<string, string> = {
   other: "אחר",
 };
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 const contactSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   email: z.string().email("Invalid email address"),
   subject: z.enum(["general", "business", "bug", "privacy", "billing", "other"]),
   message: z.string().min(1, "Message is required").max(2000),
+  privacyAccepted: z.literal(true),
 });
 
 export async function POST(req: NextRequest) {
@@ -52,6 +53,10 @@ export async function POST(req: NextRequest) {
 
     const { name, email, subject, message } = parsed.data;
     const subjectLabel = SUBJECT_LABELS[subject] ?? subject;
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safeSubjectLabel = escapeHtml(subjectLabel);
+    const safeMessage = escapeHtml(message);
 
     // Send to support
     await resend.emails.send({
@@ -65,19 +70,19 @@ export async function POST(req: NextRequest) {
           <table style="width: 100%; border-collapse: collapse;">
             <tr style="background: #f9f9f9;">
               <td style="padding: 10px 12px; font-weight: bold; width: 100px;">שם:</td>
-              <td style="padding: 10px 12px;">${name}</td>
+              <td style="padding: 10px 12px;">${safeName}</td>
             </tr>
             <tr>
               <td style="padding: 10px 12px; font-weight: bold;">מייל:</td>
-              <td style="padding: 10px 12px;"><a href="mailto:${email}">${email}</a></td>
+              <td style="padding: 10px 12px;"><a href="mailto:${safeEmail}">${safeEmail}</a></td>
             </tr>
             <tr style="background: #f9f9f9;">
               <td style="padding: 10px 12px; font-weight: bold;">נושא:</td>
-              <td style="padding: 10px 12px;">${subjectLabel}</td>
+              <td style="padding: 10px 12px;">${safeSubjectLabel}</td>
             </tr>
           </table>
           <div style="margin-top: 16px; padding: 16px; background: #f9f9f9; border-right: 4px solid #059669; border-radius: 4px;">
-            <p style="margin: 0; white-space: pre-wrap;">${message}</p>
+            <p style="margin: 0; white-space: pre-wrap;">${safeMessage}</p>
           </div>
           <p style="color: #aaa; font-size: 12px; margin-top: 16px;">נשלח מ-pokarov.co.il</p>
         </div>

@@ -6,7 +6,16 @@ import {
   useJsApiLoader,
   OverlayView,
 } from "@react-google-maps/api";
-import { warmMapStyle, TEL_AVIV_CENTER, DEFAULT_ZOOM } from "@/lib/maps/mapStyle";
+import {
+  clampToIsraelBounds,
+  DEFAULT_ZOOM,
+  ISRAEL_BOUNDS,
+  isWithinIsraelBounds,
+  MAX_ISRAEL_ZOOM,
+  MIN_ISRAEL_ZOOM,
+  TEL_AVIV_CENTER,
+  warmMapStyle,
+} from "@/lib/maps/mapStyle";
 import BusinessPopup from "./BusinessPopup";
 import type { BusinessWithSchedule, BusinessCategory } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
@@ -51,7 +60,9 @@ export default function BusinessMap({
     lat: number;
     lng: number;
   } | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 1440 : false
+  );
   const mapRef = useRef<google.maps.Map | null>(null);
 
   const { isLoaded, loadError } = useJsApiLoader({
@@ -62,25 +73,9 @@ export default function BusinessMap({
   });
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => setIsMobile(window.innerWidth < 1440);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          setUserLocation(loc);
-          onUserLocationChange?.(loc);
-        },
-        () => {
-          // Denied — use Tel Aviv default
-        }
-      );
-    }
   }, []);
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
@@ -95,15 +90,16 @@ export default function BusinessMap({
     const lat = business.today_schedule?.lat ?? business.lat;
     const lng = business.today_schedule?.lng ?? business.lng;
     if (lat && lng) {
-      mapRef.current.panTo({ lat, lng });
-      setSelectedBusiness(business);
+      mapRef.current.panTo(clampToIsraelBounds({ lat, lng }));
+      const selectTimer = setTimeout(() => setSelectedBusiness(business), 0);
+      return () => clearTimeout(selectTimer);
     }
   }, [selectedBusinessId, businesses]);
 
   // Pan + zoom when a location is chosen from the search bar or GPS
   useEffect(() => {
     if (!searchCenter || !mapRef.current) return;
-    mapRef.current.panTo({ lat: searchCenter.lat, lng: searchCenter.lng });
+    mapRef.current.panTo(clampToIsraelBounds({ lat: searchCenter.lat, lng: searchCenter.lng }));
     mapRef.current.setZoom(15);
   }, [searchCenter]);
 
@@ -151,6 +147,12 @@ export default function BusinessMap({
         clickableIcons: false,
         gestureHandling: "greedy",
         keyboardShortcuts: false,
+        minZoom: MIN_ISRAEL_ZOOM,
+        maxZoom: MAX_ISRAEL_ZOOM,
+        restriction: {
+          latLngBounds: ISRAEL_BOUNDS,
+          strictBounds: true,
+        },
       }}
       onLoad={onMapLoad}
       onClick={() => setSelectedBusiness(null)}
@@ -309,6 +311,7 @@ export default function BusinessMap({
               if (!navigator.geolocation) return;
               navigator.geolocation.getCurrentPosition((pos) => {
                 const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                if (!isWithinIsraelBounds(loc)) return;
                 setUserLocation(loc);
                 onUserLocationChange?.(loc);
                 mapRef.current?.panTo(loc);

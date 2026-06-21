@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Star } from "lucide-react";
+import Link from "next/link";
 
 interface ReviewFormProps {
   businessId: string;
@@ -13,6 +14,7 @@ export default function ReviewForm({ businessId, onSuccess }: ReviewFormProps) {
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
   const [reviewerName, setReviewerName] = useState("");
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +38,10 @@ export default function ReviewForm({ businessId, onSuccess }: ReviewFormProps) {
       setError("יש לבחור דירוג בכוכבים");
       return;
     }
+    if (!privacyAccepted) {
+      setError("יש לאשר את מדיניות הפרטיות לפני שליחת ביקורת");
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -49,6 +55,7 @@ export default function ReviewForm({ businessId, onSuccess }: ReviewFormProps) {
           rating,
           comment: comment.trim() || null,
           reviewer_name: reviewerName.trim() || null,
+          privacyAccepted,
         }),
       });
 
@@ -136,9 +143,26 @@ export default function ReviewForm({ businessId, onSuccess }: ReviewFormProps) {
           </p>
         )}
 
+        <label className="flex items-start gap-2 text-xs text-[#777]">
+          <input
+            type="checkbox"
+            required
+            checked={privacyAccepted}
+            onChange={(e) => setPrivacyAccepted(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-[#D1D5DB] accent-[#059669]"
+          />
+          <span>
+            אני מאשר/ת שהשם והביקורת עשויים להופיע באתר, בהתאם{" "}
+            <Link href="/privacy" className="text-[#059669] hover:underline">
+              למדיניות הפרטיות
+            </Link>
+            .
+          </span>
+        </label>
+
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !privacyAccepted}
           className="w-full h-11 rounded-xl bg-[#059669] hover:bg-[#047857] disabled:opacity-60 text-white font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2 shadow-sm active:scale-95"
         >
           {loading ? "...שולחים" : "שלח ביקורת"}

@@ -3,6 +3,11 @@ import { createClient } from "@/lib/supabase/client";
 
 export type EventType = "view" | "call_click" | "whatsapp_click" | "directions_click";
 
+function hasAnalyticsConsent(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem("po-cookie-consent") === "accepted";
+}
+
 // Simple random session ID for anonymous tracking (per session)
 function getSessionId(): string {
   if (typeof window === "undefined") return "";
@@ -16,6 +21,8 @@ function getSessionId(): string {
 
 export async function trackEvent(businessId: string, eventType: EventType) {
   try {
+    if (!hasAnalyticsConsent()) return;
+
     const supabase = createClient();
     await supabase.from("business_events").insert({
       business_id: businessId,

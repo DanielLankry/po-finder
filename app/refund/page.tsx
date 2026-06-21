@@ -1,5 +1,7 @@
+import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import LegalIdentity from "@/components/legal/LegalIdentity";
 import { BRAND_NAME, BUSINESS_INFO } from "@/lib/site-config";
 
 export const metadata = {
@@ -16,86 +18,79 @@ export default function RefundPage() {
           <h1 className="font-display font-extrabold text-3xl text-stone-900 mb-2">
             מדיניות ביטולים והחזרים
           </h1>
-          <p className="text-stone-500 text-sm mb-8">עדכון אחרון: מרץ 2026</p>
+          <p className="text-stone-500 text-sm mb-8">עדכון אחרון: מאי 2026</p>
 
-          <div className="space-y-6 text-stone-700 leading-relaxed">
+          <div className="space-y-8 text-stone-700 leading-relaxed">
             <section>
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                1. זכות ביטול
+                1. פרטי העסקה והמפעיל
               </h2>
-              <p>
-                בהתאם לחוק הגנת הצרכן, התשמ״א-1981, וכן לתקנות הגנת הצרכן (ביטול עסקה),
-                התשע״א-2010, ניתן לבטל רכישה של מנוי בפלטפורמת <strong>{BRAND_NAME}</strong> תוך{" "}
-                <strong>14 ימים</strong> מיום ביצוע העסקה.
+              <p className="mb-3">
+                מדיניות זו חלה על רכישת תקופת הצגה עסקית בפלטפורמת <strong>{BRAND_NAME}</strong>.
+                פרטי המסלול, התקופה והמחיר מוצגים בעמוד המחירים לפני מעבר לתשלום.
               </p>
-              <p className="mt-2">
-                הביטול יכול להתבצע בכל דרך שבה בוצעה ההזמנה המקורית, או באמצעות פנייה
-                ישירה לשירות הלקוחות.
-              </p>
+              <LegalIdentity />
             </section>
 
             <section>
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                2. תהליך ביטול
+                2. איך מבקשים ביטול
               </h2>
               <p>
-                לביטול עסקה, יש לפנות אלינו בדוא״ל:{" "}
+                אפשר לבקש ביטול באמצעות{" "}
+                <Link href="/contact" className="text-[#059669] hover:underline">
+                  טופס יצירת קשר
+                </Link>{" "}
+                או בדוא&quot;ל אל{" "}
                 <a href={`mailto:${BUSINESS_INFO.contactEmail}`} className="text-[#059669] hover:underline">
                   {BUSINESS_INFO.contactEmail}
-                </a>{" "}
-                ולציין את פרטי הבקשה הבאים:
-              </p>
-              <ul className="list-disc list-inside space-y-1 text-stone-600 mt-2">
-                <li>שם מלא</li>
-                <li>כתובת דוא״ל בה בוצע הרישום</li>
-                <li>מספר הזמנה (מופיע בדוא״ל האישור)</li>
-                <li>סיבת הביטול (אופציונלי, אך מסייע לשיפור השירות)</li>
-              </ul>
-              <p className="mt-2">נשיב לפנייתכם בתוך יום עסקים אחד.</p>
-            </section>
-
-            <section>
-              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                3. החזר כספי
-              </h2>
-              <p>
-                לאחר אישור הביטול, ההחזר הכספי יבוצע תוך <strong>14 ימי עסקים</strong> לכרטיס האשראי
-                המקורי בו בוצעה הרכישה.
-              </p>
-              <p className="mt-2">
-                ההחזר יופיע בחשבון הבנק שלכם בהתאם למחזור החיוב של חברת האשראי, ועשוי
-                להופיע בפירוט הכרטיס לפי שם השירות או שם הספק כפי שיופיע אצל חברת האשראי.
+                </a>. בבקשה יש לציין שם מלא, דוא&quot;ל שבו בוצעה ההרשמה, מזהה עסקה או
+                תאריך תשלום אם ידוע, ואת העסק הרלוונטי.
               </p>
             </section>
 
             <section>
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                4. חריגים ותנאים מיוחדים
+                3. ביטול בתוך 14 ימים
               </h2>
               <p>
-                במנויים תקופתיים (חודשי / שנתי), ימים בהם השירות כבר ניתן בפועל
-                יחושבו באופן יחסי:
-              </p>
-              <ul className="list-disc list-inside space-y-1 text-stone-600 mt-2">
-                <li>ימים שחלפו מתחילת תקופת המנוי יחויבו בהתאם לחלקם היחסי מסכום העסקה</li>
-                <li>ימים שטרם חלפו יוחזרו במלואם</li>
-                <li>ביטול לאחר תום 14 ימים מיום הרכישה אינו זכאי להחזר, אלא אם קיים פגם בשירות</li>
-              </ul>
-              <p className="mt-2">
-                דמי ביטול כמפורט בחוק (עד 5% ממחיר העסקה, ולא יותר מ-100 ₪) עשויים
-                להיגבות בביטולים מסוימים.
+                ניתן לבקש ביטול בתוך 14 ימים ממועד ביצוע העסקה, בכפוף להוראות הדין החלות
+                על עסקת מכר מרחוק ועל השירות שניתן בפועל. כאשר השירות כבר הופעל והעסק
+                הוצג לציבור, ייתכן חיוב יחסי עבור התקופה שבה השירות סופק בפועל, וכן דמי
+                ביטול אם הדין מאפשר זאת.
               </p>
             </section>
 
             <section>
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
-                5. יצירת קשר
+                4. ביטול לאחר 14 ימים
               </h2>
               <p>
-                לשאלות בנושא ביטולים והחזרים:{" "}
-                <a href={`mailto:${BUSINESS_INFO.contactEmail}`} className="text-[#059669] hover:underline">
-                  {BUSINESS_INFO.contactEmail}
-                </a>
+                אם המסלול אינו מתחדש אוטומטית, הביטול לאחר 14 ימים בדרך כלל יעצור שימוש
+                עתידי אך לא יקנה החזר יחסי, אלא אם קיימת חובה אחרת לפי דין או פגם מהותי
+                בשירות. אם יופעל בעתיד מסלול מתחדש, ניתן יהיה לבטל המשך חיוב עתידי בכל
+                עת בהתאם לדין ולהוראות שיוצגו במסלול.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
+                5. החזר כספי
+              </h2>
+              <p>
+                החזר שאושר יבוצע לאמצעי התשלום המקורי כאשר הדבר אפשרי. זמני הופעת ההחזר
+                בפירוט האשראי תלויים גם בספק התשלום ובחברת האשראי. אם ספק התשלום אינו
+                מאפשר ביטול אוטומטי, נטפל בהחזר ידנית דרך מערכת הספק.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">
+                6. לא גורע מזכויות לפי דין
+              </h2>
+              <p>
+                מדיניות זו נועדה להסביר את דרך הפעולה שלנו ואינה גורעת מזכויות שלא ניתן
+                להתנות עליהן לפי חוק הגנת הצרכן, תקנות ביטול עסקה או כל דין חל אחר.
               </p>
             </section>
           </div>

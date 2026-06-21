@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { Search, LocateFixed, MapPin, X } from "lucide-react";
 import { useJsApiLoader } from "@react-google-maps/api";
+import { isWithinIsraelBounds } from "@/lib/maps/mapStyle";
 
 const LIBRARIES: ("places")[] = ["places"];
 
@@ -49,12 +50,17 @@ export default function PlacesSearchBar({
 
   // Fetch predictions with debounce
   useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
     if (!isLoaded || query.length < 2) {
-      setPredictions([]);
-      setOpen(false);
+      debounceRef.current = setTimeout(() => {
+        setPredictions([]);
+        setOpen(false);
+        setActiveIndex(-1);
+      }, 0);
       return;
     }
-    if (debounceRef.current) clearTimeout(debounceRef.current);
+
     debounceRef.current = setTimeout(() => {
       const svc = new google.maps.places.AutocompleteService();
       svc.getPlacePredictions(
@@ -97,10 +103,19 @@ export default function PlacesSearchBar({
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ placeId: p.placeId }, (results, status) => {
       if (status === "OK" && results?.[0]?.geometry?.location) {
-        callbackRef.current({
+        const loc = {
           lat: results[0].geometry.location.lat(),
           lng: results[0].geometry.location.lng(),
           name: p.mainText,
+        };
+        if (!isWithinIsraelBounds(loc)) {
+          setGpsError("אפשר לבחור מיקום בישראל בלבד");
+          return;
+        }
+        callbackRef.current({
+          lat: loc.lat,
+          lng: loc.lng,
+          name: loc.name,
         });
       }
     });
@@ -130,6 +145,11 @@ export default function PlacesSearchBar({
       async (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
+        if (!isWithinIsraelBounds({ lat, lng })) {
+          setLocating(false);
+          setGpsError("המיקום הנוכחי מחוץ לישראל");
+          return;
+        }
         let name = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
         try {
           const geocoder = new google.maps.Geocoder();
@@ -154,7 +174,7 @@ export default function PlacesSearchBar({
       <div className="flex items-center gap-2 w-full">
         {/* Custom search input */}
         <div className="relative flex-1">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#AAAAAA] pointer-events-none" aria-hidden="true" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#AAAAAA] pointer-events-none" aria-hidden="true" />
           <input
             ref={inputRef}
             type="text"
@@ -164,7 +184,7 @@ export default function PlacesSearchBar({
             onFocus={() => predictions.length > 0 && setOpen(true)}
             placeholder={placeholder}
             disabled={!isLoaded}
-            className="w-full h-11 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] ps-10 pe-9 text-base md:text-sm text-[#222222] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-2 focus:ring-[#059669] focus:border-transparent focus:bg-white transition-all disabled:opacity-50"
+            className="w-full h-11 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] ps-9 pe-10 text-base md:text-sm text-[#222222] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-2 focus:ring-[#059669] focus:border-transparent focus:bg-white transition-all disabled:opacity-50"
             dir="rtl"
             aria-label="חיפוש מיקום"
             autoComplete="off"
@@ -172,7 +192,7 @@ export default function PlacesSearchBar({
           {query && (
             <button
               onClick={() => { setQuery(""); setPredictions([]); setOpen(false); inputRef.current?.focus(); }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#AAA] hover:text-[#555] transition-colors"
+              className="absolute end-3 top-1/2 -translate-y-1/2 text-[#AAA] hover:text-[#555] transition-colors"
             >
               <X className="h-3.5 w-3.5" />
             </button>

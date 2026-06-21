@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin } from "lucide-react";
+import CookiePreferencesButton from "./CookiePreferencesButton";
 
 const LINKS = [
   { href: "/about", label: "אודות" },
@@ -39,6 +39,9 @@ export default function Footer() {
                 </Link>
               </li>
             ))}
+            <li>
+              <CookiePreferencesButton />
+            </li>
           </ul>
         </nav>
 

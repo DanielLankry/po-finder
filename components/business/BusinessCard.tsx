@@ -7,7 +7,6 @@ import {
 import type { BusinessWithSchedule } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
 import { isOpenNow } from "@/lib/utils/schedule";
-import { BorderRotate } from "@/components/ui/BorderRotate";
 
 // ── SVG icons per category ────────────────────────────────────────────────────
 const CATEGORY_ICON_LG: Record<string, React.ReactNode> = {
@@ -40,7 +39,7 @@ interface BusinessCardProps {
   isSelected: boolean;
   isHovered?: boolean;
   isFavorited?: boolean;
-  scrollRef?: React.RefObject<HTMLDivElement | null>;
+  scrollRef?: (node: HTMLDivElement | null) => void;
   onClick: () => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
@@ -71,10 +70,6 @@ export default function BusinessCard({
       onMouseEnter={onMouseEnter} 
       onMouseLeave={onMouseLeave}
     >
-      <BorderRotate
-        active={isHovered || isSelected}
-        className="transition-all duration-300"
-      >
       <button
         onClick={onClick}
         className={`w-full text-right cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-[24px] group relative bg-white block p-3.5 ${
@@ -190,7 +185,6 @@ export default function BusinessCard({
           </div>
         </div>
       </button>
-      </BorderRotate>
     </div>
   );
 }

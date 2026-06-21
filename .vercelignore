@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+coverage
+playwright-report
+test-results
+.playwright-mcp
+.claude
+.codex
+.env*
+*.log
+*.tsbuildinfo
+Pokarov Design System.zip
+fix-amber.ps1
+tsc_output.txt
