@@ -9,7 +9,16 @@ import BusinessSelector from "@/components/dashboard/BusinessSelector";
 import ShareButtons from "@/components/business/ShareButtons";
 
 function ExpiryBadge({ expiresAt }: { expiresAt: string | null }) {
-  if (!expiresAt) return null;
+  if (!expiresAt) {
+    return (
+      <Link
+        href="/pricing"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
+      >
+        לא פעיל — לחצו לרכישה
+      </Link>
+    );
+  }
   const exp = new Date(expiresAt);
   const now = new Date();
   const daysLeft = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
