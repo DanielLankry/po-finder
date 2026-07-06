@@ -49,16 +49,16 @@ export default function PricingEditor({ initialPlans }: { initialPlans: Plan[] }
           onClick={handleSave}
           disabled={saving}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-semibold text-sm transition-all disabled:opacity-50"
-          style={{ background: "linear-gradient(135deg, #059669, #047857)" }}
+          style={{ background: "linear-gradient(135deg, #2D6A4F, #1F5038)" }}
         >
           <Save className="h-4 w-4" />
           {saving ? "שומר..." : saved ? "✅ נשמר" : "שמור שינויים"}
         </button>
       </div>
 
-      <div className="flex items-start gap-3 bg-[#ECFDF5] border border-[#A7F3D0] rounded-2xl p-4 mb-6">
-        <Info className="h-5 w-5 text-[#10B981] flex-shrink-0 mt-0.5" />
-        <p className="text-[#047857] text-sm">
+      <div className="flex items-start gap-3 bg-[#EFF5F0] border border-[#C3DCC9] rounded-2xl p-4 mb-6">
+        <Info className="h-5 w-5 text-[#4A8B66] flex-shrink-0 mt-0.5" />
+        <p className="text-[#1F5038] text-sm">
           המחירים מוצגים בשקלים. הקפד שהמחיר יעלה בהדרגה ככל שמספר הימים גדל (לא ייתכן שחודש יהיה זול יותר מ-3 שבועות).
         </p>
       </div>
@@ -79,7 +79,7 @@ export default function PricingEditor({ initialPlans }: { initialPlans: Plan[] }
             <div
               key={i}
               className={`grid grid-cols-12 gap-0 border-b border-[#F5F5F5] px-5 py-3 items-center ${
-                isDropping ? "bg-red-50" : i % 2 === 0 ? "bg-white" : "bg-[#FAFAF7]"
+                isDropping ? "bg-red-50" : i % 2 === 0 ? "bg-white" : "bg-[#F7F3EA]"
               }`}
             >
               <span className="col-span-1 text-sm text-[#888]">{i + 1}</span>
@@ -87,7 +87,7 @@ export default function PricingEditor({ initialPlans }: { initialPlans: Plan[] }
                 <input
                   value={plan.label}
                   onChange={(e) => updatePlan(i, "label", e.target.value)}
-                  className="w-full h-9 rounded-lg border border-[#E5E7EB] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] bg-white"
+                  className="w-full h-9 rounded-lg border border-[#E5E7EB] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] bg-white"
                 />
               </div>
               <div className="col-span-3 px-2">
@@ -95,7 +95,7 @@ export default function PricingEditor({ initialPlans }: { initialPlans: Plan[] }
                   type="number"
                   value={plan.days}
                   onChange={(e) => updatePlan(i, "days", e.target.value)}
-                  className="w-full h-9 rounded-lg border border-[#E5E7EB] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] bg-white"
+                  className="w-full h-9 rounded-lg border border-[#E5E7EB] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] bg-white"
                   dir="ltr"
                 />
               </div>
@@ -109,7 +109,7 @@ export default function PricingEditor({ initialPlans }: { initialPlans: Plan[] }
                     className={`w-full h-9 rounded-lg border px-3 pr-7 text-sm focus:outline-none focus:ring-2 bg-white ${
                       isDropping
                         ? "border-red-300 focus:ring-red-400 text-red-600"
-                        : "border-[#E5E7EB] focus:ring-[#059669]"
+                        : "border-[#E5E7EB] focus:ring-[#2D6A4F]"
                     }`}
                     dir="ltr"
                     min={1}

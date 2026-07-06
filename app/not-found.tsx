@@ -17,6 +17,7 @@ export default function NotFound() {
   const [pingIndex, setPingIndex] = useState(0);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     const interval = setInterval(() => {
       setPingIndex((i) => (i + 1) % PIN_DOTS.length);
@@ -26,7 +27,7 @@ export default function NotFound() {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center bg-[#FAFAF7] px-4"
+      className="min-h-screen flex flex-col items-center justify-center bg-[#F7F3EA] px-4"
       dir="rtl"
     >
       {/* Animated map background */}
@@ -51,7 +52,7 @@ export default function NotFound() {
                 y1="0"
                 x2={`${x}%`}
                 y2="100%"
-                stroke="#059669"
+                stroke="#2D6A4F"
                 strokeWidth="1"
               />
             ))}
@@ -62,7 +63,7 @@ export default function NotFound() {
                 y1={`${y}%`}
                 x2="100%"
                 y2={`${y}%`}
-                stroke="#059669"
+                stroke="#2D6A4F"
                 strokeWidth="1"
               />
             ))}
@@ -75,21 +76,21 @@ export default function NotFound() {
           >
             <path
               d="M0,90 Q50,70 100,85 T200,80 T300,90"
-              stroke="#059669"
+              stroke="#2D6A4F"
               strokeWidth="6"
               fill="none"
               strokeLinecap="round"
             />
             <path
               d="M0,130 Q80,110 160,135 T320,125"
-              stroke="#047857"
+              stroke="#1F5038"
               strokeWidth="4"
               fill="none"
               strokeLinecap="round"
             />
             <path
               d="M120,0 Q130,50 125,104 T130,208"
-              stroke="#059669"
+              stroke="#2D6A4F"
               strokeWidth="5"
               fill="none"
               strokeLinecap="round"
@@ -109,7 +110,7 @@ export default function NotFound() {
                 }}
               >
                 <div
-                  className="rounded-full bg-[#059669]/40 border border-[#059669]/60"
+                  className="rounded-full bg-[#2D6A4F]/40 border border-[#2D6A4F]/60"
                   style={{
                     width: `${dot.size * 4}px`,
                     height: `${dot.size * 4}px`,
@@ -139,13 +140,13 @@ export default function NotFound() {
                 xmlns="http://www.w3.org/2000/svg"
                 style={{
                   filter:
-                    "drop-shadow(0 8px 16px rgba(5,150,105,0.35)) drop-shadow(0 0 6px rgba(5,150,105,0.5))",
+                    "drop-shadow(0 8px 16px rgba(45,106,79,0.35)) drop-shadow(0 0 6px rgba(45,106,79,0.5))",
                 }}
               >
                 <defs>
                   <linearGradient id="pinGrad404" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#34d399" />
-                    <stop offset="100%" stopColor="#059669" />
+                    <stop offset="0%" stopColor="#6FA583" />
+                    <stop offset="100%" stopColor="#2D6A4F" />
                   </linearGradient>
                 </defs>
                 <path
@@ -182,7 +183,7 @@ export default function NotFound() {
           {mounted && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div
-                className="rounded-full border-2 border-[#059669]/30"
+                className="rounded-full border-2 border-[#2D6A4F]/30"
                 style={{
                   width: "120px",
                   height: "120px",
@@ -190,7 +191,7 @@ export default function NotFound() {
                 }}
               />
               <div
-                className="absolute rounded-full border-2 border-[#059669]/20"
+                className="absolute rounded-full border-2 border-[#2D6A4F]/20"
                 style={{
                   width: "120px",
                   height: "120px",
@@ -224,7 +225,7 @@ export default function NotFound() {
           <span
             className="font-extrabold text-[80px] leading-none"
             style={{
-              background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
+              background: "linear-gradient(135deg, #2D6A4F 0%, #1F5038 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -240,14 +241,14 @@ export default function NotFound() {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             style={{
-              filter: "drop-shadow(0 4px 8px rgba(5,150,105,0.3))",
+              filter: "drop-shadow(0 4px 8px rgba(45,106,79,0.3))",
               animation: mounted ? "pinBob 2s ease-in-out 1s infinite" : "none",
             }}
           >
             <defs>
               <linearGradient id="pinGrad0" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#34d399" />
-                <stop offset="100%" stopColor="#059669" />
+                <stop offset="0%" stopColor="#6FA583" />
+                <stop offset="100%" stopColor="#2D6A4F" />
               </linearGradient>
             </defs>
             <path
@@ -269,7 +270,7 @@ export default function NotFound() {
           <span
             className="font-extrabold text-[80px] leading-none"
             style={{
-              background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
+              background: "linear-gradient(135deg, #2D6A4F 0%, #1F5038 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -289,10 +290,10 @@ export default function NotFound() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-full text-white font-semibold text-[15px] shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+            className="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-full text-white font-semibold text-[15px] shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
             style={{
-              background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
-              boxShadow: "0 4px 16px rgba(5,150,105,0.4)",
+              background: "linear-gradient(135deg, #2D6A4F 0%, #1F5038 100%)",
+              boxShadow: "0 4px 16px rgba(45,106,79,0.4)",
             }}
           >
             <svg
@@ -314,7 +315,7 @@ export default function NotFound() {
 
           <Link
             href="/contact"
-            className="inline-flex items-center justify-center h-12 px-8 rounded-full font-semibold text-[15px] border border-[#E5E7EB] bg-white text-[#555] hover:border-[#059669]/50 hover:bg-[#ECFDF5] hover:text-[#047857] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+            className="inline-flex items-center justify-center h-12 px-8 rounded-full font-semibold text-[15px] border border-[#E5E7EB] bg-white text-[#555] hover:border-[#2D6A4F]/50 hover:bg-[#EFF5F0] hover:text-[#1F5038] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
           >
             צרו קשר
           </Link>

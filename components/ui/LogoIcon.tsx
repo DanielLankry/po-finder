@@ -8,14 +8,14 @@ export default function LogoIcon({ size = 40 }: { size?: number }) {
       xmlns="http://www.w3.org/2000/svg"
       style={{
         filter:
-          "drop-shadow(0 0 6px rgba(5,150,105,0.7)) drop-shadow(0 0 14px rgba(5,150,105,0.4))",
+          "drop-shadow(0 0 6px rgba(45,106,79,0.7)) drop-shadow(0 0 14px rgba(45,106,79,0.4))",
       }}
     >
       {/* Pin body — fully filled gradient green */}
       <defs>
         <linearGradient id="pinGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#34d399" />
-          <stop offset="100%" stopColor="#059669" />
+          <stop offset="0%" stopColor="#6FA583" />
+          <stop offset="100%" stopColor="#2D6A4F" />
         </linearGradient>
       </defs>
       <path

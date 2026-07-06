@@ -35,6 +35,7 @@ export default function AdminPaymentsPage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
   }, []);
 
@@ -58,7 +59,7 @@ export default function AdminPaymentsPage() {
   const statusBadge = (s: Attempt["status"]) => {
     const map: Record<Attempt["status"], string> = {
       pending: "bg-stone-100 text-stone-700",
-      succeeded: "bg-emerald-100 text-[#059669]",
+      succeeded: "bg-emerald-100 text-[#2D6A4F]",
       failed: "bg-red-100 text-red-700",
       refunded: "bg-amber-100 text-amber-700",
     };
@@ -74,8 +75,8 @@ export default function AdminPaymentsPage() {
   return (
     <div className="p-4 md:p-8" dir="rtl">
       <div className="flex items-center gap-3 mb-6">
-        <div className="h-10 w-10 rounded-xl bg-[#ECFDF5] flex items-center justify-center">
-          <CreditCard className="h-5 w-5 text-[#059669]" />
+        <div className="h-10 w-10 rounded-xl bg-[#EFF5F0] flex items-center justify-center">
+          <CreditCard className="h-5 w-5 text-[#2D6A4F]" />
         </div>
         <div>
           <h1 className="font-extrabold text-2xl text-[#111]">תשלומים</h1>
@@ -107,7 +108,7 @@ export default function AdminPaymentsPage() {
               </thead>
               <tbody className="divide-y divide-[#F3F4F6]">
                 {items.map((a) => (
-                  <tr key={a.id} className="hover:bg-[#FAFAF7]">
+                  <tr key={a.id} className="hover:bg-[#F7F3EA]">
                     <td className="px-4 py-3 text-[#444] whitespace-nowrap" dir="ltr">{fmtDate(a.completed_at ?? a.created_at)}</td>
                     <td className="px-4 py-3 text-[#444]">{a.user_email ?? a.user_id.slice(0, 8)}</td>
                     <td className="px-4 py-3 text-[#444]">{a.business_name ?? "—"}</td>

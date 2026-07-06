@@ -21,7 +21,7 @@ function UserAvatar({ name }: { name: string }) {
     .join("");
 
   const colors = [
-    "bg-[#D1FAE5] text-[#047857]",
+    "bg-[#DDEBE0] text-[#1F5038]",
     "bg-emerald-100 text-emerald-700",
     "bg-violet-100 text-violet-700",
     "bg-sky-100 text-sky-700",

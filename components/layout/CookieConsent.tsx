@@ -49,7 +49,7 @@ export default function CookieConsent() {
             יופעלו רק לאחר אישור. אפשר לשנות בחירה דרך תחתית האתר. לפרטים ראו את{" "}
             <Link
               href="/privacy"
-              className="text-[#059669] hover:underline"
+              className="text-[#2D6A4F] hover:underline"
             >
               מדיניות הפרטיות
             </Link>{" "}
@@ -59,13 +59,13 @@ export default function CookieConsent() {
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={decline}
-            className="h-9 px-4 rounded-lg border border-stone-300 text-stone-600 text-sm font-medium hover:bg-stone-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+            className="h-9 px-4 rounded-lg border border-stone-300 text-stone-600 text-sm font-medium hover:bg-stone-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
           >
             דחייה
           </button>
           <button
             onClick={accept}
-            className="h-9 px-4 rounded-lg bg-[#059669] text-white text-sm font-medium hover:bg-[#047857] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2"
+            className="h-9 px-4 rounded-lg bg-[#2D6A4F] text-white text-sm font-medium hover:bg-[#1F5038] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2"
           >
             אישור
           </button>

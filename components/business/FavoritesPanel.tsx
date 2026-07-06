@@ -39,7 +39,7 @@ export default function FavoritesPanel({
       {open && (
         <div
           dir="rtl"
-          className="fixed top-0 right-0 h-full w-full max-w-sm z-[70] bg-[#FAFAF7] shadow-2xl flex flex-col slide-in-right"
+          className="fixed top-0 right-0 h-full w-full max-w-sm z-[70] bg-[#F7F3EA] shadow-2xl flex flex-col slide-in-right"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">

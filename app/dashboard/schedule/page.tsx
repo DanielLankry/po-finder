@@ -228,14 +228,14 @@ export default function SchedulePage() {
 
   if (loading) return (
     <div className="flex items-center justify-center py-20">
-      <div className="h-8 w-8 rounded-full border-4 border-emerald-200 border-t-[#059669] animate-spin" />
+      <div className="h-8 w-8 rounded-full border-4 border-emerald-200 border-t-[#2D6A4F] animate-spin" />
     </div>
   );
 
   if (!businessId) return (
     <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center" dir="rtl">
       <p className="text-stone-600 mb-4">יש ליצור פרופיל עסק תחילה</p>
-      <a href="/dashboard/profile" className="text-[#059669] font-medium hover:underline">עריכת פרופיל ←</a>
+      <a href="/dashboard/profile" className="text-[#2D6A4F] font-medium hover:underline">עריכת פרופיל ←</a>
     </div>
   );
 
@@ -248,7 +248,7 @@ export default function SchedulePage() {
             key={key}
             onClick={() => { setTab(key); setSuccess(null); setError(null); }}
             className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${
-              tab === key ? "bg-white text-[#059669] shadow-sm" : "text-stone-500 hover:text-stone-700"
+              tab === key ? "bg-white text-[#2D6A4F] shadow-sm" : "text-stone-500 hover:text-stone-700"
             }`}
           >
             {label}
@@ -266,13 +266,13 @@ export default function SchedulePage() {
             {DAYS.map(({ dow, label }) => {
               const f = weeklyForms[dow];
               return (
-                <div key={dow} className={`rounded-xl border transition-all ${f.is_active ? "border-[#059669]/30 bg-[#ECFDF5]/40" : "border-stone-100 bg-stone-50/50"}`}>
+                <div key={dow} className={`rounded-xl border transition-all ${f.is_active ? "border-[#2D6A4F]/30 bg-[#EFF5F0]/40" : "border-stone-100 bg-stone-50/50"}`}>
                   {/* Day header row */}
                   <div className="flex items-center gap-3 p-3">
                     <button
                       type="button"
                       onClick={() => setWeeklyForms((p) => ({ ...p, [dow]: { ...p[dow], is_active: !p[dow].is_active } }))}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 flex-shrink-0 ${f.is_active ? "bg-[#059669]" : "bg-stone-300"}`}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 flex-shrink-0 ${f.is_active ? "bg-[#2D6A4F]" : "bg-stone-300"}`}
                       role="switch"
                       aria-checked={f.is_active}
                     >
@@ -286,7 +286,7 @@ export default function SchedulePage() {
                           type="time"
                           value={f.open_time}
                           onChange={(e) => setWeeklyForms((p) => ({ ...p, [dow]: { ...p[dow], open_time: e.target.value } }))}
-                          className="h-8 rounded-lg border border-stone-200 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] w-[100px]"
+                          className="h-8 rounded-lg border border-stone-200 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] w-[100px]"
                           dir="ltr"
                         />
                         <span className="text-stone-400 text-sm">—</span>
@@ -294,7 +294,7 @@ export default function SchedulePage() {
                           type="time"
                           value={f.close_time}
                           onChange={(e) => setWeeklyForms((p) => ({ ...p, [dow]: { ...p[dow], close_time: e.target.value } }))}
-                          className="h-8 rounded-lg border border-stone-200 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] w-[100px]"
+                          className="h-8 rounded-lg border border-stone-200 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] w-[100px]"
                           dir="ltr"
                         />
                       </div>
@@ -316,7 +316,7 @@ export default function SchedulePage() {
                             value={f.address}
                             onChange={(e) => setWeeklyForms((p) => ({ ...p, [dow]: { ...p[dow], address: e.target.value } }))}
                             placeholder="כתובת קבועה ליום זה (אופציונלי)"
-                            className="w-full h-9 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#059669] px-3 text-sm"
+                            className="w-full h-9 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] px-3 text-sm"
                           />
                         </Autocomplete>
                       ) : (
@@ -327,7 +327,7 @@ export default function SchedulePage() {
                         value={f.note}
                         onChange={(e) => setWeeklyForms((p) => ({ ...p, [dow]: { ...p[dow], note: e.target.value } }))}
                         placeholder="הערה קבועה (אופציונלי)"
-                        className="w-full h-9 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#059669] px-3 text-sm"
+                        className="w-full h-9 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] px-3 text-sm"
                       />
                     </div>
                   )}
@@ -342,7 +342,7 @@ export default function SchedulePage() {
           <Button
             onClick={handleWeeklySave}
             disabled={saving}
-            className="w-full h-11 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-semibold mt-5"
+            className="w-full h-11 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-semibold mt-5"
           >
             {saving ? "...שומר" : "שמירת התבנית השבועית"}
           </Button>
@@ -365,7 +365,7 @@ export default function SchedulePage() {
           </p>
 
           {!schedule && (
-            <div className="bg-[#ECFDF5] border border-[#D1FAE5] rounded-xl p-3 mb-5 text-sm text-[#047857]">
+            <div className="bg-[#EFF5F0] border border-[#DDEBE0] rounded-xl p-3 mb-5 text-sm text-[#1F5038]">
               💡 אין תיקון להיום — מוצג לפי התבנית השבועית. מלאו פרטים רק אם צריך לשנות משהו.
             </div>
           )}
@@ -384,7 +384,7 @@ export default function SchedulePage() {
                     value={overrideForm.address}
                     onChange={(e) => setOverrideForm((p) => ({ ...p, address: e.target.value }))}
                     placeholder="הקלידו כתובת..."
-                    className="w-full h-11 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#059669] px-4 text-sm"
+                    className="w-full h-11 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] px-4 text-sm"
                   />
                 </Autocomplete>
               ) : (
@@ -397,13 +397,13 @@ export default function SchedulePage() {
                 <Label className="block text-stone-700 font-medium text-sm mb-1.5">שעת פתיחה</Label>
                 <Input type="time" value={overrideForm.open_time}
                   onChange={(e) => setOverrideForm((p) => ({ ...p, open_time: e.target.value }))}
-                  className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]" dir="ltr" />
+                  className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F]" dir="ltr" />
               </div>
               <div>
                 <Label className="block text-stone-700 font-medium text-sm mb-1.5">שעת סגירה</Label>
                 <Input type="time" value={overrideForm.close_time}
                   onChange={(e) => setOverrideForm((p) => ({ ...p, close_time: e.target.value }))}
-                  className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]" dir="ltr" />
+                  className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F]" dir="ltr" />
               </div>
             </div>
 
@@ -414,7 +414,7 @@ export default function SchedulePage() {
                 onChange={(e) => setOverrideForm((p) => ({ ...p, note: e.target.value }))}
                 placeholder="למשל: היום יש מבצע מיוחד..."
                 rows={2}
-                className="rounded-xl border-stone-200 focus-visible:ring-[#059669] resize-none"
+                className="rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F] resize-none"
               />
             </div>
 
@@ -422,7 +422,7 @@ export default function SchedulePage() {
             {success && <p className="text-emerald-600 text-sm font-medium">{success}</p>}
 
             <Button type="submit" disabled={saving}
-              className="w-full h-11 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-semibold">
+              className="w-full h-11 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-semibold">
               {saving ? "...שומר" : schedule ? "עדכון תיקון להיום" : "פרסום תיקון להיום"}
             </Button>
           </form>

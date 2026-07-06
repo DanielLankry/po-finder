@@ -13,7 +13,7 @@ import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#FAFAF7]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#F7F3EA]" />}>
       <LoginForm />
     </Suspense>
   );
@@ -73,9 +73,8 @@ function LoginForm() {
 
   return (
     <div
-      className="min-h-screen flex"
+      className="min-h-screen flex bg-[#F7F3EA]"
       dir="rtl"
-      style={{ background: "linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 40%, #D1FAE5 100%)" }}
     >
       {/* ── Hero side — LEFT in RTL (desktop only) ─────────────────────────── */}
       <div className="hidden lg:flex flex-1 relative overflow-hidden items-center justify-center p-12">
@@ -83,7 +82,7 @@ function LoginForm() {
         <div
           className="absolute inset-0 opacity-[0.06]"
           style={{
-            backgroundImage: "linear-gradient(#059669 1px, transparent 1px), linear-gradient(90deg, #059669 1px, transparent 1px)",
+            backgroundImage: "linear-gradient(#2D6A4F 1px, transparent 1px), linear-gradient(90deg, #2D6A4F 1px, transparent 1px)",
             backgroundSize: "40px 40px",
           }}
         />
@@ -92,24 +91,24 @@ function LoginForm() {
         <div className="relative z-10 text-center max-w-sm">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="פה קרוב" className="h-20 w-auto mx-auto mb-6 drop-shadow-md" />
-          <h2 className="text-4xl font-black text-[#065F46] mb-2 leading-tight">
+          <h2 className="font-display text-6xl text-[#17402D] mb-2 leading-none">
             הפלטפורמה
           </h2>
-          <div className="text-4xl font-black text-[#059669] mb-3 h-12 flex items-center justify-center">
+          <div className="font-display text-6xl text-[#2D6A4F] mb-4 h-16 flex items-center justify-center">
             <Typewriter
               text={["לעסקים קטנים", "לדוכנים", "לעגלות קפה", "ליוצרים", "לשווקים ניידים", "לאופים ביתיים", "למוכרי פרחים", "לחקלאים", "לישראלים"]}
               speed={65}
               deleteSpeed={35}
               waitTime={2000}
-              wordColors={{ "לישראלים": "text-[#2563EB]" }}
+              wordColors={{ "לישראלים": "text-[#C4552D]" }}
             />
           </div>
-          <p className="text-[#047857] text-lg font-medium opacity-80">
+          <p className="text-[#1F5038] text-lg font-medium opacity-80">
             על המפה, בזמן אמת
           </p>
-          <div className="mt-8 rounded-3xl border border-white/60 bg-white/55 p-5 text-right shadow-sm backdrop-blur">
-            <p className="text-sm font-bold text-[#065F46] mb-2">כניסה לחשבון</p>
-            <p className="text-sm text-[#047857] leading-relaxed">
+          <div className="sticker mt-8 p-5 text-right -rotate-1">
+            <p className="text-sm font-bold text-[#17402D] mb-2">כניסה לחשבון</p>
+            <p className="text-sm text-[#1F5038] leading-relaxed">
               ניהול פרופיל עסק, שעות פעילות ותמונות או חזרה לחיפוש עסקים קרובים.
             </p>
           </div>
@@ -129,22 +128,22 @@ function LoginForm() {
           </div>
 
           {/* Tag */}
-          <div className="inline-flex items-center gap-1.5 bg-[#059669]/10 text-[#047857] text-xs font-bold px-3 py-1.5 rounded-full mb-5">
+          <div className="inline-flex items-center gap-2 bg-white text-[#1F5038] text-xs font-bold px-3.5 py-1.5 rounded-full border-2 border-[#17402D] shadow-[2px_2px_0_0_#17402D] mb-5">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#059669] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#059669]" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2D6A4F] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#2D6A4F]" />
             </span>
             כניסה לחשבון
           </div>
 
-          <h1 className="text-[32px] font-black text-[#111111] mb-1.5 leading-tight">
-            ברוכים הבאים חזרה 👋
+          <h1 className="font-display text-5xl text-[#17402D] mb-2 leading-none">
+            ברוכים הבאים חזרה
           </h1>
-          <p className="text-[#6B7280] text-sm mb-8">
+          <p className="text-[#78716C] text-sm mb-8">
             אין לכם חשבון?{" "}
             <Link
               href={explicitRedirect && explicitRedirect !== "/" ? `/auth/register?redirectTo=${encodeURIComponent(explicitRedirect)}` : "/auth/register"}
-              className="text-[#059669] font-semibold hover:underline"
+              className="text-[#2D6A4F] font-semibold hover:underline"
             >
               צרו חשבון
             </Link>
@@ -155,22 +154,22 @@ function LoginForm() {
             type="button"
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-2xl border-2 border-[#E5E7EB] bg-white text-[#374151] font-semibold text-sm hover:border-[#059669]/40 hover:bg-[#F9FFF9] transition-all duration-150 disabled:opacity-50 shadow-sm"
+            className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-2xl border-2 border-[#17402D]/20 bg-white text-[#17402D] font-bold text-sm shadow-[2px_2px_0_0_rgba(23,64,45,0.15)] hover:border-[#17402D] hover:shadow-[3px_3px_0_0_#17402D] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50"
           >
             <GoogleIcon />
             המשך עם גוגל
           </button>
 
           <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-[#E5E7EB]" />
-            <span className="text-[#9CA3AF] text-xs font-medium">או עם מייל</span>
-            <div className="flex-1 h-px bg-[#E5E7EB]" />
+            <div className="flex-1 h-px bg-[#17402D]/15" />
+            <span className="text-[#78716C] text-xs font-medium">או עם מייל</span>
+            <div className="flex-1 h-px bg-[#17402D]/15" />
           </div>
 
           {/* Form */}
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div>
-              <Label htmlFor="email" className="text-[#374151] font-semibold text-sm mb-2 block">
+              <Label htmlFor="email" className="text-[#17402D] font-bold text-sm mb-2 block">
                 כתובת מייל
               </Label>
               <Input
@@ -181,12 +180,12 @@ function LoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 dir="ltr"
-                className="h-12 rounded-2xl border-2 border-[#E5E7EB] focus-visible:border-[#059669] focus-visible:ring-0 bg-white text-sm px-4"
+                className="h-12 rounded-2xl border-2 border-[#17402D]/20 focus-visible:border-[#2D6A4F] focus-visible:ring-0 bg-white text-sm px-4"
               />
             </div>
 
             <div>
-              <Label htmlFor="password" className="text-[#374151] font-semibold text-sm mb-2 block">
+              <Label htmlFor="password" className="text-[#17402D] font-bold text-sm mb-2 block">
                 סיסמה
               </Label>
               <div className="relative">
@@ -198,12 +197,12 @@ function LoginForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   dir="ltr"
-                  className="h-12 rounded-2xl border-2 border-[#E5E7EB] focus-visible:border-[#059669] focus-visible:ring-0 bg-white text-sm px-4 pr-12"
+                  className="h-12 rounded-2xl border-2 border-[#17402D]/20 focus-visible:border-[#2D6A4F] focus-visible:ring-0 bg-white text-sm px-4 pr-12"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#9CA3AF] hover:bg-[#ECFDF5] hover:text-[#059669] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+                  className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#9CA3AF] hover:bg-[#EFF5F0] hover:text-[#2D6A4F] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
                   aria-label={showPass ? "הסתרת סיסמה" : "הצגת סיסמה"}
                 >
                   {showPass ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
@@ -212,7 +211,7 @@ function LoginForm() {
             </div>
 
             <div className="flex justify-end">
-              <Link href="/auth/forgot-password" className="text-sm text-[#059669] hover:underline font-medium">
+              <Link href="/auth/forgot-password" className="text-sm text-[#2D6A4F] hover:underline font-medium">
                 שכחתם סיסמה?
               </Link>
             </div>
@@ -222,7 +221,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 rounded-2xl bg-[#059669] hover:bg-[#047857] active:scale-[0.98] text-white font-bold text-[15px] transition-all shadow-[0_4px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_6px_24px_rgba(5,150,105,0.4)] disabled:opacity-60"
+              className="w-full h-12 rounded-2xl bg-[#C4552D] hover:bg-[#A8441F] active:scale-[0.98] text-white font-bold text-[15px] border-2 border-[#8A3618] shadow-[3px_3px_0_0_#8A3618] hover:shadow-[4px_4px_0_0_#8A3618] hover:-translate-y-0.5 transition-all disabled:opacity-60"
             >
               {loading ? "...נכנסים" : "כניסה"}
             </button>

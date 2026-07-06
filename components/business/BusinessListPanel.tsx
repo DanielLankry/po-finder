@@ -56,7 +56,7 @@ function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): 
 function SkeletonCard() {
   return (
     <div
-      className="flex gap-3 px-5 py-4 border-b border-[#EBEBEB] border-r-[3px] border-r-transparent"
+      className="flex gap-3 px-5 py-4 border-b border-[#E7E1D3] border-r-[3px] border-r-transparent"
       dir="rtl"
       aria-hidden="true"
     >
@@ -161,15 +161,15 @@ export default function BusinessListPanel({
     const selectedBusiness = businesses.find((b) => b.id === selectedBusinessId);
     if (selectedBusiness) {
       return (
-        <div className="flex flex-col h-full bg-[#FAFAFA]" dir="rtl">
+        <div className="flex flex-col h-full bg-[#FBF9F3]" dir="rtl">
           {/* Header with back button */}
-          <div className="px-5 py-3.5 border-b border-t border-[#EBEBEB] bg-[#FAFAF7] flex items-center shrink-0 sticky top-0 z-10">
+          <div className="px-5 py-3.5 border-b border-t border-[#E7E1D3] bg-[#F7F3EA] flex items-center shrink-0 sticky top-0 z-10">
             <button
               onClick={() => onBackToList?.()}
-              className="flex items-center gap-1.5 text-[#222222] hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-full px-4 py-2 -mx-4"
+              className="flex items-center gap-1.5 text-[#222222] hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] rounded-full px-4 py-2 -mx-4"
               aria-label="חזרה לרשימה"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#059669] rotate-180"><path d="m15 18-6-6 6-6"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#2D6A4F] rotate-180"><path d="m15 18-6-6 6-6"/></svg>
               <span className="font-bold text-[15px]">חזרה</span>
             </button>
           </div>
@@ -186,8 +186,8 @@ export default function BusinessListPanel({
                     sizes="(max-width: 768px) 100vw, 420px"
                   />
                 ) : (
-                 <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#ECFDF5] via-[#D1FAE5] to-[#A7F3D0]">
-                    <div className="h-12 w-12 rounded-2xl bg-[#059669] flex items-center justify-center shadow-md">
+                 <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#EFF5F0] via-[#DDEBE0] to-[#C3DCC9]">
+                    <div className="h-12 w-12 rounded-2xl bg-[#2D6A4F] flex items-center justify-center shadow-md">
                       <MapPin className="h-6 w-6 text-white" />
                     </div>
                  </div>
@@ -223,7 +223,7 @@ export default function BusinessListPanel({
 
              {/* Description */}
              {selectedBusiness.description && (
-               <p className="text-[14px] text-[#555555] leading-relaxed mb-4 border-b border-[#F0F0EC] pb-4">
+               <p className="text-[14px] text-[#555555] leading-relaxed mb-4 border-b border-[#EDE8DC] pb-4">
                  {selectedBusiness.description}
                </p>
              )}
@@ -231,16 +231,16 @@ export default function BusinessListPanel({
              <StatusCard business={selectedBusiness} schedule={selectedBusiness.today_schedule ?? null} />
 
              {/* Reviews section */}
-             <div className="mt-5 border-t border-[#F0F0EC] pt-5">
+             <div className="mt-5 border-t border-[#EDE8DC] pt-5">
                <h3 className="font-bold text-[16px] text-[#111111] mb-4">ביקורות</h3>
                {reviewsLoading ? (
                  <div className="flex items-center justify-center py-6">
-                   <div className="h-6 w-6 rounded-full border-2 border-[#D1FAE5] border-t-[#059669] animate-spin" />
+                   <div className="h-6 w-6 rounded-full border-2 border-[#DDEBE0] border-t-[#2D6A4F] animate-spin" />
                  </div>
                ) : (
                  <>
                    <ReviewsList reviews={panelReviews} />
-                   {panelReviews.length > 0 && <hr className="border-[#F0F0EC] my-4" />}
+                   {panelReviews.length > 0 && <hr className="border-[#EDE8DC] my-4" />}
                    <ReviewForm
                      businessId={selectedBusiness.id}
                      onSuccess={() => {
@@ -264,22 +264,22 @@ export default function BusinessListPanel({
   return (
     <div className="flex flex-col h-full" dir="rtl">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="px-5 pt-5 pb-4 border-b border-[#EBEBEB] bg-white flex-shrink-0 shadow-sm">
+      <div className="px-5 pt-5 pb-4 border-b-2 border-[#17402D]/10 bg-[#F7F3EA] flex-shrink-0">
         {/* Search input */}
         <div className="relative mb-3">
-          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#AAA] pointer-events-none" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#17402D]/60 pointer-events-none" />
           <input
             type="search"
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
             placeholder="חפש עסק, שכונה, מוצר..."
-            className="w-full h-10 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] ps-9 pe-9 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] focus:border-transparent transition-all"
+            className="w-full h-11 rounded-xl border-2 border-[#17402D]/20 bg-white ps-9 pe-9 text-sm font-medium text-[#17402D] placeholder:text-[#17402D]/40 shadow-[2px_2px_0_0_rgba(23,64,45,0.12)] focus:outline-none focus:border-[#17402D] focus:shadow-[3px_3px_0_0_#17402D] transition-all"
             dir="rtl"
           />
           {localSearch && (
             <button
               onClick={() => setLocalSearch("")}
-              className="absolute end-3 top-1/2 -translate-y-1/2 text-[#AAA] hover:text-[#555] transition-colors"
+              className="absolute end-3 top-1/2 -translate-y-1/2 text-[#17402D]/50 hover:text-[#C4552D] transition-colors"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -293,20 +293,20 @@ export default function BusinessListPanel({
         ) : (
           <div className="flex items-center gap-3 flex-wrap">
             {filtered.length > 0 ? (
-              <p className="text-xl font-bold text-[#111111] tracking-tight flex items-baseline gap-1">
-                <NumberTicker value={filtered.length} className="text-xl font-bold text-[#111111]" />
+              <p className="font-display text-2xl text-[#17402D] flex items-baseline gap-1.5">
+                <NumberTicker value={filtered.length} className="font-display text-2xl text-[#17402D]" />
                 <span>עסקים</span>
               </p>
             ) : (
-              <p className="text-xl font-bold text-[#111111] tracking-tight">לא נמצאו עסקים זמינים כרגע</p>
+              <p className="font-display text-2xl text-[#17402D]">לא נמצאו עסקים זמינים כרגע</p>
             )}
             {openCount > 0 && (
-              <span className="inline-flex items-center gap-2 text-sm font-semibold px-3.5 py-1.5 rounded-full bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0]">
+              <span className="inline-flex items-center gap-2 text-sm font-bold px-3.5 py-1.5 rounded-full bg-white text-[#1F5038] border-2 border-[#17402D] shadow-[2px_2px_0_0_#17402D]">
                 <span className="relative flex h-2 w-2 flex-shrink-0" aria-hidden="true">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#059669] opacity-60" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#059669]" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2D6A4F] opacity-60" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#2D6A4F]" />
                 </span>
-                <NumberTicker value={openCount} className="text-sm font-semibold text-[#047857]" />
+                <NumberTicker value={openCount} className="text-sm font-bold text-[#1F5038]" />
                 <span>פתוחים עכשיו</span>
               </span>
             )}
@@ -315,14 +315,14 @@ export default function BusinessListPanel({
       </div>
 
       {/* ── Scrollable cards ───────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto bg-[#FAFAF7] scrollbar-thin">
+      <div className="flex-1 overflow-y-auto bg-[#F7F3EA] scrollbar-thin">
         {loading ? (
           // Show 6 shimmer skeleton cards while data loads
           Array.from({ length: 6 }, (_, i) => <SkeletonCard key={i} />)
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 px-8 text-center py-16">
-            <div className="h-14 w-14 rounded-full bg-[#ECFDF5] flex items-center justify-center">
-              <MapPin className="h-7 w-7 text-[#059669]" aria-hidden="true" />
+            <div className="h-14 w-14 rounded-full bg-[#EFF5F0] flex items-center justify-center">
+              <MapPin className="h-7 w-7 text-[#2D6A4F]" aria-hidden="true" />
             </div>
             <div>
               <p className="text-[#222222] font-semibold text-sm mb-1">

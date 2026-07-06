@@ -44,3 +44,12 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# local tooling / scratch
+.claude/
+.codex/
+.playwright-mcp/
+*.log
+tsc_output.txt
+fix-amber.ps1
+*.zip

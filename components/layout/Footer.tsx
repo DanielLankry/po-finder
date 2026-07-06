@@ -13,14 +13,14 @@ const LINKS = [
 export default function Footer() {
   return (
     <footer
-      className="border-t border-slate-200 bg-[#FAFAF7] py-8"
+      className="border-t border-slate-200 bg-[#F7F3EA] py-8"
       dir="rtl"
       aria-label="כותרת תחתית"
     >
       <div className="max-w-[1280px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         <Link
           href="/"
-          className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-lg"
+          className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] rounded-lg"
           aria-label="פה קרוב — דף הבית"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -33,7 +33,7 @@ export default function Footer() {
               <li key={href}>
                 <Link
                   href={href}
-                  className="text-slate-500 text-sm hover:text-[#059669] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded"
+                  className="text-slate-500 text-sm hover:text-[#2D6A4F] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] rounded"
                 >
                   {label}
                 </Link>

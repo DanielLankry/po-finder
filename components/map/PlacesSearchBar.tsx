@@ -184,7 +184,7 @@ export default function PlacesSearchBar({
             onFocus={() => predictions.length > 0 && setOpen(true)}
             placeholder={placeholder}
             disabled={!isLoaded}
-            className="w-full h-11 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] ps-9 pe-10 text-base md:text-sm text-[#222222] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-2 focus:ring-[#059669] focus:border-transparent focus:bg-white transition-all disabled:opacity-50"
+            className="w-full h-11 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] ps-9 pe-10 text-base md:text-sm text-[#222222] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:border-transparent focus:bg-white transition-all disabled:opacity-50"
             dir="rtl"
             aria-label="חיפוש מיקום"
             autoComplete="off"
@@ -201,7 +201,7 @@ export default function PlacesSearchBar({
           {/* Custom dropdown */}
           {open && predictions.length > 0 && (
             <div
-              className="absolute top-[calc(100%+6px)] right-0 left-0 z-50 bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-[#E5E7EB] overflow-hidden"
+              className="absolute top-[calc(100%+6px)] right-0 left-0 z-50 bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-[#E7E1D3] overflow-hidden"
               dir="rtl"
             >
               {predictions.map((p, i) => (
@@ -209,10 +209,10 @@ export default function PlacesSearchBar({
                   key={p.placeId}
                   onMouseDown={(e) => { e.preventDefault(); selectPrediction(p); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-right transition-colors ${
-                    i === activeIndex ? "bg-[#F0FDF4]" : "hover:bg-[#F9FAFB]"
+                    i === activeIndex ? "bg-[#F0FDF4]" : "hover:bg-[#FBF9F3]"
                   } ${i < predictions.length - 1 ? "border-b border-[#F3F4F6]" : ""}`}
                 >
-                  <MapPin className="h-4 w-4 text-[#059669] flex-shrink-0" />
+                  <MapPin className="h-4 w-4 text-[#2D6A4F] flex-shrink-0" />
                   <div className="min-w-0 text-right">
                     <p className="text-sm font-semibold text-[#111] truncate">{p.mainText}</p>
                     {p.secondaryText && (
@@ -233,8 +233,8 @@ export default function PlacesSearchBar({
           onClick={handleGPS}
           disabled={locating}
           title="מיקום נוכחי"
-          className="flex-shrink-0 h-11 w-11 rounded-full flex items-center justify-center transition-all disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
-          style={{ background: "linear-gradient(135deg,#059669 0%,#047857 100%)" }}
+          className="flex-shrink-0 h-11 w-11 rounded-full flex items-center justify-center transition-all disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
+          style={{ background: "linear-gradient(135deg,#2D6A4F 0%,#1F5038 100%)" }}
           aria-label="השתמש במיקום הנוכחי"
         >
           <LocateFixed className={`h-[18px] w-[18px] text-white ${locating ? "animate-spin" : ""}`} aria-hidden="true" />

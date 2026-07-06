@@ -37,12 +37,12 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4" dir="rtl">
+    <div className="flex min-h-screen items-center justify-center px-4 bg-[#F7F3EA]" dir="rtl">
       <div className="w-full max-w-sm">
         <div className="mb-8">
           <Link href="/" className="inline-flex items-center gap-2 group">
-            <MapPin className="h-7 w-7 fill-[#059669] text-[#059669]" />
-            <span className="font-display font-extrabold text-2xl text-[#059669]">פה קרוב</span>
+            <MapPin className="h-7 w-7 fill-[#2D6A4F] text-[#2D6A4F]" />
+            <span className="font-display font-extrabold text-2xl text-[#2D6A4F]">פה קרוב</span>
           </Link>
         </div>
 
@@ -66,7 +66,7 @@ export default function ResetPasswordPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
+              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F]"
               dir="ltr"
             />
           </div>
@@ -83,7 +83,7 @@ export default function ResetPasswordPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               minLength={6}
-              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
+              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F]"
               dir="ltr"
             />
           </div>
@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full h-11 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium"
+            className="w-full h-11 rounded-xl bg-[#C4552D] hover:bg-[#A8441F] text-white font-bold border-2 border-[#8A3618] shadow-[2px_2px_0_0_#8A3618] transition-all"
           >
             {loading ? "...מעדכן" : "עדכון סיסמה"}
           </Button>

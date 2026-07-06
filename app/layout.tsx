@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Heebo, Rubik, Secular_One } from "next/font/google";
+import { Assistant, Karantina } from "next/font/google";
 import "./globals.css";
 import "@/lib/env";
 import CookieConsent from "@/components/layout/CookieConsent";
@@ -10,23 +10,17 @@ import { BRAND_NAME, SITE_URL } from "@/lib/site-config";
 
 const BASE_URL = SITE_URL;
 
-const heebo = Heebo({
+const assistant = Assistant({
   subsets: ["hebrew", "latin"],
   display: "swap",
-  variable: "--font-heebo",
+  variable: "--font-assistant",
 });
 
-const rubik = Rubik({
+const karantina = Karantina({
   subsets: ["hebrew", "latin"],
+  weight: ["300", "400", "700"],
   display: "swap",
-  variable: "--font-rubik-next",
-});
-
-const secularOne = Secular_One({
-  subsets: ["hebrew", "latin"],
-  weight: "400",
-  display: "swap",
-  variable: "--font-secular-next",
+  variable: "--font-karantina",
 });
 
 export const metadata: Metadata = {
@@ -127,7 +121,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" dir="rtl" className={`${heebo.variable} ${rubik.variable} ${secularOne.variable}`}>
+    <html lang="he" dir="rtl" className={`${assistant.variable} ${karantina.variable}`}>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="32x32" />
         <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />

@@ -56,7 +56,7 @@ export default function ShareButtons({ businessId, businessName }: ShareButtonsP
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl bg-gradient-to-l from-[#059669] to-[#10b981] hover:from-[#047857] hover:to-[#059669] text-white font-medium text-sm transition-all duration-150 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2"
+          className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl bg-gradient-to-l from-[#2D6A4F] to-[#4A8B66] hover:from-[#1F5038] hover:to-[#2D6A4F] text-white font-medium text-sm transition-all duration-150 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2"
           aria-label="שתף בוואטסאפ"
         >
           <MessageCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
@@ -66,7 +66,7 @@ export default function ShareButtons({ businessId, businessName }: ShareButtonsP
         {/* QR Code button */}
         <button
           onClick={() => setShowQR(true)}
-          className="flex items-center justify-center gap-2 px-4 h-11 rounded-xl border border-slate-200 text-slate-700 hover:border-[#059669] hover:text-[#059669] hover:bg-emerald-50 font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2"
+          className="flex items-center justify-center gap-2 px-4 h-11 rounded-xl border border-slate-200 text-slate-700 hover:border-[#2D6A4F] hover:text-[#2D6A4F] hover:bg-emerald-50 font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2"
           aria-label="הצג קוד QR"
         >
           <QrCode className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
@@ -105,7 +105,7 @@ export default function ShareButtons({ businessId, businessName }: ShareButtonsP
               <QRCode
                 value={businessUrl}
                 size={200}
-                fgColor="#059669"
+                fgColor="#2D6A4F"
                 bgColor="#ffffff"
                 level="M"
               />
@@ -118,7 +118,7 @@ export default function ShareButtons({ businessId, businessName }: ShareButtonsP
             {/* Download button */}
             <button
               onClick={downloadQR}
-              className="flex items-center gap-2 w-full h-10 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium text-sm transition-colors justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2"
+              className="flex items-center gap-2 w-full h-10 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-medium text-sm transition-colors justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2"
             >
               <Download className="h-4 w-4" aria-hidden="true" />
               הורד QR

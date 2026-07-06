@@ -86,7 +86,7 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAF7]" dir="rtl">
+    <div className="min-h-screen bg-[#F7F3EA]" dir="rtl">
       <Navbar />
       {showPaywallBanner ? (
         <div className="mt-[72px] bg-emerald-50 border-b border-emerald-200">
@@ -126,7 +126,7 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
       <div className="pt-24 pb-16 px-4">
         <div className="max-w-5xl mx-auto">
           <section className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-[#ECFDF5] text-[#065F46] px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 bg-[#EFF5F0] text-[#17402D] px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
               <Zap className="h-4 w-4" />
               הצטרפות עסקים
             </div>
@@ -144,7 +144,7 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
                 <span className="inline-flex items-center px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-sm font-semibold">
                   מחיר רגיל: {LAUNCH_OFFER.regularPriceText}
                 </span>
-                <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#ECFDF5] text-[#065F46] text-sm font-semibold">
+                <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#EFF5F0] text-[#17402D] text-sm font-semibold">
                   מחיר השקה: {LAUNCH_OFFER.launchPriceText}
                 </span>
                 <span className="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-sm font-semibold">
@@ -163,8 +163,8 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
                     onClick={() => setPlanIndex(index)}
                     className={`rounded-2xl border p-4 text-right transition-all ${
                       planIndex === index
-                        ? "border-[#059669] bg-[#ECFDF5] shadow-sm"
-                        : "border-[#E5E7EB] bg-white hover:border-[#059669]/40"
+                        ? "border-[#2D6A4F] bg-[#EFF5F0] shadow-sm"
+                        : "border-[#E5E7EB] bg-white hover:border-[#2D6A4F]/40"
                     }`}
                   >
                     <p className="text-sm text-[#666] mb-1">{item.label}</p>
@@ -179,8 +179,8 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
                 disabled={loading}
                 className="w-full h-14 rounded-2xl text-white font-bold text-lg disabled:opacity-60"
                 style={{
-                  background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
-                  boxShadow: "0 4px 20px rgba(5,150,105,0.35)",
+                  background: "linear-gradient(135deg, #2D6A4F 0%, #1F5038 100%)",
+                  boxShadow: "0 4px 20px rgba(45,106,79,0.35)",
                 }}
               >
                 {loading ? "מעבירים..." : `${LAUNCH_OFFER.primaryButtonText} • ₪${Math.round(plan.price / 100)}`}
@@ -190,9 +190,9 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
               </p>
               <p className="text-center text-[#888] text-xs mt-2 leading-relaxed">
                 בהמשך לתשלום אתם מאשרים שקראתם את{" "}
-                <Link href="/terms" className="text-[#059669] hover:underline">תנאי השימוש</Link>,{" "}
-                <Link href="/refund" className="text-[#059669] hover:underline">מדיניות הביטולים וההחזרים</Link>{" "}
-                ואת <Link href="/privacy" className="text-[#059669] hover:underline">מדיניות הפרטיות</Link>.
+                <Link href="/terms" className="text-[#2D6A4F] hover:underline">תנאי השימוש</Link>,{" "}
+                <Link href="/refund" className="text-[#2D6A4F] hover:underline">מדיניות הביטולים וההחזרים</Link>{" "}
+                ואת <Link href="/privacy" className="text-[#2D6A4F] hover:underline">מדיניות הפרטיות</Link>.
               </p>
             </div>
 
@@ -201,15 +201,15 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
               <div className="space-y-3 mb-6">
                 {BENEFITS.map((benefit) => (
                   <div key={benefit} className="flex items-center gap-3">
-                    <div className="h-5 w-5 rounded-full bg-[#ECFDF5] flex items-center justify-center flex-shrink-0">
-                      <Check className="h-3 w-3 text-[#059669]" />
+                    <div className="h-5 w-5 rounded-full bg-[#EFF5F0] flex items-center justify-center flex-shrink-0">
+                      <Check className="h-3 w-3 text-[#2D6A4F]" />
                     </div>
                     <span className="text-[#444] text-sm">{benefit}</span>
                   </div>
                 ))}
               </div>
 
-              <div className="rounded-2xl bg-[#FAFAF7] border border-stone-200 p-4">
+              <div className="rounded-2xl bg-[#F7F3EA] border border-stone-200 p-4">
                 <p className="text-sm text-stone-700 mb-3">
                   רוצים לדבר איתנו לפני ההצטרפות? אפשר לפנות אלינו ישירות.
                 </p>
@@ -234,7 +234,7 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
                   </a>
                   <Link
                     href="/vendors"
-                    className="inline-flex items-center justify-center h-11 rounded-full text-[#059669] font-semibold hover:underline"
+                    className="inline-flex items-center justify-center h-11 rounded-full text-[#2D6A4F] font-semibold hover:underline"
                   >
                     לעמוד ההצטרפות המלא
                   </Link>
@@ -247,7 +247,7 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
             <h2 className="text-2xl font-extrabold text-[#111] mb-6">שאלות נפוצות</h2>
             <div className="grid md:grid-cols-2 gap-4">
               {VENDOR_FAQS.map((item) => (
-                <div key={item.question} className="rounded-2xl border border-stone-200 bg-[#FAFAF7] p-5">
+                <div key={item.question} className="rounded-2xl border border-stone-200 bg-[#F7F3EA] p-5">
                   <h3 className="font-bold text-[#111] mb-2">{item.question}</h3>
                   <p className="text-sm text-[#666] leading-relaxed">{item.answer}</p>
                 </div>

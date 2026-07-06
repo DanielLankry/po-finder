@@ -135,7 +135,7 @@ export default function AdminBusinessesPage() {
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-[400px]">
-      <div className="h-10 w-10 rounded-full border-4 border-emerald-200 border-t-[#059669] animate-spin" />
+      <div className="h-10 w-10 rounded-full border-4 border-emerald-200 border-t-[#2D6A4F] animate-spin" />
     </div>
   );
 
@@ -155,7 +155,7 @@ export default function AdminBusinessesPage() {
           <button
             onClick={() => setShowAddForm(true)}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-sm transition-colors"
-            style={{ background: "linear-gradient(135deg, #059669, #047857)" }}
+            style={{ background: "linear-gradient(135deg, #2D6A4F, #1F5038)" }}
           >
             <Plus className="h-4 w-4" />
             הוסף עסק ידני
@@ -178,66 +178,66 @@ export default function AdminBusinessesPage() {
                 <div className="col-span-2">
                   <label className="block text-sm font-semibold text-[#111] mb-1">מזהה בעל העסק (UUID) *</label>
                   <input required value={form.owner_id} onChange={(e) => setForm({...form, owner_id: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" dir="ltr" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" dir="ltr" />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-semibold text-[#111] mb-1">שם העסק *</label>
                   <input required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" placeholder="שם העסק" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" placeholder="שם העסק" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">קטגוריה</label>
                   <select value={form.category} onChange={(e) => setForm({...form, category: e.target.value as BusinessCategory})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#059669]">
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]">
                     {Object.entries(CATEGORY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">כשרות</label>
                   <select value={form.kashrut} onChange={(e) => setForm({...form, kashrut: e.target.value as KashrutStatus})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#059669]">
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]">
                     {Object.entries(KASHRUT_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">טלפון</label>
                   <input value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" placeholder="050-0000000" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" placeholder="050-0000000" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">מספר עוסק</label>
                   <input value={form.business_number} onChange={(e) => setForm({...form, business_number: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" placeholder="555555555" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" placeholder="555555555" />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-semibold text-[#111] mb-1">כתובת</label>
                   <input value={form.address} onChange={(e) => setForm({...form, address: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" placeholder="שוק הכרמל, תל אביב" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" placeholder="שוק הכרמל, תל אביב" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">קו רוחב (lat)</label>
                   <input value={form.lat} onChange={(e) => setForm({...form, lat: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" dir="ltr" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" dir="ltr" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">קו אורך (lng)</label>
                   <input value={form.lng} onChange={(e) => setForm({...form, lng: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" dir="ltr" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" dir="ltr" />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-semibold text-[#111] mb-1">תיאור</label>
                   <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} rows={2}
-                    className="w-full rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none" placeholder="תיאור קצר..." />
+                    className="w-full rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] resize-none" placeholder="תיאור קצר..." />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">אינסטגרם</label>
                   <input value={form.instagram} onChange={(e) => setForm({...form, instagram: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" placeholder="username" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" placeholder="username" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">תוקף (חודשים)</label>
                   <select value={form.duration_months} onChange={(e) => setForm({...form, duration_months: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#059669]">
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]">
                     <option value="1">חודש</option><option value="3">3 חודשים</option>
                     <option value="6">חצי שנה</option><option value="12">שנה</option>
                     <option value="120">ללא הגבלה (10 שנים)</option>
@@ -246,7 +246,7 @@ export default function AdminBusinessesPage() {
               </div>
               <button type="submit" disabled={addLoading || !form.name || !form.owner_id}
                 className="w-full h-12 rounded-xl text-white font-bold text-base disabled:opacity-50 transition-all"
-                style={{ background: "linear-gradient(135deg, #059669, #047857)" }}>
+                style={{ background: "linear-gradient(135deg, #2D6A4F, #1F5038)" }}>
                 {addLoading ? "מוסיף..." : "הוסף עסק לאתר"}
               </button>
             </form>
@@ -269,71 +269,71 @@ export default function AdminBusinessesPage() {
                 <div className="col-span-2">
                   <label className="block text-sm font-semibold text-[#111] mb-1">שם העסק *</label>
                   <input required value={editBiz.name} onChange={(e) => setEditBiz({...editBiz, name: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">קטגוריה</label>
                   <select value={editBiz.category} onChange={(e) => setEditBiz({...editBiz, category: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#059669]">
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]">
                     {Object.entries(CATEGORY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">כשרות</label>
                   <select value={editBiz.kashrut} onChange={(e) => setEditBiz({...editBiz, kashrut: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#059669]">
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]">
                     {Object.entries(KASHRUT_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">טלפון</label>
                   <input value={editBiz.phone ?? ""} onChange={(e) => setEditBiz({...editBiz, phone: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">WhatsApp</label>
                   <input value={editBiz.whatsapp ?? ""} onChange={(e) => setEditBiz({...editBiz, whatsapp: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-semibold text-[#111] mb-1">כתובת</label>
                   <input value={editBiz.address ?? ""} onChange={(e) => setEditBiz({...editBiz, address: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">קו רוחב (lat)</label>
                   <input value={editBiz.lat ?? ""} onChange={(e) => setEditBiz({...editBiz, lat: parseFloat(e.target.value) || null})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" dir="ltr" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" dir="ltr" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">קו אורך (lng)</label>
                   <input value={editBiz.lng ?? ""} onChange={(e) => setEditBiz({...editBiz, lng: parseFloat(e.target.value) || null})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" dir="ltr" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" dir="ltr" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">אתר</label>
                   <input value={editBiz.website ?? ""} onChange={(e) => setEditBiz({...editBiz, website: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" dir="ltr" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" dir="ltr" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">אינסטגרם</label>
                   <input value={editBiz.instagram ?? ""} onChange={(e) => setEditBiz({...editBiz, instagram: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#111] mb-1">מספר עוסק</label>
                   <input value={editBiz.business_number ?? ""} onChange={(e) => setEditBiz({...editBiz, business_number: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-semibold text-[#111] mb-1">תיאור</label>
                   <textarea value={editBiz.description ?? ""} onChange={(e) => setEditBiz({...editBiz, description: e.target.value})} rows={3}
-                    className="w-full rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none" />
+                    className="w-full rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] resize-none" />
                 </div>
               </div>
               <button type="submit" disabled={editLoading}
                 className="w-full h-12 rounded-xl text-white font-bold text-base disabled:opacity-50"
-                style={{ background: "linear-gradient(135deg, #059669, #047857)" }}>
+                style={{ background: "linear-gradient(135deg, #2D6A4F, #1F5038)" }}>
                 {editLoading ? "שומר..." : "שמור שינויים"}
               </button>
             </form>
@@ -355,7 +355,7 @@ export default function AdminBusinessesPage() {
 
       {/* Active */}
       <div>
-        <h2 className="font-bold text-lg text-[#059669] mb-3">✅ עסקים פעילים ({active.length})</h2>
+        <h2 className="font-bold text-lg text-[#2D6A4F] mb-3">✅ עסקים פעילים ({active.length})</h2>
         {active.length === 0 ? (
           <p className="text-[#AAA] py-8 text-center">אין עסקים פעילים</p>
         ) : (
@@ -380,7 +380,7 @@ function BusinessCard({ biz, onApprove, onDelete, onEdit, actionLoading }: {
       <div className="flex items-start gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span className="bg-[#059669] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+            <span className="bg-[#2D6A4F] text-white text-xs font-bold px-2 py-0.5 rounded-full">
               {CATEGORY_LABELS[biz.category as keyof typeof CATEGORY_LABELS] ?? biz.category}
             </span>
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${biz.is_active ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
@@ -392,7 +392,7 @@ function BusinessCard({ biz, onApprove, onDelete, onEdit, actionLoading }: {
           <div className="flex flex-wrap gap-2 text-xs text-[#888] mt-1.5">
             {biz.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{biz.phone}</span>}
             {biz.address && <span>📍 {biz.address}</span>}
-            {biz.website && <a href={biz.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[#059669]"><ExternalLink className="h-3 w-3" />אתר</a>}
+            {biz.website && <a href={biz.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[#2D6A4F]"><ExternalLink className="h-3 w-3" />אתר</a>}
             {biz.expires_at && <span>פג: {new Date(biz.expires_at).toLocaleDateString("he-IL")}</span>}
           </div>
         </div>
@@ -400,12 +400,12 @@ function BusinessCard({ biz, onApprove, onDelete, onEdit, actionLoading }: {
       <div className="flex gap-2 mt-3 pt-3 border-t border-[#F5F5F5] flex-wrap">
         {!biz.is_active && (
           <button onClick={() => onApprove(biz.id)} disabled={isLoading}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#059669] text-white font-semibold text-sm hover:bg-[#047857] transition-colors disabled:opacity-50">
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#2D6A4F] text-white font-semibold text-sm hover:bg-[#1F5038] transition-colors disabled:opacity-50">
             <CheckCircle className="h-3.5 w-3.5" />{isLoading ? "..." : "אשר"}
           </button>
         )}
         <button onClick={() => onEdit(biz)} disabled={isLoading}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#D1FAE5] text-[#047857] font-semibold text-sm hover:bg-[#A7F3D0] transition-colors disabled:opacity-50">
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#DDEBE0] text-[#1F5038] font-semibold text-sm hover:bg-[#C3DCC9] transition-colors disabled:opacity-50">
           <Pencil className="h-3.5 w-3.5" />ערוך
         </button>
         <button onClick={() => onDelete(biz.id)} disabled={isLoading}

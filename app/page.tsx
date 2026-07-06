@@ -29,7 +29,7 @@ export default function Home() {
         fallback={
           <div className="flex items-center justify-center h-screen bg-surface">
             <div className="text-center">
-              <div className="h-12 w-12 rounded-full border-4 border-[#D1FAE5] border-t-[#059669] animate-spin mx-auto mb-4" />
+              <div className="h-12 w-12 rounded-full border-4 border-[#DDEBE0] border-t-[#2D6A4F] animate-spin mx-auto mb-4" />
               <p className="text-stone-500">טוען...</p>
             </div>
           </div>

@@ -13,7 +13,7 @@ export default function TermsPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-[#FAFAF7] pt-[88px] pb-16" dir="rtl">
+      <main className="min-h-screen bg-[#F7F3EA] pt-[88px] pb-16" dir="rtl">
         <div className="max-w-3xl mx-auto px-4">
           <h1 className="font-display font-extrabold text-3xl text-stone-900 mb-2">
             תנאי שימוש
@@ -28,7 +28,7 @@ export default function TermsPage() {
               <p className="mb-3">
                 השימוש בפלטפורמת <strong>{BRAND_NAME}</strong> כפוף לתנאים אלה. אם אינכם
                 מסכימים לתנאים, אין להשתמש בשירות. בכל שאלה אפשר לפנות אל{" "}
-                <a href={`mailto:${BUSINESS_INFO.contactEmail}`} className="text-[#059669] hover:underline">
+                <a href={`mailto:${BUSINESS_INFO.contactEmail}`} className="text-[#2D6A4F] hover:underline">
                   {BUSINESS_INFO.contactEmail}
                 </a>.
               </p>
@@ -92,7 +92,7 @@ export default function TermsPage() {
                 6. תשלום, תקופת הצגה וחידוש
               </h2>
               <p className="mb-2">
-                מסלולי התשלום מוצגים בעמוד <Link href="/pricing" className="text-[#059669] hover:underline">המחירים</Link>.
+                מסלולי התשלום מוצגים בעמוד <Link href="/pricing" className="text-[#2D6A4F] hover:underline">המחירים</Link>.
                 התשלום מתבצע דרך דף תשלום מאובטח של ספק תשלום חיצוני. אלא אם נאמר אחרת
                 במפורש, המסלול הוא לתקופה שנבחרה מראש ואינו חידוש אוטומטי.
               </p>
@@ -108,7 +108,7 @@ export default function TermsPage() {
               </h2>
               <p>
                 מדיניות הביטולים וההחזרים מופיעה בעמוד{" "}
-                <Link href="/refund" className="text-[#059669] hover:underline">
+                <Link href="/refund" className="text-[#2D6A4F] hover:underline">
                   מדיניות ביטולים והחזרים
                 </Link>. אין בתנאים אלה כדי לגרוע מזכויות שלא ניתן להתנות עליהן לפי דין.
               </p>
@@ -119,7 +119,7 @@ export default function TermsPage() {
                 8. פרטיות, עוגיות ודיוור
               </h2>
               <p>
-                השימוש במידע מוסדר ב<Link href="/privacy" className="text-[#059669] hover:underline">מדיניות הפרטיות</Link>.
+                השימוש במידע מוסדר ב<Link href="/privacy" className="text-[#2D6A4F] hover:underline">מדיניות הפרטיות</Link>.
                 עוגיות אנליטיקה מופעלות רק לאחר הסכמה. הודעות שירות, כגון אישור תשלום,
                 איפוס סיסמה ומענה לתמיכה, אינן דיוור שיווקי. דיוור שיווקי, אם יופעל בעתיד,
                 יישלח רק בהתאם להסכמה נפרדת ולכללי הסרה.

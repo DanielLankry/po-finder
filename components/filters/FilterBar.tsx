@@ -19,8 +19,8 @@ function CategoryButton({ value, label, icon, active, onClick }: {
       aria-pressed={active}
       className={`flex items-center gap-2 mx-1.5 px-4 py-2.5 rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] outline-none whitespace-nowrap flex-shrink-0 ${
         active
-          ? "bg-[#059669] text-white shadow-[0_2px_8px_rgba(5,150,105,0.45)] scale-105"
-          : "bg-white/80 text-[#717171] hover:bg-white hover:text-[#222222] hover:shadow-sm border border-black/[0.06] focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2"
+          ? "bg-[#2D6A4F] text-white border-2 border-[#17402D] shadow-[2px_2px_0_0_#17402D] scale-105"
+          : "bg-white text-[#57534E] border-2 border-[#17402D]/10 hover:border-[#17402D]/50 hover:text-[#17402D] focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2"
       }`}
     >
       {icon && (
@@ -63,7 +63,7 @@ export default function FilterBar({
 }: FilterBarProps) {
   return (
     <div
-      className="fixed top-[72px] inset-x-0 z-10 bg-[#FAFAF7]/90 backdrop-blur-xl border-b border-black/[0.06] shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all duration-300"
+      className="fixed top-[72px] inset-x-0 z-10 bg-[#F7F3EA] border-b-2 border-[#17402D]/10 transition-all duration-300"
       dir="rtl"
     >
       {/* Mobile-only search row */}
@@ -99,7 +99,7 @@ export default function FilterBar({
         {/* Filter button */}
         <button
           onClick={onFilterOpen}
-          className="flex items-center gap-2 h-11 px-5 rounded-full border border-black/5 bg-white/90 backdrop-blur-md text-[#222222] text-sm font-semibold shadow-sm hover:shadow-md hover:bg-white hover:-translate-y-0.5 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2 flex-shrink-0"
+          className="flex items-center gap-2 h-11 px-5 rounded-full border-2 border-[#17402D]/15 bg-white text-[#17402D] text-sm font-bold shadow-[2px_2px_0_0_rgba(23,64,45,0.15)] hover:border-[#17402D] hover:shadow-[3px_3px_0_0_#17402D] hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 flex-shrink-0"
           aria-label="פתיחת סינון מתקדם"
         >
           <SlidersHorizontal className="h-4.5 w-4.5" aria-hidden="true" />

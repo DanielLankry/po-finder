@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
       subject: `[פנייה חדשה] ${subjectLabel} — ${name}`,
       html: `
         <div dir="rtl" style="font-family: sans-serif; max-width: 520px; margin: 0 auto; padding: 24px;">
-          <h2 style="color: #059669; margin-bottom: 16px;">פנייה חדשה מהאתר</h2>
+          <h2 style="color: #2D6A4F; margin-bottom: 16px;">פנייה חדשה מהאתר</h2>
           <table style="width: 100%; border-collapse: collapse;">
             <tr style="background: #f9f9f9;">
               <td style="padding: 10px 12px; font-weight: bold; width: 100px;">שם:</td>
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
               <td style="padding: 10px 12px;">${safeSubjectLabel}</td>
             </tr>
           </table>
-          <div style="margin-top: 16px; padding: 16px; background: #f9f9f9; border-right: 4px solid #059669; border-radius: 4px;">
+          <div style="margin-top: 16px; padding: 16px; background: #f9f9f9; border-right: 4px solid #2D6A4F; border-radius: 4px;">
             <p style="margin: 0; white-space: pre-wrap;">${safeMessage}</p>
           </div>
           <p style="color: #aaa; font-size: 12px; margin-top: 16px;">נשלח מ-pokarov.co.il</p>

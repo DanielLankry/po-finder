@@ -18,7 +18,7 @@ export default function GlobalError({
   return (
     <html lang="he" dir="rtl">
       <body>
-        <main className="min-h-screen bg-[#FAFAF7] flex items-center justify-center px-4 text-center">
+        <main className="min-h-screen bg-[#F7F3EA] flex items-center justify-center px-4 text-center">
           <div className="max-w-md rounded-3xl bg-white border border-stone-200 p-8 shadow-sm">
             <h1 className="text-2xl font-extrabold text-stone-900 mb-3">משהו השתבש</h1>
             <p className="text-stone-600 mb-6">
@@ -28,7 +28,7 @@ export default function GlobalError({
               <button
                 type="button"
                 onClick={reset}
-                className="h-11 px-5 rounded-full bg-[#059669] text-white font-semibold hover:bg-[#047857]"
+                className="h-11 px-5 rounded-full bg-[#2D6A4F] text-white font-semibold hover:bg-[#1F5038]"
               >
                 נסו שוב
               </button>

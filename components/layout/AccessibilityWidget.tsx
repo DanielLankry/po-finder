@@ -116,7 +116,7 @@ export default function AccessibilityWidget() {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        className="fixed bottom-20 start-4 z-[55] h-12 w-12 rounded-full bg-[#059669] text-white shadow-lg hover:bg-[#047857] transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2 cursor-grab active:cursor-grabbing select-none"
+        className="fixed bottom-20 start-4 z-[55] h-12 w-12 rounded-full bg-[#2D6A4F] text-white shadow-lg hover:bg-[#1F5038] transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 cursor-grab active:cursor-grabbing select-none"
         style={btnStyle}
         aria-label={open ? "סגירת תפריט נגישות" : "פתיחת תפריט נגישות"}
         aria-expanded={open}
@@ -136,7 +136,7 @@ export default function AccessibilityWidget() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Type className="h-4 w-4 text-[#059669]" aria-hidden="true" />
+                <Type className="h-4 w-4 text-[#2D6A4F]" aria-hidden="true" />
                 <span className="text-sm text-stone-700">גודל טקסט</span>
               </div>
               <div className="flex items-center gap-1">
@@ -151,15 +151,15 @@ export default function AccessibilityWidget() {
                 </button>
               </div>
             </div>
-            <ToggleRow icon={<Contrast className="h-4 w-4 text-[#059669]" />} label="ניגודיות גבוהה" active={settings.highContrast} onToggle={() => update({ highContrast: !settings.highContrast })} />
-            <ToggleRow icon={<MousePointer2 className="h-4 w-4 text-[#059669]" />} label="סמן גדול" active={settings.bigCursor} onToggle={() => update({ bigCursor: !settings.bigCursor })} />
-            <ToggleRow icon={<Link2 className="h-4 w-4 text-[#059669]" />} label="הדגשת קישורים" active={settings.highlightLinks} onToggle={() => update({ highlightLinks: !settings.highlightLinks })} />
-            <ToggleRow icon={<Space className="h-4 w-4 text-[#059669]" />} label="ריווח אותיות" active={settings.letterSpacing} onToggle={() => update({ letterSpacing: !settings.letterSpacing })} />
+            <ToggleRow icon={<Contrast className="h-4 w-4 text-[#2D6A4F]" />} label="ניגודיות גבוהה" active={settings.highContrast} onToggle={() => update({ highContrast: !settings.highContrast })} />
+            <ToggleRow icon={<MousePointer2 className="h-4 w-4 text-[#2D6A4F]" />} label="סמן גדול" active={settings.bigCursor} onToggle={() => update({ bigCursor: !settings.bigCursor })} />
+            <ToggleRow icon={<Link2 className="h-4 w-4 text-[#2D6A4F]" />} label="הדגשת קישורים" active={settings.highlightLinks} onToggle={() => update({ highlightLinks: !settings.highlightLinks })} />
+            <ToggleRow icon={<Space className="h-4 w-4 text-[#2D6A4F]" />} label="ריווח אותיות" active={settings.letterSpacing} onToggle={() => update({ letterSpacing: !settings.letterSpacing })} />
           </div>
           <button onClick={reset} className="mt-4 w-full h-9 rounded-lg border border-stone-300 text-stone-600 text-sm font-medium hover:bg-stone-50 transition-colors">
             איפוס הגדרות
           </button>
-          <a href="/accessibility" className="block mt-2 text-center text-xs text-[#059669] hover:underline">הצהרת נגישות מלאה</a>
+          <a href="/accessibility" className="block mt-2 text-center text-xs text-[#2D6A4F] hover:underline">הצהרת נגישות מלאה</a>
         </div>
       )}
     </>
@@ -171,7 +171,7 @@ function ToggleRow({ icon, label, active, onToggle }: { icon: React.ReactNode; l
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">{icon}<span className="text-sm text-stone-700">{label}</span></div>
       <button onClick={onToggle} role="switch" aria-checked={active} aria-label={label}
-        className={`relative h-6 w-11 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] ${active ? "bg-[#059669]" : "bg-stone-300"}`}>
+        className={`relative h-6 w-11 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] ${active ? "bg-[#2D6A4F]" : "bg-stone-300"}`}>
         <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${active ? "start-[22px]" : "start-0.5"}`} />
       </button>
     </div>

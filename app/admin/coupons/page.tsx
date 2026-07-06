@@ -32,6 +32,7 @@ export default function AdminCouponsPage() {
     setLoading(false);
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchCoupons(); }, [fetchCoupons]);
 
   function generateCode() {
@@ -118,7 +119,7 @@ export default function AdminCouponsPage() {
                   value={form.code}
                   onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))}
                   required
-                  className="flex-1 h-10 rounded-lg border border-[#E5E7EB] bg-[#FAFAF7] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
+                  className="flex-1 h-10 rounded-lg border border-[#E5E7EB] bg-[#F7F3EA] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
                   placeholder="POK-XXXXX"
                 />
                 <button type="button" onClick={generateCode} className="h-10 px-3 rounded-lg border border-[#E5E7EB] text-xs text-[#555] hover:bg-[#F9F9F9]">
@@ -131,7 +132,7 @@ export default function AdminCouponsPage() {
               <select
                 value={form.type}
                 onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as "percent" | "fixed" }))}
-                className="w-full h-10 rounded-lg border border-[#E5E7EB] bg-[#FAFAF7] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
+                className="w-full h-10 rounded-lg border border-[#E5E7EB] bg-[#F7F3EA] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
               >
                 <option value="percent">אחוז הנחה (%)</option>
                 <option value="fixed">סכום קבוע (₪)</option>
@@ -145,7 +146,7 @@ export default function AdminCouponsPage() {
                 onChange={(e) => setForm((f) => ({ ...f, value: parseInt(e.target.value) || 0 }))}
                 required
                 min={1}
-                className="w-full h-10 rounded-lg border border-[#E5E7EB] bg-[#FAFAF7] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
+                className="w-full h-10 rounded-lg border border-[#E5E7EB] bg-[#F7F3EA] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
               />
             </div>
             <div>
@@ -156,7 +157,7 @@ export default function AdminCouponsPage() {
                 onChange={(e) => setForm((f) => ({ ...f, max_uses: e.target.value }))}
                 placeholder="ללא הגבלה"
                 min={1}
-                className="w-full h-10 rounded-lg border border-[#E5E7EB] bg-[#FAFAF7] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
+                className="w-full h-10 rounded-lg border border-[#E5E7EB] bg-[#F7F3EA] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
               />
             </div>
             <div className="col-span-2">
@@ -165,7 +166,7 @@ export default function AdminCouponsPage() {
                 type="datetime-local"
                 value={form.expires_at}
                 onChange={(e) => setForm((f) => ({ ...f, expires_at: e.target.value }))}
-                className="w-full h-10 rounded-lg border border-[#E5E7EB] bg-[#FAFAF7] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
+                className="w-full h-10 rounded-lg border border-[#E5E7EB] bg-[#F7F3EA] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
               />
             </div>
           </div>
@@ -207,7 +208,7 @@ export default function AdminCouponsPage() {
             </thead>
             <tbody>
               {coupons.map((c) => (
-                <tr key={c.id} className="border-b border-[#F3F4F6] hover:bg-[#FAFAF7] transition-colors">
+                <tr key={c.id} className="border-b border-[#F3F4F6] hover:bg-[#F7F3EA] transition-colors">
                   <td className="px-5 py-4 font-mono font-bold text-[#111]">{c.code}</td>
                   <td className="px-5 py-4 text-sm text-[#555]">{c.type === "percent" ? "אחוז" : "קבוע"}</td>
                   <td className="px-5 py-4 text-sm font-semibold text-[#7C3AED]">
@@ -222,7 +223,7 @@ export default function AdminCouponsPage() {
                   <td className="px-5 py-4">
                     <button onClick={() => toggleActive(c.id, c.is_active)} title="החלף סטטוס">
                       {c.is_active ? (
-                        <ToggleRight className="h-6 w-6 text-[#059669]" />
+                        <ToggleRight className="h-6 w-6 text-[#2D6A4F]" />
                       ) : (
                         <ToggleLeft className="h-6 w-6 text-[#CCC]" />
                       )}

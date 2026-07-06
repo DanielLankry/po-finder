@@ -16,8 +16,8 @@ import { isOpenNow } from "@/lib/utils/schedule";
 const BusinessMap = dynamic(() => import("@/components/map/BusinessMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center h-full bg-[#FAFAF7]">
-      <div className="h-10 w-10 rounded-full border-4 border-[#D1FAE5] border-t-[#059669] animate-spin" />
+    <div className="flex items-center justify-center h-full bg-[#F7F3EA]">
+      <div className="h-10 w-10 rounded-full border-4 border-[#DDEBE0] border-t-[#2D6A4F] animate-spin" />
     </div>
   ),
 });
@@ -61,9 +61,9 @@ export default function MapPage() {
   const openCount = businesses.filter((b) => isOpenNow(b.today_schedule ?? null)).length;
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-[#FAFAF7]" dir="rtl">
+    <div className="h-screen flex flex-col overflow-hidden bg-[#F7F3EA]" dir="rtl">
       {/* App purpose — visible text required by Google OAuth verification */}
-      <div className="bg-[#ECFDF5] border-b border-[#A7F3D0] px-4 py-1.5 text-center text-xs text-[#065F46] font-medium" dir="rtl">
+      <div className="bg-[#17402D] px-4 py-1.5 text-center text-xs text-[#F7F3EA] font-medium" dir="rtl">
         <span className="font-bold">פה קרוב</span> — פלטפורמה לגילוי עסקים קטנים וניידים קרוב אליכם בזמן אמת
       </div>
       <Navbar
@@ -91,7 +91,7 @@ export default function MapPage() {
       >
         {/* List panel — single-view below 1440px, right side in wide desktop split view */}
         <div
-          className={`flex-shrink-0 border-l border-[#EBEBEB] overflow-hidden bg-[#FAFAF7]
+          className={`flex-shrink-0 border-l-2 border-[#17402D]/10 overflow-hidden bg-[#F7F3EA]
             w-full min-[1440px]:w-[820px]
             ${mobileView === "list" ? "flex flex-col" : "hidden min-[1440px]:flex min-[1440px]:flex-col"}`}
         >
@@ -117,16 +117,16 @@ export default function MapPage() {
           {/* Live badge — open now count */}
           {openCount > 0 && (
             <div className="absolute top-6 left-6 z-20 fade-in-up">
-              <div className="flex items-center gap-2 h-10 px-4 rounded-full bg-[#ECFDF5] text-[#059669] font-semibold text-sm shadow-md border border-[#A7F3D0]" dir="rtl">
+              <div className="flex items-center gap-2 h-10 px-4 rounded-full bg-white text-[#17402D] font-bold text-sm border-2 border-[#17402D] shadow-[3px_3px_0_0_#17402D]" dir="rtl">
                 <span className="relative flex h-2 w-2 flex-shrink-0" aria-hidden="true">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#059669] opacity-60" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#059669]" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2D6A4F] opacity-60" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#2D6A4F]" />
                 </span>
-                <span>🟢 {openCount} עסקים פתוחים עכשיו</span>
+                <span>{openCount} עסקים פתוחים עכשיו</span>
               </div>
             </div>
           )}
-          <div className="w-full h-full rounded-[24px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-black/[0.04]" dir="ltr">
+          <div className="w-full h-full rounded-[24px] overflow-hidden border-2 border-[#17402D]/15 shadow-[6px_6px_0_0_rgba(23,64,45,0.12)]" dir="ltr">
           <BusinessMap
             businesses={businesses}
             activeCategory={activeCategory}
@@ -148,9 +148,9 @@ export default function MapPage() {
           <strong className="text-[#555]">פה קרוב</strong>
           <span> — פלטפורמה לגילוי עסקים ניידים בישראל</span>
           <span className="w-px h-3 bg-[#DDD]" />
-          <a href="/privacy" className="hover:text-[#1d938d] transition-colors">פרטיות</a>
+          <a href="/privacy" className="hover:text-[#1F5038] transition-colors">פרטיות</a>
           <span className="w-px h-3 bg-[#DDD]" />
-          <a href="/terms" className="hover:text-[#1d938d] transition-colors">תנאי שימוש</a>
+          <a href="/terms" className="hover:text-[#1F5038] transition-colors">תנאי שימוש</a>
         </div>
       </div>
 
@@ -158,7 +158,7 @@ export default function MapPage() {
       <div className="min-[1440px]:hidden fixed bottom-14 inset-x-0 z-20 flex justify-center pointer-events-none fade-in-up stagger-2">
         <button
           onClick={() => setMobileView((v) => (v === "list" ? "map" : "list"))}
-          className="pointer-events-auto flex items-center gap-2.5 h-12 px-6 rounded-full bg-black/85 backdrop-blur-xl text-white font-bold text-[15px] shadow-[0_8px_32px_rgba(0,0,0,0.3)] border border-white/10 hover:bg-black hover:scale-105 transition-all duration-300 active:scale-95"
+          className="pointer-events-auto flex items-center gap-2.5 h-12 px-6 rounded-full bg-[#17402D] text-[#F7F3EA] font-bold text-[15px] border-2 border-[#F7F3EA]/25 shadow-[4px_4px_0_0_rgba(23,64,45,0.35)] hover:scale-105 transition-all duration-300 active:scale-95"
           aria-label={mobileView === "list" ? "עבור למפה" : "עבור לרשימה"}
         >
           {mobileView === "list" ? (

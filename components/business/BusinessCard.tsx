@@ -72,9 +72,9 @@ export default function BusinessCard({
     >
       <button
         onClick={onClick}
-        className={`w-full text-right cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded-[24px] group relative bg-white block p-3.5 ${
+        className={`w-full text-right cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] rounded-[24px] group relative bg-white block p-3.5 ${
           isSelected 
-            ? "shadow-[0_8px_24px_rgba(5,150,105,0.25)] scale-[1.02]" 
+            ? "shadow-[0_8px_24px_rgba(45,106,79,0.25)] scale-[1.02]" 
             : isHovered 
               ? "shadow-[0_20px_40px_rgba(0,0,0,0.12)] scale-[1.02] transform -translate-y-1"
               : "shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)] transform hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98]"
@@ -84,7 +84,7 @@ export default function BusinessCard({
       >
         <div className="flex flex-col gap-3.5" dir="rtl">
           {/* ── Photo wrapper (aspect square) ───────────────────────────────── */}
-          <div className="relative w-full aspect-[4/3] rounded-[16px] overflow-hidden bg-[#F0F0EC] isolate">
+          <div className="relative w-full aspect-[4/3] rounded-[16px] overflow-hidden bg-[#EDE8DC] isolate">
             {primaryPhoto ? (
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -134,7 +134,7 @@ export default function BusinessCard({
             {/* Optional "Open Now" badge over image */}
             {open && (
               <div className="absolute top-3 right-3 z-10 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg pointer-events-none transition-transform duration-300 group-hover:-translate-y-0.5 border border-white/20">
-                 <span className="text-[12px] font-bold tracking-wide text-[#059669]">
+                 <span className="text-[12px] font-bold tracking-wide text-[#2D6A4F]">
                    פתוח עכשיו
                  </span>
               </div>
@@ -145,7 +145,7 @@ export default function BusinessCard({
           <div className="flex flex-col gap-1 px-1">
             {/* Line 1: Name and Rating */}
             <div className="flex justify-between items-start gap-2">
-              <p className={`font-extrabold text-[17px] leading-tight line-clamp-1 truncate tracking-tight transition-colors duration-200 ${isHovered ? 'text-[#059669]' : 'text-[#111111] group-hover:text-[#059669]'}`}>
+              <p className={`font-extrabold text-[17px] leading-tight line-clamp-1 truncate tracking-tight transition-colors duration-200 ${isHovered ? 'text-[#2D6A4F]' : 'text-[#111111] group-hover:text-[#2D6A4F]'}`}>
                 {business.name}
               </p>
               {business.avg_rating > 0 && (
