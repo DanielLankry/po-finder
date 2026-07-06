@@ -14,10 +14,10 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-body);
-  --font-display: var(--font-rubik);
-  --font-rubik: var(--font-rubik);
+  --font-display: var(--font-poster);
+  --font-rubik: var(--font-ui);
   --font-body: var(--font-body);
-  --font-brand: 'Secular One', var(--font-rubik), system-ui, sans-serif;
+  --font-brand: var(--font-poster);
   --font-mono: var(--font-geist-mono);
 
   /* shadcn required mappings */
@@ -52,19 +52,19 @@
   --color-card: var(--card);
 
   /* ── Design system — Green scale (brand) ── */
-  --color-green-50:  #ECFDF5;
-  --color-green-100: #D1FAE5;
-  --color-green-200: #A7F3D0;
-  --color-green-300: #6EE7B7;
-  --color-green-400: #34D399;
-  --color-green-500: #10B981;  /* secondary / accent */
-  --color-green-600: #059669;  /* PRIMARY */
-  --color-green-700: #047857;  /* hover / pressed */
-  --color-green-800: #065F46;
-  --color-green-900: #064E3B;
+  --color-green-50:  #EFF5F0;
+  --color-green-100: #DDEBE0;
+  --color-green-200: #C3DCC9;
+  --color-green-300: #9DC4A8;
+  --color-green-400: #6FA583;
+  --color-green-500: #4A8B66;  /* secondary / accent */
+  --color-green-600: #2D6A4F;  /* PRIMARY */
+  --color-green-700: #1F5038;  /* hover / pressed */
+  --color-green-800: #17402D;
+  --color-green-900: #112F22;
 
   /* Warm neutral stone */
-  --color-stone-50:  #FAFAF7;
+  --color-stone-50:  #F7F3EA;
   --color-stone-100: #F5F5F4;
   --color-stone-200: #E7E5E4;
   --color-stone-300: #D6D3D1;
@@ -108,9 +108,31 @@
   --color-cat-jewelry-bg: #EDE9FE; --color-cat-jewelry-fg: #5B21B6;
   --color-cat-vintage-bg: #F5F0FF; --color-cat-vintage-fg: #6D28D9;
 
+  /* Emerald remap → market green (re-skins all emerald-* utility classes) */
+  --color-emerald-50:  #EFF5F0;
+  --color-emerald-100: #DDEBE0;
+  --color-emerald-200: #C3DCC9;
+  --color-emerald-300: #9DC4A8;
+  --color-emerald-400: #6FA583;
+  --color-emerald-500: #4A8B66;
+  --color-emerald-600: #2D6A4F;
+  --color-emerald-700: #1F5038;
+  --color-emerald-800: #17402D;
+  --color-emerald-900: #112F22;
+
+  /* Terracotta — poster accent */
+  --color-terracotta-50:  #FBF1EA;
+  --color-terracotta-100: #F6E3D9;
+  --color-terracotta-400: #D97B52;
+  --color-terracotta-500: #C4552D;
+  --color-terracotta-600: #A8441F;
+  --color-terracotta-700: #8A3618;
+
   /* App-level semantic surfaces */
-  --color-surface: #FAFAF7;
-  --color-kashrut: #047857;
+  --color-surface: #F7F3EA;
+  --color-paper: #F7F3EA;
+  --color-ink: #17402D;
+  --color-kashrut: #1F5038;
   --color-verified: #7C3AED;
 
   /* Radius — 10px base scale per design system */
@@ -126,19 +148,27 @@
   /* Shadows — 4-tier, green-tinted brand system */
   --shadow-xs:     0 1px 2px rgba(0,0,0,0.04);
   --shadow-sm:     0 1px 2px rgba(0,0,0,0.08);
-  --shadow-card:   0 2px 8px rgba(5,150,105,0.08), 0 0 1px rgba(0,0,0,0.04);
-  --shadow-hover:  0 8px 24px rgba(5,150,105,0.18), 0 0 1px rgba(0,0,0,0.04);
+  --shadow-card:   0 2px 8px rgba(45,106,79,0.08), 0 0 1px rgba(0,0,0,0.04);
+  --shadow-hover:  0 8px 24px rgba(45,106,79,0.18), 0 0 1px rgba(0,0,0,0.04);
   --shadow-lift:   0 20px 40px rgba(0,0,0,0.12);
   --shadow-popup:  0 12px 32px rgba(0,0,0,0.18), 0 0 1px rgba(0,0,0,0.04);
   --shadow-navbar: 0 1px 2px rgba(0,0,0,0.08);
-  --shadow-cta:    0 4px 20px rgba(5,150,105,0.40);
+  --shadow-cta:    0 4px 20px rgba(45,106,79,0.40);
   --shadow-sheet:  0 -8px 40px rgba(0,0,0,0.15);
+
+  /* Poster shadows — hard offset, no blur (sticker/stamp look) */
+  --shadow-sticker:    4px 4px 0 0 #17402D;
+  --shadow-sticker-sm: 2px 2px 0 0 #17402D;
+  --shadow-sticker-terracotta: 4px 4px 0 0 #8A3618;
 }
 
 :root {
-  --font-body: var(--font-heebo), "Heebo", "Rubik", "Noto Sans Hebrew", "Segoe UI", Arial, sans-serif;
-  --font-rubik: var(--font-rubik-next), "Rubik", "Heebo", "Noto Sans Hebrew", "Segoe UI", Arial, sans-serif;
-  --font-secular: var(--font-secular-next), "Secular One", "Rubik", "Heebo", "Noto Sans Hebrew", sans-serif;
+  /* Street-market poster type system:
+     Assistant → body + UI · Karantina → display/poster headlines */
+  --font-body: var(--font-assistant), "Assistant", "Noto Sans Hebrew", "Segoe UI", Arial, sans-serif;
+  --font-ui: var(--font-assistant), "Assistant", "Noto Sans Hebrew", "Segoe UI", Arial, sans-serif;
+  --font-poster: var(--font-karantina), "Karantina", "Assistant", "Noto Sans Hebrew", sans-serif;
+  --font-secular: var(--font-poster);
   --font-geist-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --radius: 0.625rem;
   --background: #FFFFFF;
@@ -147,31 +177,31 @@
   --card-foreground: #0A0A0A;
   --popover: #FFFFFF;
   --popover-foreground: #0A0A0A;
-  --primary: #059669;
+  --primary: #2D6A4F;
   --primary-foreground: #FFFFFF;
-  --secondary: #10B981;
+  --secondary: #4A8B66;
   --secondary-foreground: #FFFFFF;
-  --muted: #FAFAF7;
+  --muted: #F7F3EA;
   --muted-foreground: #717171;
-  --accent: #ECFDF5;
-  --accent-foreground: #065F46;
+  --accent: #EFF5F0;
+  --accent-foreground: #17402D;
   --destructive: #EF4444;
   --border: #EBEBEB;
   --input: #DDDDDD;
-  --ring: #059669;
-  --chart-1: #059669;
-  --chart-2: #10B981;
+  --ring: #2D6A4F;
+  --chart-1: #2D6A4F;
+  --chart-2: #4A8B66;
   --chart-3: #F59E0B;
   --chart-4: #7C3AED;
   --chart-5: #EC4899;
   --sidebar: #FFFFFF;
   --sidebar-foreground: #0A0A0A;
-  --sidebar-primary: #059669;
+  --sidebar-primary: #2D6A4F;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: #F7F7F5;
   --sidebar-accent-foreground: #222222;
   --sidebar-border: #EBEBEB;
-  --sidebar-ring: #059669;
+  --sidebar-ring: #2D6A4F;
 }
 
 @layer base {
@@ -199,6 +229,13 @@
     line-height: 1.2;
   }
 
+  /* Poster headlines — Karantina is condensed; wants tighter leading & max 700 */
+  h1, h2 {
+    font-family: var(--font-poster);
+    font-weight: 700;
+    line-height: 1.05;
+  }
+
   p {
     font-weight: 400;
     line-height: 1.65;
@@ -206,7 +243,7 @@
 
   /* Per design system: links default to brand green, never blue. Component-level
      anchors that need different treatment should opt out explicitly. */
-  a { color: #047857; }
+  a { color: #1F5038; }
   a:hover { text-decoration: underline; }
   /* Tailwind-styled links (any class-based color) keep their class color */
   a[class*="text-"] { color: inherit; }
@@ -214,11 +251,11 @@
 }
 
 /* ── Design-system semantic type utilities ── */
-.ds-eyebrow  { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #047857; }
-.ds-label    { font-family: var(--font-rubik), sans-serif; font-size: 0.875rem; font-weight: 500; }
+.ds-eyebrow  { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #1F5038; }
+.ds-label    { font-family: var(--font-ui), sans-serif; font-size: 0.875rem; font-weight: 500; }
 .ds-caption  { font-size: 0.75rem; color: #888888; }
 .ds-tabular  { font-variant-numeric: tabular-nums; }
-.brand-wordmark { font-family: 'Secular One', var(--font-rubik), sans-serif; font-weight: 400; letter-spacing: -0.01em; }
+.brand-wordmark { font-family: var(--font-poster), sans-serif; font-weight: 700; letter-spacing: 0.01em; }
 
 /* Skip to content link for accessibility */
 .skip-to-content {
@@ -227,7 +264,7 @@
   right: 0;
   z-index: 100;
   padding: 0.75rem 1.5rem;
-  background: #059669;
+  background: #2D6A4F;
   color: white;
   font-weight: 500;
   border-radius: 0 0 0 0.75rem;
@@ -348,7 +385,7 @@
     position: absolute;
     inset: -3px;
     border-radius: 50%;
-    background: #059669;
+    background: #2D6A4F;
     animation: pulse-ring 2s ease-out infinite;
     pointer-events: none;
   }
@@ -359,7 +396,7 @@
 
   /* ── Shimmer loading skeleton ── */
   .shimmer {
-    background: linear-gradient(90deg, #ECFDF5 25%, #D1FAE5 50%, #ECFDF5 75%);
+    background: linear-gradient(90deg, #EFF5F0 25%, #DDEBE0 50%, #EFF5F0 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
   }
@@ -374,7 +411,7 @@
   }
   .card-hover:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(5,150,105,0.15), 0 0 1px rgba(0,0,0,0.04);
+    box-shadow: 0 8px 24px rgba(45,106,79,0.15), 0 0 1px rgba(0,0,0,0.04);
   }
 
   /* ── Button press micro-interaction ── */
@@ -406,7 +443,7 @@
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M4 4l20 8-8 4-4 8z' fill='%23000' stroke='%23fff' stroke-width='1'/%3E%3C/svg%3E") 4 4, auto !important;
 }
 .a11y-highlight-links a {
-  outline: 2px solid #059669 !important;
+  outline: 2px solid #2D6A4F !important;
   outline-offset: 2px;
   text-decoration: underline !important;
 }
@@ -426,7 +463,7 @@
   border-radius: 16px;
   border: 1px solid #E7E5E4;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
-  font-family: var(--font-rubik), sans-serif;
+  font-family: var(--font-ui), sans-serif;
 }
 .driver-popover-title {
   color: #0F172A;
@@ -439,25 +476,25 @@
   line-height: 1.5;
 }
 .driver-popover-progress-text {
-  color: #059669;
+  color: #2D6A4F;
   font-weight: 600;
 }
 .driver-popover-next-btn,
 .driver-popover-prev-btn,
 .driver-popover-close-btn {
-  font-family: var(--font-rubik), sans-serif;
+  font-family: var(--font-ui), sans-serif;
 }
 .driver-popover-next-btn {
-  background: #059669 !important;
+  background: #2D6A4F !important;
   color: #FFFFFF !important;
-  border: 1px solid #059669 !important;
+  border: 1px solid #2D6A4F !important;
   text-shadow: none !important;
   font-weight: 600 !important;
   border-radius: 10px !important;
 }
 .driver-popover-next-btn:hover {
-  background: #047857 !important;
-  border-color: #047857 !important;
+  background: #1F5038 !important;
+  border-color: #1F5038 !important;
 }
 .driver-popover-prev-btn {
   background: #FFFFFF !important;
@@ -468,7 +505,7 @@
   text-shadow: none !important;
 }
 .driver-popover-prev-btn:hover {
-  background: #FAFAF7 !important;
+  background: #F7F3EA !important;
 }
 .driver-overlay {
   background: rgba(15, 23, 42, 0.55) !important;
@@ -478,66 +515,100 @@
 .gm-style-cc { display: none !important; }
 a[href^="https://maps.google.com/maps"] { display: none !important; }
 
-/* BackgroundGradientAnimation keyframes */
-@keyframes first {
-  0% { transform: translate(0%, 0%) rotate(0deg); }
-  50% { transform: translate(15%, -10%) rotate(180deg); }
-  100% { transform: translate(0%, 0%) rotate(360deg); }
-}
-@keyframes second {
-  0% { transform: translate(-5%, 5%) rotate(0deg); }
-  50% { transform: translate(10%, 15%) rotate(-180deg); }
-  100% { transform: translate(-5%, 5%) rotate(-360deg); }
-}
-@keyframes third {
-  0% { transform: translate(10%, -5%) rotate(0deg); }
-  50% { transform: translate(-10%, 10%) rotate(180deg); }
-  100% { transform: translate(10%, -5%) rotate(360deg); }
-}
-@keyframes fourth {
-  0% { transform: translate(-5%, -5%) rotate(0deg); }
-  50% { transform: translate(10%, -20%) rotate(-180deg); }
-  100% { transform: translate(-5%, -5%) rotate(-360deg); }
-}
-@keyframes fifth {
-  0% { transform: translate(0%, 10%) rotate(0deg); }
-  50% { transform: translate(-10%, 5%) rotate(180deg); }
-  100% { transform: translate(0%, 10%) rotate(360deg); }
-}
-.animate-first { animation: first 8s infinite linear; }
-.animate-second { animation: second 10s infinite linear; }
-.animate-third { animation: third 7s infinite linear; }
-.animate-fourth { animation: fourth 9s infinite linear; }
-.animate-fifth { animation: fifth 11s infinite linear; }
+/* ── Street-market poster kit ───────────────────────────────────────── */
 
-  /* ── 21st.dev: animated-shiny-text ── */
-  @keyframes shiny-text {
-    0%, 90%, 100% {
-      background-position: calc(-100% - var(--shiny-width)) 0;
-    }
-    30%, 60% {
-      background-position: calc(100% + var(--shiny-width)) 0;
-    }
+/* Sticker — the signature poster surface: solid border + hard offset shadow */
+.sticker {
+  border: 2px solid #17402D;
+  box-shadow: 4px 4px 0 0 #17402D;
+  border-radius: 14px;
+  background: #FFFFFF;
+}
+.sticker-terracotta {
+  border: 2px solid #8A3618;
+  box-shadow: 4px 4px 0 0 #8A3618;
+  border-radius: 14px;
+  background: #FFFFFF;
+}
+
+/* Marker highlight — hand-swiped terracotta stroke behind a headline word */
+.marker-highlight {
+  position: relative;
+  display: inline-block;
+  z-index: 0;
+}
+.marker-highlight::after {
+  content: "";
+  position: absolute;
+  inset: 42% -0.12em 14% -0.12em;
+  background: #C4552D;
+  opacity: 0.35;
+  z-index: -1;
+  transform: skew(-6deg);
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Poster hover — card lifts against its hard shadow */
+  .poster-hover {
+    transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 180ms ease-out;
   }
-  .animate-shiny-text {
-    animation: shiny-text 8s infinite;
+  .poster-hover:hover {
+    transform: translate(2px, -4px);
+    box-shadow: 7px 8px 0 0 #17402D;
   }
 
-  /* ── 21st.dev: shimmer-button ── */
-  @keyframes shimmer-slide {
-    to { transform: translate(calc(100cqw - 100%), 0); }
+  /* Stamp wiggle — playful tilt for icon tiles / badges */
+  .stamp-wiggle {
+    transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  @keyframes spin-around {
-    0% { transform: translateZ(0) rotate(0); }
-    15%, 35% { transform: translateZ(0) rotate(90deg); }
-    65%, 85% { transform: translateZ(0) rotate(270deg); }
-    100% { transform: translateZ(0) rotate(360deg); }
+  .stamp-wiggle:hover {
+    transform: rotate(-2deg) scale(1.04);
   }
-  .animate-shimmer-slide { animation: shimmer-slide var(--speed) ease-in-out infinite alternate; }
-  .animate-spin-around { animation: spin-around calc(var(--speed) * 2) infinite linear; }
+
+  /* Scroll reveal — driven by <Reveal> (adds .is-visible on intersect) */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--reveal-delay, 0s);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Marquee — endless category strip (content must be duplicated once) */
+  .marquee {
+    display: flex;
+    overflow: hidden;
+    user-select: none;
+    gap: 1rem;
+    mask-image: linear-gradient(to left, transparent, black 8%, black 92%, transparent);
+  }
+  .marquee-track {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 1rem;
+    min-width: 100%;
+    animation: marquee-scroll 30s linear infinite;
+  }
+  .marquee:hover .marquee-track {
+    animation-play-state: paused;
+  }
+  @keyframes marquee-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(50%); } /* RTL: content flows right */
+  }
+}
+/* Reduced motion: reveal content is simply visible */
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; }
+}
 
 /* ── Font roles ─────────────────────────────────────────────────────── */
-/* Rubik → UI elements: buttons, inputs, nav, labels */
+/* Assistant → UI elements: buttons, inputs, nav, labels, small headings */
 button,
 input,
 select,
@@ -547,12 +618,24 @@ nav,
 [class*="font-bold"],
 [class*="font-semibold"],
 [class*="font-black"],
-h1, h2, h3, h4, h5 {
-  font-family: var(--font-rubik), var(--font-secular), sans-serif;
+h3, h4, h5 {
+  font-family: var(--font-ui), sans-serif;
 }
 
-/* Heebo → body copy */
+/* Karantina → poster headlines (h1/h2 + anything opting in via font-display) */
+h1, h2 {
+  font-family: var(--font-poster), sans-serif;
+}
+
+/* Assistant → body copy */
 p, li, span:not([class*="font-bold"]):not([class*="font-semibold"]), td, th, blockquote {
-  font-family: var(--font-body), var(--font-rubik), sans-serif;
+  font-family: var(--font-body), sans-serif;
+}
+
+/* font-display opt-in wins over the role rules above — including inner spans
+   (typewriter words, ticker digits) */
+.font-display,
+.font-display span:not([class*="font-sans"]) {
+  font-family: var(--font-poster), sans-serif;
 }
 

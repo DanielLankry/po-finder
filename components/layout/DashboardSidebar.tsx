@@ -22,17 +22,17 @@ export default function DashboardSidebar() {
 
   return (
     <aside className="w-full md:w-56 flex-shrink-0" aria-label="ניווט לוח הבקרה" data-tour="sidebar">
-      <nav className="hidden md:block bg-[#FAFAF7] rounded-2xl border border-slate-200 overflow-hidden shadow-card">
+      <nav className="hidden md:block bg-[#F7F3EA] rounded-2xl border border-slate-200 overflow-hidden shadow-card">
         {NAV_ITEMS.map(({ href, label, exact }) => {
           const active = isActive(href, exact);
           return (
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 px-5 py-3.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-inset border-r-2 ${
+              className={`flex items-center gap-3 px-5 py-3.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-inset border-r-2 ${
                 active
-                  ? "bg-[#ECFDF5] text-[#047857] border-r-[#059669]"
-                  : "text-slate-600 hover:bg-[#ECFDF5] hover:text-[#047857] border-r-transparent hover:border-r-[#059669]"
+                  ? "bg-[#EFF5F0] text-[#1F5038] border-r-[#2D6A4F]"
+                  : "text-slate-600 hover:bg-[#EFF5F0] hover:text-[#1F5038] border-r-transparent hover:border-r-[#2D6A4F]"
               }`}
               aria-current={active ? "page" : undefined}
             >
@@ -42,15 +42,15 @@ export default function DashboardSidebar() {
         })}
       </nav>
 
-      <nav className="flex md:hidden overflow-x-auto scrollbar-hide bg-[#FAFAF7] rounded-2xl border border-slate-200 shadow-card">
+      <nav className="flex md:hidden overflow-x-auto scrollbar-hide bg-[#F7F3EA] rounded-2xl border border-slate-200 shadow-card">
         {NAV_ITEMS.map(({ href, label, exact }) => {
           const active = isActive(href, exact);
           return (
             <Link
               key={href}
               href={href}
-              className={`flex-1 py-3 px-2 text-center text-xs font-medium whitespace-nowrap border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] ${
-                active ? "text-[#059669] border-b-[#059669]" : "text-slate-600 hover:text-[#059669] border-b-transparent hover:border-b-[#059669]"
+              className={`flex-1 py-3 px-2 text-center text-xs font-medium whitespace-nowrap border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] ${
+                active ? "text-[#2D6A4F] border-b-[#2D6A4F]" : "text-slate-600 hover:text-[#2D6A4F] border-b-transparent hover:border-b-[#2D6A4F]"
               }`}
               aria-current={active ? "page" : undefined}
             >

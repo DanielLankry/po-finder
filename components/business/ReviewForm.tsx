@@ -22,10 +22,10 @@ export default function ReviewForm({ businessId, onSuccess }: ReviewFormProps) {
   if (success) {
     return (
       <div
-        className="border border-emerald-200 rounded-2xl p-5 bg-[#ECFDF5] text-center"
+        className="border border-emerald-200 rounded-2xl p-5 bg-[#EFF5F0] text-center"
         dir="rtl"
       >
-        <p className="text-[#065F46] font-semibold text-sm">
+        <p className="text-[#17402D] font-semibold text-sm">
           ✅ הביקורת נשמרה! תודה רבה.
         </p>
       </div>
@@ -95,7 +95,7 @@ export default function ReviewForm({ businessId, onSuccess }: ReviewFormProps) {
                 onMouseLeave={() => setHoverRating(0)}
                 aria-label={`${star} כוכבים`}
                 aria-pressed={rating === star}
-                className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded transition-transform hover:scale-110 active:scale-95"
+                className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] rounded transition-transform hover:scale-110 active:scale-95"
               >
                 <Star
                   className={`h-7 w-7 transition-all duration-100 ${
@@ -117,7 +117,7 @@ export default function ReviewForm({ businessId, onSuccess }: ReviewFormProps) {
           value={reviewerName}
           onChange={(e) => setReviewerName(e.target.value)}
           maxLength={60}
-          className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] focus:border-transparent transition-all"
+          className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:border-transparent transition-all"
           dir="rtl"
         />
 
@@ -129,7 +129,7 @@ export default function ReviewForm({ businessId, onSuccess }: ReviewFormProps) {
             onChange={(e) => setComment(e.target.value)}
             rows={3}
             maxLength={300}
-            className="w-full px-3 py-2.5 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#059669] focus:border-transparent transition-all"
+            className="w-full px-3 py-2.5 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:border-transparent transition-all"
             dir="rtl"
           />
           <span className="absolute left-2 bottom-2 text-[11px] text-[#AAAAAA]">
@@ -149,11 +149,11 @@ export default function ReviewForm({ businessId, onSuccess }: ReviewFormProps) {
             required
             checked={privacyAccepted}
             onChange={(e) => setPrivacyAccepted(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-[#D1D5DB] accent-[#059669]"
+            className="mt-0.5 h-4 w-4 rounded border-[#D1D5DB] accent-[#2D6A4F]"
           />
           <span>
             אני מאשר/ת שהשם והביקורת עשויים להופיע באתר, בהתאם{" "}
-            <Link href="/privacy" className="text-[#059669] hover:underline">
+            <Link href="/privacy" className="text-[#2D6A4F] hover:underline">
               למדיניות הפרטיות
             </Link>
             .
@@ -163,7 +163,7 @@ export default function ReviewForm({ businessId, onSuccess }: ReviewFormProps) {
         <button
           type="submit"
           disabled={loading || !privacyAccepted}
-          className="w-full h-11 rounded-xl bg-[#059669] hover:bg-[#047857] disabled:opacity-60 text-white font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2 shadow-sm active:scale-95"
+          className="w-full h-11 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] disabled:opacity-60 text-white font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 shadow-sm active:scale-95"
         >
           {loading ? "...שולחים" : "שלח ביקורת"}
         </button>

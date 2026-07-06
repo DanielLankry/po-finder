@@ -19,9 +19,9 @@ export default async function AdminPage() {
   ]);
 
   const cards = [
-    { label: "סה״כ עסקים", value: total ?? 0, icon: Store, color: "#059669", bg: "#ECFDF5" },
+    { label: "סה״כ עסקים", value: total ?? 0, icon: Store, color: "#2D6A4F", bg: "#EFF5F0" },
     { label: "ממתינים לאישור", value: pending ?? 0, icon: Clock, color: "#D97706", bg: "#FEF3C7" },
-    { label: "עסקים פעילים", value: active ?? 0, icon: CheckCircle, color: "#059669", bg: "#ECFDF5" },
+    { label: "עסקים פעילים", value: active ?? 0, icon: CheckCircle, color: "#2D6A4F", bg: "#EFF5F0" },
     { label: "קופונים פעילים", value: coupons ?? 0, icon: Ticket, color: "#7C3AED", bg: "#EDE9FE" },
   ];
 

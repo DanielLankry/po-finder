@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { BusinessEvent } from "@/lib/types";
 import { Calendar, Clock, Tag } from "lucide-react";
 
@@ -41,29 +42,31 @@ export default function EventsSection({ events }: EventsSectionProps) {
                 )}
                 <div className="flex flex-wrap items-center gap-3 text-sm text-stone-500">
                   <span className="flex items-center gap-1.5">
-                    <Calendar className="h-4 w-4 text-[#059669]" aria-hidden="true" />
+                    <Calendar className="h-4 w-4 text-[#2D6A4F]" aria-hidden="true" />
                     {formatHebrewDate(event.event_date)}
                   </span>
                   {event.start_time && (
                     <span className="flex items-center gap-1.5 tabular-nums">
-                      <Clock className="h-4 w-4 text-[#059669]" aria-hidden="true" />
+                      <Clock className="h-4 w-4 text-[#2D6A4F]" aria-hidden="true" />
                       {event.start_time.slice(0, 5)}
                       {event.end_time && ` – ${event.end_time.slice(0, 5)}`}
                     </span>
                   )}
                   {event.price != null && (
                     <span className="flex items-center gap-1.5">
-                      <Tag className="h-4 w-4 text-[#059669]" aria-hidden="true" />
+                      <Tag className="h-4 w-4 text-[#2D6A4F]" aria-hidden="true" />
                       {event.price === 0 ? "כניסה חופשית" : `₪${event.price}`}
                     </span>
                   )}
                 </div>
               </div>
               {event.image_url && (
-                <img
+                <Image
                   src={event.image_url}
                   alt={event.title}
-                  className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
+                  width={80}
+                  height={80}
+                  className="rounded-xl object-cover flex-shrink-0"
                 />
               )}
             </div>

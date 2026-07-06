@@ -31,7 +31,7 @@ export default function BusinessPopup({
       {/* Close button */}
       <button
         onClick={onClose}
-        className="absolute top-2 left-2 z-10 h-8 w-8 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center hover:bg-white hover:scale-110 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] shadow-sm"
+        className="absolute top-2 left-2 z-10 h-8 w-8 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center hover:bg-white hover:scale-110 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] shadow-sm"
         aria-label="סגירת חלונית"
       >
         <X className="h-4 w-4 text-slate-600" />
@@ -54,21 +54,21 @@ export default function BusinessPopup({
               }}
             />
             <div
-              className="absolute inset-0 flex-col items-center justify-center bg-gradient-to-br from-[#ECFDF5] via-[#D1FAE5] to-[#A7F3D0]"
+              className="absolute inset-0 flex-col items-center justify-center bg-gradient-to-br from-[#EFF5F0] via-[#DDEBE0] to-[#C3DCC9]"
               style={{ display: "none" }}
             >
-              <div className="h-12 w-12 rounded-2xl bg-[#059669] flex items-center justify-center mb-2 shadow-md">
+              <div className="h-12 w-12 rounded-2xl bg-[#2D6A4F] flex items-center justify-center mb-2 shadow-md">
                 <MapPin className="h-6 w-6 text-white" />
               </div>
-              <span className="text-[#059669]/70 text-xs font-medium">{CATEGORY_LABELS[business.category]}</span>
+              <span className="text-[#2D6A4F]/70 text-xs font-medium">{CATEGORY_LABELS[business.category]}</span>
             </div>
           </>
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#ECFDF5] via-[#D1FAE5] to-[#A7F3D0]">
-            <div className="h-12 w-12 rounded-2xl bg-[#059669] flex items-center justify-center mb-2 shadow-md">
+          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#EFF5F0] via-[#DDEBE0] to-[#C3DCC9]">
+            <div className="h-12 w-12 rounded-2xl bg-[#2D6A4F] flex items-center justify-center mb-2 shadow-md">
               <MapPin className="h-6 w-6 text-white" />
             </div>
-            <span className="text-[#059669]/70 text-xs font-medium">{CATEGORY_LABELS[business.category]}</span>
+            <span className="text-[#2D6A4F]/70 text-xs font-medium">{CATEGORY_LABELS[business.category]}</span>
           </div>
         )}
         {/* Status overlay badge on photo */}
@@ -119,13 +119,13 @@ export default function BusinessPopup({
         {/* Address & hours */}
         {address && (
           <div className="flex items-start gap-2 text-xs text-slate-500">
-            <MapPin className="h-3.5 w-3.5 text-[#059669] mt-0.5 flex-shrink-0" aria-hidden="true" />
+            <MapPin className="h-3.5 w-3.5 text-[#2D6A4F] mt-0.5 flex-shrink-0" aria-hidden="true" />
             <span>{address}</span>
           </div>
         )}
         {schedule?.open_time && schedule?.close_time && (
           <div className="flex items-center gap-2 text-xs text-slate-500">
-            <Clock className="h-3.5 w-3.5 text-[#059669] flex-shrink-0" aria-hidden="true" />
+            <Clock className="h-3.5 w-3.5 text-[#2D6A4F] flex-shrink-0" aria-hidden="true" />
             <span className="tabular-nums">
               {schedule.open_time.slice(0, 5)} – {schedule.close_time.slice(0, 5)}
             </span>
@@ -135,7 +135,7 @@ export default function BusinessPopup({
         {/* Badges */}
         <div className="flex flex-wrap gap-1.5">
           {business.kashrut !== "none" && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#047857] font-medium pop-in">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-[#EFF5F0] text-[#1F5038] font-medium pop-in">
               {KASHRUT_LABELS[business.kashrut]}
             </span>
           )}
@@ -150,7 +150,7 @@ export default function BusinessPopup({
         {/* CTA */}
         <Link
           href={`/businesses/${business.id}`}
-          className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2 shadow-sm btn-press"
+          className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 shadow-sm btn-press"
         >
           לפרטים המלאים ←
         </Link>

@@ -127,7 +127,7 @@ export default function BusinessMap({
     return (
       <div className="flex items-center justify-center h-full bg-surface">
         <div className="text-center">
-          <div className="h-10 w-10 rounded-full border-4 border-[#D1FAE5] border-t-[#059669] animate-spin mx-auto mb-3" />
+          <div className="h-10 w-10 rounded-full border-4 border-[#DDEBE0] border-t-[#2D6A4F] animate-spin mx-auto mb-3" />
           <p className="text-stone-500 text-sm">טוען מפה...</p>
         </div>
       </div>
@@ -231,7 +231,7 @@ export default function BusinessMap({
                   width: size,
                   height: size,
                   fontSize: isSelected || isHovered ? "1.4rem" : "1.1rem",
-                  border: `2px solid ${isSelected || isHovered ? "#059669" : "rgba(255,255,255,0.8)"}`,
+                  border: `2px solid ${isSelected || isHovered ? "#2D6A4F" : "rgba(255,255,255,0.8)"}`,
                   opacity: open ? 1 : 0.5,
                   filter: open ? "none" : "grayscale(1)",
                 }}
@@ -318,8 +318,8 @@ export default function BusinessMap({
                 mapRef.current?.setZoom(15);
               });
             }}
-            className="w-11 h-11 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
-            style={{ background: "linear-gradient(135deg,#059669 0%,#047857 100%)" }}
+            className="w-11 h-11 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
+            style={{ background: "linear-gradient(135deg,#2D6A4F 0%,#1F5038 100%)" }}
             aria-label="מיקום שלי"
           >
             {/* Navigation arrow — points to current location */}

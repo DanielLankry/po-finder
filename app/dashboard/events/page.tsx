@@ -123,7 +123,7 @@ export default function EventsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 rounded-full border-4 border-emerald-200 border-t-[#059669] animate-spin" />
+        <div className="h-8 w-8 rounded-full border-4 border-emerald-200 border-t-[#2D6A4F] animate-spin" />
       </div>
     );
   }
@@ -132,7 +132,7 @@ export default function EventsPage() {
     return (
       <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center" dir="rtl">
         <p className="text-stone-600 mb-4">יש ליצור פרופיל עסק תחילה</p>
-        <a href="/dashboard/profile" className="text-[#059669] font-medium hover:underline">עריכת פרופיל ←</a>
+        <a href="/dashboard/profile" className="text-[#2D6A4F] font-medium hover:underline">עריכת פרופיל ←</a>
       </div>
     );
   }
@@ -154,7 +154,7 @@ export default function EventsPage() {
         <Button
           onClick={() => { setShowForm(!showForm); setSuccess(null); setError(null); }}
           data-tour="events-new"
-          className="h-10 px-4 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium text-sm"
+          className="h-10 px-4 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-medium text-sm"
         >
           <Plus className="h-4 w-4 ml-1" />
           אירוע חדש
@@ -175,7 +175,7 @@ export default function EventsPage() {
                 onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
                 placeholder="למשל: הופעת שישי בלייב"
                 required
-                className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
+                className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F]"
               />
             </div>
 
@@ -188,7 +188,7 @@ export default function EventsPage() {
                 onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
                 placeholder="פרטים נוספים על האירוע..."
                 rows={3}
-                className="rounded-xl border-stone-200 focus-visible:ring-[#059669] resize-none"
+                className="rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F] resize-none"
               />
             </div>
 
@@ -203,7 +203,7 @@ export default function EventsPage() {
                   onChange={(e) => setForm((p) => ({ ...p, event_date: e.target.value }))}
                   required
                   min={todayStr}
-                  className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
+                  className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F]"
                   dir="ltr"
                 />
               </div>
@@ -215,7 +215,7 @@ export default function EventsPage() {
                   type="time"
                   value={form.start_time}
                   onChange={(e) => setForm((p) => ({ ...p, start_time: e.target.value }))}
-                  className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
+                  className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F]"
                   dir="ltr"
                 />
               </div>
@@ -227,7 +227,7 @@ export default function EventsPage() {
                   type="time"
                   value={form.end_time}
                   onChange={(e) => setForm((p) => ({ ...p, end_time: e.target.value }))}
-                  className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
+                  className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F]"
                   dir="ltr"
                 />
               </div>
@@ -244,7 +244,7 @@ export default function EventsPage() {
                 value={form.price}
                 onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))}
                 placeholder="אופציונלי"
-                className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669] w-40"
+                className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F] w-40"
                 dir="ltr"
               />
             </div>
@@ -253,7 +253,7 @@ export default function EventsPage() {
               <Button
                 type="submit"
                 disabled={saving}
-                className="h-11 px-6 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-semibold"
+                className="h-11 px-6 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-semibold"
               >
                 {saving ? "...שומר" : "הוסף אירוע"}
               </Button>
@@ -293,19 +293,19 @@ export default function EventsPage() {
                   )}
                   <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-stone-500">
                     <span className="flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5 text-[#059669]" />
+                      <Calendar className="h-3.5 w-3.5 text-[#2D6A4F]" />
                       {formatHebrewDate(event.event_date)}
                     </span>
                     {event.start_time && (
                       <span className="flex items-center gap-1 tabular-nums">
-                        <Clock className="h-3.5 w-3.5 text-[#059669]" />
+                        <Clock className="h-3.5 w-3.5 text-[#2D6A4F]" />
                         {event.start_time.slice(0, 5)}
                         {event.end_time && ` – ${event.end_time.slice(0, 5)}`}
                       </span>
                     )}
                     {event.price != null && (
                       <span className="flex items-center gap-1">
-                        <Tag className="h-3.5 w-3.5 text-[#059669]" />
+                        <Tag className="h-3.5 w-3.5 text-[#2D6A4F]" />
                         {event.price === 0 ? "ללא עלות" : `₪${event.price}`}
                       </span>
                     )}
@@ -330,7 +330,7 @@ export default function EventsPage() {
       ) : !showForm ? (
         <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center">
           <div className="h-14 w-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
-            <Calendar className="h-7 w-7 text-[#059669]" />
+            <Calendar className="h-7 w-7 text-[#2D6A4F]" />
           </div>
           <h2 className="font-bold text-lg text-stone-900 mb-1">אין אירועים קרובים</h2>
           <p className="text-stone-500 text-sm">

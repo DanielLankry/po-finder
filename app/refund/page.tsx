@@ -13,7 +13,7 @@ export default function RefundPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-[#FAFAF7] pt-[88px] pb-16" dir="rtl">
+      <main className="min-h-screen bg-[#F7F3EA] pt-[88px] pb-16" dir="rtl">
         <div className="max-w-3xl mx-auto px-4">
           <h1 className="font-display font-extrabold text-3xl text-stone-900 mb-2">
             מדיניות ביטולים והחזרים
@@ -38,11 +38,11 @@ export default function RefundPage() {
               </h2>
               <p>
                 אפשר לבקש ביטול באמצעות{" "}
-                <Link href="/contact" className="text-[#059669] hover:underline">
+                <Link href="/contact" className="text-[#2D6A4F] hover:underline">
                   טופס יצירת קשר
                 </Link>{" "}
                 או בדוא&quot;ל אל{" "}
-                <a href={`mailto:${BUSINESS_INFO.contactEmail}`} className="text-[#059669] hover:underline">
+                <a href={`mailto:${BUSINESS_INFO.contactEmail}`} className="text-[#2D6A4F] hover:underline">
                   {BUSINESS_INFO.contactEmail}
                 </a>. בבקשה יש לציין שם מלא, דוא&quot;ל שבו בוצעה ההרשמה, מזהה עסקה או
                 תאריך תשלום אם ידוע, ואת העסק הרלוונטי.

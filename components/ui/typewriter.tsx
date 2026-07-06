@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { motion, Variants } from "framer-motion"
 
 import { cn } from "@/lib/utils"
@@ -19,7 +19,7 @@ interface TypewriterProps {
     animate: Variants["animate"]
   }
   cursorClassName?: string
-  /** Map specific words to a Tailwind color class, e.g. { "ישראלים": "text-[#10B981]" } */
+  /** Map specific words to a Tailwind color class, e.g. { "ישראלים": "text-[#4A8B66]" } */
   wordColors?: Record<string, string>
   /** CSS text-shadow value for a glow effect */
   glowColor?: string
@@ -57,7 +57,7 @@ const Typewriter = ({
   const [isDeleting, setIsDeleting] = useState(false)
   const [currentTextIndex, setCurrentTextIndex] = useState(0)
 
-  const texts = Array.isArray(text) ? text : [text]
+  const texts = useMemo(() => Array.isArray(text) ? text : [text], [text])
 
   useEffect(() => {
     let timeout: NodeJS.Timeout
@@ -108,6 +108,7 @@ const Typewriter = ({
     speed,
     deleteSpeed,
     waitTime,
+    initialDelay,
     texts,
     currentTextIndex,
     loop,

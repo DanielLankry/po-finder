@@ -123,11 +123,11 @@ export default async function BusinessPage({ params }: Props) {
       />
       <Navbar />
       <ViewTracker businessId={id} />
-      <div className="min-h-screen bg-[#FAFAF7]" dir="rtl">
+      <div className="min-h-screen bg-[#F7F3EA]" dir="rtl">
         <div className="max-w-[1280px] mx-auto px-4 pt-[88px] pb-16">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 mb-6 text-sm text-stone-500">
-            <Link href="/" className="hover:text-[#059669] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded">
+            <Link href="/" className="hover:text-[#2D6A4F] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] rounded">
               דף הבית
             </Link>
             <ArrowRight className="h-3.5 w-3.5 rotate-180" aria-hidden="true" />
@@ -146,11 +146,11 @@ export default async function BusinessPage({ params }: Props) {
               {/* Header */}
               <div className="mb-6">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-[#D1FAE5] text-[#047857] font-medium">
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-[#DDEBE0] text-[#1F5038] font-medium">
                     {CATEGORY_LABELS[business.category as keyof typeof CATEGORY_LABELS]}
                   </span>
                   {business.kashrut !== "none" && (
-                    <span className="text-xs px-2.5 py-1 rounded-full bg-[#D1FAE5] text-[#047857] font-medium">
+                    <span className="text-xs px-2.5 py-1 rounded-full bg-[#DDEBE0] text-[#1F5038] font-medium">
                       {KASHRUT_LABELS[business.kashrut as keyof typeof KASHRUT_LABELS]}
                     </span>
                   )}

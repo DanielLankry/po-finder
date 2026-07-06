@@ -2,8 +2,6 @@ import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Mail, MessageCircle, ArrowLeft, MapPin, CreditCard, Users, CircleHelp } from "lucide-react";
-import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
-import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { BRAND_NAME, BUSINESS_INFO, LAUNCH_OFFER, getWhatsAppHref } from "@/lib/site-config";
 
 export const metadata = {
@@ -17,15 +15,15 @@ export default function AboutPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-[#FAFAF7] pt-[88px] pb-16" dir="rtl">
+      <main className="min-h-screen bg-[#F7F3EA] pt-[88px] pb-16" dir="rtl">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="mb-4">
-            <AnimatedShinyText className="inline-flex items-center gap-1.5 text-sm font-medium px-3.5 py-1.5 rounded-full border border-[#D1FAE5] bg-[#ECFDF5] text-[#047857]" shimmerWidth={120}>
+          <div className="mb-5">
+            <span className="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-1.5 rounded-full border-2 border-[#17402D] bg-white text-[#1F5038] shadow-[2px_2px_0_0_#17402D]">
               פלטפורמה לעסקים קטנים ועסקים ניידים
-            </AnimatedShinyText>
+            </span>
           </div>
 
-          <h1 className="font-display font-extrabold text-3xl text-stone-900 mb-2">
+          <h1 className="font-display text-5xl md:text-6xl text-[#17402D] mb-2">
             אודות {BRAND_NAME}
           </h1>
           <p className="text-stone-500 text-sm mb-8">
@@ -36,7 +34,7 @@ export default function AboutPage() {
             <section className="bg-white rounded-3xl border border-stone-200 p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                  <Users className="h-5 w-5 text-[#059669]" aria-hidden="true" />
+                  <Users className="h-5 w-5 text-[#2D6A4F]" aria-hidden="true" />
                 </div>
                 <h2 className="font-display font-bold text-xl text-stone-900">מי אנחנו</h2>
               </div>
@@ -50,7 +48,7 @@ export default function AboutPage() {
             <section className="bg-white rounded-3xl border border-stone-200 p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="h-5 w-5 text-[#059669]" aria-hidden="true" />
+                  <MapPin className="h-5 w-5 text-[#2D6A4F]" aria-hidden="true" />
                 </div>
                 <h2 className="font-display font-bold text-xl text-stone-900">למי הפלטפורמה מתאימה</h2>
               </div>
@@ -63,7 +61,7 @@ export default function AboutPage() {
             <section className="bg-white rounded-3xl border border-stone-200 p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                  <ArrowLeft className="h-5 w-5 text-[#059669]" aria-hidden="true" />
+                  <ArrowLeft className="h-5 w-5 text-[#2D6A4F]" aria-hidden="true" />
                 </div>
                 <h2 className="font-display font-bold text-xl text-stone-900">איך השירות עובד</h2>
               </div>
@@ -77,7 +75,7 @@ export default function AboutPage() {
             <section className="bg-white rounded-3xl border border-stone-200 p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                  <CreditCard className="h-5 w-5 text-[#059669]" aria-hidden="true" />
+                  <CreditCard className="h-5 w-5 text-[#2D6A4F]" aria-hidden="true" />
                 </div>
                 <h2 className="font-display font-bold text-xl text-stone-900">איך התשלום עובד</h2>
               </div>
@@ -88,7 +86,7 @@ export default function AboutPage() {
             <section className="bg-white rounded-3xl border border-stone-200 p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                  <CircleHelp className="h-5 w-5 text-[#059669]" aria-hidden="true" />
+                  <CircleHelp className="h-5 w-5 text-[#2D6A4F]" aria-hidden="true" />
                 </div>
                 <h2 className="font-display font-bold text-xl text-stone-900">איך מבטלים</h2>
               </div>
@@ -96,7 +94,7 @@ export default function AboutPage() {
                 אפשר לבטל בהתאם למדיניות הביטולים וההחזרים המפורסמת באתר. בתקופת ההשקה אין
                 התחייבות, ואפשר לפנות אלינו במייל לפני חיוב נוסף או שאלה על החשבון.
               </p>
-              <Link href="/refund" className="inline-flex mt-3 text-[#059669] font-medium hover:underline">
+              <Link href="/refund" className="inline-flex mt-3 text-[#2D6A4F] font-medium hover:underline">
                 למדיניות הביטולים וההחזרים
               </Link>
             </section>
@@ -141,17 +139,12 @@ export default function AboutPage() {
             <section className="text-center py-4">
               <p className="text-stone-600 mb-6">רוצים לבדוק אם השירות מתאים לעסק שלכם?</p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-                <Link href="/pricing">
-                  <ShimmerButton
-                    shimmerColor="#a7f3d0"
-                    background="rgba(5,150,105,1)"
-                    className="h-11 px-6 text-sm font-semibold"
-                  >
-                    <span className="flex items-center gap-2">
-                      {LAUNCH_OFFER.primaryButtonText}
-                      <ArrowLeft className="h-4 w-4" />
-                    </span>
-                  </ShimmerButton>
+                <Link
+                  href="/pricing"
+                  className="poster-hover inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-[#C4552D] hover:bg-[#A8441F] text-white text-sm font-bold border-2 border-[#8A3618] shadow-[3px_3px_0_0_#8A3618]"
+                >
+                  {LAUNCH_OFFER.primaryButtonText}
+                  <ArrowLeft className="h-4 w-4" />
                 </Link>
                 <Link href="/" className="inline-flex items-center gap-2 h-11 px-6 rounded-full border border-stone-200 bg-white text-stone-700 text-sm font-medium hover:bg-stone-50 transition-colors">
                   חזרה למפה

@@ -49,7 +49,7 @@ export default function FilterDrawer({
             </SheetTitle>
             <button
               onClick={onClose}
-              className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-[#ECFDF5] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]"
+              className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-[#EFF5F0] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
               aria-label="סגירת סינון"
             >
               <X className="h-4 w-4 text-stone-600" />
@@ -68,8 +68,8 @@ export default function FilterDrawer({
                   role="switch"
                   aria-checked={filters.openNow}
                   onClick={() => update({ openNow: !filters.openNow })}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2 ${
-                    filters.openNow ? "bg-[#059669]" : "bg-stone-200"
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 ${
+                    filters.openNow ? "bg-[#2D6A4F]" : "bg-stone-200"
                   }`}
                 >
                   <span
@@ -91,15 +91,15 @@ export default function FilterDrawer({
                     key={value}
                     onClick={() => update({ kashrut: value })}
                     aria-pressed={filters.kashrut === value}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] btn-press ${
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] btn-press ${
                       filters.kashrut === value
-                        ? "border-[#059669] bg-[#ECFDF5] text-[#047857]"
-                        : "border-stone-200 text-stone-600 hover:border-[#A7F3D0] hover:bg-[#ECFDF5]/50"
+                        ? "border-[#2D6A4F] bg-[#EFF5F0] text-[#1F5038]"
+                        : "border-stone-200 text-stone-600 hover:border-[#C3DCC9] hover:bg-[#EFF5F0]/50"
                     }`}
                   >
                     {label}
                     {filters.kashrut === value && (
-                      <span className="h-2 w-2 rounded-full bg-[#059669]" aria-hidden="true" />
+                      <span className="h-2 w-2 rounded-full bg-[#2D6A4F]" aria-hidden="true" />
                     )}
                   </button>
                 ))}
@@ -110,7 +110,7 @@ export default function FilterDrawer({
             <div>
               <div className="flex items-center justify-between mb-3">
                 <p className="font-medium text-stone-900">דירוג מינימלי</p>
-                <span className="text-[#059669] font-bold">
+                <span className="text-[#2D6A4F] font-bold">
                   {filters.minRating > 0 ? `★ ${filters.minRating}+` : "הכל"}
                 </span>
               </div>
@@ -134,13 +134,13 @@ export default function FilterDrawer({
           <div className="p-6 border-t border-stone-200 flex gap-3">
             <button
               onClick={handleReset}
-              className="flex-1 h-11 rounded-xl border border-stone-200 text-stone-600 font-medium text-sm hover:bg-stone-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] btn-press"
+              className="flex-1 h-11 rounded-xl border border-stone-200 text-stone-600 font-medium text-sm hover:bg-stone-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] btn-press"
             >
               איפוס
             </button>
             <button
               onClick={onClose}
-              className="flex-1 h-11 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2 btn-press shadow-sm"
+              className="flex-1 h-11 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 btn-press shadow-sm"
             >
               החל סינון
             </button>

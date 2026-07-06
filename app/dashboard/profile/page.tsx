@@ -147,7 +147,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 rounded-full border-4 border-[#A7F3D0] border-t-[#059669] animate-spin" />
+        <div className="h-8 w-8 rounded-full border-4 border-[#C3DCC9] border-t-[#2D6A4F] animate-spin" />
       </div>
     );
   }
@@ -171,7 +171,7 @@ export default function ProfilePage() {
               placeholder="קפה של דני"
               required
               maxLength={100}
-              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
+              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F]"
             />
           </FormField>
         </div>
@@ -183,7 +183,7 @@ export default function ProfilePage() {
             placeholder="ספרו על העסק שלכם..."
             rows={3}
             maxLength={500}
-            className="rounded-xl border-stone-200 focus-visible:ring-[#059669] resize-none"
+            className="rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F] resize-none"
           />
         </FormField>
 
@@ -216,7 +216,7 @@ export default function ProfilePage() {
               value={form.category}
               onValueChange={(v) => update("category", v)}
             >
-              <SelectTrigger className="h-11 rounded-xl border-stone-200 focus:ring-[#059669]">
+              <SelectTrigger className="h-11 rounded-xl border-stone-200 focus:ring-[#2D6A4F]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -234,7 +234,7 @@ export default function ProfilePage() {
               value={form.kashrut}
               onValueChange={(v) => update("kashrut", v)}
             >
-              <SelectTrigger className="h-11 rounded-xl border-stone-200 focus:ring-[#059669]">
+              <SelectTrigger className="h-11 rounded-xl border-stone-200 focus:ring-[#2D6A4F]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -255,7 +255,7 @@ export default function ProfilePage() {
               onChange={(e) => update("phone", e.target.value)}
               placeholder="05X-XXXXXXX"
               type="tel"
-              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
+              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F]"
               dir="ltr"
             />
           </FormField>
@@ -266,7 +266,7 @@ export default function ProfilePage() {
               onChange={(e) => update("whatsapp", e.target.value)}
               placeholder="972XXXXXXXXX"
               type="tel"
-              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
+              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F]"
               dir="ltr"
             />
           </FormField>
@@ -280,7 +280,7 @@ export default function ProfilePage() {
                 value={form.instagram}
                 onChange={(e) => update("instagram", e.target.value)}
                 placeholder="username"
-                className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669] pr-8"
+                className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F] pr-8"
                 dir="ltr"
               />
             </div>
@@ -292,7 +292,7 @@ export default function ProfilePage() {
               onChange={(e) => update("website", e.target.value)}
               placeholder="https://..."
               type="url"
-              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
+              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F]"
               dir="ltr"
             />
           </FormField>
@@ -303,7 +303,7 @@ export default function ProfilePage() {
             value={form.business_number}
             onChange={(e) => update("business_number", e.target.value)}
             placeholder="אופציונלי"
-            className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#059669]"
+            className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F]"
             dir="ltr"
           />
         </FormField>
@@ -319,7 +319,7 @@ export default function ProfilePage() {
           type="submit"
           disabled={saving}
           data-tour="profile-save"
-          className="w-full h-11 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium"
+          className="w-full h-11 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-medium"
         >
           {saving ? "...שומר" : business ? "שמירת שינויים" : "יצירת עסק"}
         </Button>

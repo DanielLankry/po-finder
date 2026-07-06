@@ -17,7 +17,7 @@ const NAV = [
 const LOGO = (
   <svg width="20" height="25" viewBox="0 0 40 50" fill="none">
     <defs><linearGradient id="gl" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stopColor="#34d399"/><stop offset="100%" stopColor="#059669"/>
+      <stop offset="0%" stopColor="#6FA583"/><stop offset="100%" stopColor="#2D6A4F"/>
     </linearGradient></defs>
     <path d="M20 0C9.507 0 1 8.507 1 19c0 13.255 17.5 29.5 18.25 30.188a1.125 1.125 0 0 0 1.5 0C21.5 48.5 39 32.255 39 19 39 8.507 30.493 0 20 0z" fill="url(#gl)"/>
     <text x="20" y="26" textAnchor="middle" fontFamily="sans-serif" fontWeight="800" fontSize="20" fill="white">פ</text>
@@ -46,8 +46,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             onClick={() => setSidebarOpen(false)}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
               active
-                ? "bg-[#ECFDF5] text-[#059669] font-semibold"
-                : "text-[#555] hover:bg-[#ECFDF5] hover:text-[#059669]"
+                ? "bg-[#EFF5F0] text-[#2D6A4F] font-semibold"
+                : "text-[#555] hover:bg-[#EFF5F0] hover:text-[#2D6A4F]"
             }`}
           >
             <Icon className="h-4 w-4 flex-shrink-0" />
@@ -85,7 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       `}>
         {/* Logo — desktop */}
         <div className="hidden md:flex p-6 border-b border-[#E5E7EB] items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-[#ECFDF5] flex items-center justify-center">
+          <div className="h-9 w-9 rounded-xl bg-[#EFF5F0] flex items-center justify-center">
             {LOGO}
           </div>
           <div>
@@ -97,7 +97,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Logo — mobile (with close) */}
         <div className="md:hidden flex items-center justify-between p-4 pt-5 border-b border-[#E5E7EB]">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-xl bg-[#ECFDF5] flex items-center justify-center">{LOGO}</div>
+            <div className="h-8 w-8 rounded-xl bg-[#EFF5F0] flex items-center justify-center">{LOGO}</div>
             <p className="font-bold text-[#111] text-sm">ניהול</p>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-[#F3F4F6]">

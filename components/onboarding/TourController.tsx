@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { driver, type Driver } from "driver.js";
 import "driver.js/dist/driver.css";
-import { TOUR_STEPS, routeForStep } from "./steps";
+import { TOUR_STEPS } from "./steps";
 
 const STATE_KEY = "pofkarov.tour.state";
 

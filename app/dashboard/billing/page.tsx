@@ -53,7 +53,7 @@ export default function BillingPage() {
 
       {/* Current listings / status */}
       <section className="bg-white rounded-2xl border border-stone-200 shadow-card overflow-hidden">
-        <div className="flex items-center gap-2 px-6 py-4 border-b border-stone-100 bg-[#FAFAF7]">
+        <div className="flex items-center gap-2 px-6 py-4 border-b border-stone-100 bg-[#F7F3EA]">
           <Calendar className="h-5 w-5 text-stone-500" />
           <h2 className="font-display font-bold text-base text-stone-900">
             סטטוס נוכחי
@@ -86,7 +86,7 @@ export default function BillingPage() {
       <section>
         <Link
           href="/pricing"
-          className="flex items-center gap-3 bg-gradient-to-br from-[#059669] to-[#047857] text-white rounded-2xl p-5 hover:shadow-lg transition-all group"
+          className="flex items-center gap-3 bg-gradient-to-br from-[#2D6A4F] to-[#1F5038] text-white rounded-2xl p-5 hover:shadow-lg transition-all group"
         >
           <div className="h-11 w-11 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
             <RefreshCw className="h-5 w-5" />
@@ -110,7 +110,7 @@ export default function BillingPage() {
             </h2>
             <p className="text-stone-500 text-sm">
               קבלות נשלחות אליכם בדוא&quot;ל לאחר השלמת התשלום. לעותק נוסף או שאלות —{" "}
-              <Link href="/contact" className="text-[#059669] hover:underline font-medium">
+              <Link href="/contact" className="text-[#2D6A4F] hover:underline font-medium">
                 צרו איתנו קשר
               </Link>
               .
@@ -133,7 +133,7 @@ function BusinessStatusRow({ business }: { business: BusinessLite }) {
   if (!exp) status = { label: "לא שולם", color: "bg-stone-100 text-stone-600" };
   else if (daysLeft! <= 0) status = { label: "פג תוקף", color: "bg-red-100 text-red-700" };
   else if (daysLeft! <= 7) status = { label: `${daysLeft} ימים נותרו`, color: "bg-amber-100 text-amber-700" };
-  else status = { label: "פעיל", color: "bg-emerald-100 text-[#059669]" };
+  else status = { label: "פעיל", color: "bg-emerald-100 text-[#2D6A4F]" };
 
   return (
     <div className="px-6 py-4 flex items-center justify-between gap-4 flex-wrap">

@@ -37,8 +37,8 @@ export default async function AdminStatsPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "סה״כ עסקים", value: totalBiz ?? 0, icon: BarChart3, color: "#059669", bg: "#ECFDF5" },
-          { label: "עסקים פעילים", value: activeBiz ?? 0, icon: TrendingUp, color: "#059669", bg: "#ECFDF5" },
+          { label: "סה״כ עסקים", value: totalBiz ?? 0, icon: BarChart3, color: "#2D6A4F", bg: "#EFF5F0" },
+          { label: "עסקים פעילים", value: activeBiz ?? 0, icon: TrendingUp, color: "#2D6A4F", bg: "#EFF5F0" },
           { label: "נרשמו ב-30 יום", value: last30 ?? 0, icon: Calendar, color: "#2563EB", bg: "#DBEAFE" },
           { label: "נרשמו ב-7 ימים", value: last7 ?? 0, icon: Calendar, color: "#7C3AED", bg: "#EDE9FE" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
@@ -65,7 +65,7 @@ export default async function AdminStatsPage() {
                   <span className="text-[#888]">{count} ({pct}%)</span>
                 </div>
                 <div className="h-2 bg-[#F3F4F6] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#059669] rounded-full transition-all" style={{ width: `${pct}%` }} />
+                  <div className="h-full bg-[#2D6A4F] rounded-full transition-all" style={{ width: `${pct}%` }} />
                 </div>
               </div>
             );

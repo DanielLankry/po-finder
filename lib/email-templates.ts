@@ -24,7 +24,7 @@ const FOOTER_HTML = `
         פה קרוב — גלו עסקים קטנים וניידים קרוב אליכם
       </p>
       <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 12px; color: #D1D5DB;">
-        <a href="https://pokarov.co.il" style="color: #059669; text-decoration: none;">pokarov.co.il</a>
+        <a href="https://pokarov.co.il" style="color: #2D6A4F; text-decoration: none;">pokarov.co.il</a>
         &nbsp;·&nbsp;
         <a href="mailto:support@pokarov.co.il" style="color: #9CA3AF; text-decoration: none;">support@pokarov.co.il</a>
       </p>
@@ -77,14 +77,14 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
       <td>
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
-            <td style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 40px 32px 36px; text-align: center; border-radius: 20px 20px 0 0;">
+            <td style="background: linear-gradient(135deg, #2D6A4F 0%, #1F5038 100%); padding: 40px 32px 36px; text-align: center; border-radius: 20px 20px 0 0;">
               <!-- Logo white version -->
               <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 20px;">
                 <tr>
                   <td>
                     <svg width="44" height="55" viewBox="0 0 40 50" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));">
                       <path d="M20 0C9.507 0 1 8.507 1 19c0 13.255 17.5 29.5 18.25 30.188a1.125 1.125 0 0 0 1.5 0C21.5 48.5 39 32.255 39 19 39 8.507 30.493 0 20 0z" fill="rgba(255,255,255,0.95)"/>
-                      <text x="20" y="26" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="20" fill="#059669">פ</text>
+                      <text x="20" y="26" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="20" fill="#2D6A4F">פ</text>
                     </svg>
                   </td>
                   <td style="padding-right: 10px; vertical-align: middle;">
@@ -117,27 +117,27 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
         </p>
 
         <!-- Info box -->
-        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #F0FDF4; border-radius: 14px; border: 1px solid #D1FAE5; margin-bottom: 24px;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #F0FDF4; border-radius: 14px; border: 1px solid #DDEBE0; margin-bottom: 24px;">
           <tr>
             <td style="padding: 20px 24px;">
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
                   <td style="padding-bottom: 12px;">
                     <span style="font-size: 18px;">📍</span>
-                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #065F46; margin-right: 8px;">מופיע על המפה</span>
+                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #17402D; margin-right: 8px;">מופיע על המפה</span>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding-bottom: 12px;">
                     <span style="font-size: 18px;">⭐</span>
-                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #065F46; margin-right: 8px;">לקוחות יכולים להשאיר ביקורות</span>
+                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #17402D; margin-right: 8px;">לקוחות יכולים להשאיר ביקורות</span>
                   </td>
                 </tr>
                 ${expiryStr ? `
                 <tr>
                   <td>
                     <span style="font-size: 18px;">📅</span>
-                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #065F46; margin-right: 8px;">פעיל עד ${expiryStr}</span>
+                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #17402D; margin-right: 8px;">פעיל עד ${expiryStr}</span>
                   </td>
                 </tr>` : ""}
               </table>
@@ -149,7 +149,7 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
             <td align="center" style="padding-bottom: 8px;">
-              <a href="https://pokarov.co.il" style="display: inline-block; background: linear-gradient(135deg, #059669, #047857); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 40px; border-radius: 50px; box-shadow: 0 4px 16px rgba(5,150,105,0.35);">
+              <a href="https://pokarov.co.il" style="display: inline-block; background: linear-gradient(135deg, #2D6A4F, #1F5038); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 40px; border-radius: 50px; box-shadow: 0 4px 16px rgba(45,106,79,0.35);">
                 צפה בפה קרוב ←
               </a>
             </td>
@@ -157,7 +157,7 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
         </table>
 
         <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 13px; color: #9CA3AF; text-align: center; margin-top: 16px;">
-          שאלות? <a href="mailto:support@pokarov.co.il" style="color: #059669; text-decoration: none;">support@pokarov.co.il</a>
+          שאלות? <a href="mailto:support@pokarov.co.il" style="color: #2D6A4F; text-decoration: none;">support@pokarov.co.il</a>
         </p>
       </td>
     </tr>
@@ -259,13 +259,13 @@ export function contactAutoReplyTemplate(name: string, subjectLabel: string): st
                 <tr>
                   <td>
                     <svg width="44" height="55" viewBox="0 0 40 50" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
-                      <defs><linearGradient id="pg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#059669"/></linearGradient></defs>
+                      <defs><linearGradient id="pg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6FA583"/><stop offset="100%" stop-color="#2D6A4F"/></linearGradient></defs>
                       <path d="M20 0C9.507 0 1 8.507 1 19c0 13.255 17.5 29.5 18.25 30.188a1.125 1.125 0 0 0 1.5 0C21.5 48.5 39 32.255 39 19 39 8.507 30.493 0 20 0z" fill="url(#pg2)"/>
                       <text x="20" y="26" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="20" fill="white">פ</text>
                     </svg>
                   </td>
                   <td style="padding-right: 10px; vertical-align: middle;">
-                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #059669;">פה קרוב</span>
+                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #2D6A4F;">פה קרוב</span>
                   </td>
                 </tr>
               </table>
@@ -288,10 +288,10 @@ export function contactAutoReplyTemplate(name: string, subjectLabel: string): st
         </p>
 
         <!-- Timeline -->
-        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #FAFAF7; border-radius: 14px; border: 1px solid #E5E7EB; margin-bottom: 24px;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #F7F3EA; border-radius: 14px; border: 1px solid #E5E7EB; margin-bottom: 24px;">
           <tr>
             <td style="padding: 20px 24px;">
-              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 13px; font-weight: 700; color: #059669; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">⏱ מה קורה עכשיו?</p>
+              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 13px; font-weight: 700; color: #2D6A4F; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">⏱ מה קורה עכשיו?</p>
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
                   <td style="padding-bottom: 10px;">
@@ -320,7 +320,7 @@ export function contactAutoReplyTemplate(name: string, subjectLabel: string): st
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
             <td align="center">
-              <a href="https://pokarov.co.il" style="display: inline-block; background: linear-gradient(135deg, #059669, #047857); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 15px; font-weight: 700; text-decoration: none; padding: 13px 36px; border-radius: 50px; box-shadow: 0 4px 14px rgba(5,150,105,0.3);">
+              <a href="https://pokarov.co.il" style="display: inline-block; background: linear-gradient(135deg, #2D6A4F, #1F5038); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 15px; font-weight: 700; text-decoration: none; padding: 13px 36px; border-radius: 50px; box-shadow: 0 4px 14px rgba(45,106,79,0.3);">
                 בחזרה לפה קרוב ←
               </a>
             </td>

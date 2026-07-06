@@ -11,7 +11,7 @@ export default function AccessibilityPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-[#FAFAF7] pt-[88px] pb-16" dir="rtl">
+      <main className="min-h-screen bg-[#F7F3EA] pt-[88px] pb-16" dir="rtl">
         <div className="max-w-3xl mx-auto px-4">
           <h1 className="font-display font-extrabold text-3xl text-stone-900 mb-2">
             הצהרת נגישות
@@ -77,10 +77,10 @@ export default function AccessibilityPage() {
               </h2>
               <p>
                 לפניות, בקשות התאמה או דיווח על תקלה בנגישות אפשר לפנות אל{" "}
-                <a href={`mailto:${BUSINESS_INFO.contactEmail}`} className="text-[#059669] hover:underline">
+                <a href={`mailto:${BUSINESS_INFO.contactEmail}`} className="text-[#2D6A4F] hover:underline">
                   {BUSINESS_INFO.contactEmail}
                 </a>{" "}
-                או דרך <a href="/contact" className="text-[#059669] hover:underline">טופס יצירת קשר</a>.
+                או דרך <a href="/contact" className="text-[#2D6A4F] hover:underline">טופס יצירת קשר</a>.
               </p>
               <p className="mt-3 text-sm text-stone-500">
                 כדי שנוכל לטפל מהר, ציינו את כתובת העמוד, תיאור הבעיה, סוג המכשיר,

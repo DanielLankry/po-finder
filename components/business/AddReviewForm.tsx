@@ -28,7 +28,7 @@ export default function AddReviewForm({ businessId, isLoggedIn }: AddReviewFormP
         </p>
         <a
           href="/auth/login"
-          className="inline-flex items-center justify-center h-10 px-6 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] focus-visible:ring-offset-2 shadow-sm btn-press"
+          className="inline-flex items-center justify-center h-10 px-6 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 shadow-sm btn-press"
         >
           כניסה
         </a>
@@ -92,7 +92,7 @@ export default function AddReviewForm({ businessId, isLoggedIn }: AddReviewFormP
                 onMouseLeave={() => setHoverRating(0)}
                 aria-label={`${star} כוכבים`}
                 aria-pressed={rating === star}
-                className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669] rounded transition-transform hover:scale-110 active:scale-95"
+                className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] rounded transition-transform hover:scale-110 active:scale-95"
               >
                 <Star
                   className={`h-7 w-7 transition-all duration-100 ${
@@ -113,7 +113,7 @@ export default function AddReviewForm({ businessId, isLoggedIn }: AddReviewFormP
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={3}
-          className="resize-none rounded-xl border-slate-200 focus-visible:ring-[#059669]"
+          className="resize-none rounded-xl border-slate-200 focus-visible:ring-[#2D6A4F]"
           aria-label="תגובה"
           maxLength={500}
         />
@@ -126,7 +126,7 @@ export default function AddReviewForm({ businessId, isLoggedIn }: AddReviewFormP
 
         <p className="text-xs text-stone-400 text-center">
           בשליחה אני מאשר/ת את{" "}
-          <Link href="/privacy" className="text-[#059669] hover:underline">
+          <Link href="/privacy" className="text-[#2D6A4F] hover:underline">
             מדיניות הפרטיות
           </Link>
         </p>
@@ -134,7 +134,7 @@ export default function AddReviewForm({ businessId, isLoggedIn }: AddReviewFormP
         <Button
           type="submit"
           disabled={loading}
-          className="w-full h-11 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-medium shadow-sm btn-press"
+          className="w-full h-11 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-medium shadow-sm btn-press"
         >
           {loading ? "...שולחים" : "שלחו ביקורת"}
         </Button>

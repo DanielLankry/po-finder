@@ -14,7 +14,7 @@ export default function PrivacyPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-[#FAFAF7] pt-[88px] pb-16" dir="rtl">
+      <main className="min-h-screen bg-[#F7F3EA] pt-[88px] pb-16" dir="rtl">
         <div className="max-w-3xl mx-auto px-4">
           <h1 className="font-display font-extrabold text-3xl text-stone-900 mb-2">
             מדיניות פרטיות
@@ -32,7 +32,7 @@ export default function PrivacyPage() {
                 פלטפורמת <strong>{BRAND_NAME}</strong> פועלת בדומיין{" "}
                 <span className="font-mono text-sm" dir="ltr">{SITE_DOMAIN}</span>. לפניות בנושא פרטיות,
                 אבטחת מידע או מימוש זכויות אפשר לפנות אל{" "}
-                <a href={`mailto:${contactEmail}`} className="text-[#059669] hover:underline">
+                <a href={`mailto:${contactEmail}`} className="text-[#2D6A4F] hover:underline">
                   {contactEmail}
                 </a>.
               </p>
@@ -125,7 +125,7 @@ export default function PrivacyPage() {
                       href={href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-[#059669] hover:underline"
+                      className="text-xs text-[#2D6A4F] hover:underline"
                     >
                       מידע נוסף על {name}
                     </a>
@@ -170,8 +170,8 @@ export default function PrivacyPage() {
                 נכון, למחוק חשבון או להסיר מידע שאינו דרוש עוד לשירות, בכפוף לחובות שמירה
                 ולחריגים בדין.
               </p>
-              <div className="rounded-xl border border-[#D1FAE5] bg-[#ECFDF5] p-4">
-                <p className="text-sm text-[#065F46]">
+              <div className="rounded-xl border border-[#DDEBE0] bg-[#EFF5F0] p-4">
+                <p className="text-sm text-[#17402D]">
                   למימוש זכויות שלחו בקשה אל{" "}
                   <a href={`mailto:${contactEmail}`} className="font-semibold hover:underline">
                     {contactEmail}
@@ -203,7 +203,7 @@ export default function PrivacyPage() {
                   href="https://www.gov.il/he/departments/the-privacy-protection-authority"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#059669] hover:underline"
+                  className="text-[#2D6A4F] hover:underline"
                 >
                   הרשות להגנת הפרטיות
                 </a>.
