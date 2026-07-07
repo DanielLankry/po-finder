@@ -42,6 +42,8 @@ export interface Business {
   avg_rating: number;
   review_count: number;
   is_active: boolean;
+  /** Active visibility boost expiry — boosted ⇔ non-null and in the future. */
+  boost_expires_at?: string | null;
   created_at: string;
 }
 
@@ -110,6 +112,8 @@ export interface WeeklyScheduleEntry {
 export interface BusinessWithSchedule extends Business {
   today_schedule?: BusinessSchedule | null;
   photos?: Photo[];
+  /** Computed server-side: boost_expires_at is in the future. */
+  boosted?: boolean;
 }
 
 export const CATEGORY_LABELS: Record<BusinessCategory, string> = {
