@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/supabase/admin";
 import { rateLimit } from "@/lib/rate-limit";
-import { getPlanByDays } from "@/lib/plans-server";
+import { getPlanByKind } from "@/lib/plans-server";
 import { createSignedCheckoutUrl } from "@/lib/hyp";
 import { BRAND_NAME } from "@/lib/site-config";
 import { ensurePublicUser } from "@/lib/user-profile";
@@ -12,7 +12,7 @@ import { ensurePublicUser } from "@/lib/user-profile";
 export const runtime = "nodejs";
 
 const checkoutSchema = z.object({
-  planDays: z.number().int().positive(),
+  kind: z.enum(["listing", "boost"]),
   businessId: z.string().uuid().optional(),
 });
 
@@ -39,9 +39,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const plan = await getPlanByDays(parsed.data.planDays);
+  const plan = await getPlanByKind(parsed.data.kind);
   if (!plan) {
     return NextResponse.json({ error: "invalid plan" }, { status: 400 });
+  }
+
+  // Boost applies to a specific existing business — required.
+  if (parsed.data.kind === "boost" && !parsed.data.businessId) {
+    return NextResponse.json(
+      { error: "businessId required for boost" },
+      { status: 400 }
+    );
   }
 
   // If renewing, verify the business belongs to the user.
@@ -76,6 +84,7 @@ export async function POST(req: NextRequest) {
       business_id: parsed.data.businessId ?? null,
       plan_days: plan.days,
       amount_agorot: plan.price,
+      kind: plan.kind,
       status: "pending",
     })
     .select("id")
