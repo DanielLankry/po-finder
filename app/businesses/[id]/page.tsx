@@ -15,6 +15,7 @@ import ReviewSummary from "@/components/business/ReviewSummary";
 import ReviewsList from "@/components/business/ReviewsList";
 import AddReviewForm from "@/components/business/AddReviewForm";
 import EventsSection from "@/components/business/EventsSection";
+import PromotedBadge from "@/components/business/PromotedBadge";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
@@ -86,6 +87,8 @@ export default async function BusinessPage({ params }: Props) {
 
   const isLoggedIn = !!authData.user;
   const photos = business.photos ?? [];
+  const boosted =
+    !!business.boost_expires_at && new Date(business.boost_expires_at) > new Date();
 
   // JSON-LD LocalBusiness schema
   const localBusinessSchema = {
@@ -160,6 +163,7 @@ export default async function BusinessPage({ params }: Props) {
                       עסק מאומת
                     </span>
                   )}
+                  {boosted && <PromotedBadge />}
                 </div>
                 <h1 className="font-display font-extrabold text-3xl text-stone-900 mb-3">
                   {business.name}
