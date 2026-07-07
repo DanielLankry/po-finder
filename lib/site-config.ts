@@ -13,14 +13,15 @@ export const BUSINESS_INFO = {
 };
 
 export const LAUNCH_OFFER = {
-  regularPriceText: "₪270 לחודש",
-  launchPriceText: "₪99 לחודש ל־3 חודשים",
+  regularPriceText: "₪15 לשנה",
+  launchPriceText: "₪15 לשנה בלבד",
   noCommitmentText: "ללא התחייבות",
-  mainCtaText: "מחיר השקה לעסקים הראשונים: ₪99 לחודש ל־3 חודשים, ללא התחייבות.",
-  primaryButtonText: "הצטרפו במחיר השקה",
-  secondaryText: "כולל הקמת פרופיל ראשוני בחינם.",
+  mainCtaText: "הצטרפות לעסקים: ₪15 לשנה בלבד, ללא התחייבות.",
+  primaryButtonText: "הצטרפו עכשיו",
+  secondaryText:
+    "רוצים בולטות נוספת? קידום חודשי ב־₪20 לחודש — נרכש חודש-חודש, ללא התחייבות.",
   pricingSummary:
-    "המחיר הרגיל הוא ₪270 לחודש. בתקופת ההשקה, עסקים ראשונים מצטרפים במחיר של ₪99 לחודש ל־3 חודשים, ללא התחייבות.",
+    "רישום שנתי במחיר ₪15 לשנה. רוצים להיות בולטים יותר? קידום חודשי ב־₪20 לחודש מציב אתכם ראשונים בחיפוש ובמפה — ללא התחייבות.",
 };
 
 export const VENDOR_FAQS = [
