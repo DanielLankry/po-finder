@@ -70,7 +70,7 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
   const admin = adminClient();
   const { data: attempt } = await admin
     .from("payment_attempts")
-    .select("id, user_id, business_id, plan_days, amount_agorot, status")
+    .select("id, user_id, business_id, plan_days, amount_agorot, status, kind")
     .eq("id", order)
     .single();
 
@@ -149,29 +149,37 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
   // silently affect 0 rows and leave subscription_status='none', which the
   // businesses INSERT RLS policy then rejects. Migration 019 also makes the
   // RLS predicate accept the payment_attempts ledger as a fallback signal.
-  const { error: userError } = await admin
-    .from("users")
-    .upsert(
-      {
-        id: attempt.user_id,
-        subscription_status: "active",
-      },
-      { onConflict: "id" }
-    );
-  if (userError) {
-    console.error("[/api/payments/return] failed to mark user subscription active:", userError);
+  // Boost purchases never grant listing rights, so only listing payments
+  // flip the subscription flag.
+  if (attempt.kind !== "boost") {
+    const { error: userError } = await admin
+      .from("users")
+      .upsert(
+        {
+          id: attempt.user_id,
+          subscription_status: "active",
+        },
+        { onConflict: "id" }
+      );
+    if (userError) {
+      console.error("[/api/payments/return] failed to mark user subscription active:", userError);
+    }
   }
 
   if (attempt.business_id) {
-    // Renewal — extend from now() OR existing expires_at (whichever is later).
+    // Extend from now() OR existing expiry (whichever is later).
+    // listing → expires_at; boost → boost_expires_at.
+    const column = attempt.kind === "boost" ? "boost_expires_at" : "expires_at";
     const { data: biz } = await admin
       .from("businesses")
-      .select("expires_at")
+      .select("expires_at, boost_expires_at")
       .eq("id", attempt.business_id)
       .single();
 
-    const baseMs = biz?.expires_at
-      ? Math.max(Date.parse(biz.expires_at), Date.now())
+    const current =
+      attempt.kind === "boost" ? biz?.boost_expires_at : biz?.expires_at;
+    const baseMs = current
+      ? Math.max(Date.parse(current), Date.now())
       : Date.now();
     const newExpiry = new Date(
       baseMs + attempt.plan_days * 24 * 60 * 60 * 1000
@@ -179,15 +187,16 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
 
     const { error: businessError } = await admin
       .from("businesses")
-      .update({ expires_at: newExpiry })
+      .update({ [column]: newExpiry })
       .eq("id", attempt.business_id);
     if (businessError) {
       console.error("[/api/payments/return] failed to extend business expiry:", businessError);
     }
   }
-  // If no business_id, the trigger consume_payment_for_business() in
-  // migration 017 will pick this credit up when the user creates their
-  // business.
+  // If no business_id (listing pre-pay), the trigger
+  // consume_payment_for_business() picks this credit up when the user
+  // creates their business. Boosts always carry business_id (checkout
+  // enforces it).
 
   return NextResponse.redirect(`${origin}/dashboard/billing?payment=success`);
 }

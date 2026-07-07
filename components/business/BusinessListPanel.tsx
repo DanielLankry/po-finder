@@ -3,12 +3,13 @@
 import { useRef, useEffect, useCallback, useState } from "react";
 import Image from "next/image";
 import { NumberTicker } from "@/components/ui/number-ticker";
-import { MapPin, Star, Search, X } from "lucide-react";
+import { MapPin, Star, Search, X, Sparkles } from "lucide-react";
 import type { BusinessWithSchedule, BusinessCategory } from "@/lib/types";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import type { FilterState } from "@/components/filters/FilterDrawer";
 import { isOpenNow } from "@/lib/utils/schedule";
 import BusinessCard from "./BusinessCard";
+import PromotedBadge from "./PromotedBadge";
 import StatusCard from "./StatusCard";
 import ReviewForm from "./ReviewForm";
 import ReviewsList from "./ReviewsList";
@@ -106,6 +107,9 @@ export default function BusinessListPanel({
       return true;
     })
     .sort((a, b) => {
+      // Boosted businesses always lead, even when sorting by distance.
+      const boostDelta = Number(!!b.boosted) - Number(!!a.boosted);
+      if (boostDelta !== 0) return boostDelta;
       if (!userLocation) return 0;
       const latA = a.today_schedule?.lat ?? a.lat;
       const lngA = a.today_schedule?.lng ?? a.lng;
@@ -193,7 +197,10 @@ export default function BusinessListPanel({
                  </div>
                )}
              </div>
-             <h2 className="text-[26px] font-extrabold mb-1 text-[#111111] tracking-tight">{selectedBusiness.name}</h2>
+             <div className="flex flex-wrap items-center gap-2 mb-1">
+               <h2 className="text-[26px] font-extrabold text-[#111111] tracking-tight">{selectedBusiness.name}</h2>
+               {selectedBusiness.boosted ? <PromotedBadge /> : null}
+             </div>
 
              {/* Rating + category row */}
              <div className="flex items-center gap-2 flex-wrap mb-3">
@@ -336,22 +343,50 @@ export default function BusinessListPanel({
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 lg:p-6 pb-24">
-            {filtered.map((b, index) => (
-              <div key={b.id} className={`h-full fade-in-up stagger-${(index % 6) + 1}`}>
-                <BusinessCard
-                  business={b}
-                  isSelected={selectedBusinessId === b.id}
-                  isHovered={hoveredBusinessId === b.id}
-                  isFavorited={favoriteIds?.has(b.id)}
-                  scrollRef={(node) => setCardRef(b.id, node)}
-                  onClick={() => onBusinessSelect(b)}
-                  onMouseEnter={() => onBusinessHover?.(b.id)}
-                  onMouseLeave={() => onBusinessHover?.(null)}
-                  onFavoriteToggle={() => onFavoriteToggle?.(b.id)}
-                />
-              </div>
-            ))}
+          <div className="p-4 lg:p-6 pb-24">
+            {(() => {
+              const boosted = filtered.filter((b) => b.boosted);
+              const rest = filtered.filter((b) => !b.boosted);
+              const renderCards = (items: BusinessWithSchedule[]) => (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {items.map((b, index) => (
+                    <div key={b.id} className={`h-full fade-in-up stagger-${(index % 6) + 1}`}>
+                      <BusinessCard
+                        business={b}
+                        isSelected={selectedBusinessId === b.id}
+                        isHovered={hoveredBusinessId === b.id}
+                        isFavorited={favoriteIds?.has(b.id)}
+                        scrollRef={(node) => setCardRef(b.id, node)}
+                        onClick={() => onBusinessSelect(b)}
+                        onMouseEnter={() => onBusinessHover?.(b.id)}
+                        onMouseLeave={() => onBusinessHover?.(null)}
+                        onFavoriteToggle={() => onFavoriteToggle?.(b.id)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              );
+
+              if (boosted.length === 0) return renderCards(filtered);
+
+              return (
+                <>
+                  <p className="px-1 pb-2 text-xs font-bold text-amber-700 flex items-center gap-1">
+                    <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                    עסקים מקודמים
+                  </p>
+                  {renderCards(boosted)}
+                  {rest.length > 0 && (
+                    <>
+                      <p className="px-1 pt-5 pb-2 text-xs font-bold text-[#17402D]/70">
+                        כל העסקים
+                      </p>
+                      {renderCards(rest)}
+                    </>
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
       </div>
