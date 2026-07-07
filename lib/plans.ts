@@ -1,11 +1,11 @@
-export type Plan = { days: number; label: string; price: number };
+export type PlanKind = "listing" | "boost";
+export type Plan = { kind: PlanKind; days: number; label: string; price: number };
 export type PlanDays = number;
 
 // Static fallback used when DB is unreachable.
 export const PLANS: Plan[] = [
-  { days: 30, label: "חודש",     price: 9900  },
-  { days: 60, label: "חודשיים",  price: 19800 },
-  { days: 90, label: "3 חודשים", price: 29700 },
+  { kind: "listing", days: 365, label: "רישום שנתי",  price: 1500 },
+  { kind: "boost",   days: 30,  label: "קידום חודשי", price: 2000 },
 ];
 
 export function getPlanByIndex(plans: Plan[], index: number): Plan {
