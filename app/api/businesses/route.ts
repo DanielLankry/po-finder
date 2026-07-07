@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
       }
       const { data, error } = await supabase
         .from("businesses")
-        .select("id, name, expires_at, is_active")
+        .select("id, name, expires_at, boost_expires_at, is_active")
         .eq("owner_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
