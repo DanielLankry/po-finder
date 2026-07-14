@@ -38,7 +38,6 @@ export async function GET(req: NextRequest) {
       .from("businesses")
       .select(`
         id,
-        owner_id,
         name,
         description,
         category,
@@ -51,13 +50,10 @@ export async function GET(req: NextRequest) {
         website,
         instagram,
         kashrut,
-        business_number,
+        is_verified,
         avg_rating,
         review_count,
-        is_active,
-        is_legacy_public,
-        created_at,
-        photos(id, business_id, url, is_primary, created_at)
+        photos(id, url, is_primary)
       `)
       .eq("is_verified", true)
       .eq("is_active", true)

@@ -9,6 +9,7 @@ export default async function AdminStatsPage() {
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const nowIso = now.toISOString();
 
   const [
     { count: totalBiz },
@@ -18,7 +19,7 @@ export default async function AdminStatsPage() {
     { data: categories },
   ] = await Promise.all([
     supabase.from("businesses").select("*", { count: "exact", head: true }),
-    supabase.from("businesses").select("*", { count: "exact", head: true }).eq("is_active", true),
+    supabase.from("businesses").select("*", { count: "exact", head: true }).eq("is_verified", true).eq("is_active", true).or(`is_legacy_public.eq.true,expires_at.gt.${nowIso}`),
     supabase.from("businesses").select("*", { count: "exact", head: true }).gte("created_at", thirtyDaysAgo),
     supabase.from("businesses").select("*", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
     supabase.from("businesses").select("category"),
@@ -32,17 +33,17 @@ export default async function AdminStatsPage() {
   const sortedCats = Object.entries(catCounts).sort((a, b) => b[1] - a[1]);
 
   return (
-    <div className="p-8" dir="rtl">
-      <h1 className="font-extrabold text-2xl text-[#111] mb-6">סטטיסטיקות</h1>
+    <div className="p-4 md:p-8" dir="rtl">
+      <h1 className="font-display text-3xl text-[#17402D] mb-6">סטטיסטיקות</h1>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
           { label: "סה״כ עסקים", value: totalBiz ?? 0, icon: BarChart3, color: "#2D6A4F", bg: "#EFF5F0" },
           { label: "עסקים פעילים", value: activeBiz ?? 0, icon: TrendingUp, color: "#2D6A4F", bg: "#EFF5F0" },
           { label: "נרשמו ב-30 יום", value: last30 ?? 0, icon: Calendar, color: "#2563EB", bg: "#DBEAFE" },
           { label: "נרשמו ב-7 ימים", value: last7 ?? 0, icon: Calendar, color: "#7C3AED", bg: "#EDE9FE" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm">
+          <div key={label} className="brand-panel-soft bg-[#FFFDF7] p-5 sm:p-6">
             <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-3" style={{ background: bg }}>
               <Icon className="h-5 w-5" style={{ color }} />
             </div>
@@ -53,7 +54,7 @@ export default async function AdminStatsPage() {
       </div>
 
       {/* Category breakdown */}
-      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm">
+      <div className="brand-panel bg-[#FFFDF7] p-5 sm:p-6">
         <h2 className="font-bold text-lg text-[#111] mb-4">עסקים לפי קטגוריה</h2>
         <div className="space-y-3">
           {sortedCats.map(([cat, count]) => {

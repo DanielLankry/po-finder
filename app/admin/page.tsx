@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/supabase/admin";
-import { Store, Clock, CheckCircle, Ticket, Sparkles, Banknote, CreditCard } from "lucide-react";
+import { Store, Clock, CheckCircle, Ticket, Sparkles, Banknote, CreditCard, Hand } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +18,7 @@ export default async function AdminPage() {
   const monthStart = new Date();
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
+  const nowIso = new Date().toISOString();
 
   const [
     { count: total },
@@ -28,8 +29,8 @@ export default async function AdminPage() {
     { data: recentPayments },
   ] = await Promise.all([
     supabase.from("businesses").select("*", { count: "exact", head: true }),
-    supabase.from("businesses").select("*", { count: "exact", head: true }).eq("is_active", false),
-    supabase.from("businesses").select("*", { count: "exact", head: true }).eq("is_active", true),
+    supabase.from("businesses").select("*", { count: "exact", head: true }).eq("is_verified", false),
+    supabase.from("businesses").select("*", { count: "exact", head: true }).eq("is_verified", true).eq("is_active", true).or(`is_legacy_public.eq.true,expires_at.gt.${nowIso}`),
     supabase.from("coupons").select("*", { count: "exact", head: true }).eq("is_active", true),
     admin
       .from("payment_attempts")
@@ -58,10 +59,10 @@ export default async function AdminPage() {
 
   return (
     <div className="p-4 md:p-8" dir="rtl">
-      <h1 className="font-extrabold text-2xl text-[#111] mb-6">ברוך הבא 👋</h1>
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <h1 className="mb-6 flex items-center gap-2 font-display text-3xl text-[#17402D]">ברוך הבא <Hand className="h-6 w-6 text-[#C4552D]" aria-hidden="true" /></h1>
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4">
         {cards.map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="bg-white rounded-2xl border border-[#E5E7EB] p-5 md:p-6 shadow-sm">
+          <div key={label} className="brand-panel-soft bg-[#FFFDF7] p-5 md:p-6">
             <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-3" style={{ background: bg }}>
               <Icon className="h-5 w-5" style={{ color }} />
             </div>
@@ -72,7 +73,7 @@ export default async function AdminPage() {
       </div>
 
       {/* Recent payments */}
-      <div className="mt-6 bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-sm">
+      <div className="brand-panel mt-6 overflow-hidden bg-[#FFFDF7]">
         <div className="flex items-center gap-2 px-5 py-3 border-b border-[#E5E7EB] bg-[#F9FAFB]">
           <CreditCard className="h-4 w-4 text-[#888]" />
           <span className="text-xs font-bold text-[#888]">תשלומים אחרונים</span>

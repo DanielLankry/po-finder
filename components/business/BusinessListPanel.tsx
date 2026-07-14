@@ -3,7 +3,7 @@
 import { useRef, useEffect, useCallback, useState } from "react";
 import Image from "next/image";
 import { NumberTicker } from "@/components/ui/number-ticker";
-import { MapPin, Star, Search, X } from "lucide-react";
+import { CheckCircle2, ChevronRight, MapPin, Star, Search, X } from "lucide-react";
 import type { BusinessWithSchedule, BusinessCategory } from "@/lib/types";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import type { FilterState } from "@/components/filters/FilterDrawer";
@@ -87,6 +87,7 @@ export default function BusinessListPanel({
   searchQuery = "",
 }: BusinessListPanelProps) {
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const detailScrollRef = useRef<HTMLDivElement>(null);
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const [panelReviews, setPanelReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -157,104 +158,153 @@ export default function BusinessListPanel({
     node?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [selectedBusinessId]);
 
+  // A newly selected business always starts at its summary, not at the scroll
+  // position left behind by the previous business.
+  useEffect(() => {
+    if (!selectedBusinessId) return;
+    const frame = window.requestAnimationFrame(() => {
+      detailScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [selectedBusinessId]);
+
   if (selectedBusinessId && !loading) {
     const selectedBusiness = businesses.find((b) => b.id === selectedBusinessId);
     if (selectedBusiness) {
+      const primaryPhoto =
+        selectedBusiness.photos?.find((photo) => photo.is_primary) ?? selectedBusiness.photos?.[0];
+      const selectedOpen = isOpenNow(selectedBusiness.today_schedule ?? null);
+
       return (
-        <div className="flex flex-col h-full bg-[#FBF9F3]" dir="rtl">
-          {/* Header with back button */}
-          <div className="px-5 py-3.5 border-b border-t border-[#E7E1D3] bg-[#F7F3EA] flex items-center shrink-0 sticky top-0 z-10">
+        <div className="brand-canvas flex h-full min-h-0 flex-col" dir="rtl">
+          <div className="z-10 flex shrink-0 items-center justify-between border-b-2 border-[#17402D]/20 bg-[#F7F3EA]/95 px-4 py-3 backdrop-blur-sm lg:px-6">
             <button
+              type="button"
               onClick={() => onBackToList?.()}
-              className="flex items-center gap-1.5 text-[#222222] hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] rounded-full px-4 py-2 -mx-4"
+              className="business-type-button flex min-h-10 items-center gap-1.5 px-4 text-sm font-black"
               aria-label="חזרה לרשימה"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#2D6A4F] rotate-180"><path d="m15 18-6-6 6-6"/></svg>
-              <span className="font-bold text-[15px]">חזרה</span>
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
+              חזרה לעסקים
             </button>
+            <span className="font-display text-xl text-[#17402D]">כרטיס עסק</span>
           </div>
-          {/* Detail content */}
-          <div className="flex-1 overflow-y-auto p-5 scrollbar-thin">
-             {/* Large photo */}
-              <div className="w-full h-56 rounded-2xl overflow-hidden mb-5 bg-slate-100 shadow-sm relative isolate">
-                {selectedBusiness.photos?.[0] ? (
-                  <Image
-                    src={selectedBusiness.photos[0].url}
-                    className="object-cover"
-                    alt={selectedBusiness.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 420px"
-                  />
-                ) : (
-                 <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#EFF5F0] via-[#DDEBE0] to-[#C3DCC9]">
-                    <div className="h-12 w-12 rounded-2xl bg-[#2D6A4F] flex items-center justify-center shadow-md">
-                      <MapPin className="h-6 w-6 text-white" />
+
+          <div
+            ref={detailScrollRef}
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain scrollbar-thin"
+            data-testid="business-detail-scroll"
+          >
+            <div className="mx-auto max-w-[800px] p-4 pb-28 lg:p-6 lg:pb-28">
+              <div className="grid items-start gap-5 md:grid-cols-[minmax(0,1.08fr)_minmax(300px,0.92fr)]">
+                <div className="space-y-5">
+                  <section className="brand-panel overflow-hidden bg-[#FFFDF7]">
+                    <div className="relative h-48 border-b-2 border-[#17402D] bg-[#DDEBE0] lg:h-52">
+                      {primaryPhoto ? (
+                        <Image
+                          src={primaryPhoto.url}
+                          className="object-cover"
+                          alt={selectedBusiness.name}
+                          fill
+                          priority
+                          sizes="(max-width: 767px) 100vw, 430px"
+                        />
+                      ) : (
+                        <div className="brand-map-grid flex h-full items-center justify-center text-[#17402D]">
+                          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-[#17402D] bg-[#FFF8DC] shadow-[4px_4px_0_0_#17402D]">
+                            <MapPin className="h-8 w-8" aria-hidden="true" />
+                          </div>
+                        </div>
+                      )}
+                      <span
+                        className={`absolute bottom-3 right-3 rounded-full border-2 px-3 py-1 text-xs font-black shadow-[2px_2px_0_0_#17402D] ${
+                          selectedOpen
+                            ? "border-[#17402D] bg-[#DDEBE0] text-[#17402D]"
+                            : "border-[#8A3618] bg-[#F7E7DE] text-[#8A3618]"
+                        }`}
+                      >
+                        {selectedOpen ? "פתוח עכשיו" : "לא פתוח כרגע"}
+                      </span>
                     </div>
-                 </div>
-               )}
-             </div>
-             <div className="flex flex-wrap items-center gap-2 mb-1">
-               <h2 className="text-[26px] font-extrabold text-[#111111] tracking-tight">{selectedBusiness.name}</h2>
-             </div>
 
-             {/* Rating + category row */}
-             <div className="flex items-center gap-2 flex-wrap mb-3">
-               {selectedBusiness.avg_rating > 0 && (
-                 <span className="flex items-center gap-1 text-[13px] font-bold text-[#222222]">
-                   <Star className="h-3.5 w-3.5 fill-[#222222]" />
-                   {selectedBusiness.avg_rating.toFixed(1)}
-                   <span className="font-normal text-[#888888]">({selectedBusiness.review_count})</span>
-                 </span>
-               )}
-               {selectedBusiness.avg_rating > 0 && <span className="text-[#DDDDDD]">·</span>}
-               <span className="text-[13px] font-semibold px-2.5 py-0.5 rounded-full"
-                 style={{ backgroundColor: CATEGORY_CHIP[selectedBusiness.category]?.bg ?? "#F3F4F6", color: CATEGORY_CHIP[selectedBusiness.category]?.text ?? "#374151" }}>
-                 {CATEGORY_LABELS[selectedBusiness.category]}
-               </span>
-               {selectedBusiness.kashrut !== "none" && (
-                 <span className="text-[13px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
-                   {KASHRUT_LABELS[selectedBusiness.kashrut]}
-                 </span>
-               )}
-               {selectedBusiness.business_number && (
-                 <span className="text-[12px] font-semibold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-700">
-                   ✓ מאומת
-                 </span>
-               )}
-             </div>
+                    <div className="space-y-4 p-5">
+                      <div>
+                        <h2 className="font-display text-3xl text-[#17402D]">{selectedBusiness.name}</h2>
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          {selectedBusiness.avg_rating > 0 && (
+                            <span className="inline-flex items-center gap-1 text-sm font-black text-[#17402D]">
+                              <Star className="h-4 w-4 fill-[#F4B942] text-[#8A3618]" aria-hidden="true" />
+                              {selectedBusiness.avg_rating.toFixed(1)}
+                              <span className="font-normal text-[#17402D]/55">
+                                ({selectedBusiness.review_count} ביקורות)
+                              </span>
+                            </span>
+                          )}
+                          <span
+                            className="brand-chip px-3 py-1 text-xs"
+                            style={{
+                              backgroundColor: CATEGORY_CHIP[selectedBusiness.category]?.bg ?? "#FFF8DC",
+                              color: CATEGORY_CHIP[selectedBusiness.category]?.text ?? "#17402D",
+                            }}
+                          >
+                            {CATEGORY_LABELS[selectedBusiness.category]}
+                          </span>
+                          {selectedBusiness.kashrut !== "none" && (
+                            <span className="rounded-full border-2 border-[#17402D]/25 bg-[#DDEBE0] px-3 py-1 text-xs font-black text-[#17402D]">
+                              {KASHRUT_LABELS[selectedBusiness.kashrut]}
+                            </span>
+                          )}
+                          {selectedBusiness.is_verified && (
+                            <span className="inline-flex items-center gap-1 rounded-full border-2 border-[#5D3A9B]/30 bg-[#F0EAFE] px-3 py-1 text-xs font-black text-[#5D3A9B]">
+                              <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                              מאומת
+                            </span>
+                          )}
+                        </div>
+                      </div>
 
-             {/* Description */}
-             {selectedBusiness.description && (
-               <p className="text-[14px] text-[#555555] leading-relaxed mb-4 border-b border-[#EDE8DC] pb-4">
-                 {selectedBusiness.description}
-               </p>
-             )}
+                      {selectedBusiness.description && (
+                        <>
+                          <div className="brand-rule" aria-hidden="true" />
+                          <p className="text-sm leading-relaxed text-[#17402D]/75">
+                            {selectedBusiness.description}
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </section>
+                </div>
 
-             <StatusCard business={selectedBusiness} schedule={selectedBusiness.today_schedule ?? null} />
+                <StatusCard business={selectedBusiness} schedule={selectedBusiness.today_schedule ?? null} />
+              </div>
 
-             {/* Reviews section */}
-             <div className="mt-5 border-t border-[#EDE8DC] pt-5">
-               <h3 className="font-bold text-[16px] text-[#111111] mb-4">ביקורות</h3>
-               {reviewsLoading ? (
-                 <div className="flex items-center justify-center py-6">
-                   <div className="h-6 w-6 rounded-full border-2 border-[#DDEBE0] border-t-[#2D6A4F] animate-spin" />
-                 </div>
-               ) : (
-                 <>
-                   <ReviewsList reviews={panelReviews} />
-                   {panelReviews.length > 0 && <hr className="border-[#EDE8DC] my-4" />}
-                   <ReviewForm
-                     businessId={selectedBusiness.id}
-                     onSuccess={() => {
-                       // Refresh reviews after submit
-                       fetch(`/api/reviews?businessId=${selectedBusiness.id}`)
-                         .then((r) => r.json())
-                         .then((data) => setPanelReviews(data.reviews ?? []));
-                     }}
-                   />
-                 </>
-               )}
-             </div>
+              <section className="brand-panel-soft mt-5 bg-[#FFFDF7] p-5 lg:p-6">
+                <div className="mb-5 flex items-end justify-between gap-3 border-b-2 border-[#17402D]/15 pb-3">
+                  <h3 className="font-display text-2xl text-[#17402D]">ביקורות מהשכונה</h3>
+                  <span className="text-xs font-bold text-[#17402D]/55">
+                    {panelReviews.length > 0 ? `${panelReviews.length} ביקורות` : "היו הראשונים"}
+                  </span>
+                </div>
+                {reviewsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#DDEBE0] border-t-[#2D6A4F]" />
+                  </div>
+                ) : (
+                  <>
+                    <ReviewsList reviews={panelReviews} />
+                    {panelReviews.length > 0 && <div className="brand-rule my-5" aria-hidden="true" />}
+                    <ReviewForm
+                      businessId={selectedBusiness.id}
+                      onSuccess={() => {
+                        fetch(`/api/reviews?businessId=${selectedBusiness.id}`)
+                          .then((response) => response.json())
+                          .then((data) => setPanelReviews(data.reviews ?? []));
+                      }}
+                    />
+                  </>
+                )}
+              </section>
+            </div>
           </div>
         </div>
       );

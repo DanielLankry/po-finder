@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import type { BusinessCategory, KashrutStatus } from "@/lib/types";
-import { CheckCircle, XCircle, Phone, ExternalLink, RefreshCw, Plus, X, Pencil } from "lucide-react";
+import { CheckCircle, XCircle, Phone, ExternalLink, RefreshCw, Plus, X, Pencil, MapPin } from "lucide-react";
 
 interface Business {
   id: string;
@@ -19,11 +19,20 @@ interface Business {
   business_number: string | null;
   is_active: boolean;
   is_verified: boolean;
+  is_legacy_public?: boolean;
   created_at: string;
   expires_at: string | null;
   lat: number | null;
   lng: number | null;
   address: string | null;
+}
+
+/** Mirrors the public listing predicate for the admin's live-listing count. */
+function isCurrentlyPublic(business: Business): boolean {
+  if (!business.is_active || !business.is_verified) return false;
+  if (business.is_legacy_public) return true;
+  if (!business.expires_at) return false;
+  return new Date(business.expires_at).getTime() > Date.now();
 }
 
 const EMPTY_FORM = {
@@ -133,7 +142,7 @@ export default function AdminBusinessesPage() {
 
   const pending = businesses.filter((b) => !b.is_verified);
   const verified = businesses.filter((b) => b.is_verified);
-  const active = businesses.filter((b) => b.is_active);
+  const active = businesses.filter((b) => isCurrentlyPublic(b));
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-[400px]">
@@ -147,7 +156,7 @@ export default function AdminBusinessesPage() {
       <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
         <div>
           <h1 className="font-extrabold text-2xl text-[#111]">ניהול עסקים</h1>
-          <p className="text-[#888] text-sm">{pending.length} ממתינים לאימות · {verified.length} מאומתים · {active.length} בתשלום</p>
+          <p className="text-[#888] text-sm">{pending.length} ממתינים לאימות · {verified.length} מאומתים · {active.length} מוצגים כעת</p>
         </div>
         <div className="flex gap-2">
           <button onClick={fetchAll} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-[#E5E7EB] text-sm text-[#555] hover:bg-[#F9F9F9] transition-colors">
@@ -377,8 +386,9 @@ function BusinessCard({ biz, onApprove, onDelete, onEdit, actionLoading }: {
   onDelete: (id: string) => void; onEdit: (b: Business) => void; actionLoading: string | null;
 }) {
   const isLoading = actionLoading === biz.id;
+  const currentlyPublic = isCurrentlyPublic(biz);
   return (
-    <div className={`bg-white rounded-2xl border p-4 md:p-5 shadow-sm ${biz.is_active ? "border-[#E5E7EB]" : "border-amber-200 bg-amber-50/30"}`}>
+    <div className={`brand-panel-soft p-4 md:p-5 ${currentlyPublic ? "bg-[#FFFDF7]" : "bg-amber-50/70"}`}>
       <div className="flex items-start gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -386,14 +396,14 @@ function BusinessCard({ biz, onApprove, onDelete, onEdit, actionLoading }: {
               {CATEGORY_LABELS[biz.category as keyof typeof CATEGORY_LABELS] ?? biz.category}
             </span>
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${biz.is_verified ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
-              {biz.is_verified ? (biz.is_active ? "מאומת ובתשלום" : "מאומת, ממתין לתשלום") : "ממתין לאימות"}
+              {biz.is_verified ? (currentlyPublic ? "מאומת ומוצג" : "מאומת, לא מוצג") : "ממתין לאימות"}
             </span>
           </div>
           <h2 className="font-bold text-[#111] text-base md:text-lg truncate">{biz.name}</h2>
           {biz.description && <p className="text-[#666] text-sm mt-0.5 line-clamp-1">{biz.description}</p>}
           <div className="flex flex-wrap gap-2 text-xs text-[#888] mt-1.5">
             {biz.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{biz.phone}</span>}
-            {biz.address && <span>📍 {biz.address}</span>}
+            {biz.address && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" aria-hidden="true" />{biz.address}</span>}
             {biz.website && <a href={biz.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[#2D6A4F]"><ExternalLink className="h-3 w-3" />אתר</a>}
             {biz.expires_at && <span>פג: {new Date(biz.expires_at).toLocaleDateString("he-IL")}</span>}
           </div>

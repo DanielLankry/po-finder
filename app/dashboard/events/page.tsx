@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Tag, Trash2, Plus } from "lucide-react";
+import { Calendar, Clock, Tag, Trash2, Plus, PartyPopper } from "lucide-react";
 import type { BusinessEvent } from "@/lib/types";
 
 function formatHebrewDate(dateStr: string): string {
@@ -95,13 +95,14 @@ export default function EventsPage() {
       setEvents((prev) => [...prev, data].sort((a, b) => a.event_date.localeCompare(b.event_date)));
       setForm({ title: "", description: "", event_date: "", start_time: "", end_time: "", price: "" });
       setShowForm(false);
-      setSuccess("✓ האירוע נוסף בהצלחה!");
+      setSuccess("האירוע נוסף בהצלחה!");
     }
     setSaving(false);
   }
 
   async function handleDelete(eventId: string) {
     if (!businessId) return;
+    if (!window.confirm("למחוק את האירוע? לא ניתן לבטל את הפעולה.")) return;
     setDeleting(eventId);
     setError(null);
 
@@ -115,7 +116,7 @@ export default function EventsPage() {
       setError("שגיאה במחיקת האירוע.");
     } else {
       setEvents((prev) => prev.filter((ev) => ev.id !== eventId));
-      setSuccess("✓ האירוע הוסר.");
+      setSuccess("האירוע הוסר.");
     }
     setDeleting(null);
   }
@@ -130,7 +131,7 @@ export default function EventsPage() {
 
   if (!businessId) {
     return (
-      <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center" dir="rtl">
+      <div className="brand-panel p-8 text-center" dir="rtl">
         <p className="text-stone-600 mb-4">יש ליצור פרופיל עסק תחילה</p>
         <a href="/dashboard/profile" className="text-[#2D6A4F] font-medium hover:underline">עריכת פרופיל ←</a>
       </div>
@@ -146,7 +147,7 @@ export default function EventsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-bold text-xl text-stone-900">🎉 אירועים</h1>
+          <h1 className="flex items-center gap-2 font-display text-3xl text-[#17402D]"><PartyPopper className="h-6 w-6 text-[#C4552D]" aria-hidden="true" /> אירועים</h1>
           <p className="text-stone-500 text-sm mt-1">
             הוסיפו הופעות, מכירות, אירועים חד-פעמיים
           </p>
@@ -154,7 +155,7 @@ export default function EventsPage() {
         <Button
           onClick={() => { setShowForm(!showForm); setSuccess(null); setError(null); }}
           data-tour="events-new"
-          className="h-10 px-4 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-medium text-sm"
+          className="h-11 px-4 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-medium text-sm"
         >
           <Plus className="h-4 w-4 ml-1" />
           אירוע חדש
@@ -163,14 +164,15 @@ export default function EventsPage() {
 
       {/* Add form */}
       {showForm && (
-        <div className="bg-white rounded-2xl border border-stone-200 p-6">
+        <div className="brand-panel bg-[#FFFDF7] p-5 sm:p-6">
           <h2 className="font-bold text-lg text-stone-900 mb-4">הוספת אירוע</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label className="block text-stone-700 font-medium text-sm mb-1.5">
+              <Label htmlFor="event-title" className="block text-stone-700 font-medium text-sm mb-1.5">
                 כותרת האירוע *
               </Label>
               <Input
+                id="event-title"
                 value={form.title}
                 onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
                 placeholder="למשל: הופעת שישי בלייב"
@@ -180,10 +182,11 @@ export default function EventsPage() {
             </div>
 
             <div>
-              <Label className="block text-stone-700 font-medium text-sm mb-1.5">
+              <Label htmlFor="event-description" className="block text-stone-700 font-medium text-sm mb-1.5">
                 תיאור (אופציונלי)
               </Label>
               <Textarea
+                id="event-description"
                 value={form.description}
                 onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
                 placeholder="פרטים נוספים על האירוע..."
@@ -194,10 +197,11 @@ export default function EventsPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <Label className="block text-stone-700 font-medium text-sm mb-1.5">
+                <Label htmlFor="event-date" className="block text-stone-700 font-medium text-sm mb-1.5">
                   תאריך *
                 </Label>
                 <Input
+                  id="event-date"
                   type="date"
                   value={form.event_date}
                   onChange={(e) => setForm((p) => ({ ...p, event_date: e.target.value }))}
@@ -208,10 +212,11 @@ export default function EventsPage() {
                 />
               </div>
               <div>
-                <Label className="block text-stone-700 font-medium text-sm mb-1.5">
+                <Label htmlFor="event-start-time" className="block text-stone-700 font-medium text-sm mb-1.5">
                   שעת התחלה
                 </Label>
                 <Input
+                  id="event-start-time"
                   type="time"
                   value={form.start_time}
                   onChange={(e) => setForm((p) => ({ ...p, start_time: e.target.value }))}
@@ -220,10 +225,11 @@ export default function EventsPage() {
                 />
               </div>
               <div>
-                <Label className="block text-stone-700 font-medium text-sm mb-1.5">
+                <Label htmlFor="event-end-time" className="block text-stone-700 font-medium text-sm mb-1.5">
                   שעת סיום
                 </Label>
                 <Input
+                  id="event-end-time"
                   type="time"
                   value={form.end_time}
                   onChange={(e) => setForm((p) => ({ ...p, end_time: e.target.value }))}
@@ -234,10 +240,11 @@ export default function EventsPage() {
             </div>
 
             <div>
-              <Label className="block text-stone-700 font-medium text-sm mb-1.5">
+              <Label htmlFor="event-price" className="block text-stone-700 font-medium text-sm mb-1.5">
                 מחיר (₪) — השאירו ריק אם אין מחיר, 0 לכניסה חופשית
               </Label>
               <Input
+                id="event-price"
                 type="number"
                 min="0"
                 step="1"
@@ -314,8 +321,8 @@ export default function EventsPage() {
                 <button
                   onClick={() => handleDelete(event.id)}
                   disabled={deleting === event.id}
-                  className="p-2 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
-                  title="מחיקת אירוע"
+                  className="flex h-11 w-11 items-center justify-center rounded-xl text-stone-500 hover:text-red-600 hover:bg-red-50 transition-colors flex-shrink-0"
+                  aria-label={`מחיקת האירוע ${event.title}`}
                 >
                   {deleting === event.id ? (
                     <div className="h-4 w-4 rounded-full border-2 border-red-300 border-t-red-500 animate-spin" />
@@ -328,7 +335,7 @@ export default function EventsPage() {
           </div>
         </div>
       ) : !showForm ? (
-        <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center">
+        <div className="brand-panel-soft bg-[#FFFDF7] p-8 text-center">
           <div className="h-14 w-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
             <Calendar className="h-7 w-7 text-[#2D6A4F]" />
           </div>
@@ -341,7 +348,7 @@ export default function EventsPage() {
 
       {/* Past events */}
       {pastEvents.length > 0 && (
-        <div className="bg-white rounded-2xl border border-stone-200 p-6 opacity-60">
+        <div className="brand-panel-soft bg-[#FFFDF7] p-5 sm:p-6 opacity-70">
           <h2 className="font-bold text-base text-stone-900 mb-4">
             אירועים שעברו ({pastEvents.length})
           </h2>
@@ -360,7 +367,8 @@ export default function EventsPage() {
                 <button
                   onClick={() => handleDelete(event.id)}
                   disabled={deleting === event.id}
-                  className="p-2 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
+                  className="flex h-11 w-11 items-center justify-center rounded-xl text-stone-500 hover:text-red-600 hover:bg-red-50 transition-colors flex-shrink-0"
+                  aria-label={`מחיקת האירוע ${event.title}`}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>

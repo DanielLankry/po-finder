@@ -137,32 +137,38 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-2">
+                <fieldset>
+                  <legend className="block text-sm font-semibold text-[#111] mb-2">
                     נושא <span className="text-red-400">*</span>
-                  </label>
-                  <div className="flex flex-wrap gap-2">
+                  </legend>
+                  <div className="flex flex-wrap gap-2" aria-required="true">
                     {SUBJECTS.map((s) => {
                       const Icon = s.icon;
                       return (
-                        <button
+                        <label
                           key={s.value}
-                          type="button"
-                          onClick={() => setForm({ ...form, subject: s.value })}
-                          className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium border transition-all ${
+                          className={`flex min-h-11 cursor-pointer items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium transition-all focus-within:ring-2 focus-within:ring-[#2D6A4F] focus-within:ring-offset-2 ${
                             form.subject === s.value
                               ? "bg-[#2D6A4F] text-white border-[#2D6A4F] shadow-sm"
                               : "bg-white text-[#555] border-[#E5E7EB] hover:border-[#2D6A4F]/40 hover:text-[#2D6A4F]"
                           }`}
                         >
-                          <Icon className="h-3.5 w-3.5" />
+                          <input
+                            type="radio"
+                            name="subject"
+                            value={s.value}
+                            checked={form.subject === s.value}
+                            onChange={() => setForm({ ...form, subject: s.value })}
+                            required
+                            className="sr-only"
+                          />
+                          <Icon className="h-3.5 w-3.5" aria-hidden="true" />
                           {s.label}
-                        </button>
+                        </label>
                       );
                     })}
                   </div>
-                  <input type="text" required value={form.subject} onChange={() => {}} className="sr-only" />
-                </div>
+                </fieldset>
 
                 <div>
                   <label htmlFor="message" className="block text-sm font-semibold text-[#111] mb-1.5">

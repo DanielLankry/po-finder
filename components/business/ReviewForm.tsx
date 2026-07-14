@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Star } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckCircle2, LogIn, Star } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 interface ReviewFormProps {
   businessId: string;
@@ -18,15 +19,47 @@ export default function ReviewForm({ businessId, onSuccess }: ReviewFormProps) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [authState, setAuthState] = useState<"loading" | "signed-in" | "signed-out">("loading");
+
+  useEffect(() => {
+    const supabase = createClient();
+    let cancelled = false;
+    supabase.auth.getUser().then(({ data }) => {
+      if (!cancelled) setAuthState(data.user ? "signed-in" : "signed-out");
+    }).catch(() => {
+      if (!cancelled) setAuthState("signed-out");
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  if (authState === "loading") {
+    return <div className="h-24 animate-pulse rounded-2xl bg-[#DDEBE0]/70" aria-label="טוען טופס ביקורת" />;
+  }
+
+  if (authState === "signed-out") {
+    return (
+      <div className="rounded-2xl border-2 border-[#17402D]/20 bg-[#F7F3EA] p-5 text-center" dir="rtl">
+        <p className="text-sm font-bold text-[#17402D]">יש להתחבר כדי להשאיר ביקורת</p>
+        <Link
+          href="/auth/login"
+          className="brand-button mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-6 text-sm font-black"
+        >
+          <LogIn className="h-4 w-4" aria-hidden="true" />
+          כניסה
+        </Link>
+      </div>
+    );
+  }
 
   if (success) {
     return (
       <div
-        className="border border-emerald-200 rounded-2xl p-5 bg-[#EFF5F0] text-center"
+        className="flex items-center justify-center gap-2 rounded-2xl border-2 border-[#17402D]/25 bg-[#DDEBE0] p-5 text-center"
         dir="rtl"
       >
-        <p className="text-[#17402D] font-semibold text-sm">
-          ✅ הביקורת נשמרה! תודה רבה.
+        <CheckCircle2 className="h-5 w-5 text-[#17402D]" aria-hidden="true" />
+        <p className="text-sm font-black text-[#17402D]">
+          הביקורת נשמרה, תודה רבה.
         </p>
       </div>
     );
@@ -74,13 +107,13 @@ export default function ReviewForm({ businessId, onSuccess }: ReviewFormProps) {
   }
 
   return (
-    <div className="border border-[#E5E7EB] rounded-2xl p-5 bg-white" dir="rtl">
-      <h3 className="font-bold text-base text-[#111111] mb-4">כתבו ביקורת</h3>
+    <div className="rounded-2xl border-2 border-[#17402D]/20 bg-[#F7F3EA] p-4 lg:p-5" dir="rtl">
+      <h3 className="mb-4 font-display text-xl text-[#17402D]">כתבו ביקורת</h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Star picker */}
         <div>
-          <p className="text-sm text-[#888888] mb-2">דירוג:</p>
+          <p className="mb-2 text-sm font-bold text-[#17402D]/70">איך היה?</p>
           <div
             className="flex gap-1"
             role="group"
@@ -95,13 +128,13 @@ export default function ReviewForm({ businessId, onSuccess }: ReviewFormProps) {
                 onMouseLeave={() => setHoverRating(0)}
                 aria-label={`${star} כוכבים`}
                 aria-pressed={rating === star}
-                className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] rounded transition-transform hover:scale-110 active:scale-95"
+                className="flex h-11 w-11 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] transition-transform hover:scale-105 active:scale-95"
               >
                 <Star
                   className={`h-7 w-7 transition-all duration-100 ${
                     star <= (hoverRating || rating)
                       ? "fill-amber-400 text-amber-400 scale-110"
-                      : "fill-slate-200 text-slate-200"
+                      : "fill-[#D8D1C2] text-[#D8D1C2]"
                   }`}
                   aria-hidden="true"
                 />
@@ -111,45 +144,49 @@ export default function ReviewForm({ businessId, onSuccess }: ReviewFormProps) {
         </div>
 
         {/* Name field */}
-        <input
-          type="text"
-          placeholder="שם (אופציונלי)"
-          value={reviewerName}
-          onChange={(e) => setReviewerName(e.target.value)}
-          maxLength={60}
-          className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:border-transparent transition-all"
-          dir="rtl"
-        />
-
-        {/* Comment */}
-        <div className="relative">
-          <textarea
-            placeholder="ספרו על החוויה שלכם (אופציונלי)..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            rows={3}
-            maxLength={300}
-            className="w-full px-3 py-2.5 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:border-transparent transition-all"
+        <label className="grid gap-1.5 text-sm font-bold text-[#17402D]/70">
+          שם <span className="font-normal text-[#17402D]/45">(אופציונלי)</span>
+          <input
+            type="text"
+            placeholder="איך נציג אתכם?"
+            value={reviewerName}
+            onChange={(e) => setReviewerName(e.target.value)}
+            maxLength={60}
+            className="brand-control h-11 w-full rounded-xl px-3 text-sm font-normal text-[#17402D] transition-all placeholder:text-[#17402D]/35"
             dir="rtl"
           />
-          <span className="absolute left-2 bottom-2 text-[11px] text-[#AAAAAA]">
+        </label>
+
+        {/* Comment */}
+        <label className="relative grid gap-1.5 text-sm font-bold text-[#17402D]/70">
+          ספרו על החוויה <span className="font-normal text-[#17402D]/45">(אופציונלי)</span>
+          <textarea
+            placeholder="מה אהבתם במיוחד?"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            rows={4}
+            maxLength={300}
+            className="brand-control w-full resize-none rounded-xl px-3 py-2.5 pb-7 text-sm font-normal text-[#17402D] transition-all placeholder:text-[#17402D]/35"
+            dir="rtl"
+          />
+          <span className="absolute bottom-2 left-2 text-[11px] font-normal text-[#17402D]/40">
             {comment.length}/300
           </span>
-        </div>
+        </label>
 
         {error && (
-          <p role="alert" className="text-red-600 text-sm">
+          <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-2.5 text-sm text-red-700">
             {error}
           </p>
         )}
 
-        <label className="flex items-start gap-2 text-xs text-[#777]">
+        <label className="flex items-start gap-2 text-xs leading-relaxed text-[#17402D]/65">
           <input
             type="checkbox"
             required
             checked={privacyAccepted}
             onChange={(e) => setPrivacyAccepted(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-[#D1D5DB] accent-[#2D6A4F]"
+            className="mt-0.5 h-4 w-4 rounded border-[#17402D]/30 accent-[#2D6A4F]"
           />
           <span>
             אני מאשר/ת שהשם והביקורת עשויים להופיע באתר, בהתאם{" "}
@@ -163,7 +200,7 @@ export default function ReviewForm({ businessId, onSuccess }: ReviewFormProps) {
         <button
           type="submit"
           disabled={loading || !privacyAccepted}
-          className="w-full h-11 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] disabled:opacity-60 text-white font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 shadow-sm active:scale-95"
+          className="brand-button min-h-12 w-full rounded-full px-5 text-sm font-black transition-all focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#2D6A4F]/35 disabled:cursor-not-allowed disabled:opacity-55"
         >
           {loading ? "...שולחים" : "שלח ביקורת"}
         </button>

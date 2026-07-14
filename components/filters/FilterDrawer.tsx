@@ -41,7 +41,7 @@ export default function FilterDrawer({
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent side="right" className="w-80 p-0" dir="rtl" showCloseButton={false}>
+      <SheetContent side="right" className="w-[min(22rem,calc(100vw-1rem))] p-0" dir="rtl" showCloseButton={false}>
         <div className="flex flex-col h-full">
           <SheetHeader className="flex flex-row items-center justify-between p-6 border-b border-stone-200">
             <SheetTitle className="font-display font-bold text-lg text-stone-900">
@@ -49,7 +49,7 @@ export default function FilterDrawer({
             </SheetTitle>
             <button
               onClick={onClose}
-              className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-[#EFF5F0] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
+              className="rounded-full h-11 w-11 flex items-center justify-center hover:bg-[#EFF5F0] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
               aria-label="סגירת סינון"
             >
               <X className="h-4 w-4 text-stone-600" />
@@ -68,15 +68,15 @@ export default function FilterDrawer({
                   role="switch"
                   aria-checked={filters.openNow}
                   onClick={() => update({ openNow: !filters.openNow })}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 ${
-                    filters.openNow ? "bg-[#2D6A4F]" : "bg-stone-200"
-                  }`}
+                  className="inline-flex h-11 w-12 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2"
                 >
-                  <span
-                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                      filters.openNow ? "-translate-x-[22px]" : "-translate-x-[2px]"
-                    }`}
-                  />
+                  <span className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${filters.openNow ? "bg-[#2D6A4F]" : "bg-stone-200"}`}>
+                    <span
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                        filters.openNow ? "-translate-x-[22px]" : "-translate-x-[2px]"
+                      }`}
+                    />
+                  </span>
                 </button>
               </div>
               <p className="text-stone-500 text-sm mt-1">הצגת עסקים שפתוחים כרגע</p>

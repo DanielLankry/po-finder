@@ -231,7 +231,11 @@ function Notice({
         ? "border-amber-300 bg-amber-50 text-amber-900"
         : "border-red-300 bg-red-50 text-red-900";
   return (
-    <div className={`flex items-start gap-3 rounded-xl border p-4 ${classes}`}>
+    <div
+      className={`flex items-start gap-3 rounded-xl border p-4 ${classes}`}
+      role={tone === "error" ? "alert" : "status"}
+      aria-live={tone === "error" ? "assertive" : "polite"}
+    >
       <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
       <p className="text-sm">{text}</p>
     </div>
