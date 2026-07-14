@@ -32,8 +32,8 @@ function LoginForm() {
 
   const supabase = createClient();
 
-  // Business owners land on /dashboard (which guards to /pricing if no
-  // active sub) so signin and signup converge on the same paid-setup flow.
+  // Business owners land on /dashboard (which guards to /pricing without a
+  // listing, payment credit, or renewal relationship) so auth flows converge.
   // Customers go home.
   async function postLoginDestination(userId: string): Promise<string> {
     if (explicitRedirect) return explicitRedirect;
@@ -73,19 +73,14 @@ function LoginForm() {
 
   return (
     <div
-      className="min-h-screen flex bg-[#F7F3EA]"
+      className="brand-canvas min-h-screen flex"
       dir="rtl"
     >
       {/* ── Hero side — LEFT in RTL (desktop only) ─────────────────────────── */}
-      <div className="hidden lg:flex flex-1 relative overflow-hidden items-center justify-center p-12">
+      <div className="brand-map-grid hidden lg:flex flex-1 relative overflow-hidden items-center justify-center border-l-2 border-[#17402D] p-12">
         {/* Map-style background grid */}
-        <div
-          className="absolute inset-0 opacity-[0.06]"
-          style={{
-            backgroundImage: "linear-gradient(#2D6A4F 1px, transparent 1px), linear-gradient(90deg, #2D6A4F 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
+        <div className="absolute -right-12 top-20 h-32 w-32 rotate-12 rounded-[2rem] border-2 border-[#8A3618] bg-[#F6E3D9] shadow-[5px_5px_0_0_#8A3618]" aria-hidden="true" />
+        <div className="absolute -left-8 bottom-16 h-24 w-24 -rotate-12 rounded-full border-2 border-[#17402D] bg-[#FFF3B0] shadow-[4px_4px_0_0_#17402D]" aria-hidden="true" />
 
         {/* Big center text */}
         <div className="relative z-10 text-center max-w-sm">
@@ -116,8 +111,8 @@ function LoginForm() {
       </div>
 
       {/* ── Form side — RIGHT in RTL ──────────────────────────────────────── */}
-      <div className="flex flex-1 items-center justify-center p-6 lg:p-16">
-        <div className="w-full max-w-[420px]">
+      <div className="flex flex-1 items-center justify-center p-5 sm:p-8 lg:p-14">
+        <div className="brand-panel w-full max-w-[460px] p-6 sm:p-9">
 
           {/* Mobile logo */}
           <div className="flex justify-center mb-8 lg:hidden">
@@ -180,7 +175,7 @@ function LoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 dir="ltr"
-                className="h-12 rounded-2xl border-2 border-[#17402D]/20 focus-visible:border-[#2D6A4F] focus-visible:ring-0 bg-white text-sm px-4"
+                className="brand-control h-12 rounded-xl focus-visible:ring-0 text-sm px-4"
               />
             </div>
 
@@ -197,7 +192,7 @@ function LoginForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   dir="ltr"
-                  className="h-12 rounded-2xl border-2 border-[#17402D]/20 focus-visible:border-[#2D6A4F] focus-visible:ring-0 bg-white text-sm px-4 pr-12"
+                  className="brand-control h-12 rounded-xl focus-visible:ring-0 text-sm px-4 pr-12"
                 />
                 <button
                   type="button"
@@ -221,7 +216,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 rounded-2xl bg-[#C4552D] hover:bg-[#A8441F] active:scale-[0.98] text-white font-bold text-[15px] border-2 border-[#8A3618] shadow-[3px_3px_0_0_#8A3618] hover:shadow-[4px_4px_0_0_#8A3618] hover:-translate-y-0.5 transition-all disabled:opacity-60"
+              className="brand-button w-full h-12 rounded-xl font-bold text-[15px] transition-all disabled:opacity-60"
             >
               {loading ? "...נכנסים" : "כניסה"}
             </button>

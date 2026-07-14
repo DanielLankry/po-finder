@@ -21,11 +21,10 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
 
   // Paywall: dashboard is for users with any meaningful relationship to the
   // paid side of the product. Access is granted if any of:
-  //   (a) their user row has active/past_due subscription status
-  //   (b) they own a business with expires_at > now() (active subscription)
-  //   (c) they have a paid-but-unconsumed payment_attempt waiting to be linked
+  //   (a) they own a business with expires_at > now() (active listing)
+  //   (b) they have a paid-but-unconsumed payment_attempt waiting to be linked
   //       to a business they're about to create (lib/migrations/017 trigger)
-  //   (d) they own any business at all — even if the period expired or the
+  //   (c) they own any business at all — even if the period expired or the
   //       listing is still pending admin approval. /dashboard/billing is where
   //       they renew; locking them out of their own dashboard would force them
   //       to re-pay before they can even see the renewal screen.
@@ -38,7 +37,7 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-surface pt-[72px]" dir="rtl">
+      <div className="brand-canvas min-h-screen pt-[72px]" dir="rtl">
         <div className="max-w-[1280px] mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row gap-8">
             <DashboardSidebar />

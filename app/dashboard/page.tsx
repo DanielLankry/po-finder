@@ -19,7 +19,7 @@ function ExpiryBadge({ expiresAt }: { expiresAt: string | null }) {
     return (
       <Link
         href="/pricing"
-        className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border-2 border-red-700 bg-red-100 text-red-700 shadow-[2px_2px_0_0_#B91C1C] hover:bg-red-200 transition-colors"
       >
         תוקף פג — חדשו עכשיו
       </Link>
@@ -27,13 +27,13 @@ function ExpiryBadge({ expiresAt }: { expiresAt: string | null }) {
   }
   if (daysLeft <= 7) {
     return (
-      <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-100 text-amber-700">
+      <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border-2 border-amber-700 bg-amber-100 text-amber-700 shadow-[2px_2px_0_0_#B45309]">
         פעיל עד {formatted}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-100 text-[#2D6A4F]">
+    <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border-2 border-[#2D6A4F] bg-emerald-100 text-[#2D6A4F] shadow-[2px_2px_0_0_#2D6A4F]">
       פעיל עד {formatted}
     </span>
   );
@@ -54,8 +54,8 @@ export default async function DashboardPage({
   return (
     <div className="space-y-6" dir="rtl">
       {businesses.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center shadow-card">
-          <div className="h-16 w-16 rounded-full bg-[#DDEBE0] flex items-center justify-center mx-auto mb-4">
+        <div className="brand-panel p-8 text-center">
+          <div className="h-16 w-16 rotate-3 rounded-2xl border-2 border-[#17402D] bg-[#FFF3B0] shadow-[3px_3px_0_0_#17402D] flex items-center justify-center mx-auto mb-5">
             <Plus className="h-8 w-8 text-[#2D6A4F]" aria-hidden="true" />
           </div>
           <h2 className="font-display font-bold text-xl text-stone-900 mb-2">
@@ -66,7 +66,7 @@ export default async function DashboardPage({
           </p>
           <Link
             href="/dashboard/profile"
-            className="inline-flex items-center justify-center h-11 px-6 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2"
+            className="brand-button inline-flex items-center justify-center h-11 px-6 rounded-xl font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4552D] focus-visible:ring-offset-2"
           >
             יצירת פרופיל עסק
           </Link>
@@ -114,14 +114,15 @@ async function DashboardContent({
         <BusinessSelector businesses={businesses} selectedId={business.id} />
       )}
 
-      <div>
+      <div className="brand-panel-soft relative overflow-hidden p-5 sm:p-6">
+        <div className="absolute -left-5 -top-5 h-16 w-16 rotate-12 rounded-2xl border-2 border-[#8A3618] bg-[#F6E3D9]" aria-hidden="true" />
         <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="font-display font-bold text-2xl text-stone-900">
-            שלום! 👋
+          <h1 className="font-display text-4xl text-[#17402D]">
+            שלום! <span aria-hidden="true">👋</span>
           </h1>
           <ExpiryBadge expiresAt={(business as unknown as Record<string, unknown>).expires_at as string | null} />
         </div>
-        <p className="text-stone-500 text-sm mt-1">
+        <p className="relative text-stone-600 text-sm mt-1">
           ברוכים הבאים ללוח הבקרה של{" "}
           <span className="font-medium text-stone-700">{business.name}</span>
         </p>
@@ -129,7 +130,7 @@ async function DashboardContent({
 
       {/* Pending approval banner — shown until admin approves the business */}
       {!business.is_active && (
-        <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-5">
+        <div className="flex items-start gap-3 bg-amber-50 border-2 border-amber-700 rounded-[18px] p-5 shadow-[3px_3px_0_0_#B45309]">
           <div className="h-10 w-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
             <Clock3 className="h-5 w-5 text-amber-600" aria-hidden="true" />
           </div>
@@ -145,21 +146,21 @@ async function DashboardContent({
 
       {/* Today's status card */}
       <div
-        className={`rounded-2xl p-6 border ${
+        className={`rounded-[18px] p-6 border-2 shadow-[4px_4px_0_0_#17402D] ${
           isOpen
-            ? "bg-emerald-50 border-emerald-200"
-            : "bg-white border-stone-200"
-        } shadow-card`}
+            ? "bg-emerald-50 border-[#17402D]"
+            : "bg-white border-[#17402D]"
+        }`}
       >
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-display font-bold text-lg text-stone-900">
             סטטוס היום
           </h2>
           <span
-            className={`text-sm font-medium px-3 py-1 rounded-full ${
+            className={`text-sm font-bold px-3 py-1 rounded-full border-2 ${
               isOpen
-                ? "bg-emerald-500 text-white"
-                : "bg-stone-200 text-stone-600"
+                ? "bg-emerald-500 text-white border-[#17402D]"
+                : "bg-stone-200 text-stone-600 border-stone-500"
             }`}
           >
             {isOpen ? "פתוח עכשיו ●" : schedule ? "סגור" : "לא פורסם"}
@@ -195,7 +196,7 @@ async function DashboardContent({
 
         <Link
           href="/dashboard/schedule"
-          className="inline-flex items-center justify-center h-10 px-5 mt-4 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2"
+          className="brand-button inline-flex items-center justify-center h-10 px-5 mt-4 rounded-xl font-bold text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4552D] focus-visible:ring-offset-2"
         >
           {schedule ? "עריכת לוח הזמנים" : "פרסמו לוח זמנים"}
         </Link>
@@ -228,29 +229,30 @@ async function DashboardContent({
       </div>
 
       {/* Analytics widget — last 30 days */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-card">
+      <div className="brand-panel p-6">
         <h2 className="font-display font-bold text-base text-stone-900 mb-1">
           אנליטיקה — 30 הימים האחרונים
         </h2>
         <p className="text-stone-400 text-xs mb-4">
           נתוני ביקורים ופעולות על הדף הציבורי
         </p>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="text-center">
+        <div className="brand-rule mb-5" aria-hidden="true" />
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+          <div className="rounded-xl bg-[#EFF5F0] p-3 text-center">
             <div className="flex items-center justify-center mb-1">
               <Eye className="h-4 w-4 text-[#4A8B66]" aria-hidden="true" />
             </div>
             <p className="font-display font-bold text-2xl text-stone-900">{viewCount}</p>
             <p className="text-stone-500 text-xs mt-0.5">צפיות</p>
           </div>
-          <div className="text-center">
+          <div className="rounded-xl bg-[#FFF3B0]/60 p-3 text-center">
             <div className="flex items-center justify-center mb-1">
               <Phone className="h-4 w-4 text-emerald-500" aria-hidden="true" />
             </div>
             <p className="font-display font-bold text-2xl text-stone-900">{callCount}</p>
             <p className="text-stone-500 text-xs mt-0.5">לחיצות שיחה</p>
           </div>
-          <div className="text-center">
+          <div className="rounded-xl bg-[#F6E3D9] p-3 text-center">
             <div className="flex items-center justify-center mb-1">
               <MessageCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
             </div>
@@ -261,7 +263,7 @@ async function DashboardContent({
       </div>
 
       {/* Share section */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-card" dir="rtl">
+      <div className="brand-panel-soft p-6" dir="rtl">
         <h2 className="font-display font-bold text-base text-stone-900 mb-1">
           שתף את הדף שלי
         </h2>
@@ -270,7 +272,7 @@ async function DashboardContent({
       </div>
 
       {/* Quick links */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-card">
+      <div className="brand-panel-soft p-6">
         <h2 className="font-display font-bold text-base text-stone-900 mb-4">
           קישורים מהירים
         </h2>
@@ -307,7 +309,7 @@ function StatCard({
   return (
     <Link
       href={href}
-      className="bg-white rounded-2xl border border-stone-200 p-5 shadow-card hover:shadow-hover transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
+      className="brand-panel-soft poster-hover p-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
     >
       <div className="flex items-center gap-2 mb-2">{icon}<span className="text-stone-500 text-sm">{label}</span></div>
       <p className="font-display font-bold text-xl text-stone-900">{value}</p>

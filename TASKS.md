@@ -55,6 +55,9 @@
 - [x] Accessibility (ARIA labels, semantic HTML, skip-to-content)
 - [x] Custom 404 page (Hebrew)
 - [x] Error boundary page with retry
+- [x] Extend the PostHog-inspired product-paper theme across pricing, auth, and dashboard — 2026-07-14
+  - Files modified: `app/globals.css`, `app/auth/login/page.tsx`, `app/auth/register/page.tsx`, `app/pricing/PricingClient.tsx`, `app/dashboard/layout.tsx`, `app/dashboard/page.tsx`, `components/layout/DashboardSidebar.tsx`, `components/dashboard/BusinessSelector.tsx`, `components/layout/AccessibilityWidget.tsx`
+  - Summary: Added reusable paper, ink-border, offset-shadow, and tactile control styles so the highest-impact owner journey feels cohesive while preserving Hebrew RTL behavior.
 
 ### Static Pages
 - [x] Privacy policy page
@@ -84,6 +87,9 @@
 - [x] SEO metadata on auth & dashboard pages
 - [x] Next.js 16 `proxy.ts` convention adopted
 - [x] Sentry instrumentation updated for request errors and router transitions
+- [x] Add paid-listing lifecycle regression coverage — 2026-07-14
+  - Files modified: `app/api/businesses/route.ts`, `app/api/payments/return/route.ts`, `app/sitemap.ts`, `lib/dashboard-access-core.ts`, `lib/dashboard-access.ts`, `lib/db/businesses.ts`, `lib/payments.ts`, `supabase/migrations/20260714054020_enforce_paid_listing_lifecycle.sql`, `supabase/migrations/20260714054311_preserve_legacy_public_listings.sql`, `tests/dashboard-access.test.mjs`, `tests/destructive/paid-listing-lifecycle.spec.ts`, `tests/destructive/unpaid-business-owner.spec.ts`, `tests/utils/supabase-admin.ts`, `TASKS.md`, `AGENTS.md`
+  - Summary: Enforced single-use paid listing credits and expiry at the database and public-route layers, preserved legacy seeded listings, removed the stale profile flag from entitlement decisions, and added provider-free paid/unpaid lifecycle regressions including the signed-in owner public-listing path.
 
 ---
 

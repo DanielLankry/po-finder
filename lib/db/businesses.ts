@@ -13,10 +13,12 @@ export async function getBusinesses(filters?: {
   date?: string;
 }) {
   const supabase = await createClient();
+  const nowIso = new Date().toISOString();
   let query = supabase
     .from("businesses")
     .select("*, photos(url, is_primary)")
-    .eq("is_active", true);
+    .eq("is_active", true)
+    .or(`expires_at.is.null,expires_at.gt.${nowIso}`);
 
   if (filters?.category) {
     query = query.eq("category", filters.category);
@@ -39,6 +41,8 @@ export async function getBusinessById(id: string) {
     .from("businesses")
     .select("*, photos(*)")
     .eq("id", id)
+    .eq("is_active", true)
+    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
     .single();
 
   if (error) throw error;

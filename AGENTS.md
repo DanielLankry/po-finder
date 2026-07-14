@@ -26,6 +26,14 @@ Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do
 - HYP completion redirects may arrive on page routes such as `/pricing`; `proxy.ts` detects HYP return parameters and redirects them to `/api/payments/return` for settlement.
 - Dashboard access is centralized in `lib/dashboard-access.ts`; the navbar reads `/api/account/status` instead of duplicating paid-state Supabase queries client-side.
 - Public map/list readiness lives in `lib/public-business.ts`; schedules should affect open-now/hours only, not whether an active business card exists.
+- Shared product-paper UI primitives live in `app/globals.css` under `brand-*`; use them for warm dotted canvases, ink-bordered panels, tactile controls, and hard-shadow CTAs instead of inventing page-local card styles.
+- A succeeded, unconsumed `listing` payment attempt is the single-use business INSERT entitlement; the trigger links it to the new business, and `users.subscription_status` must not grant another listing.
+- Expired owners retain business/payment reads and normal profile edits, but authenticated clients have no UPDATE grant for `is_active`, `expires_at`, or `boost_expires_at`; current paid listings require approval plus future expiry, while pre-expiry active seed rows with `expires_at IS NULL` are deliberately grandfathered.
+- Public discovery queries must always apply the expiry predicate explicitly because the permissive owner SELECT policy intentionally exposes an owner's expired row for dashboard and billing continuity.
 
 ## Known Issues
 - If HYP charges a card but no browser return reaches `/api/payments/return`, existing pending attempts must be reconciled manually or via a future transaction inquiry integration.
+- Repo-wide `npm run lint` also scans historical `.claude/worktrees` and can fail on stale copies; run targeted ESLint for changed files alongside the production build until those worktrees are excluded.
+
+## Architecture Decisions
+- The PostHog-inspired direction is interpreted as Hebrew neighborhood field notes—warm paper, green ink, terracotta accents, offset shadows, and map geometry—so the site keeps its own `פה קרוב` identity rather than copying another product.

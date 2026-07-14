@@ -70,7 +70,7 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
   const admin = adminClient();
   const { data: attempt } = await admin
     .from("payment_attempts")
-    .select("id, user_id, business_id, plan_days, amount_agorot, status, kind")
+    .select("id, business_id, plan_days, amount_agorot, status, kind")
     .eq("id", order)
     .single();
 
@@ -127,7 +127,7 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
   }
 
-  // Success — settle the attempt, flip subscription, bump expires_at.
+  // Success — settle the attempt and bump the relevant business expiry.
   const { error: settleError } = await admin
     .from("payment_attempts")
     .update({
@@ -142,28 +142,6 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     .eq("id", attempt.id);
   if (settleError) {
     console.error("[/api/payments/return] failed to mark attempt succeeded:", settleError);
-  }
-
-  // Upsert (not update) — if the public.users row is missing for any reason
-  // (auth callback hadn't run, OAuth edge case, etc.) a plain update would
-  // silently affect 0 rows and leave subscription_status='none', which the
-  // businesses INSERT RLS policy then rejects. Migration 019 also makes the
-  // RLS predicate accept the payment_attempts ledger as a fallback signal.
-  // Boost purchases never grant listing rights, so only listing payments
-  // flip the subscription flag.
-  if (attempt.kind !== "boost") {
-    const { error: userError } = await admin
-      .from("users")
-      .upsert(
-        {
-          id: attempt.user_id,
-          subscription_status: "active",
-        },
-        { onConflict: "id" }
-      );
-    if (userError) {
-      console.error("[/api/payments/return] failed to mark user subscription active:", userError);
-    }
   }
 
   if (attempt.business_id) {

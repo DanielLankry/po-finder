@@ -5,6 +5,7 @@ import * as path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local'), quiet: true });
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!URL || !KEY) {
@@ -66,6 +67,107 @@ export async function createConfirmedUser(opts: {
     .then(() => undefined, () => undefined);
 
   return { id: data.user.id, email: opts.email, password };
+}
+
+/**
+ * Simulates the successful server-side settlement of a listing payment.
+ * This never calls HYP: the succeeded ledger row is the durable entitlement
+ * consumed by the business INSERT trigger.
+ */
+export async function grantListingPlan(opts: {
+  ownerId: string;
+  planDays?: number;
+  amountAgorot?: number;
+}): Promise<{ id: string }> {
+  const sb = admin();
+  const planDays = opts.planDays ?? 365;
+
+  const { data, error } = await sb
+    .from('payment_attempts')
+    .insert({
+      user_id: opts.ownerId,
+      business_id: null,
+      plan_days: planDays,
+      amount_agorot: opts.amountAgorot ?? 1500,
+      kind: 'listing',
+      status: 'succeeded',
+      hyp_response_code: 'QA_DATABASE_GRANT_NO_PROVIDER',
+      raw_return: {
+        qa: true,
+        provider_called: false,
+        purpose: 'paid-lifecycle-regression',
+      },
+      completed_at: new Date().toISOString(),
+    })
+    .select('id')
+    .single();
+  if (error) throw new Error(`grantListingPlan failed: ${error.message}`);
+
+  return { id: data.id };
+}
+
+/** Signs a disposable QA user into a non-persistent client for real RLS checks. */
+export async function signInTestUser(user: CreatedUser): Promise<SupabaseClient> {
+  if (!ANON_KEY) {
+    throw new Error(
+      'Missing NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local — required for authenticated RLS tests'
+    );
+  }
+
+  const sb = createClient(URL!, ANON_KEY, { auth: { persistSession: false } });
+  const { error } = await sb.auth.signInWithPassword({
+    email: user.email,
+    password: user.password,
+  });
+  if (error) throw new Error(`signInTestUser failed: ${error.message}`);
+  return sb;
+}
+
+/**
+ * Creates an owner-controlled inactive business through the authenticated Data API.
+ * The insert deliberately omits plan fields so the database must consume one listing credit.
+ */
+export async function createPendingBusinessAsOwner(
+  ownerClient: SupabaseClient,
+  opts: { ownerId: string; name: string }
+): Promise<{ id: string }> {
+  const { data, error } = await ownerClient
+    .from('businesses')
+    .insert({
+      owner_id: opts.ownerId,
+      name: opts.name,
+      description: 'QA paid lifecycle regression business',
+      category: 'coffee',
+      address: 'QA Test Address, Tel Aviv',
+      lat: 32.0853,
+      lng: 34.7818,
+      kashrut: 'none',
+      is_active: false,
+    })
+    .select('id')
+    .single();
+  if (error) throw new Error(`createPendingBusinessAsOwner failed: ${error.message}`);
+  return { id: data.id };
+}
+
+/** Simulates the separate admin approval step without involving a payment provider. */
+export async function approveBusiness(businessId: string): Promise<void> {
+  const { error } = await admin()
+    .from('businesses')
+    .update({ is_active: true })
+    .eq('id', businessId);
+  if (error) throw new Error(`approveBusiness failed: ${error.message}`);
+}
+
+/** Forces a paid listing into the past so public and owner-side expiry behavior can be tested. */
+export async function expireBusinessListing(businessId: string): Promise<string> {
+  const expiredAt = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { error } = await admin()
+    .from('businesses')
+    .update({ expires_at: expiredAt })
+    .eq('id', businessId);
+  if (error) throw new Error(`expireBusinessListing failed: ${error.message}`);
+  return expiredAt;
 }
 
 export async function seedPaidActiveBusiness(opts: {

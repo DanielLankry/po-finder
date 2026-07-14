@@ -2,8 +2,8 @@
  * Payment-provider seam.
  *
  * Plans are day-based (lib/plans.ts). One-shot charges only — no recurring,
- * no card vault. Payment grants users.subscription_status='active' so the
- * RLS policy user_is_subscribed() unlocks business INSERT/UPDATE.
+ * no card vault. A successful unconsumed listing payment is the database
+ * credit that authorizes exactly one business INSERT.
  *
  * The trigger consume_payment_for_business() (migration 017) bumps
  * businesses.expires_at by plan_days when a paid user creates a business.

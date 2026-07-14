@@ -33,6 +33,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ businesses: data ?? [] });
     }
 
+    const nowIso = new Date().toISOString();
     let query = supabase
       .from("businesses")
       .select(`
@@ -58,7 +59,11 @@ export async function GET(req: NextRequest) {
         created_at,
         photos(id, business_id, url, is_primary, created_at)
       `)
-      .eq("is_active", true);
+      .eq("is_active", true)
+      // This API can run with an owner's session. The owner SELECT policy lets
+      // expired owners reach billing data, so public discovery must also apply
+      // the expiry boundary explicitly instead of relying on RLS alone.
+      .or(`expires_at.is.null,expires_at.gt.${nowIso}`);
 
     // Full-text search via tsvector
     if (q) {
