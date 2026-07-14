@@ -6,29 +6,28 @@ import PlacesSearchBar, { type LocationResult } from "@/components/map/PlacesSea
 
 type Category = BusinessCategory | "all";
 
-function CategoryButton({ value, label, icon, active, onClick }: {
+function CategoryButton({ value, label, icon, active, index, onClick }: {
   value: Category;
   label: string;
   icon: React.ReactNode;
   active: boolean;
+  index: number;
   onClick: (v: Category) => void;
 }) {
   return (
     <button
       onClick={() => onClick(value)}
       aria-pressed={active}
-      className={`flex items-center gap-2 mx-1.5 px-4 py-2.5 rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] outline-none whitespace-nowrap flex-shrink-0 ${
-        active
-          ? "bg-[#2D6A4F] text-white border-2 border-[#17402D] shadow-[2px_2px_0_0_#17402D] scale-105"
-          : "bg-white text-[#57534E] border-2 border-[#17402D]/10 hover:border-[#17402D]/50 hover:text-[#17402D] focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2"
-      }`}
+      data-active={active}
+      className="business-type-button flex shrink-0 items-center gap-2 whitespace-nowrap px-4 py-2.5 outline-none"
+      style={{ "--pill-delay": `${Math.min(index * 18, 140)}ms` } as React.CSSProperties}
     >
       {icon && (
-        <span aria-hidden="true" className={active ? "opacity-100" : "opacity-70"}>
+        <span aria-hidden="true" className="business-type-icon">
           {icon}
         </span>
       )}
-      <span className={`text-[14px] ${active ? "font-semibold" : "font-medium"}`}>
+      <span className="text-[14px] font-bold">
         {label}
       </span>
     </button>
@@ -82,15 +81,15 @@ export default function FilterBar({
             className="md:hidden flex gap-2.5 overflow-x-auto scrollbar-hide items-center px-1 py-1"
             style={{ WebkitOverflowScrolling: "touch" }}
           >
-            {CATEGORIES.map(({ value, label, icon }) => (
-              <CategoryButton key={value} value={value} label={label} icon={icon} active={activeCategory === value} onClick={onCategoryChange} />
+            {CATEGORIES.map(({ value, label, icon }, index) => (
+              <CategoryButton key={value} value={value} label={label} icon={icon} active={activeCategory === value} index={index} onClick={onCategoryChange} />
             ))}
           </div>
 
           {/* Desktop — static scrollable row */}
           <div className="hidden md:flex gap-2.5 overflow-x-auto scrollbar-hide items-center px-1 py-1">
-            {CATEGORIES.map(({ value, label, icon }) => (
-              <CategoryButton key={value} value={value} label={label} icon={icon} active={activeCategory === value} onClick={onCategoryChange} />
+            {CATEGORIES.map(({ value, label, icon }, index) => (
+              <CategoryButton key={value} value={value} label={label} icon={icon} active={activeCategory === value} index={index} onClick={onCategoryChange} />
             ))}
           </div>
 

@@ -33,7 +33,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 bg-[#F7F3EA]" dir="rtl">
+    <div className="brand-canvas flex min-h-screen items-center justify-center px-4" dir="rtl">
       <div className="w-full max-w-sm">
         <div className="mb-8">
           <Link href="/" className="inline-flex items-center gap-2 group">

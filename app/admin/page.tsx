@@ -15,7 +15,6 @@ export default async function AdminPage() {
   const supabase = await createClient();
   const admin = adminClient();
 
-  const nowIso = new Date().toISOString();
   const monthStart = new Date();
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
@@ -25,7 +24,6 @@ export default async function AdminPage() {
     { count: pending },
     { count: active },
     { count: coupons },
-    { count: boosts },
     { data: monthPayments },
     { data: recentPayments },
   ] = await Promise.all([
@@ -33,7 +31,6 @@ export default async function AdminPage() {
     supabase.from("businesses").select("*", { count: "exact", head: true }).eq("is_active", false),
     supabase.from("businesses").select("*", { count: "exact", head: true }).eq("is_active", true),
     supabase.from("coupons").select("*", { count: "exact", head: true }).eq("is_active", true),
-    admin.from("businesses").select("*", { count: "exact", head: true }).gt("boost_expires_at", nowIso),
     admin
       .from("payment_attempts")
       .select("amount_agorot")
@@ -55,7 +52,6 @@ export default async function AdminPage() {
     { label: "סה״כ עסקים", value: total ?? 0, icon: Store, color: "#2D6A4F", bg: "#EFF5F0" },
     { label: "ממתינים לאישור", value: pending ?? 0, icon: Clock, color: "#D97706", bg: "#FEF3C7" },
     { label: "עסקים פעילים", value: active ?? 0, icon: CheckCircle, color: "#2D6A4F", bg: "#EFF5F0" },
-    { label: "קידומים פעילים", value: boosts ?? 0, icon: Sparkles, color: "#D97706", bg: "#FEF3C7" },
     { label: "הכנסות החודש", value: `₪${Math.round(revenueMonth / 100)}`, icon: Banknote, color: "#2D6A4F", bg: "#EFF5F0" },
     { label: "קופונים פעילים", value: coupons ?? 0, icon: Ticket, color: "#7C3AED", bg: "#EDE9FE" },
   ];

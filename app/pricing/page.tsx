@@ -3,5 +3,5 @@ import PricingClient from "./PricingClient";
 
 export default async function PricingPage() {
   const plans = await getPlans();
-  return <PricingClient plans={plans} />;
+  return <PricingClient plans={plans} nowIso={new Date().toISOString()} />;
 }

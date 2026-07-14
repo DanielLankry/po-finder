@@ -17,8 +17,9 @@ export async function getBusinesses(filters?: {
   let query = supabase
     .from("businesses")
     .select("*, photos(url, is_primary)")
+    .eq("is_verified", true)
     .eq("is_active", true)
-    .or(`expires_at.is.null,expires_at.gt.${nowIso}`);
+    .or(`is_legacy_public.eq.true,expires_at.gt.${nowIso}`);
 
   if (filters?.category) {
     query = query.eq("category", filters.category);
@@ -41,8 +42,9 @@ export async function getBusinessById(id: string) {
     .from("businesses")
     .select("*, photos(*)")
     .eq("id", id)
+    .eq("is_verified", true)
     .eq("is_active", true)
-    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+    .or(`is_legacy_public.eq.true,expires_at.gt.${new Date().toISOString()}`)
     .single();
 
   if (error) throw error;

@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const admin = adminClient();
   const { data: attempts, error } = await admin
     .from("payment_attempts")
-    .select("id, user_id, business_id, plan_days, amount_agorot, status, hyp_transaction_id, hyp_card_mask, hyp_response_code, created_at, completed_at")
+    .select("id, user_id, business_id, product_code, plan_days, duration_months, bonus_boost_days, amount_agorot, status, service_status, hyp_transaction_id, hyp_card_mask, hyp_response_code, created_at, completed_at")
     .order("created_at", { ascending: false })
     .limit(200);
 

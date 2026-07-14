@@ -15,7 +15,6 @@ import ReviewSummary from "@/components/business/ReviewSummary";
 import ReviewsList from "@/components/business/ReviewsList";
 import AddReviewForm from "@/components/business/AddReviewForm";
 import EventsSection from "@/components/business/EventsSection";
-import PromotedBadge from "@/components/business/PromotedBadge";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
@@ -87,8 +86,6 @@ export default async function BusinessPage({ params }: Props) {
 
   const isLoggedIn = !!authData.user;
   const photos = business.photos ?? [];
-  const boosted =
-    !!business.boost_expires_at && new Date(business.boost_expires_at) > new Date();
 
   // JSON-LD LocalBusiness schema
   const localBusinessSchema = {
@@ -126,7 +123,7 @@ export default async function BusinessPage({ params }: Props) {
       />
       <Navbar />
       <ViewTracker businessId={id} />
-      <div className="min-h-screen bg-[#F7F3EA]" dir="rtl">
+      <div className="brand-canvas min-h-screen" dir="rtl">
         <div className="max-w-[1280px] mx-auto px-4 pt-[88px] pb-16">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 mb-6 text-sm text-stone-500">
@@ -163,7 +160,6 @@ export default async function BusinessPage({ params }: Props) {
                       עסק מאומת
                     </span>
                   )}
-                  {boosted && <PromotedBadge />}
                 </div>
                 <h1 className="font-display font-extrabold text-3xl text-stone-900 mb-3">
                   {business.name}

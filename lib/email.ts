@@ -55,11 +55,22 @@ export async function sendContactAutoReply(to: string, name: string, subjectLabe
 }
 
 // ── Expiry reminder ───────────────────────────────────────────────────────────
-export async function sendExpiryReminder(to: string, businessName: string, expiresAt: Date) {
-  await resend.emails.send({
+export async function sendExpiryReminder(
+  to: string,
+  businessName: string,
+  expiresAt: Date,
+  daysBefore: 30 | 7 | 1
+) {
+  const { error } = await resend.emails.send({
     from: FROM_EMAIL,
     to,
-    subject: `⏰ הרישום של ${businessName} עומד לפוג בעוד 7 ימים`,
-    html: expiryReminderTemplate(businessName, expiresAt, "https://pokarov.co.il/pricing"),
+    subject: `⏰ הרישום של ${businessName} עומד לפוג בעוד ${daysBefore} ימים`,
+    html: expiryReminderTemplate(
+      businessName,
+      expiresAt,
+      "https://pokarov.co.il/dashboard/billing",
+      daysBefore
+    ),
   });
+  if (error) throw new Error(error.message);
 }

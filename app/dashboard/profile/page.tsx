@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,19 @@ import type { Business, BusinessCategory, KashrutStatus } from "@/lib/types";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import PlacesSearchBar from "@/components/map/PlacesSearchBar";
 import type { LocationResult } from "@/components/map/PlacesSearchBar";
-import { MapPin } from "lucide-react";
+import { BadgeCheck, Beef, CakeSlice, Coffee, Eye, Flower2, Gem, Leaf, MapPin, MessageCircle, Phone, Shirt, UtensilsCrossed, Wheat } from "lucide-react";
+
+const CATEGORY_ICONS: Record<BusinessCategory, React.ComponentType<{ className?: string }>> = {
+  coffee: Coffee,
+  food: UtensilsCrossed,
+  sweets: CakeSlice,
+  meat: Beef,
+  vegan: Leaf,
+  celiac: Wheat,
+  flowers: Flower2,
+  jewelry: Gem,
+  vintage: Shirt,
+};
 
 export default function ProfilePage() {
   const [business, setBusiness] = useState<Business | null>(null);
@@ -153,13 +166,13 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-card" dir="rtl">
+    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]" dir="rtl">
+      <div className="brand-panel p-6">
       <h1 className="font-display font-bold text-xl text-stone-900 mb-6">
         {business ? "עריכת פרטי העסק" : "יצירת פרופיל עסק"}
       </h1>
       <p className="mb-5 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-        פרטי העסק שתשמרו כאן מיועדים להצגה ציבורית לאחר אישור העסק. אל תזינו מידע
-        שאינכם רוצים שיופיע באתר.
+        זו טיוטה פרטית בחינם. היא תופיע לציבור רק אחרי אימות העסק ותשלום על רישום פעיל.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -211,23 +224,29 @@ export default function ProfilePage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField label="קטגוריה" required>
-            <Select
-              value={form.category}
-              onValueChange={(v) => update("category", v)}
-            >
-              <SelectTrigger className="h-11 rounded-xl border-stone-200 focus:ring-[#2D6A4F]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {(Object.keys(CATEGORY_LABELS) as BusinessCategory[]).map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {CATEGORY_LABELS[cat]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="sm:col-span-2">
+          <FormField label="סוג העסק" required>
+            <div className="col-span-full flex gap-2.5 overflow-x-auto px-1 pb-2 pt-1 scrollbar-hide sm:flex-wrap" role="group" aria-label="בחירת סוג העסק">
+              {(Object.keys(CATEGORY_LABELS) as BusinessCategory[]).map((category, index) => {
+                const Icon = CATEGORY_ICONS[category];
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    aria-pressed={form.category === category}
+                    data-active={form.category === category}
+                    onClick={() => update("category", category)}
+                    className="business-type-button flex shrink-0 items-center gap-2 px-4 py-2.5"
+                    style={{ "--pill-delay": `${Math.min(index * 18, 140)}ms` } as React.CSSProperties}
+                  >
+                    <span className="business-type-icon" aria-hidden="true"><Icon className="h-4 w-4" /></span>
+                    <span className="text-sm font-bold">{CATEGORY_LABELS[category]}</span>
+                  </button>
+                );
+              })}
+            </div>
           </FormField>
+          </div>
 
           <FormField label="כשרות">
             <Select
@@ -310,9 +329,10 @@ export default function ProfilePage() {
 
         {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
         {success && (
-          <p className="text-emerald-600 text-sm font-medium">
-            ✓ הפרטים נשמרו בהצלחה
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            <span className="font-medium">✓ הטיוטה נשמרה בהצלחה</span>
+            <Link href="/dashboard/billing" className="font-bold underline">למסלולים ותשלום</Link>
+          </div>
         )}
 
         <Button
@@ -324,6 +344,36 @@ export default function ProfilePage() {
           {saving ? "...שומר" : business ? "שמירת שינויים" : "יצירת עסק"}
         </Button>
       </form>
+      </div>
+
+      <aside className="brand-panel-orange sticky top-24 overflow-hidden p-5">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Eye className="h-4 w-4 text-[#8A3618]" />
+            <p className="font-bold text-[#8A3618]">תצוגה מקדימה</p>
+          </div>
+          <span className="rounded-full border border-[#8A3618] bg-white px-2.5 py-1 text-[10px] font-bold text-[#8A3618]">טיוטה פרטית</span>
+        </div>
+        <div className="overflow-hidden rounded-2xl border-2 border-[#17402D] bg-[#FFFDF7] shadow-[4px_4px_0_0_#17402D]">
+          <div className="flex h-36 items-center justify-center bg-[linear-gradient(135deg,#DDEBE0,#FFF3B0)]">
+            <span className="font-display text-6xl text-[#17402D]">{form.name.trim().slice(0, 1) || "פ"}</span>
+          </div>
+          <div className="space-y-3 p-5">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h2 className="font-display text-3xl leading-none text-stone-950">{form.name.trim() || "שם העסק"}</h2>
+                <p className="mt-1 text-xs font-bold text-[#2D6A4F]">{CATEGORY_LABELS[form.category]}</p>
+              </div>
+              {business?.is_verified ? <BadgeCheck className="h-5 w-5 shrink-0 text-[#2D6A4F]" aria-label="עסק מאומת" /> : null}
+            </div>
+            <p className="min-h-10 text-sm leading-relaxed text-stone-600">{form.description.trim() || "התיאור שתכתבו יופיע כאן."}</p>
+            {form.address ? <p className="flex items-center gap-2 text-xs text-stone-600"><MapPin className="h-3.5 w-3.5 text-[#C4552D]" />{form.address}</p> : null}
+            {form.phone ? <p className="flex items-center gap-2 text-xs text-stone-600" dir="ltr"><Phone className="h-3.5 w-3.5 text-[#2D6A4F]" />{form.phone}</p> : null}
+            {form.whatsapp ? <p className="flex items-center gap-2 text-xs text-stone-600" dir="ltr"><MessageCircle className="h-3.5 w-3.5 text-[#2D6A4F]" />WhatsApp {form.whatsapp}</p> : null}
+          </div>
+        </div>
+        <p className="mt-4 text-xs leading-relaxed text-stone-600">אפשר לערוך ולצפות בטיוטה בלי לשלם. אחרי אימות, בוחרים מסלול ורק אז הכרטיס נכנס למפה ולרשימה.</p>
+      </aside>
     </div>
   );
 }

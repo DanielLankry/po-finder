@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
       address: address || null,
       lat: lat ? parseFloat(lat) : null,
       lng: lng ? parseFloat(lng) : null,
+      is_verified: true,
       is_active: true,
       expires_at: expires.toISOString(),
     })

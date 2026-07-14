@@ -7,7 +7,6 @@ import {
 import type { BusinessWithSchedule } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
 import { isOpenNow } from "@/lib/utils/schedule";
-import PromotedBadge from "./PromotedBadge";
 
 // ── SVG icons per category ────────────────────────────────────────────────────
 const CATEGORY_ICON_LG: Record<string, React.ReactNode> = {
@@ -144,13 +143,12 @@ export default function BusinessCard({
 
           {/* ── Text content (3 lines) ───────────────────────────────────────── */}
           <div className="flex flex-col gap-1 px-1">
-            {/* Line 1: Name (+ promoted badge) and Rating */}
+            {/* Line 1: Name and rating */}
             <div className="flex justify-between items-start gap-2">
               <span className="flex items-center gap-1.5 min-w-0">
                 <p className={`font-extrabold text-[17px] leading-tight line-clamp-1 truncate tracking-tight transition-colors duration-200 ${isHovered ? 'text-[#2D6A4F]' : 'text-[#111111] group-hover:text-[#2D6A4F]'}`}>
                   {business.name}
                 </p>
-                {business.boosted ? <PromotedBadge /> : null}
               </span>
               {business.avg_rating > 0 && (
                 <div className="flex items-center gap-1 flex-shrink-0 mt-0.5">

@@ -15,7 +15,7 @@ export default function AboutPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-[#F7F3EA] pt-[88px] pb-16" dir="rtl">
+      <main className="brand-canvas min-h-screen pt-[88px] pb-16" dir="rtl">
         <div className="max-w-4xl mx-auto px-4">
           <div className="mb-5">
             <span className="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-1.5 rounded-full border-2 border-[#17402D] bg-white text-[#1F5038] shadow-[2px_2px_0_0_#17402D]">

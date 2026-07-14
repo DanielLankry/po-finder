@@ -6,7 +6,7 @@ import {
   createConfirmedUser,
   createPendingBusinessAsOwner,
   expireBusinessListing,
-  grantListingPlan,
+  grantDurationPlan,
   signInTestUser,
   TEST_PASSWORD,
   uniqEmail,
@@ -35,24 +35,24 @@ test('listing grant is consumed once and expiry removes every public surface', a
   let ctx: Awaited<ReturnType<typeof pwRequest.newContext>> | null = null;
 
   try {
-    const grant = await grantListingPlan({ ownerId: user.id });
     const ownerClient = await signInTestUser(user);
     const business = await createPendingBusinessAsOwner(ownerClient, {
       ownerId: user.id,
       name: businessName,
     });
     await approveBusiness(business.id);
+    const grant = await grantDurationPlan({ ownerId: user.id, businessId: business.id });
 
     const [{ data: payment, error: paymentError }, { data: paidBusiness, error: businessError }] =
       await Promise.all([
         admin()
           .from('payment_attempts')
-          .select('business_id, status, kind, plan_days')
+          .select('business_id, product_code, status, kind, plan_days, duration_months, amount_agorot')
           .eq('id', grant.id)
           .single(),
         admin()
           .from('businesses')
-          .select('is_active, expires_at')
+          .select('is_verified, is_active, expires_at')
           .eq('id', business.id)
           .single(),
       ]);
@@ -61,10 +61,14 @@ test('listing grant is consumed once and expiry removes every public surface', a
     expect(businessError).toBeNull();
     expect(payment).toMatchObject({
       business_id: business.id,
+      product_code: 'listing_6m',
       status: 'succeeded',
       kind: 'listing',
-      plan_days: 365,
+      plan_days: 180,
+      duration_months: 6,
+      amount_agorot: 4000,
     });
+    expect(paidBusiness?.is_verified).toBe(true);
     expect(paidBusiness?.is_active).toBe(true);
     expect(Date.parse(paidBusiness?.expires_at ?? '')).toBeGreaterThan(Date.now());
 
@@ -114,8 +118,8 @@ test('listing grant is consumed once and expiry removes every public surface', a
     const billingPage = await page.goto('/dashboard/billing');
     expect(billingPage?.status()).toBeLessThan(400);
     await expect(page.locator('body')).toContainText(businessName);
-    await expect(page.locator('text=פג תוקף').first()).toBeVisible();
-    await expect(page.getByRole('button', { name: /חידוש רישום/ }).first()).toBeVisible();
+    await expect(page.locator('text=לא מופיע לציבור').first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /פרסום העסק ל־6 חודשים/ }).first()).toBeVisible();
 
     // BrowserContext requests share the signed-in owner's cookies. This is the
     // critical regression: the owner RLS policy may expose the expired row for

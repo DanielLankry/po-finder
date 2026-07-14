@@ -171,6 +171,19 @@
   --font-secular: var(--font-poster);
   --font-geist-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --radius: 0.625rem;
+  /* A quiet neighborhood-map texture shared by public and owner surfaces.
+     Layered gradients keep it asset-free while route lines and location marks
+     add depth without lowering content contrast. */
+  --site-paper: #F7F3EA;
+  --site-paper-pattern:
+    radial-gradient(circle at 82% -8%, rgba(45, 106, 79, 0.08), transparent 30rem),
+    radial-gradient(circle at 8% 96%, rgba(196, 85, 45, 0.065), transparent 26rem),
+    radial-gradient(circle at 1px 1px, rgba(23, 64, 45, 0.075) 1px, transparent 1.2px),
+    radial-gradient(circle at 18px 18px, rgba(196, 85, 45, 0.105) 1.25px, transparent 1.6px),
+    linear-gradient(32deg, transparent 49.55%, rgba(23, 64, 45, 0.034) 49.7%, rgba(23, 64, 45, 0.034) 50.3%, transparent 50.45%),
+    linear-gradient(148deg, transparent 49.55%, rgba(196, 85, 45, 0.026) 49.7%, rgba(196, 85, 45, 0.026) 50.3%, transparent 50.45%);
+  --site-paper-pattern-size: auto, auto, 22px 22px, 110px 80px, 220px 160px, 220px 160px;
+  --site-paper-pattern-position: center, center, 0 0, 30px 12px, 0 0, 72px 28px;
   --background: #FFFFFF;
   --foreground: #0A0A0A;
   --card: #FFFFFF;
@@ -210,6 +223,10 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
+    background-color: var(--site-paper);
+    background-image: var(--site-paper-pattern);
+    background-position: var(--site-paper-pattern-position);
+    background-size: var(--site-paper-pattern-size);
     font-feature-settings: "kern" 1, "liga" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -552,10 +569,10 @@ a[href^="https://maps.google.com/maps"] { display: none !important; }
    and neighborhood wayfinding. These are intentionally structural utilities so
    public, auth, and dashboard screens share the same visual grammar. */
 .brand-canvas {
-  background-color: #F7F3EA;
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(23, 64, 45, 0.095) 1px, transparent 0);
-  background-size: 24px 24px;
+  background-color: var(--site-paper);
+  background-image: var(--site-paper-pattern);
+  background-position: var(--site-paper-pattern-position);
+  background-size: var(--site-paper-pattern-size);
 }
 
 .brand-map-grid {
@@ -635,6 +652,40 @@ a[href^="https://maps.google.com/maps"] { display: none !important; }
   transform: none;
 }
 
+/* Category controls echo the two strong navbar actions: quiet ink outline by
+   default, terracotta fill when selected, and a tactile hard shadow in both
+   states. */
+.business-type-button {
+  min-height: 42px;
+  border: 2px solid #17402D;
+  border-radius: 9999px;
+  background: #FFFFFF;
+  box-shadow: 3px 3px 0 0 #17402D;
+  color: #17402D;
+  transform: translate(0, 0);
+}
+
+.business-type-button[data-active="true"] {
+  border-color: #8A3618;
+  background: #C4552D;
+  box-shadow: 3px 3px 0 0 #8A3618;
+  color: #FFFFFF;
+}
+
+.business-type-button:focus-visible {
+  outline: 3px solid rgba(45, 106, 79, 0.35);
+  outline-offset: 3px;
+}
+
+.business-type-icon {
+  display: inline-flex;
+  opacity: 0.82;
+}
+
+.business-type-button[data-active="true"] .business-type-icon {
+  opacity: 1;
+}
+
 .brand-rule {
   height: 2px;
   background: repeating-linear-gradient(
@@ -647,7 +698,103 @@ a[href^="https://maps.google.com/maps"] { display: none !important; }
   opacity: 0.28;
 }
 
+.duration-slider {
+  height: 12px;
+  appearance: none;
+  border: 2px solid #17402D;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #DDEBE0, #FFF3B0);
+  box-shadow: 2px 2px 0 0 #17402D;
+  cursor: pointer;
+}
+
+.duration-slider::-webkit-slider-thumb {
+  width: 28px;
+  height: 28px;
+  appearance: none;
+  border: 3px solid #8A3618;
+  border-radius: 9999px;
+  background: #C4552D;
+  box-shadow: 2px 2px 0 0 #8A3618;
+}
+
+.duration-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #8A3618;
+  border-radius: 9999px;
+  background: #C4552D;
+  box-shadow: 2px 2px 0 0 #8A3618;
+}
+
+.duration-slider:focus-visible {
+  outline: 3px solid rgba(45, 106, 79, 0.35);
+  outline-offset: 5px;
+}
+
 @media (prefers-reduced-motion: no-preference) {
+  .ambient-motion,
+  .brand-canvas {
+    animation: paper-drift 28s ease-in-out infinite alternate;
+  }
+
+  .brand-button,
+  .business-type-button,
+  .brand-chip,
+  .brand-control,
+  .duration-slider::-webkit-slider-thumb,
+  .duration-slider::-moz-range-thumb {
+    transition:
+      transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 180ms ease-out,
+      border-color 180ms ease-out,
+      background-color 180ms ease-out,
+      color 180ms ease-out;
+  }
+
+  .business-type-button {
+    animation: business-type-enter 270ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--pill-delay, 0ms);
+  }
+
+  .business-type-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 4px 4px 0 0 #17402D;
+  }
+
+  .business-type-button[data-active="true"]:hover {
+    box-shadow: 4px 4px 0 0 #8A3618;
+  }
+
+  .business-type-button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 0 #17402D;
+  }
+
+  .business-type-button[data-active="true"]:active {
+    box-shadow: 1px 1px 0 0 #8A3618;
+  }
+
+  .business-type-button[data-active="true"] .business-type-icon {
+    animation: business-type-icon-pop 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes business-type-enter {
+    from { opacity: 0; transform: translateY(7px) scale(0.96); }
+    to { opacity: 1; transform: translate(0, 0) scale(1); }
+  }
+
+  @keyframes business-type-icon-pop {
+    0% { transform: scale(0.9); }
+    70% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes paper-drift {
+    from { background-position: var(--site-paper-pattern-position); }
+    to { background-position: center, center, 8px -6px, 38px 6px, 8px -6px, 80px 22px; }
+  }
+
   /* Poster hover — card lifts against its hard shadow */
   .poster-hover {
     transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 180ms ease-out;

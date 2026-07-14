@@ -37,16 +37,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Business not found" }, { status: 404 });
   }
 
-  const updates: Record<string, unknown> = { is_active: true };
-  if (!biz.expires_at) {
-    const exp = new Date();
-    exp.setMonth(exp.getMonth() + 1);
-    updates.expires_at = exp.toISOString();
-  }
-
   const { error } = await admin
     .from("businesses")
-    .update(updates)
+    .update({
+      is_verified: true,
+      is_active: !!biz.expires_at && Date.parse(biz.expires_at) > Date.now(),
+    })
     .eq("id", businessId);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -65,5 +61,5 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, isVerified: true });
 }

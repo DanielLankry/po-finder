@@ -74,34 +74,57 @@ export async function createConfirmedUser(opts: {
  * This never calls HYP: the succeeded ledger row is the durable entitlement
  * consumed by the business INSERT trigger.
  */
-export async function grantListingPlan(opts: {
+export type DurationPlanCode =
+  | 'listing_1m'
+  | 'listing_2m'
+  | 'listing_3m'
+  | 'listing_4m'
+  | 'listing_5m'
+  | 'listing_6m'
+  | 'listing_7m'
+  | 'listing_8m'
+  | 'listing_9m'
+  | 'listing_10m'
+  | 'listing_11m'
+  | 'listing_12m';
+
+export async function grantDurationPlan(opts: {
   ownerId: string;
-  planDays?: number;
-  amountAgorot?: number;
+  businessId: string;
+  productCode?: DurationPlanCode;
 }): Promise<{ id: string }> {
   const sb = admin();
-  const planDays = opts.planDays ?? 365;
+  const productCode = opts.productCode ?? 'listing_6m';
 
   const { data, error } = await sb
     .from('payment_attempts')
     .insert({
       user_id: opts.ownerId,
-      business_id: null,
-      plan_days: planDays,
-      amount_agorot: opts.amountAgorot ?? 1500,
+      business_id: opts.businessId,
+      product_code: productCode,
+      plan_days: 1,
+      duration_months: 1,
+      amount_agorot: 1,
       kind: 'listing',
-      status: 'succeeded',
-      hyp_response_code: 'QA_DATABASE_GRANT_NO_PROVIDER',
-      raw_return: {
-        qa: true,
-        provider_called: false,
-        purpose: 'paid-lifecycle-regression',
-      },
-      completed_at: new Date().toISOString(),
+      status: 'pending',
     })
     .select('id')
     .single();
-  if (error) throw new Error(`grantListingPlan failed: ${error.message}`);
+  if (error) throw new Error(`grantDurationPlan failed: ${error.message}`);
+
+  const { error: settleError } = await sb.rpc('settle_payment_attempt', {
+    p_attempt_id: data.id,
+    p_hyp_transaction_id: `QA-${data.id}`,
+    p_hyp_auth_code: 'QA_AUTH',
+    p_hyp_card_mask: '0000',
+    p_hyp_response_code: '0',
+    p_raw_return: {
+      qa: true,
+      provider_called: false,
+      purpose: 'paid-lifecycle-regression',
+    },
+  });
+  if (settleError) throw new Error(`settle_payment_attempt failed: ${settleError.message}`);
 
   return { id: data.id };
 }
@@ -150,11 +173,11 @@ export async function createPendingBusinessAsOwner(
   return { id: data.id };
 }
 
-/** Simulates the separate admin approval step without involving a payment provider. */
+/** Simulates admin verification without granting free public listing time. */
 export async function approveBusiness(businessId: string): Promise<void> {
   const { error } = await admin()
     .from('businesses')
-    .update({ is_active: true })
+    .update({ is_verified: true, is_active: false })
     .eq('id', businessId);
   if (error) throw new Error(`approveBusiness failed: ${error.message}`);
 }
@@ -190,6 +213,7 @@ export async function seedPaidActiveBusiness(opts: {
       address: 'Tel Aviv',
       lat: 32.0853,
       lng: 34.7818,
+      is_verified: true,
       is_active: true,
       expires_at: expires.toISOString(),
     })
@@ -203,7 +227,7 @@ export async function getOwnerBusinesses(ownerId: string) {
   const sb = admin();
   const { data, error } = await sb
     .from('businesses')
-    .select('id, name, is_active, expires_at, owner_id')
+    .select('id, name, is_verified, is_active, expires_at, owner_id')
     .eq('owner_id', ownerId);
   if (error) throw error;
   return data ?? [];

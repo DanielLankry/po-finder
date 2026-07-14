@@ -58,6 +58,9 @@
 - [x] Extend the PostHog-inspired product-paper theme across pricing, auth, and dashboard — 2026-07-14
   - Files modified: `app/globals.css`, `app/auth/login/page.tsx`, `app/auth/register/page.tsx`, `app/pricing/PricingClient.tsx`, `app/dashboard/layout.tsx`, `app/dashboard/page.tsx`, `components/layout/DashboardSidebar.tsx`, `components/dashboard/BusinessSelector.tsx`, `components/layout/AccessibilityWidget.tsx`
   - Summary: Added reusable paper, ink-border, offset-shadow, and tactile control styles so the highest-impact owner journey feels cohesive while preserving Hebrew RTL behavior.
+- [x] Add a subtle neighborhood-map background pattern across the site — 2026-07-14
+  - Files modified: `app/globals.css`, `app/about/page.tsx`, `app/accessibility/page.tsx`, `app/auth/forgot-password/page.tsx`, `app/auth/reset-password/page.tsx`, `app/businesses/[id]/page.tsx`, `app/contact/page.tsx`, `app/privacy/page.tsx`, `app/refund/page.tsx`, `app/terms/page.tsx`, `app/vendors/page.tsx`, `TASKS.md`, `AGENTS.md`
+  - Summary: Replaced flat cream page backgrounds with a shared, asset-free paper texture made from faint route lines, registration dots, location marks, and soft brand-color washes.
 
 ### Static Pages
 - [x] Privacy policy page
@@ -68,7 +71,7 @@
 
 ### Launch Readiness
 - [x] Hebrew visible brand standardized to "פה קרוב"
-- [x] Business-owner CTA standardized around the ₪99 launch offer
+- [x] Business-owner CTA standardized around one duration-based listing product
 - [x] About/contact trust copy uses configured business contact info without public placeholders
 - [x] Vendor and pricing FAQ sections added
 - [x] Demo/test businesses filtered from the public map
@@ -90,6 +93,9 @@
 - [x] Add paid-listing lifecycle regression coverage — 2026-07-14
   - Files modified: `app/api/businesses/route.ts`, `app/api/payments/return/route.ts`, `app/sitemap.ts`, `lib/dashboard-access-core.ts`, `lib/dashboard-access.ts`, `lib/db/businesses.ts`, `lib/payments.ts`, `supabase/migrations/20260714054020_enforce_paid_listing_lifecycle.sql`, `supabase/migrations/20260714054311_preserve_legacy_public_listings.sql`, `tests/dashboard-access.test.mjs`, `tests/destructive/paid-listing-lifecycle.spec.ts`, `tests/destructive/unpaid-business-owner.spec.ts`, `tests/utils/supabase-admin.ts`, `TASKS.md`, `AGENTS.md`
   - Summary: Enforced single-use paid listing credits and expiry at the database and public-route layers, preserved legacy seeded listings, removed the stale profile flag from entitlement decisions, and added provider-free paid/unpaid lifecycle regressions including the signed-in owner public-listing path.
+- [x] Replace subscriptions and boost packages with one duration-based listing product — 2026-07-14
+  - Files modified: `.env.local.example`, `app/pricing/page.tsx`, `app/pricing/PricingClient.tsx`, `app/dashboard/billing/page.tsx`, `app/dashboard/billing/BillingClient.tsx`, `components/business/DurationSelectorCard.tsx`, `app/api/payments/checkout/route.ts`, `app/api/admin/payments/[id]/refund/route.ts`, `app/api/cron/expiry-reminders/route.ts`, `lib/plans.ts`, `lib/plans-server.ts`, `lib/expiry-reminders.ts`, `lib/email.ts`, `lib/email-templates.ts`, `lib/site-config.ts`, `supabase/migrations/20260714105000_duration_slider_pricing.sql`, `supabase/migrations/20260714105500_deactivate_legacy_payment_products.sql`, `tests/plans.test.mjs`, `tests/expiry-reminders.test.mjs`, `tests/public/pricing-v2.spec.ts`, `tests/destructive/pricing-duration-products.spec.ts`, `tests/destructive/paid-listing-lifecycle.spec.ts`, `vercel.json`, `design-qa.md`
+  - Summary: Added the 1–12 month one-time price slider, calendar-month renewals with exact LIFO refunds, automatic expiry reminders, and removed boost sales and promoted placement while preserving historical payment records.
 
 ---
 

@@ -61,7 +61,7 @@ export default function MapPage() {
   const openCount = businesses.filter((b) => isOpenNow(b.today_schedule ?? null)).length;
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-[#F7F3EA]" dir="rtl">
+    <div className="brand-canvas ambient-motion h-screen flex flex-col overflow-hidden" dir="rtl">
       {/* App purpose — visible text required by Google OAuth verification */}
       <div className="bg-[#17402D] px-4 py-1.5 text-center text-xs text-[#F7F3EA] font-medium" dir="rtl">
         <span className="font-bold">פה קרוב</span> — פלטפורמה לגילוי עסקים קטנים וניידים קרוב אליכם בזמן אמת

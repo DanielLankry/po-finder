@@ -18,6 +18,7 @@ interface Business {
   kashrut: string;
   business_number: string | null;
   is_active: boolean;
+  is_verified: boolean;
   created_at: string;
   expires_at: string | null;
   lat: number | null;
@@ -63,7 +64,7 @@ export default function AdminBusinessesPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ businessId }),
     });
-    if (res.ok) setBusinesses((prev) => prev.map((b) => b.id === businessId ? { ...b, is_active: true } : b));
+    if (res.ok) setBusinesses((prev) => prev.map((b) => b.id === businessId ? { ...b, is_verified: true } : b));
     else alert("שגיאה באישור העסק");
     setActionLoading(null);
   }
@@ -130,7 +131,8 @@ export default function AdminBusinessesPage() {
     setEditLoading(false);
   }
 
-  const pending = businesses.filter((b) => !b.is_active);
+  const pending = businesses.filter((b) => !b.is_verified);
+  const verified = businesses.filter((b) => b.is_verified);
   const active = businesses.filter((b) => b.is_active);
 
   if (loading) return (
@@ -145,7 +147,7 @@ export default function AdminBusinessesPage() {
       <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
         <div>
           <h1 className="font-extrabold text-2xl text-[#111]">ניהול עסקים</h1>
-          <p className="text-[#888] text-sm">{pending.length} ממתינים · {active.length} פעילים</p>
+          <p className="text-[#888] text-sm">{pending.length} ממתינים לאימות · {verified.length} מאומתים · {active.length} בתשלום</p>
         </div>
         <div className="flex gap-2">
           <button onClick={fetchAll} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-[#E5E7EB] text-sm text-[#555] hover:bg-[#F9F9F9] transition-colors">
@@ -353,14 +355,14 @@ export default function AdminBusinessesPage() {
         </div>
       )}
 
-      {/* Active */}
+      {/* Verified */}
       <div>
-        <h2 className="font-bold text-lg text-[#2D6A4F] mb-3">✅ עסקים פעילים ({active.length})</h2>
-        {active.length === 0 ? (
-          <p className="text-[#AAA] py-8 text-center">אין עסקים פעילים</p>
+        <h2 className="font-bold text-lg text-[#2D6A4F] mb-3">✅ עסקים מאומתים ({verified.length})</h2>
+        {verified.length === 0 ? (
+          <p className="text-[#AAA] py-8 text-center">אין עסקים מאומתים</p>
         ) : (
           <div className="flex flex-col gap-3">
-            {active.map((biz) => (
+            {verified.map((biz) => (
               <BusinessCard key={biz.id} biz={biz} onApprove={approve} onDelete={deleteBiz} onEdit={setEditBiz} actionLoading={actionLoading} />
             ))}
           </div>
@@ -383,8 +385,8 @@ function BusinessCard({ biz, onApprove, onDelete, onEdit, actionLoading }: {
             <span className="bg-[#2D6A4F] text-white text-xs font-bold px-2 py-0.5 rounded-full">
               {CATEGORY_LABELS[biz.category as keyof typeof CATEGORY_LABELS] ?? biz.category}
             </span>
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${biz.is_active ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
-              {biz.is_active ? "פעיל" : "ממתין"}
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${biz.is_verified ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+              {biz.is_verified ? (biz.is_active ? "מאומת ובתשלום" : "מאומת, ממתין לתשלום") : "ממתין לאימות"}
             </span>
           </div>
           <h2 className="font-bold text-[#111] text-base md:text-lg truncate">{biz.name}</h2>
@@ -398,7 +400,7 @@ function BusinessCard({ biz, onApprove, onDelete, onEdit, actionLoading }: {
         </div>
       </div>
       <div className="flex gap-2 mt-3 pt-3 border-t border-[#F5F5F5] flex-wrap">
-        {!biz.is_active && (
+        {!biz.is_verified && (
           <button onClick={() => onApprove(biz.id)} disabled={isLoading}
             className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#2D6A4F] text-white font-semibold text-sm hover:bg-[#1F5038] transition-colors disabled:opacity-50">
             <CheckCircle className="h-3.5 w-3.5" />{isLoading ? "..." : "אשר"}

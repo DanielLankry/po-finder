@@ -47,7 +47,7 @@ export default function ContactPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-[#F7F3EA] pt-[88px] pb-20" dir="rtl">
+      <main className="brand-canvas min-h-screen pt-[88px] pb-20" dir="rtl">
         <div className="max-w-2xl mx-auto px-4">
           <div className="text-center mb-10">
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EFF5F0] mb-4">
