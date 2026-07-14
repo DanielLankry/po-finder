@@ -97,6 +97,13 @@ test('listing grant is consumed once and expiry removes every public surface', a
     const expiredDetail = await ctx.get(`/businesses/${business.id}?qa=${Date.now()}`);
     expect(expiredDetail.status(), 'expired business detail must not remain public').toBe(404);
 
+    const expiredSitemap = await ctx.get(`/sitemap.xml?qa=${Date.now()}`);
+    expect(expiredSitemap.status()).toBe(200);
+    expect(
+      await expiredSitemap.text(),
+      'expired business must not remain in the public sitemap'
+    ).not.toContain(`/businesses/${business.id}`);
+
     const { data: ownerBusinesses, error: ownerReadError } = await ownerClient
       .from('businesses')
       .select('id, name, expires_at, is_active')
