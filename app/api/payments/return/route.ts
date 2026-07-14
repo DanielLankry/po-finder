@@ -88,14 +88,35 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
   }
 
-  const verified = await verifyReturnSignature(params).catch((err) => {
-    console.error("[/api/payments/return] verify threw:", err);
-    return false;
-  });
-
   // Fold the redirect query into a JSON snapshot for support / debugging.
   const rawReturn: Record<string, string> = {};
   for (const [k, v] of params.entries()) rawReturn[k] = v;
+
+  let verified: boolean;
+  try {
+    verified = await verifyReturnSignature(params);
+  } catch (err) {
+    console.error("[/api/payments/return] verifier unavailable:", err);
+    Sentry.captureException(err, {
+      tags: {
+        route: "payments-return",
+        phase: "hyp-verify",
+        attemptId: attempt.id,
+      },
+    });
+    const { error } = await admin
+      .from("payment_attempts")
+      .update({
+        hyp_response_code: responseCode ?? "verify_unavailable",
+        raw_return: rawReturn,
+      })
+      .eq("id", attempt.id)
+      .eq("status", "pending");
+    if (error) {
+      console.error("[/api/payments/return] failed to retain pending verification:", error);
+    }
+    return NextResponse.redirect(`${origin}/dashboard/billing?payment=processing`);
+  }
 
   if (!verified) {
     const { error } = await admin

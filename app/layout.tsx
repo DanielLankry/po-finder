@@ -141,7 +141,7 @@ export default function RootLayout({
           דלגו לתוכן הראשי
         </a>
         <PostHogProvider>
-          <main id="main-content">{children}</main>
+          <div id="main-content">{children}</div>
         </PostHogProvider>
         <AccessibilityWidget />
         <CookieConsent />

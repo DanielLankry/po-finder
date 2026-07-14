@@ -30,6 +30,12 @@ export async function POST(req: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+  if (!user.email) {
+    return NextResponse.json(
+      { ok: false, error: "verified email required" },
+      { status: 400 }
+    );
+  }
 
   const body = await req.json().catch(() => ({}));
   const parsed = checkoutSchema.safeParse(body);
@@ -107,15 +113,24 @@ export async function POST(req: NextRequest) {
   cancelUrl.searchParams.set("attempt", attempt.id);
 
   try {
+    const { data: profile } = await admin
+      .from("users")
+      .select("name")
+      .eq("id", user.id)
+      .maybeSingle();
+    const nameParts = (profile?.name ?? "").trim().split(/\s+/).filter(Boolean);
+    const firstName = nameParts.shift() ?? "";
+    const lastName = nameParts.join(" ");
+
     const url = await createSignedCheckoutUrl({
       amount: Math.round(plan.price / 100), // HYP expects whole shekels
       // Plain hyphen — HYP's downstream description field uses windows-1255
       // and renders an em-dash as "?" on the hosted payment page.
       info: `${BRAND_NAME} - ${plan.label}`,
       order: attempt.id,
-      email: "",
-      firstName: "",
-      lastName: "",
+      email: user.email,
+      firstName,
+      lastName,
       successUrl: returnUrl.toString(),
       errorUrl: returnUrl.toString(),
       cancelUrl: cancelUrl.toString(),

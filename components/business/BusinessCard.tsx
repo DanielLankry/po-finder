@@ -64,9 +64,9 @@ export default function BusinessCard({
   const chip = CATEGORY_CHIP[business.category];
 
   return (
-    <div 
+    <div
       ref={scrollRef} 
-      className="px-2 py-2" 
+      className="relative px-2 py-2"
       onMouseEnter={onMouseEnter} 
       onMouseLeave={onMouseLeave}
     >
@@ -108,29 +108,6 @@ export default function BusinessCard({
               </div>
             )}
             
-            {/* Heart button overlay */}
-            <div
-              className={`absolute top-3 left-3 z-10 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 ${
-                isFavorited
-                  ? "opacity-100 bg-white/90"
-                  : `bg-white/10 hover:bg-white/30 ${isHovered ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`
-              }`}
-              onClick={(e) => {
-                e.stopPropagation();
-                onFavoriteToggle?.();
-              }}
-              role="button"
-              aria-label={isFavorited ? "הסר ממועדפים" : "שמור למועדפים"}
-            >
-              <Heart
-                className={`h-5 w-5 transition-all duration-200 drop-shadow-md ${
-                  isFavorited
-                    ? "fill-rose-500 text-rose-500 scale-110"
-                    : "text-white stroke-[2px]"
-                }`}
-              />
-            </div>
-
             {/* Optional "Open Now" badge over image */}
             {open && (
               <div className="absolute top-3 right-3 z-10 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg pointer-events-none transition-transform duration-300 group-hover:-translate-y-0.5 border border-white/20">
@@ -186,6 +163,20 @@ export default function BusinessCard({
             </p>
           </div>
         </div>
+      </button>
+      <button
+        type="button"
+        onClick={onFavoriteToggle}
+        className="absolute left-7 top-7 z-10 flex h-11 w-11 items-center justify-center rounded-full border-2 border-white/80 bg-white/95 text-stone-600 shadow-md backdrop-blur-md transition-all hover:scale-105 hover:text-rose-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+        aria-label={isFavorited ? "הסר ממועדפים" : "שמור למועדפים"}
+        aria-pressed={isFavorited}
+      >
+        <Heart
+          className={`h-5 w-5 transition-all duration-200 ${
+            isFavorited ? "scale-110 fill-rose-500 text-rose-500" : "text-stone-600"
+          }`}
+          aria-hidden="true"
+        />
       </button>
     </div>
   );

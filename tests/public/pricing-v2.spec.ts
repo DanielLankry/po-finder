@@ -50,6 +50,8 @@ test.describe("duration pricing", () => {
     const data = (await response.json()) as { businesses?: Record<string, unknown>[] };
     for (const business of data.businesses ?? []) {
       expect(business).not.toHaveProperty("boosted");
+      expect(business).not.toHaveProperty("owner_id");
+      expect(business).not.toHaveProperty("business_number");
     }
   });
 

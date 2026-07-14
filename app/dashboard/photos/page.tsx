@@ -49,7 +49,7 @@ export default function PhotosPage() {
     setUploadError(null);
 
     const MAX_SIZE = 10 * 1024 * 1024; // 10MB
-    const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
     for (const file of Array.from(files)) {
       if (!ALLOWED_TYPES.includes(file.type)) {
@@ -108,18 +108,34 @@ export default function PhotosPage() {
   }
 
   async function deletePhoto(photo: Photo) {
-    // Extract storage path from public URL — everything after /object/public/photos/
-    const match = photo.url.match(/\/object\/public\/photos\/(.+)$/);
-    const filePath = match?.[1];
-    if (filePath) {
-      await supabase.storage.from("photos").remove([decodeURIComponent(filePath)]);
-    }
+    if (!window.confirm("למחוק את התמונה? לא ניתן לבטל את הפעולה.")) return;
+
+    // Remove the database row first so a transient Storage error cannot leave
+    // a broken image reference visible in the owner or public experience.
     const { error: dbError } = await supabase.from("photos").delete().eq("id", photo.id);
     if (dbError) {
       setUploadError(`שגיאה במחיקה: ${dbError.message}`);
       return;
     }
-    setPhotos((prev) => prev.filter((p) => p.id !== photo.id));
+
+    // Extract storage path from public URL — everything after /object/public/photos/
+    const match = photo.url.match(/\/object\/public\/photos\/(.+)$/);
+    const filePath = match?.[1];
+    if (filePath) {
+      const { error: storageError } = await supabase.storage
+        .from("photos")
+        .remove([decodeURIComponent(filePath)]);
+      if (storageError) {
+        console.error("Failed to remove orphaned photo object:", storageError);
+      }
+    }
+
+    const remaining = photos.filter((item) => item.id !== photo.id);
+    if (photo.is_primary && remaining[0]) {
+      await supabase.from("photos").update({ is_primary: true }).eq("id", remaining[0].id);
+      remaining[0] = { ...remaining[0], is_primary: true };
+    }
+    setPhotos(remaining);
   }
 
   if (loading) {
@@ -132,7 +148,7 @@ export default function PhotosPage() {
 
   return (
     <div className="space-y-6" dir="rtl">
-      <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-card">
+      <div className="brand-panel bg-[#FFFDF7] p-5 sm:p-6">
         <h1 className="font-display font-bold text-xl text-stone-900 mb-2">תמונות</h1>
         <p className="text-stone-500 text-sm mb-6">
           הוסיפו תמונות של העסק. הגדירו תמונה ראשית שתופיע בכרטיס.
@@ -179,7 +195,7 @@ export default function PhotosPage() {
           ref={fileInputRef}
           type="file"
           multiple
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           className="hidden"
           onChange={(e) => e.target.files && uploadFiles(e.target.files)}
           aria-label="בחירת תמונות להעלאה"
@@ -189,7 +205,7 @@ export default function PhotosPage() {
         {photos.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
             {photos.map((photo) => (
-              <div key={photo.id} className="relative group rounded-xl overflow-hidden aspect-square">
+              <div key={photo.id} className="relative group rounded-xl overflow-hidden aspect-square border-2 border-[#17402D]/20 bg-[#EDE8DC]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={photo.url}
@@ -205,12 +221,12 @@ export default function PhotosPage() {
                   </div>
                 )}
 
-                {/* Actions on hover */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                {/* Actions stay visible on touch; pointer devices reveal them on hover. */}
+                <div className="absolute inset-x-0 bottom-0 flex min-h-14 items-center justify-center gap-2 bg-gradient-to-t from-black/70 to-transparent p-2 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
                   {!photo.is_primary && (
                     <button
                       onClick={() => setPrimary(photo.id)}
-                      className="bg-white text-stone-700 text-xs font-medium px-2 py-1.5 rounded-lg hover:bg-[#EFF5F0] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
+                      className="min-h-11 bg-white text-stone-700 text-xs font-bold px-3 py-2 rounded-xl hover:bg-[#EFF5F0] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
                       aria-label="הגדרה כתמונה ראשית"
                     >
                       הגדרה כראשית
@@ -218,10 +234,10 @@ export default function PhotosPage() {
                   )}
                   <button
                     onClick={() => deletePhoto(photo)}
-                    className="bg-white text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                    className="flex h-11 w-11 items-center justify-center bg-white text-red-600 rounded-xl hover:bg-red-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                     aria-label="מחיקת תמונה"
                   >
-                    <X className="h-3.5 w-3.5" />
+                    <X className="h-5 w-5" aria-hidden="true" />
                   </button>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CalendarDays, CalendarRange, CreditCard, Images, LayoutDashboard, Store } from "lucide-react";
@@ -10,11 +11,17 @@ const NAV_ITEMS = [
   { href: "/dashboard/schedule", label: "לוח זמנים להיום", icon: CalendarDays },
   { href: "/dashboard/events", label: "אירועים", icon: CalendarRange },
   { href: "/dashboard/photos", label: "תמונות", icon: Images },
-  { href: "/dashboard/billing", label: "חיוב ומנוי", icon: CreditCard },
+  { href: "/dashboard/billing", label: "תשלום ותקופה", icon: CreditCard },
 ];
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
+  const mobileNavRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const activeLink = mobileNavRef.current?.querySelector<HTMLElement>("[aria-current='page']");
+    activeLink?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [pathname]);
 
   function isActive(href: string, exact?: boolean) {
     if (exact) return pathname === href;
@@ -48,7 +55,7 @@ export default function DashboardSidebar() {
         })}
       </nav>
 
-      <nav className="brand-panel-soft flex md:hidden overflow-x-auto scrollbar-hide bg-[#FFFDF7]">
+      <nav ref={mobileNavRef} className="brand-panel-soft flex md:hidden overflow-x-auto scrollbar-hide scroll-px-4 bg-[#FFFDF7]" aria-label="ניווט לוח הבקרה בנייד">
         {NAV_ITEMS.map(({ href, label, exact, icon: Icon }) => {
           const active = isActive(href, exact);
           return (

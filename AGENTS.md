@@ -33,11 +33,16 @@ Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do
 - New purchases use only `listing_1m` through `listing_12m`; `duration_months` is the authoritative immutable entitlement snapshot, and renewal extends from `max(now(), expires_at)` using UTC calendar-month arithmetic.
 - Duration refunds restore stored before/after expiry snapshots and must pass `preflight_refund_payment_entitlement` newest-first; never subtract calendar months because month-end arithmetic is not invertible.
 - Expiry reminders run through `/api/cron/expiry-reminders` at 30, 7, and 1 days and deduplicate on `(business_id, expires_at, days_before)`, so a renewed expiry starts a fresh reminder cycle.
+- Product analytics are written server-side to `business_analytics_events`; `business_events` is reserved for owner-managed scheduled events.
+- Authentication return paths must pass through `safeRedirectPath`; public business selects must exclude owner and business-number fields.
+- HYP verification transport failures leave the payment attempt pending for reconciliation; only a completed negative verification marks it failed.
+- Review writes require an authenticated user, and the public `photos` bucket accepts only JPEG, PNG, or WebP files up to 10 MB without public object-listing access.
 
 ## Known Issues
 - If HYP charges a card but no browser return reaches `/api/payments/return`, existing pending attempts must be reconciled manually or via a future transaction inquiry integration.
 - Repo-wide `npm run lint` also scans historical `.claude/worktrees` and can fail on stale copies; run targeted ESLint for changed files alongside the production build until those worktrees are excluded.
 - The expiry reminder route returns `503` until `CRON_SECRET` is configured in the deployment; Vercel Cron sends it as the bearer token.
+- Legal pages still require the operator's real legal name, registration/ID number, postal address, and customer-service phone before a public launch announcement.
 
 ## Architecture Decisions
 - The PostHog-inspired direction is interpreted as Hebrew neighborhood field notes—warm paper, green ink, terracotta accents, offset shadows, and map geometry—so the site keeps its own `פה קרוב` identity rather than copying another product.

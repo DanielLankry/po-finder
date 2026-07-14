@@ -16,6 +16,19 @@ import {
   TEL_AVIV_CENTER,
   warmMapStyle,
 } from "@/lib/maps/mapStyle";
+import {
+  Beef,
+  CakeSlice,
+  Coffee,
+  Flower2,
+  Gem,
+  Leaf,
+  LocateFixed,
+  MapPin,
+  Shirt,
+  UtensilsCrossed,
+  Wheat,
+} from "lucide-react";
 import BusinessPopup from "./BusinessPopup";
 import type { BusinessWithSchedule, BusinessCategory } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
@@ -27,13 +40,12 @@ interface BusinessMapProps {
   filters: FilterState;
   selectedBusinessId?: string | null;
   onBusinessSelect?: (b: BusinessWithSchedule) => void;
+  onBusinessClear?: () => void;
   externalHoveredId?: string | null;
   onBusinessHover?: (id: string | null) => void;
   searchCenter?: { lat: number; lng: number } | null;
   onUserLocationChange?: (loc: { lat: number; lng: number }) => void;
 }
-
-
 
 const MAP_CONTAINER_STYLE = {
   width: "100%",
@@ -42,12 +54,25 @@ const MAP_CONTAINER_STYLE = {
 
 const libraries: ("places" | "geometry")[] = ["places"];
 
+const CATEGORY_ICONS: Record<BusinessCategory, typeof MapPin> = {
+  coffee: Coffee,
+  food: UtensilsCrossed,
+  sweets: CakeSlice,
+  meat: Beef,
+  vegan: Leaf,
+  celiac: Wheat,
+  flowers: Flower2,
+  jewelry: Gem,
+  vintage: Shirt,
+};
+
 export default function BusinessMap({
   businesses,
   activeCategory,
   filters,
   selectedBusinessId,
   onBusinessSelect,
+  onBusinessClear,
   externalHoveredId,
   onBusinessHover,
   searchCenter,
@@ -63,7 +88,9 @@ export default function BusinessMap({
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth < 1440 : false
   );
+  const [mapReady, setMapReady] = useState(false);
   const mapRef = useRef<google.maps.Map | null>(null);
+  const lastFocusedBusinessId = useRef<string | null>(null);
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
@@ -80,25 +107,56 @@ export default function BusinessMap({
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
+    setMapReady(true);
   }, []);
 
-  // Pan map when card is clicked in the list panel
-  useEffect(() => {
-    if (!selectedBusinessId || !mapRef.current) return;
-    const business = businesses.find((b) => b.id === selectedBusinessId);
-    if (!business) return;
+  const focusBusinessOnMap = useCallback((business: BusinessWithSchedule) => {
+    const map = mapRef.current;
+    if (!map) return;
+
     const lat = business.today_schedule?.lat ?? business.lat;
     const lng = business.today_schedule?.lng ?? business.lng;
-    if (lat && lng) {
-      mapRef.current.panTo(clampToIsraelBounds({ lat, lng }));
-      const selectTimer = setTimeout(() => setSelectedBusiness(business), 0);
-      return () => clearTimeout(selectTimer);
-    }
-  }, [selectedBusinessId, businesses]);
+    if (lat == null || lng == null) return;
+
+    lastFocusedBusinessId.current = business.id;
+    map.panTo(clampToIsraelBounds({ lat, lng }));
+    if ((map.getZoom() ?? DEFAULT_ZOOM) < 14) map.setZoom(14);
+
+    google.maps.event.addListenerOnce(map, "idle", () => {
+      const mapHeight = map.getDiv().clientHeight;
+      const offset = isMobile
+        ? Math.min(150, Math.round(mapHeight * 0.18))
+        : -Math.min(135, Math.round(mapHeight * 0.16));
+      map.panBy(0, offset);
+    });
+  }, [isMobile]);
+
+  const selectBusiness = useCallback((business: BusinessWithSchedule) => {
+    setSelectedBusiness(business);
+    focusBusinessOnMap(business);
+    onBusinessSelect?.(business);
+  }, [focusBusinessOnMap, onBusinessSelect]);
+
+  const clearSelectedBusiness = useCallback(() => {
+    lastFocusedBusinessId.current = null;
+    setSelectedBusiness(null);
+    onBusinessClear?.();
+  }, [onBusinessClear]);
+
+  // Keep list, marker, popup, and camera selection in one synchronized state.
+  useEffect(() => {
+    const business = selectedBusinessId
+      ? businesses.find((candidate) => candidate.id === selectedBusinessId) ?? null
+      : null;
+    const syncTimer = window.setTimeout(() => setSelectedBusiness(business), 0);
+    if (business && lastFocusedBusinessId.current !== business.id) focusBusinessOnMap(business);
+    return () => window.clearTimeout(syncTimer);
+  }, [selectedBusinessId, businesses, focusBusinessOnMap, mapReady]);
 
   // Pan + zoom when a location is chosen from the search bar or GPS
   useEffect(() => {
     if (!searchCenter || !mapRef.current) return;
+    lastFocusedBusinessId.current = null;
     mapRef.current.panTo(clampToIsraelBounds({ lat: searchCenter.lat, lng: searchCenter.lng }));
     mapRef.current.setZoom(15);
   }, [searchCenter]);
@@ -155,7 +213,11 @@ export default function BusinessMap({
         },
       }}
       onLoad={onMapLoad}
-      onClick={() => setSelectedBusiness(null)}
+      onUnmount={() => {
+        mapRef.current = null;
+        setMapReady(false);
+      }}
+      onClick={clearSelectedBusiness}
     >
       {visibleBusinesses.map((business) => {
         const schedule = business.today_schedule;
@@ -168,45 +230,34 @@ export default function BusinessMap({
         const isHovered = internalHovered || externalHoveredId === business.id;
         const open = isOpenNow(schedule ?? null);
 
-        const CATEGORY_EMOJI: Record<string, string> = {
-          coffee:  "☕",
-          food:    "🍽️",
-          sweets:  "🍰",
-          meat:    "🥩",
-          vegan:   "🌿",
-          celiac:  "🌾",
-          flowers: "🌸",
-          jewelry: "💎",
-          vintage: "👗",
-        };
-        const emoji = CATEGORY_EMOJI[business.category] ?? "📍";
+        const CategoryIcon = CATEGORY_ICONS[business.category] ?? MapPin;
 
         const size = isSelected || isHovered ? 40 : 32;
+        const hitSize = 44;
 
         return (
           <OverlayView
             key={business.id}
             position={{ lat, lng }}
             mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-            getPixelPositionOffset={() => ({ x: -(size / 2), y: -(size / 2) })}
+            getPixelPositionOffset={() => ({ x: -(hitSize / 2), y: -(hitSize / 2) })}
           >
             <div
               style={{
                 position: "relative",
-                width: size,
-                height: size,
+                width: hitSize,
+                height: hitSize,
                 zIndex: isSelected || isHovered ? 20 : 10,
                 filter: isSelected || isHovered
                   ? "drop-shadow(0 4px 12px rgba(0,0,0,0.25))"
                   : "drop-shadow(0 2px 4px rgba(0,0,0,0.12))",
                 cursor: "pointer",
                 userSelect: "none",
-                transition: "width 0.2s, height 0.2s, filter 0.2s",
+                transition: "filter 0.2s",
               }}
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedBusiness(business);
-                onBusinessSelect?.(business);
+                selectBusiness(business);
               }}
               onMouseEnter={() => {
                 setHoveredId(business.id);
@@ -222,7 +273,7 @@ export default function BusinessMap({
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
-                  setSelectedBusiness(business);
+                  selectBusiness(business);
                 }
               }}
             >
@@ -230,22 +281,25 @@ export default function BusinessMap({
                 style={{
                   width: size,
                   height: size,
-                  fontSize: isSelected || isHovered ? "1.4rem" : "1.1rem",
-                  border: `2px solid ${isSelected || isHovered ? "#2D6A4F" : "rgba(255,255,255,0.8)"}`,
+                  border: `2px solid ${isSelected ? "#8A3618" : isHovered ? "#17402D" : "rgba(255,255,255,0.9)"}`,
                   opacity: open ? 1 : 0.5,
                   filter: open ? "none" : "grayscale(1)",
                 }}
-                className="flex items-center justify-center rounded-full bg-white shadow-md select-none transition-all duration-200"
+                className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full shadow-md select-none transition-all duration-200 ${
+                  isSelected ? "bg-[#C4552D] text-white" : "bg-[#FFFDF7] text-[#17402D]"
+                }`}
               >
-                {emoji}
+                <CategoryIcon className={isSelected || isHovered ? "h-5 w-5" : "h-4 w-4"} aria-hidden="true" />
               </div>
 
               {/* Popup for desktop */}
               {isSelected && !isMobile && (
-                <div style={{ position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)", zIndex: 30 }}>
+                <div
+                  className="pointer-events-auto absolute bottom-[calc(100%+16px)] left-1/2 z-30 -translate-x-1/2"
+                >
                   <BusinessPopup
                     business={business}
-                    onClose={() => setSelectedBusiness(null)}
+                    onClose={clearSelectedBusiness}
                   />
                 </div>
               )}
@@ -298,7 +352,7 @@ export default function BusinessMap({
       {selectedBusiness && isMobile && (
         <BusinessPopup
           business={selectedBusiness}
-          onClose={() => setSelectedBusiness(null)}
+          onClose={clearSelectedBusiness}
           isMobile
         />
       )}
@@ -318,18 +372,10 @@ export default function BusinessMap({
                 mapRef.current?.setZoom(15);
               });
             }}
-            className="w-11 h-11 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
-            style={{ background: "linear-gradient(135deg,#2D6A4F 0%,#1F5038 100%)" }}
+            className="business-type-button flex h-11 min-h-0 w-11 items-center justify-center bg-[#17402D] p-0 text-[#FFFDF7]"
             aria-label="מיקום שלי"
           >
-            {/* Navigation arrow — points to current location */}
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3" />
-              <line x1="12" y1="2" x2="12" y2="6" />
-              <line x1="12" y1="18" x2="12" y2="22" />
-              <line x1="2" y1="12" x2="6" y2="12" />
-              <line x1="18" y1="12" x2="22" y2="12" />
-            </svg>
+            <LocateFixed className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
       )}

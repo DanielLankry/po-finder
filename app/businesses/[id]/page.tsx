@@ -154,7 +154,7 @@ export default async function BusinessPage({ params }: Props) {
                       {KASHRUT_LABELS[business.kashrut as keyof typeof KASHRUT_LABELS]}
                     </span>
                   )}
-                  {business.business_number && (
+                  {business.is_verified && (
                     <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 font-medium">
                       <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
                       עסק מאומת
@@ -231,6 +231,9 @@ export default async function BusinessPage({ params }: Props) {
         )}
       </div>
       <Footer />
+      {business.whatsapp && (
+        <div className="h-[calc(5rem+env(safe-area-inset-bottom))] lg:hidden" aria-hidden="true" />
+      )}
     </>
   );
 }

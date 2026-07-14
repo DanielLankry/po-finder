@@ -1,10 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/";
+  const next = safeRedirectPath(searchParams.get("next"), "/");
 
   if (code) {
     const supabase = await createClient();
@@ -24,16 +25,19 @@ export async function GET(request: Request) {
 
         if (!existingUser) {
           const meta = user.user_metadata ?? {};
+          const role = meta.role === "business_owner" ? "business_owner" : "customer";
           await supabase.from("users").insert({
             id: user.id,
             email: user.email ?? "",
-            role: meta.role ?? "customer",
-            name: meta.name ?? meta.full_name ?? "",
+            role,
+            name: String(meta.name ?? meta.full_name ?? "").slice(0, 120),
           });
         }
       }
 
-      return NextResponse.redirect(`${origin}${next}`);
+      const response = NextResponse.redirect(new URL(next, origin));
+      response.headers.set("Cache-Control", "private, no-store");
+      return response;
     }
   }
 

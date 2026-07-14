@@ -96,6 +96,9 @@
 - [x] Replace subscriptions and boost packages with one duration-based listing product — 2026-07-14
   - Files modified: `.env.local.example`, `app/pricing/page.tsx`, `app/pricing/PricingClient.tsx`, `app/dashboard/billing/page.tsx`, `app/dashboard/billing/BillingClient.tsx`, `components/business/DurationSelectorCard.tsx`, `app/api/payments/checkout/route.ts`, `app/api/admin/payments/[id]/refund/route.ts`, `app/api/cron/expiry-reminders/route.ts`, `lib/plans.ts`, `lib/plans-server.ts`, `lib/expiry-reminders.ts`, `lib/email.ts`, `lib/email-templates.ts`, `lib/site-config.ts`, `supabase/migrations/20260714105000_duration_slider_pricing.sql`, `supabase/migrations/20260714105500_deactivate_legacy_payment_products.sql`, `tests/plans.test.mjs`, `tests/expiry-reminders.test.mjs`, `tests/public/pricing-v2.spec.ts`, `tests/destructive/pricing-duration-products.spec.ts`, `tests/destructive/paid-listing-lifecycle.spec.ts`, `vercel.json`, `design-qa.md`
   - Summary: Added the 1–12 month one-time price slider, calendar-month renewals with exact LIFO refunds, automatic expiry reminders, and removed boost sales and promoted placement while preserving historical payment records.
+- [x] Harden mobile launch UX, public data, reviews, payments, and production storage — 2026-07-14
+  - Files modified: `app/MapPage.tsx`, `app/admin/businesses/page.tsx`, `app/admin/layout.tsx`, `app/admin/page.tsx`, `app/admin/stats/page.tsx`, `app/api/analytics/events/route.ts`, `app/api/businesses/route.ts`, `app/api/payments/checkout/route.ts`, `app/api/payments/return/route.ts`, `app/api/reviews/route.ts`, `app/auth/callback/route.ts`, `app/auth/login/page.tsx`, `app/auth/register/page.tsx`, `app/businesses/[id]/page.tsx`, `app/contact/page.tsx`, `app/dashboard/billing/BillingClient.tsx`, `app/dashboard/events/page.tsx`, `app/dashboard/page.tsx`, `app/dashboard/photos/page.tsx`, `app/dashboard/profile/page.tsx`, `app/dashboard/schedule/page.tsx`, `app/globals.css`, `app/layout.tsx`, `components/business/BusinessCard.tsx`, `components/business/BusinessListPanel.tsx`, `components/business/DurationSelectorCard.tsx`, `components/business/FavoritesPanel.tsx`, `components/business/ReviewForm.tsx`, `components/business/ReviewsList.tsx`, `components/business/StatusCard.tsx`, `components/filters/FilterBar.tsx`, `components/filters/FilterDrawer.tsx`, `components/layout/AccessibilityWidget.tsx`, `components/layout/CookieConsent.tsx`, `components/layout/DashboardSidebar.tsx`, `components/layout/Navbar.tsx`, `components/map/BusinessMap.tsx`, `components/map/BusinessPopup.tsx`, `lib/analytics.ts`, `lib/db/businesses.ts`, `lib/hyp.ts`, `lib/safe-redirect.ts`, `public/google-g.svg`, `supabase/migrations/20260714112838_split_business_analytics_events.sql`, `supabase/migrations/20260714133500_harden_review_policies.sql`, `tests/public/pricing-v2.spec.ts`, `tests/safe-redirect.test.mjs`, `TASKS.md`, `AGENTS.md`.
+  - Summary: Unified responsive product-paper UI across public, owner, and admin flows; added 44 px mobile controls and accessible overlays; prevented expired or private data from leaking through public discovery; hardened auth redirects, reviews, payment reconciliation, analytics, and photo storage; and applied the production database migrations.
 
 ---
 
@@ -109,8 +112,8 @@
   - `app/dashboard/photos/page.tsx`
 
 ### Medium Priority
-- [ ] **Fix search on non-homepage** - Navbar search input on other pages doesn't navigate back to map with search params
-- [ ] **Verify storage bucket migration** - Confirm `002_storage_bucket.sql` has been applied to production Supabase
+- [x] **Fix search on non-homepage** - Navbar search returns to the map with a shareable `q` parameter.
+- [x] **Verify storage bucket migration** - Production `photos` bucket is limited to 10 MB JPEG, PNG, and WebP uploads.
 - [ ] **Resolve remaining repo-wide ESLint debt** - Full `npm run lint` still reports pre-existing React Compiler issues in admin, map, cookie, and UI utility files.
 
 ### Low Priority

@@ -1,10 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, Clock, X, Star, CheckCircle2 } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock3,
+  MapPin,
+  Navigation,
+  Star,
+  X,
+} from "lucide-react";
 import type { BusinessWithSchedule } from "@/lib/types";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import { isOpenNow } from "@/lib/utils/schedule";
+import { trackEvent } from "@/lib/analytics";
 
 interface BusinessPopupProps {
   business: BusinessWithSchedule;
@@ -19,163 +28,138 @@ export default function BusinessPopup({
 }: BusinessPopupProps) {
   const schedule = business.today_schedule ?? null;
   const open = isOpenNow(schedule);
-  const primaryPhoto = business.photos?.find((p) => p.is_primary) ?? business.photos?.[0];
+  const primaryPhoto = business.photos?.find((photo) => photo.is_primary) ?? business.photos?.[0];
   const address = schedule?.address ?? business.address;
+  const mapsQuery = encodeURIComponent(address ?? business.name);
 
   const content = (
-    <div
-      className="rounded-2xl overflow-hidden bg-white"
-      style={{ boxShadow: "0 12px 32px rgba(0,0,0,0.18), 0 0 1px rgba(0,0,0,0.04)" }}
-      dir="rtl"
-    >
-      {/* Close button */}
-      <button
-        onClick={onClose}
-        className="absolute top-2 left-2 z-10 h-8 w-8 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center hover:bg-white hover:scale-110 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] shadow-sm"
-        aria-label="סגירת חלונית"
-      >
-        <X className="h-4 w-4 text-slate-600" />
-      </button>
-
-      {/* Photo */}
-      <div className="relative h-44 bg-slate-100">
+    <article className="brand-panel overflow-hidden bg-[#FFFDF7]" dir="rtl">
+      <div className="relative h-32 border-b-2 border-[#17402D] bg-[#DDEBE0]">
         {primaryPhoto ? (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={primaryPhoto.url}
-              alt={`תמונה של ${business.name}`}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                const target = e.currentTarget;
-                target.style.display = "none";
-                const placeholder = target.nextElementSibling as HTMLElement | null;
-                if (placeholder) placeholder.style.display = "flex";
-              }}
-            />
-            <div
-              className="absolute inset-0 flex-col items-center justify-center bg-gradient-to-br from-[#EFF5F0] via-[#DDEBE0] to-[#C3DCC9]"
-              style={{ display: "none" }}
-            >
-              <div className="h-12 w-12 rounded-2xl bg-[#2D6A4F] flex items-center justify-center mb-2 shadow-md">
-                <MapPin className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-[#2D6A4F]/70 text-xs font-medium">{CATEGORY_LABELS[business.category]}</span>
-            </div>
-          </>
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={primaryPhoto.url}
+            alt={`תמונה של ${business.name}`}
+            className="h-full w-full object-cover"
+          />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#EFF5F0] via-[#DDEBE0] to-[#C3DCC9]">
-            <div className="h-12 w-12 rounded-2xl bg-[#2D6A4F] flex items-center justify-center mb-2 shadow-md">
-              <MapPin className="h-6 w-6 text-white" />
+          <div className="brand-map-grid flex h-full items-center justify-center text-[#17402D]">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-[#17402D] bg-[#FFF8DC] shadow-[3px_3px_0_0_#17402D]">
+              <MapPin className="h-7 w-7" aria-hidden="true" />
             </div>
-            <span className="text-[#2D6A4F]/70 text-xs font-medium">{CATEGORY_LABELS[business.category]}</span>
           </div>
         )}
-        {/* Status overlay badge on photo */}
-        <div className="absolute bottom-2 right-2">
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="business-type-button absolute left-3 top-3 z-10 flex h-11 min-h-11 w-11 items-center justify-center p-0"
+          aria-label="סגירת חלונית"
+        >
+          <X className="h-4 w-4" aria-hidden="true" />
+        </button>
+
+        <span className="brand-chip absolute bottom-3 right-3 px-3 py-1 text-xs">
+          {CATEGORY_LABELS[business.category]}
+        </span>
+      </div>
+
+      <div className="space-y-4 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="font-display text-2xl leading-none text-[#17402D]">
+              {business.name}
+            </h3>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-bold text-[#17402D]/70">
+              {business.avg_rating > 0 && (
+                <span className="inline-flex items-center gap-1">
+                  <Star className="h-3.5 w-3.5 fill-[#F4B942] text-[#8A3618]" aria-hidden="true" />
+                  {business.avg_rating.toFixed(1)}
+                  <span className="font-normal">({business.review_count})</span>
+                </span>
+              )}
+              {business.kashrut !== "none" && <span>{KASHRUT_LABELS[business.kashrut]}</span>}
+              {business.is_verified && (
+                <span className="inline-flex items-center gap-1 text-[#5D3A9B]">
+                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  מאומת
+                </span>
+              )}
+            </div>
+          </div>
+
           <span
-            className={`text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${
+            className={`shrink-0 rounded-full border-2 px-2.5 py-1 text-xs font-black ${
               open
-                ? "bg-emerald-500/90 text-white"
-                : schedule
-                ? "bg-black/60 text-white"
-                : "bg-black/50 text-white/80"
+                ? "border-[#17402D] bg-[#DDEBE0] text-[#17402D]"
+                : "border-[#8A3618]/40 bg-[#F7E7DE] text-[#8A3618]"
             }`}
           >
-            {open ? "● פתוח עכשיו" : schedule ? "סגור היום" : "שעות לא עודכנו"}
+            {open ? "פתוח עכשיו" : schedule ? "סגור היום" : "שעות לא עודכנו"}
           </span>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="p-4 space-y-3">
-        {/* Rating row */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <Star className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden="true" />
-            <span className="font-semibold text-sm text-slate-900">
-              {business.avg_rating > 0 ? business.avg_rating.toFixed(1) : "—"}
-            </span>
-            {business.review_count > 0 && (
-              <span className="text-slate-400 text-xs">
-                ({business.review_count} ביקורות)
+        <div className="brand-rule" aria-hidden="true" />
+
+        <div className="grid gap-2 text-sm text-[#17402D]/80">
+          {address && (
+            <div className="flex items-start gap-2">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#C4552D]" aria-hidden="true" />
+              <span className="line-clamp-2">{address}</span>
+            </div>
+          )}
+          {schedule?.open_time && schedule?.close_time && (
+            <div className="flex items-center gap-2">
+              <Clock3 className="h-4 w-4 shrink-0 text-[#C4552D]" aria-hidden="true" />
+              <span className="tabular-nums font-bold">
+                היום, {schedule.open_time.slice(0, 5)}–{schedule.close_time.slice(0, 5)}
               </span>
-            )}
-          </div>
-        </div>
-
-        {/* Name + category */}
-        <div>
-          <h3 className="font-display font-bold text-base text-slate-900 leading-tight">
-            {business.name}
-          </h3>
-          <p className="text-slate-400 text-xs mt-0.5">
-            {CATEGORY_LABELS[business.category]}
-          </p>
-        </div>
-
-        <hr className="border-slate-100" />
-
-        {/* Address & hours */}
-        {address && (
-          <div className="flex items-start gap-2 text-xs text-slate-500">
-            <MapPin className="h-3.5 w-3.5 text-[#2D6A4F] mt-0.5 flex-shrink-0" aria-hidden="true" />
-            <span>{address}</span>
-          </div>
-        )}
-        {schedule?.open_time && schedule?.close_time && (
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <Clock className="h-3.5 w-3.5 text-[#2D6A4F] flex-shrink-0" aria-hidden="true" />
-            <span className="tabular-nums">
-              {schedule.open_time.slice(0, 5)} – {schedule.close_time.slice(0, 5)}
-            </span>
-          </div>
-        )}
-
-        {/* Badges */}
-        <div className="flex flex-wrap gap-1.5">
-          {business.kashrut !== "none" && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-[#EFF5F0] text-[#1F5038] font-medium pop-in">
-              {KASHRUT_LABELS[business.kashrut]}
-            </span>
-          )}
-          {business.business_number && (
-            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium pop-in stagger-1">
-              <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-              עסק מאומת
-            </span>
+            </div>
           )}
         </div>
 
-        {/* CTA */}
-        <Link
-          href={`/businesses/${business.id}`}
-          className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-medium text-sm transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 shadow-sm btn-press"
-        >
-          לפרטים המלאים ←
-        </Link>
+        <div className="grid grid-cols-[1fr_auto] gap-3">
+          <Link
+            href={`/businesses/${business.id}`}
+            className="brand-button flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-sm font-black transition-all focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#2D6A4F]/35"
+          >
+            לכרטיס העסק
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          </Link>
+          {address && (
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackEvent(business.id, "directions_click")}
+              className="business-type-button flex min-h-11 items-center justify-center gap-2 px-4 text-sm font-black"
+              aria-label={`הוראות הגעה אל ${business.name}`}
+            >
+              <Navigation className="h-4 w-4" aria-hidden="true" />
+              <span className="hidden min-[360px]:inline">ניווט</span>
+            </a>
+          )}
+        </div>
       </div>
-    </div>
+    </article>
   );
 
   if (isMobile) {
     return (
       <>
-        {/* Backdrop */}
         <div
-          className="fixed inset-0 bg-black/40 z-30 fade-in"
+          className="fixed inset-0 z-30 bg-[#17402D]/35 backdrop-blur-[1px] fade-in"
           onClick={onClose}
           aria-hidden="true"
         />
-        {/* Bottom sheet */}
         <div
-          className="fixed inset-x-0 bottom-0 z-30 popup-enter"
+          className="fixed inset-x-0 bottom-0 z-40 popup-enter"
           role="dialog"
           aria-modal="true"
           aria-label={`פרטי ${business.name}`}
         >
-          <div className="mx-auto max-w-sm pb-4 px-4">
-            <div className="h-1 w-10 bg-slate-300 rounded-full mx-auto mb-3" aria-hidden="true" />
+          <div className="mx-auto max-w-md px-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-[#FFFDF7] shadow-sm" aria-hidden="true" />
             <div className="relative">{content}</div>
           </div>
         </div>
@@ -185,13 +169,11 @@ export default function BusinessPopup({
 
   return (
     <div
-      className="absolute z-20 w-80 slide-in-right"
+      className="relative w-[360px] max-w-[calc(100vw-3rem)] popup-focus-enter"
       role="dialog"
-      aria-modal="true"
       aria-label={`פרטי ${business.name}`}
-      style={{ top: "calc(100% + 8px)" }}
     >
-      <div className="relative">{content}</div>
+      {content}
     </div>
   );
 }

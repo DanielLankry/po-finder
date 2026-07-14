@@ -82,8 +82,8 @@ export default function DurationSelectorCard({
 
         <div className="mt-8" dir="ltr">
           <div className="mb-2 flex items-center justify-between text-xs font-bold text-[#17402D]">
-            <span>1 month</span>
-            <span>12 months</span>
+            <span>חודש</span>
+            <span>12 חודשים</span>
           </div>
           <input
             aria-label="משך הפרסום בחודשים"

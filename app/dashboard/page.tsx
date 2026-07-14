@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Clock, Star, Camera, MapPin, MessageCircle, Eye, Phone, Clock3 } from "lucide-react";
+import { Plus, Clock, Star, Camera, MapPin, MessageCircle, Eye, Phone, Clock3, Hand } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessesByOwner } from "@/lib/db/businesses";
 import { getTodaySchedule } from "@/lib/db/schedules";
@@ -99,7 +99,7 @@ async function DashboardContent({
   // eslint-disable-next-line react-hooks/purity
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const { data: analyticsData } = await supabase
-    .from("business_events")
+    .from("business_analytics_events")
     .select("event_type")
     .eq("business_id", business.id)
     .gte("created_at", thirtyDaysAgo);
@@ -118,7 +118,7 @@ async function DashboardContent({
         <div className="absolute -left-5 -top-5 h-16 w-16 rotate-12 rounded-2xl border-2 border-[#8A3618] bg-[#F6E3D9]" aria-hidden="true" />
         <div className="flex items-center gap-3 flex-wrap">
           <h1 className="font-display text-4xl text-[#17402D]">
-            שלום! <span aria-hidden="true">👋</span>
+            שלום! <Hand className="inline-block h-7 w-7 text-[#C4552D]" aria-hidden="true" />
           </h1>
           <ExpiryBadge expiresAt={(business as unknown as Record<string, unknown>).expires_at as string | null} />
         </div>
@@ -137,7 +137,7 @@ async function DashboardContent({
           <div>
             <p className="font-semibold text-amber-900 text-sm">הטיוטה ממתינה לאימות</p>
             <p className="text-amber-700 text-xs mt-1 leading-relaxed">
-              פרטי העסק נשמרו באופן פרטי. הצוות יאמת את העסק, ואז יהיה אפשר לבחור רישום שנתי ולהעלות אותו לאוויר.
+              פרטי העסק נשמרו באופן פרטי. הצוות יאמת את העסק, ואז יהיה אפשר לבחור את משך ההופעה ולהעלות אותו לאוויר.
             </p>
           </div>
         </div>
@@ -148,8 +148,8 @@ async function DashboardContent({
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FFF3B0]"><Clock3 className="h-5 w-5 text-[#8A3618]" /></div>
           <div className="flex-1">
             <p className="text-sm font-semibold text-stone-950">העסק מאומת, אבל לא מופיע לציבור</p>
-            <p className="mt-1 text-xs leading-relaxed text-stone-600">בחרו רישום שנתי כדי לפרסם את הכרטיס במפה וברשימה למשך 365 ימים.</p>
-            <Link href="/dashboard/billing" className="mt-3 inline-flex rounded-lg bg-[#8A3618] px-4 py-2 text-xs font-bold text-white">לבחירת מסלול</Link>
+            <p className="mt-1 text-xs leading-relaxed text-stone-600">בחרו בין חודש ל־12 חודשים ושלמו פעם אחת עבור זמן ההופעה.</p>
+            <Link href="/dashboard/billing" className="mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#8A3618] px-4 py-2 text-xs font-bold text-white">לבחירת משך הופעה</Link>
           </div>
         </div>
       )}

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { LayoutDashboard, Store, Tag, BarChart3, LogOut, Ticket, Menu, X, CreditCard } from "lucide-react";
 
 const NAV = [
@@ -14,19 +15,26 @@ const NAV = [
   { href: "/admin/stats", label: "סטטיסטיקות", icon: BarChart3 },
 ];
 
-const LOGO = (
-  <svg width="20" height="25" viewBox="0 0 40 50" fill="none">
-    <defs><linearGradient id="gl" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stopColor="#6FA583"/><stop offset="100%" stopColor="#2D6A4F"/>
-    </linearGradient></defs>
-    <path d="M20 0C9.507 0 1 8.507 1 19c0 13.255 17.5 29.5 18.25 30.188a1.125 1.125 0 0 0 1.5 0C21.5 48.5 39 32.255 39 19 39 8.507 30.493 0 20 0z" fill="url(#gl)"/>
-    <text x="20" y="26" textAnchor="middle" fontFamily="sans-serif" fontWeight="800" fontSize="20" fill="white">פ</text>
-  </svg>
-);
-
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (pathname === "/admin/login" || !sidebarOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setSidebarOpen(false);
+    }
+
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [pathname, sidebarOpen]);
 
   if (pathname === "/admin/login") return <>{children}</>;
 
@@ -36,19 +44,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const navLinks = (
-    <nav className="flex-1 p-4 space-y-1">
+    <nav className="flex-1 p-4 space-y-2" aria-label="ניווט ניהול">
       {NAV.map(({ href, label, icon: Icon }) => {
-        const active = pathname === href;
+        const active = href === "/admin" ? pathname === href : pathname.startsWith(href);
         return (
           <Link
             key={href}
             href={href}
             onClick={() => setSidebarOpen(false)}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+            className={`flex min-h-11 items-center gap-3 rounded-xl border-2 px-3 py-2.5 text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] ${
               active
-                ? "bg-[#EFF5F0] text-[#2D6A4F] font-semibold"
-                : "text-[#555] hover:bg-[#EFF5F0] hover:text-[#2D6A4F]"
+                ? "border-[#8A3618] bg-[#F6E3D9] text-[#8A3618] shadow-[2px_2px_0_0_#8A3618]"
+                : "border-transparent text-stone-600 hover:border-[#17402D]/25 hover:bg-[#EFF5F0] hover:text-[#17402D]"
             }`}
+            aria-current={active ? "page" : undefined}
           >
             <Icon className="h-4 w-4 flex-shrink-0" />
             {label}
@@ -59,48 +68,58 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   );
 
   return (
-    <div className="min-h-screen bg-[#F3F4F6]" dir="rtl">
+    <div className="brand-canvas min-h-[100dvh]" dir="rtl">
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 inset-x-0 z-50 bg-white border-b border-[#E5E7EB] flex items-center justify-between px-4 h-14 shadow-sm">
+      <div className="md:hidden fixed top-0 inset-x-0 z-50 bg-[#F7F3EA]/95 border-b-2 border-[#17402D] flex items-center justify-between px-4 h-16 shadow-[0_3px_0_0_rgba(23,64,45,0.12)] backdrop-blur-sm">
         <div className="flex items-center gap-2">
-          {LOGO}
-          <span className="font-bold text-[#111] text-sm">פה קרוב — ניהול</span>
+          <Image src="/logo.png" alt="" width={40} height={40} className="h-10 w-10 rounded-xl" />
+          <span className="font-bold text-[#17402D] text-sm">פה קרוב — ניהול</span>
         </div>
-        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="h-9 w-9 flex items-center justify-center rounded-xl hover:bg-[#F3F4F6] transition-colors">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="h-11 w-11 flex items-center justify-center rounded-xl hover:bg-[#EFF5F0] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
+          aria-label={sidebarOpen ? "סגירת תפריט ניהול" : "פתיחת תפריט ניהול"}
+          aria-expanded={sidebarOpen}
+          aria-controls="admin-sidebar"
+        >
           {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={() => setSidebarOpen(false)} />
+        <div className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]" onClick={() => setSidebarOpen(false)} aria-hidden="true" />
       )}
 
       {/* Sidebar */}
-      <aside className={`
-        fixed top-0 right-0 h-full w-60 bg-white border-l border-[#E5E7EB] flex flex-col shadow-sm z-50
+      <aside
+        id="admin-sidebar"
+        className={`
+        fixed top-0 right-0 h-[100dvh] w-[min(18rem,calc(100vw-2rem))] bg-[#FFFDF7] border-l-2 border-[#17402D] flex flex-col shadow-[6px_0_0_0_rgba(23,64,45,0.12)] z-50
         transition-transform duration-300
         md:translate-x-0
-        ${sidebarOpen ? "translate-x-0" : "translate-x-full md:translate-x-0"}
-      `}>
+        ${sidebarOpen ? "visible translate-x-0" : "invisible translate-x-full pointer-events-none md:visible md:translate-x-0 md:pointer-events-auto"}
+      `}
+        role={sidebarOpen ? "dialog" : undefined}
+        aria-modal={sidebarOpen ? "true" : undefined}
+        aria-label="תפריט ניהול"
+      >
         {/* Logo — desktop */}
-        <div className="hidden md:flex p-6 border-b border-[#E5E7EB] items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-[#EFF5F0] flex items-center justify-center">
-            {LOGO}
-          </div>
+        <div className="hidden md:flex p-6 border-b-2 border-[#17402D] bg-[#FFF3B0] items-center gap-3">
+          <Image src="/logo.png" alt="" width={44} height={44} className="h-11 w-11 rounded-xl" />
           <div>
-            <p className="font-bold text-[#111] text-sm">פה קרוב</p>
-            <p className="text-[#888] text-xs">לוח ניהול</p>
+            <p className="font-display text-xl text-[#17402D]">פה קרוב</p>
+            <p className="text-[#8A3618] font-bold text-xs">לוח ניהול</p>
           </div>
         </div>
 
         {/* Logo — mobile (with close) */}
-        <div className="md:hidden flex items-center justify-between p-4 pt-5 border-b border-[#E5E7EB]">
+        <div className="md:hidden flex items-center justify-between p-4 pt-[max(1.25rem,env(safe-area-inset-top))] border-b-2 border-[#17402D] bg-[#FFF3B0]">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-xl bg-[#EFF5F0] flex items-center justify-center">{LOGO}</div>
-            <p className="font-bold text-[#111] text-sm">ניהול</p>
+            <Image src="/logo.png" alt="" width={40} height={40} className="h-10 w-10 rounded-xl" />
+            <p className="font-bold text-[#17402D] text-sm">ניהול</p>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-[#F3F4F6]">
+          <button onClick={() => setSidebarOpen(false)} className="h-11 w-11 flex items-center justify-center rounded-xl hover:bg-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]" aria-label="סגירת תפריט ניהול">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -108,10 +127,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {navLinks}
 
         {/* Logout */}
-        <div className="p-4 border-t border-[#E5E7EB]">
+        <div className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t-2 border-[#17402D]/20">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-500 hover:bg-red-50 transition-colors text-sm font-medium"
+            className="w-full min-h-11 flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 transition-colors text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
             <LogOut className="h-4 w-4" />
             יציאה
@@ -120,7 +139,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main content */}
-      <main className="md:mr-60 pt-14 md:pt-0 min-h-screen">
+      <main className="md:mr-72 pt-16 md:pt-0 min-h-[100dvh]">
         {children}
       </main>
     </div>

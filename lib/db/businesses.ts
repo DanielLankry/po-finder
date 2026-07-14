@@ -40,7 +40,25 @@ export async function getBusinessById(id: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("businesses")
-    .select("*, photos(*)")
+    .select(`
+      id,
+      name,
+      description,
+      category,
+      address,
+      lat,
+      lng,
+      weekly_hours,
+      phone,
+      whatsapp,
+      website,
+      instagram,
+      kashrut,
+      avg_rating,
+      review_count,
+      is_verified,
+      photos(id, business_id, url, is_primary, created_at)
+    `)
     .eq("id", id)
     .eq("is_verified", true)
     .eq("is_active", true)
