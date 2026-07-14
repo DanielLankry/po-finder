@@ -88,19 +88,14 @@ function RegisterForm() {
 
   return (
     <div
-      className="min-h-screen flex bg-[#F7F3EA]"
+      className="brand-canvas min-h-screen flex"
       dir="rtl"
       
     >
       {/* ── Hero side — LEFT in RTL (desktop only) ─────────────────────────── */}
-      <div className="hidden lg:flex flex-1 relative overflow-hidden items-center justify-center p-12">
-        <div
-          className="absolute inset-0 opacity-[0.06]"
-          style={{
-            backgroundImage: "linear-gradient(#2D6A4F 1px, transparent 1px), linear-gradient(90deg, #2D6A4F 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
+      <div className="brand-map-grid hidden lg:flex flex-1 relative overflow-hidden items-center justify-center border-l-2 border-[#17402D] p-12">
+        <div className="absolute -right-12 top-20 h-32 w-32 rotate-12 rounded-[2rem] border-2 border-[#8A3618] bg-[#F6E3D9] shadow-[5px_5px_0_0_#8A3618]" aria-hidden="true" />
+        <div className="absolute -left-8 bottom-16 h-24 w-24 -rotate-12 rounded-full border-2 border-[#17402D] bg-[#FFF3B0] shadow-[4px_4px_0_0_#17402D]" aria-hidden="true" />
         <div className="relative z-10 text-center max-w-sm">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="פה קרוב" className="h-20 w-auto mx-auto mb-6 drop-shadow-md" />
@@ -115,7 +110,7 @@ function RegisterForm() {
             />
           </div>
           <p className="text-[#1F5038] text-lg font-medium opacity-80">על המפה, בזמן אמת</p>
-          <div className="mt-8 rounded-3xl border border-white/60 bg-white/55 p-5 text-right shadow-sm backdrop-blur">
+          <div className="sticker mt-8 p-5 text-right rotate-1">
             <p className="text-sm font-bold text-[#17402D] mb-2">מה מקבלים?</p>
             <p className="text-sm text-[#1F5038] leading-relaxed">
               פרופיל עסק, מיקום, שעות פעילות, תמונות וכפתור התקשרות במקום אחד.
@@ -125,8 +120,8 @@ function RegisterForm() {
       </div>
 
       {/* ── Form side — RIGHT in RTL ──────────────────────────────────────── */}
-      <div className="flex flex-1 items-center justify-center p-6 lg:p-12 overflow-y-auto">
-        <div className="w-full max-w-[420px]">
+      <div className="flex flex-1 items-center justify-center p-5 sm:p-8 lg:p-12 overflow-y-auto">
+        <div className="brand-panel w-full max-w-[460px] p-6 sm:p-8 my-5">
 
           {/* Mobile logo */}
           <div className="flex justify-center mb-6 lg:hidden">
@@ -198,20 +193,20 @@ function RegisterForm() {
                   <Label htmlFor="name" className="text-[#17402D] font-semibold text-sm mb-2 block">שם מלא</Label>
                   <Input id="name" type="text" placeholder="ישראל ישראלי" value={name}
                     onChange={(e) => setName(e.target.value)} required
-                    className="h-12 rounded-2xl border-2 border-[#17402D]/20 focus-visible:border-[#2D6A4F] focus-visible:ring-0 bg-white text-sm" />
+                    className="brand-control h-12 rounded-xl focus-visible:ring-0 text-sm" />
                 </div>
                 <div>
                   <Label htmlFor="email" className="text-[#17402D] font-semibold text-sm mb-2 block">כתובת מייל</Label>
                   <Input id="email" type="email" placeholder="your@email.com" value={email}
                     onChange={(e) => setEmail(e.target.value)} required dir="ltr"
-                    className="h-12 rounded-2xl border-2 border-[#17402D]/20 focus-visible:border-[#2D6A4F] focus-visible:ring-0 bg-white text-sm" />
+                    className="brand-control h-12 rounded-xl focus-visible:ring-0 text-sm" />
                 </div>
                 <div>
                   <Label htmlFor="password" className="text-[#17402D] font-semibold text-sm mb-2 block">סיסמה (לפחות 6 תווים)</Label>
                   <div className="relative">
                     <Input id="password" type={showPass ? "text" : "password"} placeholder="••••••••" value={password}
                       onChange={(e) => setPassword(e.target.value)} required minLength={6} dir="ltr"
-                      className="h-12 rounded-2xl border-2 border-[#17402D]/20 focus-visible:border-[#2D6A4F] focus-visible:ring-0 bg-white text-sm pr-12" />
+                      className="brand-control h-12 rounded-xl focus-visible:ring-0 text-sm pr-12" />
                     <button type="button" onClick={() => setShowPass(!showPass)}
                       className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#A8A29E] hover:bg-[#EFF5F0] hover:text-[#2D6A4F] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
                       aria-label={showPass ? "הסתרת סיסמה" : "הצגת סיסמה"}>
@@ -223,7 +218,7 @@ function RegisterForm() {
                 {error && <p role="alert" className="text-red-500 text-sm bg-red-50 px-4 py-2.5 rounded-xl">{error}</p>}
 
                 <button type="submit" disabled={loading}
-                  className="w-full h-12 rounded-2xl bg-[#2D6A4F] hover:bg-[#1F5038] active:scale-[0.98] text-white font-bold text-[15px] transition-all shadow-[0_4px_20px_rgba(45,106,79,0.3)] disabled:opacity-60">
+                  className="brand-button w-full h-12 rounded-xl font-bold text-[15px] transition-all disabled:opacity-60">
                   {loading ? "...נרשמים" : isPricingSignup ? "יצירת חשבון והמשך לתשלום" : "יצירת חשבון"}
                 </button>
               </form>
@@ -245,8 +240,8 @@ function RoleCard({ active, onClick, icon, title, description }: {
 }) {
   return (
     <button type="button" onClick={onClick} aria-pressed={active}
-      className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 text-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 ${
-        active ? "border-[#2D6A4F] bg-[#EFF5F0] text-[#1F5038] shadow-sm" : "border-[#17402D]/20 bg-white text-[#78716C] hover:border-[#2D6A4F]/40 hover:bg-[#EFF5F0]"
+      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 text-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 ${
+        active ? "border-[#17402D] bg-[#FFF3B0] text-[#17402D] shadow-[3px_3px_0_0_#17402D] -translate-y-0.5" : "border-[#17402D]/25 bg-white text-[#78716C] shadow-[2px_2px_0_0_rgba(23,64,45,0.14)] hover:border-[#2D6A4F] hover:bg-[#EFF5F0]"
       }`}>
       <span className={`transition-colors ${active ? "text-[#2D6A4F]" : "text-[#A8A29E]"}`}>{icon}</span>
       <span className="font-bold text-sm">{title}</span>

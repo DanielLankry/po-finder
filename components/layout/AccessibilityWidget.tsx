@@ -52,7 +52,9 @@ export default function AccessibilityWidget() {
             setSettings(savedSettings);
             applySettings(savedSettings);
           }
-          if (savedPosition) setPos(savedPosition);
+          // Mobile uses a predictable top-corner anchor so the control never
+          // covers full-width checkout or authentication actions.
+          if (savedPosition && window.innerWidth >= 640) setPos(savedPosition);
         });
       }
     } catch { /* ignore */ }
@@ -73,6 +75,7 @@ export default function AccessibilityWidget() {
 
   // Drag handlers
   function onPointerDown(e: React.PointerEvent) {
+    if (window.innerWidth < 640) return;
     dragging.current = true;
     const rect = btnRef.current!.getBoundingClientRect();
     offset.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
@@ -116,7 +119,7 @@ export default function AccessibilityWidget() {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        className="fixed bottom-20 start-4 z-[55] h-12 w-12 rounded-full bg-[#2D6A4F] text-white shadow-lg hover:bg-[#1F5038] transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 cursor-grab active:cursor-grabbing select-none"
+        className="fixed top-[84px] end-3 z-[55] h-10 w-10 rounded-full border-2 border-[#17402D] bg-[#2D6A4F] text-white shadow-[2px_2px_0_0_#17402D] hover:bg-[#1F5038] transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 select-none sm:top-auto sm:end-auto sm:bottom-20 sm:start-4 sm:h-12 sm:w-12 sm:cursor-grab sm:active:cursor-grabbing"
         style={btnStyle}
         aria-label={open ? "סגירת תפריט נגישות" : "פתיחת תפריט נגישות"}
         aria-expanded={open}
@@ -126,7 +129,7 @@ export default function AccessibilityWidget() {
 
       {open && (
         <div
-          className="fixed bottom-[136px] start-4 z-[55] w-72 bg-white rounded-2xl shadow-popup border border-stone-200 p-5 fade-in"
+          className="brand-panel fixed top-[136px] end-3 z-[55] w-[calc(100vw-1.5rem)] max-w-72 p-5 fade-in sm:top-auto sm:end-auto sm:bottom-[136px] sm:start-4"
           style={panelStyle}
           dir="rtl"
           role="dialog"

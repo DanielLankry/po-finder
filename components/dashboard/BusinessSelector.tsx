@@ -21,7 +21,7 @@ export default function BusinessSelector({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 p-4 shadow-card">
+    <div className="brand-panel-soft p-4">
       <label className="flex items-center gap-2 text-sm font-medium text-stone-600 mb-2">
         <Building2 className="h-4 w-4 text-[#2D6A4F]" aria-hidden="true" />
         בחרו עסק לניהול
@@ -30,7 +30,7 @@ export default function BusinessSelector({
         <select
           value={selectedId}
           onChange={handleChange}
-          className="w-full h-11 appearance-none rounded-xl border border-stone-200 bg-white px-4 pr-4 pl-10 text-sm font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:border-transparent cursor-pointer"
+          className="brand-control w-full h-11 appearance-none rounded-xl px-4 pr-4 pl-10 text-sm font-bold text-stone-900 cursor-pointer"
         >
           {businesses.map((biz) => (
             <option key={biz.id} value={biz.id}>

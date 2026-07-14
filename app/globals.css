@@ -548,6 +548,105 @@ a[href^="https://maps.google.com/maps"] { display: none !important; }
   border-radius: 2px;
 }
 
+/* Product-paper surfaces — playful, high-contrast UI inspired by field notes
+   and neighborhood wayfinding. These are intentionally structural utilities so
+   public, auth, and dashboard screens share the same visual grammar. */
+.brand-canvas {
+  background-color: #F7F3EA;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(23, 64, 45, 0.095) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.brand-map-grid {
+  background-color: #EFF5F0;
+  background-image:
+    linear-gradient(rgba(23, 64, 45, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23, 64, 45, 0.07) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.brand-panel {
+  border: 2px solid #17402D;
+  border-radius: 18px;
+  background: #FFFFFF;
+  box-shadow: 5px 5px 0 0 #17402D;
+}
+
+.brand-panel-soft {
+  border: 2px solid rgba(23, 64, 45, 0.3);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 3px 3px 0 0 rgba(23, 64, 45, 0.18);
+}
+
+.brand-panel-orange {
+  border: 2px solid #8A3618;
+  border-radius: 18px;
+  background: #FFFFFF;
+  box-shadow: 5px 5px 0 0 #8A3618;
+}
+
+.brand-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 2px solid #17402D;
+  border-radius: 9999px;
+  background: #FFF8DC;
+  box-shadow: 2px 2px 0 0 #17402D;
+  color: #17402D;
+  font-weight: 700;
+}
+
+.brand-control {
+  border: 2px solid rgba(23, 64, 45, 0.28);
+  background: #FFFFFF;
+  box-shadow: 2px 2px 0 0 rgba(23, 64, 45, 0.16);
+}
+
+.brand-control:focus,
+.brand-control:focus-visible {
+  border-color: #2D6A4F;
+  box-shadow: 3px 3px 0 0 #2D6A4F;
+  outline: none;
+}
+
+.brand-button {
+  border: 2px solid #8A3618;
+  background: #C4552D;
+  box-shadow: 3px 3px 0 0 #8A3618;
+  color: #FFFFFF;
+}
+
+.brand-button:hover {
+  background: #A8441F;
+  box-shadow: 5px 5px 0 0 #8A3618;
+  transform: translateY(-2px);
+}
+
+.brand-button:active {
+  box-shadow: 1px 1px 0 0 #8A3618;
+  transform: translate(2px, 2px);
+}
+
+.brand-button:disabled:hover {
+  box-shadow: 3px 3px 0 0 #8A3618;
+  transform: none;
+}
+
+.brand-rule {
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    #17402D 0,
+    #17402D 8px,
+    transparent 8px,
+    transparent 13px
+  );
+  opacity: 0.28;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   /* Poster hover — card lifts against its hard shadow */
   .poster-hover {
@@ -556,6 +655,17 @@ a[href^="https://maps.google.com/maps"] { display: none !important; }
   .poster-hover:hover {
     transform: translate(2px, -4px);
     box-shadow: 7px 8px 0 0 #17402D;
+  }
+  .brand-panel-orange.poster-hover:hover {
+    box-shadow: 7px 8px 0 0 #8A3618;
+  }
+
+  .brand-panel-soft {
+    transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 180ms ease-out, border-color 180ms ease-out;
+  }
+  .brand-panel-soft:hover {
+    border-color: #17402D;
+    box-shadow: 5px 5px 0 0 rgba(23, 64, 45, 0.28);
   }
 
   /* Stamp wiggle — playful tilt for icon tiles / badges */
@@ -638,4 +748,3 @@ p, li, span:not([class*="font-bold"]):not([class*="font-semibold"]), td, th, blo
 .font-display span:not([class*="font-sans"]) {
   font-family: var(--font-poster), sans-serif;
 }
-

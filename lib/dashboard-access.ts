@@ -8,13 +8,8 @@ export async function getDashboardAccessForUser(userId: string): Promise<{
   const admin = adminClient();
   const nowIso = new Date().toISOString();
 
-  const [profileResult, activeBusinessResult, unconsumedPaymentResult, anyBusinessResult] =
+  const [activeBusinessResult, unconsumedPaymentResult, anyBusinessResult] =
     await Promise.all([
-      admin
-        .from("users")
-        .select("subscription_status")
-        .eq("id", userId)
-        .maybeSingle(),
       admin
         .from("businesses")
         .select("id")
@@ -39,7 +34,6 @@ export async function getDashboardAccessForUser(userId: string): Promise<{
     ]);
 
   const firstError =
-    profileResult.error ??
     activeBusinessResult.error ??
     unconsumedPaymentResult.error ??
     anyBusinessResult.error;
@@ -48,7 +42,6 @@ export async function getDashboardAccessForUser(userId: string): Promise<{
   }
 
   const signals = {
-    subscriptionStatus: profileResult.data?.subscription_status,
     hasActiveBusiness: !!activeBusinessResult.data,
     hasUnconsumedPayment: !!unconsumedPaymentResult.data,
     hasAnyBusiness: !!anyBusinessResult.data,

@@ -102,7 +102,7 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
   const boostPrice = Math.round(boost.price / 100);
 
   return (
-    <div className="min-h-screen bg-[#F7F3EA]" dir="rtl">
+    <div className="brand-canvas min-h-screen" dir="rtl">
       <Navbar />
       {showPaywallBanner ? (
         <div className="mt-[72px] bg-emerald-50 border-b border-emerald-200">
@@ -139,24 +139,26 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
         </div>
       ) : null}
 
-      <div className="pt-24 pb-16 px-4">
+      <div className="pt-24 pb-16 px-4 overflow-hidden">
         <div className="max-w-5xl mx-auto">
-          <section className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-[#EFF5F0] text-[#17402D] px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
+          <section className="relative text-center mb-12">
+            <div className="absolute -right-8 md:right-8 top-5 h-16 w-16 rotate-12 rounded-2xl border-2 border-[#8A3618] bg-[#F6E3D9] shadow-[3px_3px_0_0_#8A3618]" aria-hidden="true" />
+            <div className="absolute -left-10 md:left-12 top-16 h-12 w-12 -rotate-12 rounded-full border-2 border-[#17402D] bg-[#FFF3B0] shadow-[3px_3px_0_0_#17402D]" aria-hidden="true" />
+            <div className="brand-chip relative px-4 py-1.5 text-sm mb-5">
               <Zap className="h-4 w-4" />
               הצטרפות עסקים
             </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-[#111] mb-4">
-              מחיר אחד פשוט. בולטות למי שרוצה.
+            <h1 className="relative font-display text-5xl md:text-7xl text-[#17402D] mb-4">
+              מחיר אחד פשוט. <span className="marker-highlight">בולטות למי שרוצה.</span>
             </h1>
-            <p className="text-[#555] text-lg max-w-3xl mx-auto leading-relaxed">
+            <p className="relative text-[#44403C] text-lg max-w-3xl mx-auto leading-relaxed">
               {LAUNCH_OFFER.pricingSummary}
             </p>
           </section>
 
           <section className="grid md:grid-cols-2 gap-6 mb-10">
             {/* Listing card — primary */}
-            <div className="bg-white rounded-3xl border-2 border-[#2D6A4F] p-6 md:p-8 shadow-sm flex flex-col">
+            <div className="brand-panel poster-hover p-6 md:p-8 flex flex-col">
               <div className="flex items-center gap-2 mb-4">
                 <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#EFF5F0] text-[#17402D] text-sm font-semibold">
                   {listing.label}
@@ -177,7 +179,7 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
               <div className="space-y-3 mb-6 flex-1">
                 {LISTING_BENEFITS.map((benefit) => (
                   <div key={benefit} className="flex items-center gap-3">
-                    <div className="h-5 w-5 rounded-full bg-[#EFF5F0] flex items-center justify-center flex-shrink-0">
+                    <div className="h-5 w-5 rounded-md border border-[#17402D] bg-[#EFF5F0] flex items-center justify-center flex-shrink-0">
                       <Check className="h-3 w-3 text-[#2D6A4F]" />
                     </div>
                     <span className="text-[#444] text-sm">{benefit}</span>
@@ -188,11 +190,7 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
               <button
                 onClick={handleListingCheckout}
                 disabled={loading !== null}
-                className="w-full h-14 rounded-2xl text-white font-bold text-lg disabled:opacity-60"
-                style={{
-                  background: "linear-gradient(135deg, #2D6A4F 0%, #1F5038 100%)",
-                  boxShadow: "0 4px 20px rgba(45,106,79,0.35)",
-                }}
+                className="brand-button w-full h-14 rounded-xl font-bold text-lg transition-all disabled:opacity-60"
               >
                 {loading === "listing" ? "מעבירים..." : `${LAUNCH_OFFER.primaryButtonText} • ₪${listingPrice}`}
               </button>
@@ -205,7 +203,7 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
             </div>
 
             {/* Boost card — add-on */}
-            <div className="bg-white rounded-3xl border border-amber-300 p-6 md:p-8 shadow-sm flex flex-col">
+            <div className="brand-panel-orange poster-hover p-6 md:p-8 flex flex-col">
               <div className="flex items-center gap-2 mb-4">
                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-semibold">
                   <Sparkles className="h-4 w-4" />
@@ -229,7 +227,7 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
               <div className="space-y-3 mb-6 flex-1">
                 {BOOST_BENEFITS.map((benefit) => (
                   <div key={benefit} className="flex items-center gap-3">
-                    <div className="h-5 w-5 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                    <div className="h-5 w-5 rounded-md border border-amber-500 bg-amber-100 flex items-center justify-center flex-shrink-0">
                       <Sparkles className="h-3 w-3 text-amber-600" />
                     </div>
                     <span className="text-[#444] text-sm">{benefit}</span>
@@ -240,7 +238,7 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
               <button
                 onClick={handleBoostCta}
                 disabled={loading !== null}
-                className="w-full h-14 rounded-2xl font-bold text-lg border-2 border-amber-400 text-amber-800 bg-amber-50 hover:bg-amber-100 transition-colors disabled:opacity-60"
+                className="w-full h-14 rounded-xl font-bold text-lg border-2 border-[#8A3618] text-[#8A3618] bg-[#FBF1EA] shadow-[3px_3px_0_0_#8A3618] hover:bg-[#F6E3D9] hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#8A3618] transition-all disabled:opacity-60"
               >
                 {loading === "boost" ? "מעבירים..." : "לקידום העסק — ללוח הבקרה"}
               </button>
@@ -250,7 +248,7 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
             </div>
           </section>
 
-          <section className="bg-white rounded-3xl border border-[#E5E7EB] p-6 md:p-8 shadow-sm mb-10">
+          <section className="brand-panel-soft p-6 md:p-8 mb-10">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
               <p className="text-sm text-stone-700">
                 רוצים לדבר איתנו לפני ההצטרפות? אפשר לפנות אלינו ישירות.
@@ -284,11 +282,14 @@ export default function PricingClient({ plans }: { plans: Plan[] }) {
             </div>
           </section>
 
-          <section className="bg-white rounded-3xl border border-[#E5E7EB] p-6 md:p-8 shadow-sm">
-            <h2 className="text-2xl font-extrabold text-[#111] mb-6">שאלות נפוצות</h2>
+          <section className="brand-panel p-6 md:p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <h2 className="font-display text-4xl text-[#17402D]">שאלות נפוצות</h2>
+              <div className="brand-rule flex-1" aria-hidden="true" />
+            </div>
             <div className="grid md:grid-cols-2 gap-4">
               {VENDOR_FAQS.map((item) => (
-                <div key={item.question} className="rounded-2xl border border-stone-200 bg-[#F7F3EA] p-5">
+                <div key={item.question} className="brand-panel-soft bg-[#FFFDF7] p-5">
                   <h3 className="font-bold text-[#111] mb-2">{item.question}</h3>
                   <p className="text-sm text-[#666] leading-relaxed">{item.answer}</p>
                 </div>
