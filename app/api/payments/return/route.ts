@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { adminClient } from "@/lib/supabase/admin";
 import { verifyReturnSignature } from "@/lib/hyp";
 import {
@@ -17,8 +18,9 @@ export const runtime = "nodejs";
  * Query params include: Id, CCode, Amount, ACode, Order (= our attempt id),
  * L4digit, signature, etc.
  *
- * We verify the signature with HYP, then idempotently mark the attempt
- * succeeded/failed and apply the plan_days to the user's business.
+ * We verify the signature with HYP, then settle the payment and entitlement in
+ * one database transaction. This prevents a charged payment from being marked
+ * complete without its listing/boost being applied.
  */
 export async function GET(req: NextRequest) {
   return settlePaymentReturn(req, req.nextUrl.searchParams);
@@ -70,7 +72,7 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
   const admin = adminClient();
   const { data: attempt } = await admin
     .from("payment_attempts")
-    .select("id, business_id, plan_days, amount_agorot, status, kind")
+    .select("id, business_id, product_code, amount_agorot, status, kind")
     .eq("id", order)
     .single();
 
@@ -127,54 +129,31 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
   }
 
-  // Success — settle the attempt and bump the relevant business expiry.
-  const { error: settleError } = await admin
-    .from("payment_attempts")
-    .update({
-      status: "succeeded",
-      hyp_transaction_id: getHypTransactionId(params),
-      hyp_auth_code: getHypAuthCode(params),
-      hyp_card_mask: getHypCardMask(params),
-      hyp_response_code: responseCode,
-      raw_return: rawReturn,
-      completed_at: new Date().toISOString(),
-    })
-    .eq("id", attempt.id);
+  const { error: settleError } = await admin.rpc("settle_payment_attempt", {
+    p_attempt_id: attempt.id,
+    p_hyp_transaction_id: getHypTransactionId(params) ?? "",
+    p_hyp_auth_code: getHypAuthCode(params) ?? "",
+    p_hyp_card_mask: getHypCardMask(params) ?? "",
+    p_hyp_response_code: responseCode ?? "0",
+    p_raw_return: rawReturn,
+  });
   if (settleError) {
-    console.error("[/api/payments/return] failed to mark attempt succeeded:", settleError);
+    console.error("[/api/payments/return] atomic settlement failed:", settleError);
+    Sentry.captureMessage("HYP payment verified but entitlement settlement failed", {
+      level: "error",
+      tags: {
+        route: "payments-return",
+        attemptId: attempt.id,
+        productCode: attempt.product_code,
+      },
+      extra: { error: settleError.message },
+    });
+    // Leave the attempt pending for safe reconciliation. Never label a verified
+    // card charge as failed when entitlement application needs attention.
+    return NextResponse.redirect(
+      `${origin}/dashboard/billing?payment=processing`
+    );
   }
-
-  if (attempt.business_id) {
-    // Extend from now() OR existing expiry (whichever is later).
-    // listing → expires_at; boost → boost_expires_at.
-    const column = attempt.kind === "boost" ? "boost_expires_at" : "expires_at";
-    const { data: biz } = await admin
-      .from("businesses")
-      .select("expires_at, boost_expires_at")
-      .eq("id", attempt.business_id)
-      .single();
-
-    const current =
-      attempt.kind === "boost" ? biz?.boost_expires_at : biz?.expires_at;
-    const baseMs = current
-      ? Math.max(Date.parse(current), Date.now())
-      : Date.now();
-    const newExpiry = new Date(
-      baseMs + attempt.plan_days * 24 * 60 * 60 * 1000
-    ).toISOString();
-
-    const { error: businessError } = await admin
-      .from("businesses")
-      .update({ [column]: newExpiry })
-      .eq("id", attempt.business_id);
-    if (businessError) {
-      console.error("[/api/payments/return] failed to extend business expiry:", businessError);
-    }
-  }
-  // If no business_id (listing pre-pay), the trigger
-  // consume_payment_for_business() picks this credit up when the user
-  // creates their business. Boosts always carry business_id (checkout
-  // enforces it).
 
   return NextResponse.redirect(`${origin}/dashboard/billing?payment=success`);
 }

@@ -99,7 +99,7 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
                 </table>
               </div>
               <h1 style="font-family: 'Rubik', Arial, sans-serif; font-size: 26px; font-weight: 800; color: white; margin: 0 0 8px;">העסק שלך אושר! 🎉</h1>
-              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: rgba(255,255,255,0.85); margin: 0;">${safeBusinessName} עכשיו על המפה</p>
+              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: rgba(255,255,255,0.85); margin: 0;">${safeBusinessName} עבר אימות ומוכן לרישום</p>
             </td>
           </tr>
         </table>
@@ -111,9 +111,9 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
       <td style="padding: 36px 32px 20px;">
         <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 16px; color: #374151; line-height: 1.7; margin-bottom: 24px;">
           שלום! 👋<br><br>
-          אנחנו שמחים לבשר שהעסק <strong style="color: #111827;">${safeBusinessName}</strong> עבר את תהליך האישור ועלה לאוויר בפה קרוב.
+          אנחנו שמחים לבשר שהעסק <strong style="color: #111827;">${safeBusinessName}</strong> עבר את תהליך האימות בפה קרוב.
           <br><br>
-          לקוחות בסביבתך יוכלו למצוא אותך עכשיו על המפה בזמן אמת.
+          כדי לפרסם אותו ללקוחות במפה וברשימה, אפשר לבחור עכשיו את משך ההופעה מלוח החיובים.
         </p>
 
         <!-- Info box -->
@@ -124,7 +124,7 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
                 <tr>
                   <td style="padding-bottom: 12px;">
                     <span style="font-size: 18px;">📍</span>
-                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #17402D; margin-right: 8px;">מופיע על המפה</span>
+                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #17402D; margin-right: 8px;">מוכן להפעלה לאחר תשלום</span>
                   </td>
                 </tr>
                 <tr>
@@ -149,8 +149,8 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
             <td align="center" style="padding-bottom: 8px;">
-              <a href="https://pokarov.co.il" style="display: inline-block; background: linear-gradient(135deg, #2D6A4F, #1F5038); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 40px; border-radius: 50px; box-shadow: 0 4px 16px rgba(45,106,79,0.35);">
-                צפה בפה קרוב ←
+              <a href="https://pokarov.co.il/dashboard/billing" style="display: inline-block; background: linear-gradient(135deg, #2D6A4F, #1F5038); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 40px; border-radius: 50px; box-shadow: 0 4px 16px rgba(45,106,79,0.35);">
+                בחירת משך הופעה ←
               </a>
             </td>
           </tr>
@@ -332,11 +332,15 @@ export function contactAutoReplyTemplate(name: string, subjectLabel: string): st
 }
 
 // ── 4. Expiry Reminder ────────────────────────────────────────────────────────
-export function expiryReminderTemplate(businessName: string, expiresAt: Date, renewUrl: string): string {
+export function expiryReminderTemplate(
+  businessName: string,
+  expiresAt: Date,
+  renewUrl: string,
+  daysBefore: 30 | 7 | 1
+): string {
   const safeBusinessName = escapeHtml(businessName);
   const safeRenewUrl = escapeHtml(renewUrl);
   const expiryStr = expiresAt.toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" });
-  const daysLeft = Math.ceil((expiresAt.getTime() - Date.now()) / 86400000);
 
   return wrapper(`
     <!-- Header amber -->
@@ -347,7 +351,7 @@ export function expiryReminderTemplate(businessName: string, expiresAt: Date, re
             <td style="background: linear-gradient(135deg, #D97706 0%, #B45309 100%); padding: 36px 32px; text-align: center; border-radius: 20px 20px 0 0;">
               <p style="font-size: 40px; margin-bottom: 12px;">⏰</p>
               <h1 style="font-family: 'Rubik', Arial, sans-serif; font-size: 22px; font-weight: 800; color: white; margin: 0 0 6px;">הרישום שלך עומד לפוג</h1>
-              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: rgba(255,255,255,0.85); margin: 0;">נשארו <strong>${daysLeft} ימים</strong> לרישום ${safeBusinessName}</p>
+              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: rgba(255,255,255,0.85); margin: 0;">נשארו <strong>${daysBefore} ימים</strong> לרישום ${safeBusinessName}</p>
             </td>
           </tr>
         </table>

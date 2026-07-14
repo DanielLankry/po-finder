@@ -13,7 +13,7 @@ export default function TermsPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-[#F7F3EA] pt-[88px] pb-16" dir="rtl">
+      <main className="brand-canvas min-h-screen pt-[88px] pb-16" dir="rtl">
         <div className="max-w-3xl mx-auto px-4">
           <h1 className="font-display font-extrabold text-3xl text-stone-900 mb-2">
             תנאי שימוש
@@ -97,8 +97,10 @@ export default function TermsPage() {
                 במפורש, המסלול הוא לתקופה שנבחרה מראש ואינו חידוש אוטומטי.
               </p>
               <p>
-                לאחר תום תקופת ההצגה, ייתכן שהעסק לא יופיע לציבור עד לחידוש. קבלה או
-                חשבונית יישלחו בדוא&quot;ל בהתאם לפרטים שסופקו.
+                חידוש לפני מועד התפוגה מוסיף את התקופה החדשה לתאריך התפוגה הקיים. לאחר
+                תום תקופת ההצגה העסק מוסר אוטומטית מהמפה, מהחיפוש, מעמוד העסק וממפת
+                האתר עד לחידוש; לוח הבקרה של הבעלים נשאר זמין. קבלה או חשבונית יישלחו
+                בדוא&quot;ל בהתאם לפרטים שסופקו.
               </p>
             </section>
 

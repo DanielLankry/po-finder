@@ -128,18 +128,28 @@ async function DashboardContent({
         </p>
       </div>
 
-      {/* Pending approval banner — shown until admin approves the business */}
-      {!business.is_active && (
+      {/* Verification and paid visibility are separate lifecycle states. */}
+      {!business.is_verified && (
         <div className="flex items-start gap-3 bg-amber-50 border-2 border-amber-700 rounded-[18px] p-5 shadow-[3px_3px_0_0_#B45309]">
           <div className="h-10 w-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
             <Clock3 className="h-5 w-5 text-amber-600" aria-hidden="true" />
           </div>
           <div>
-            <p className="font-semibold text-amber-900 text-sm">העסק ממתין לאישור</p>
+            <p className="font-semibold text-amber-900 text-sm">הטיוטה ממתינה לאימות</p>
             <p className="text-amber-700 text-xs mt-1 leading-relaxed">
-              התשלום התקבל ופרטי העסק נשמרו. הצוות שלנו יאשר את הרישום בקרוב ואז העסק יופיע על המפה.
-              תקבלו הודעה במייל לאחר האישור.
+              פרטי העסק נשמרו באופן פרטי. הצוות יאמת את העסק, ואז יהיה אפשר לבחור רישום שנתי ולהעלות אותו לאוויר.
             </p>
+          </div>
+        </div>
+      )}
+
+      {business.is_verified && !business.is_active && (
+        <div className="brand-panel-orange flex items-start gap-3 p-5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FFF3B0]"><Clock3 className="h-5 w-5 text-[#8A3618]" /></div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-stone-950">העסק מאומת, אבל לא מופיע לציבור</p>
+            <p className="mt-1 text-xs leading-relaxed text-stone-600">בחרו רישום שנתי כדי לפרסם את הכרטיס במפה וברשימה למשך 365 ימים.</p>
+            <Link href="/dashboard/billing" className="mt-3 inline-flex rounded-lg bg-[#8A3618] px-4 py-2 text-xs font-bold text-white">לבחירת מסלול</Link>
           </div>
         </div>
       )}

@@ -1,65 +1,61 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('pricing v2', () => {
-  test('pricing page shows both products', async ({ page }) => {
-    await page.goto('/pricing');
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    // Listing product
-    await expect(page.getByText('רישום שנתי').first()).toBeVisible();
-    // Boost product
-    await expect(page.getByText('קידום חודשי').first()).toBeVisible();
-    // Prices come from the plans table (₪15 / ₪20)
-    await expect(page.getByText('₪15').first()).toBeVisible();
-    await expect(page.getByText('₪20').first()).toBeVisible();
+test.describe("duration pricing", () => {
+  test("shows one duration slider with six months selected by default", async ({ page }) => {
+    await page.goto("/pricing");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("משלמים פעם אחת");
+    await expect(page.getByText("6 חודשים — ₪40")).toBeVisible();
+    await expect(page.getByText("בתשלום חד־פעמי").first()).toBeVisible();
+    await expect(page.getByText("ללא חידוש אוטומטי").first()).toBeVisible();
+    await expect(page.getByText(/קידום ל־30|קידום ל-30|מסלול השקה/)).toHaveCount(0);
   });
 
-  test('pricing page has no horizontal overflow', async ({ page }) => {
-    await page.goto('/pricing');
-    await page.waitForLoadState('domcontentloaded');
+  test("slider covers all twelve prices and labels twelve months as best value", async ({ page }) => {
+    await page.goto("/pricing");
+    const slider = page.getByRole("slider", { name: "משך הפרסום בחודשים" });
+
+    await slider.fill("1");
+    await expect(page.getByText("חודש אחד — ₪10")).toBeVisible();
+
+    await slider.fill("12");
+    await expect(page.getByText("12 חודשים — ₪60")).toBeVisible();
+    await expect(page.getByText("הכי משתלם")).toBeVisible();
+    await expect(page.getByRole("button", { name: "פרסום העסק ל־12 חודשים" })).toBeVisible();
+  });
+
+  test("pricing page has no horizontal overflow", async ({ page }) => {
+    await page.goto("/pricing");
+    await page.waitForLoadState("domcontentloaded");
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth
     );
     expect(overflow).toBe(false);
   });
 
-  test('checkout API rejects boost without businessId (never 500)', async ({ request }) => {
-    const res = await request.post('/api/payments/checkout', {
-      data: { kind: 'boost' },
+  test("checkout rejects retired boost and legacy plan bodies", async ({ request }) => {
+    const boost = await request.post("/api/payments/checkout", {
+      data: { planCode: "boost_30", businessId: "00000000-0000-0000-0000-000000000000" },
     });
-    // 401 unauthenticated (no session in test) or 400 validation.
-    expect([400, 401]).toContain(res.status());
-  });
+    expect([400, 401]).toContain(boost.status());
 
-  test('checkout API rejects legacy planDays body', async ({ request }) => {
-    const res = await request.post('/api/payments/checkout', {
+    const legacy = await request.post("/api/payments/checkout", {
       data: { planDays: 30 },
     });
-    expect([400, 401]).toContain(res.status());
+    expect([400, 401]).toContain(legacy.status());
   });
 
-  test('businesses API exposes boosted flag and sorts boosted first', async ({ request }) => {
-    const res = await request.get('/api/businesses');
-    expect(res.ok()).toBe(true);
-    const data = (await res.json()) as {
-      businesses?: { boosted?: boolean }[];
-    };
-    const businesses = data.businesses ?? [];
-    // Every item carries the computed flag.
-    for (const b of businesses) {
-      expect(typeof b.boosted).toBe('boolean');
-    }
-    // Boosted block strictly precedes non-boosted block.
-    const firstNormal = businesses.findIndex((b) => !b.boosted);
-    if (firstNormal !== -1) {
-      for (const b of businesses.slice(firstNormal)) {
-        expect(b.boosted).toBe(false);
-      }
+  test("public businesses no longer expose promoted placement", async ({ request }) => {
+    const response = await request.get("/api/businesses");
+    expect(response.ok()).toBe(true);
+    const data = (await response.json()) as { businesses?: Record<string, unknown>[] };
+    for (const business of data.businesses ?? []) {
+      expect(business).not.toHaveProperty("boosted");
     }
   });
 
-  test('homepage loads without horizontal overflow', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForLoadState('domcontentloaded');
+  test("homepage loads without horizontal overflow", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForLoadState("domcontentloaded");
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth
     );

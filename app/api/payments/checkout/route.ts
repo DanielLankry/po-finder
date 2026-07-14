@@ -4,7 +4,8 @@ import * as Sentry from "@sentry/nextjs";
 import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/supabase/admin";
 import { rateLimit } from "@/lib/rate-limit";
-import { getPlanByKind } from "@/lib/plans-server";
+import { getPlanByCode } from "@/lib/plans-server";
+import { PLAN_CODES } from "@/lib/plans";
 import { createSignedCheckoutUrl } from "@/lib/hyp";
 import { BRAND_NAME } from "@/lib/site-config";
 import { ensurePublicUser } from "@/lib/user-profile";
@@ -12,8 +13,8 @@ import { ensurePublicUser } from "@/lib/user-profile";
 export const runtime = "nodejs";
 
 const checkoutSchema = z.object({
-  kind: z.enum(["listing", "boost"]),
-  businessId: z.string().uuid().optional(),
+  planCode: z.enum(PLAN_CODES),
+  businessId: z.string().uuid(),
 });
 
 export async function POST(req: NextRequest) {
@@ -39,32 +40,26 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const plan = await getPlanByKind(parsed.data.kind);
+  const plan = await getPlanByCode(parsed.data.planCode);
   if (!plan) {
     return NextResponse.json({ error: "invalid plan" }, { status: 400 });
   }
 
-  // Boost applies to a specific existing business — required.
-  if (parsed.data.kind === "boost" && !parsed.data.businessId) {
+  const { data: business } = await supabase
+    .from("businesses")
+    .select("id, is_verified, is_active, expires_at")
+    .eq("id", parsed.data.businessId)
+    .eq("owner_id", user.id)
+    .single();
+  if (!business) {
+    return NextResponse.json({ error: "business not found" }, { status: 404 });
+  }
+  if (!business.is_verified) {
     return NextResponse.json(
-      { error: "businessId required for boost" },
-      { status: 400 }
+      { error: "business_not_verified" },
+      { status: 409 }
     );
   }
-
-  // If renewing, verify the business belongs to the user.
-  if (parsed.data.businessId) {
-    const { data: biz } = await supabase
-      .from("businesses")
-      .select("id")
-      .eq("id", parsed.data.businessId)
-      .eq("owner_id", user.id)
-      .single();
-    if (!biz) {
-      return NextResponse.json({ error: "business not found" }, { status: 404 });
-    }
-  }
-
   const admin = adminClient();
   try {
     await ensurePublicUser(admin, user, "business_owner");
@@ -81,8 +76,11 @@ export async function POST(req: NextRequest) {
     .from("payment_attempts")
     .insert({
       user_id: user.id,
-      business_id: parsed.data.businessId ?? null,
+      business_id: parsed.data.businessId,
+      product_code: plan.code,
       plan_days: plan.days,
+      duration_months: plan.months,
+      bonus_boost_days: plan.boostDays,
       amount_agorot: plan.price,
       kind: plan.kind,
       status: "pending",

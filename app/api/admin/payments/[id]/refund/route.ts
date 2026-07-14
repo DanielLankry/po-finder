@@ -18,7 +18,7 @@ export async function POST(
 
   const { data: attempt, error } = await admin
     .from("payment_attempts")
-    .select("id, status, hyp_transaction_id, business_id, user_id, plan_days")
+    .select("id, status, hyp_transaction_id, business_id, product_code")
     .eq("id", id)
     .single();
 
@@ -35,6 +35,23 @@ export async function POST(
     return NextResponse.json({ error: "missing hyp transaction id" }, { status: 400 });
   }
 
+  // Validate that the entitlement can be rolled back before money is returned.
+  // Duration renewals are refunded newest-first so the exact saved expiry can
+  // be restored without month-end date drift.
+  const { error: preflightError } = await admin.rpc(
+    "preflight_refund_payment_entitlement",
+    { p_attempt_id: attempt.id }
+  );
+  if (preflightError) {
+    return NextResponse.json(
+      {
+        error: "refund requires a newer entitlement to be refunded first",
+        detail: preflightError.message,
+      },
+      { status: 409 }
+    );
+  }
+
   const { ok, raw } = await refundTransaction(attempt.hyp_transaction_id);
 
   if (!ok) {
@@ -46,46 +63,23 @@ export async function POST(
     );
   }
 
-  // Mark attempt refunded. Roll back expires_at on the linked business and
-  // flip subscription_status if this was the user's only paid attempt.
-  await admin
-    .from("payment_attempts")
-    .update({ status: "refunded" })
-    .eq("id", attempt.id);
-
-  if (attempt.business_id) {
-    const { data: biz } = await admin
-      .from("businesses")
-      .select("expires_at")
-      .eq("id", attempt.business_id)
-      .single();
-
-    if (biz?.expires_at) {
-      const rolled = Math.max(
-        Date.parse(biz.expires_at) - attempt.plan_days * 24 * 60 * 60 * 1000,
-        Date.now()
-      );
-      // If the rollback puts the listing in the past, just deactivate it.
-      const newExpiry = rolled <= Date.now() ? null : new Date(rolled).toISOString();
-      await admin
-        .from("businesses")
-        .update({ expires_at: newExpiry, ...(newExpiry === null ? { is_active: false } : {}) })
-        .eq("id", attempt.business_id);
-    }
-  }
-
-  // If user has no other succeeded attempts, knock subscription back to canceled.
-  const { count } = await admin
-    .from("payment_attempts")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", attempt.user_id)
-    .eq("status", "succeeded");
-
-  if (!count || count === 0) {
-    await admin
-      .from("users")
-      .update({ subscription_status: "canceled" })
-      .eq("id", attempt.user_id);
+  const { error: entitlementError } = await admin.rpc(
+    "refund_payment_entitlement",
+    { p_attempt_id: attempt.id }
+  );
+  if (entitlementError) {
+    console.error(
+      "[/api/admin/payments/refund] provider refund succeeded but entitlement rollback failed:",
+      entitlementError
+    );
+    return NextResponse.json(
+      {
+        error: "provider refund succeeded; entitlement rollback needs support",
+        detail: entitlementError.message,
+        raw,
+      },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ ok: true, raw });

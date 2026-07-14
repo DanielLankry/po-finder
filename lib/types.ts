@@ -42,6 +42,9 @@ export interface Business {
   avg_rating: number;
   review_count: number;
   is_active: boolean;
+  is_verified?: boolean;
+  is_legacy_public?: boolean;
+  expires_at?: string | null;
   /** Active visibility boost expiry — boosted ⇔ non-null and in the future. */
   boost_expires_at?: string | null;
   created_at: string;

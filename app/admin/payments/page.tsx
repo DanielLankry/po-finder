@@ -7,8 +7,11 @@ interface Attempt {
   id: string;
   user_id: string;
   business_id: string | null;
+  product_code: string;
   plan_days: number;
+  duration_months: number | null;
   amount_agorot: number;
+  service_status: string | null;
   status: "pending" | "succeeded" | "failed" | "refunded";
   hyp_transaction_id: string | null;
   hyp_card_mask: string | null;
@@ -23,6 +26,7 @@ export default function AdminPaymentsPage() {
   const [items, setItems] = useState<Attempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [refundingId, setRefundingId] = useState<string | null>(null);
+  const [serviceUpdatingId, setServiceUpdatingId] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -48,10 +52,26 @@ export default function AdminPaymentsPage() {
     });
     const d = await r.json();
     if (!r.ok) {
-      alert(`שגיאה: ${d.error ?? "unknown"}\n${d.raw ?? ""}`);
+      alert(`שגיאה: ${d.error ?? "unknown"}\n${d.detail ?? d.raw ?? ""}`);
     }
     setRefundingId(null);
     load();
+  }
+
+  async function updateServiceStatus(id: string, serviceStatus: string) {
+    setServiceUpdatingId(id);
+    const response = await fetch(`/api/admin/payments/${id}/service`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ serviceStatus }),
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      alert(`שגיאה: ${body.error ?? "unknown"}`);
+    } else {
+      setItems((current) => current.map((item) => item.id === id ? { ...item, service_status: serviceStatus } : item));
+    }
+    setServiceUpdatingId(null);
   }
 
   const fmt = (a: number) => `₪${(a / 100).toFixed(2)}`;
@@ -99,7 +119,7 @@ export default function AdminPaymentsPage() {
                   <th className="text-right px-4 py-3">תאריך</th>
                   <th className="text-right px-4 py-3">משתמש</th>
                   <th className="text-right px-4 py-3">עסק</th>
-                  <th className="text-right px-4 py-3">תקופה</th>
+                  <th className="text-right px-4 py-3">מוצר</th>
                   <th className="text-right px-4 py-3">סכום</th>
                   <th className="text-right px-4 py-3">סטטוס</th>
                   <th className="text-right px-4 py-3">HYP</th>
@@ -112,7 +132,27 @@ export default function AdminPaymentsPage() {
                     <td className="px-4 py-3 text-[#444] whitespace-nowrap" dir="ltr">{fmtDate(a.completed_at ?? a.created_at)}</td>
                     <td className="px-4 py-3 text-[#444]">{a.user_email ?? a.user_id.slice(0, 8)}</td>
                     <td className="px-4 py-3 text-[#444]">{a.business_name ?? "—"}</td>
-                    <td className="px-4 py-3 text-[#444]">{a.plan_days} ימים</td>
+                    <td className="px-4 py-3 text-[#444]">
+                      <span className="font-mono text-xs" dir="ltr">{a.product_code}</span>
+                      <div className="text-[10px] text-[#888]">
+                        {a.duration_months ? `${a.duration_months} חודשים` : `${a.plan_days} ימים`}
+                      </div>
+                      {a.service_status ? (
+                        <select
+                          value={a.service_status}
+                          disabled={serviceUpdatingId === a.id}
+                          onChange={(event) => updateServiceStatus(a.id, event.target.value)}
+                          className="mt-1 rounded-lg border border-stone-300 bg-white px-2 py-1 text-[11px]"
+                          aria-label="סטטוס שירות השקה בליווי"
+                        >
+                          <option value="pending">ממתין</option>
+                          <option value="contacted">נוצר קשר</option>
+                          <option value="in_progress">בטיפול</option>
+                          <option value="completed">הושלם</option>
+                          <option value="cancelled">בוטל</option>
+                        </select>
+                      ) : null}
+                    </td>
                     <td className="px-4 py-3 font-semibold text-[#111]">{fmt(a.amount_agorot)}</td>
                     <td className="px-4 py-3">{statusBadge(a.status)}</td>
                     <td className="px-4 py-3 text-xs text-[#888]" dir="ltr">

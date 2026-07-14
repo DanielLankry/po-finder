@@ -13,7 +13,7 @@ export default function RefundPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-[#F7F3EA] pt-[88px] pb-16" dir="rtl">
+      <main className="brand-canvas min-h-screen pt-[88px] pb-16" dir="rtl">
         <div className="max-w-3xl mx-auto px-4">
           <h1 className="font-display font-extrabold text-3xl text-stone-900 mb-2">
             מדיניות ביטולים והחזרים
@@ -66,10 +66,9 @@ export default function RefundPage() {
                 4. ביטול לאחר 14 ימים
               </h2>
               <p>
-                אם המסלול אינו מתחדש אוטומטית, הביטול לאחר 14 ימים בדרך כלל יעצור שימוש
-                עתידי אך לא יקנה החזר יחסי, אלא אם קיימת חובה אחרת לפי דין או פגם מהותי
-                בשירות. אם יופעל בעתיד מסלול מתחדש, ניתן יהיה לבטל המשך חיוב עתידי בכל
-                עת בהתאם לדין ולהוראות שיוצגו במסלול.
+                תקופת ההופעה אינה מתחדשת אוטומטית. ביטול לאחר 14 ימים בדרך כלל יעצור
+                שימוש עתידי אך לא יקנה החזר יחסי, אלא אם קיימת חובה אחרת לפי דין או פגם
+                מהותי בשירות.
               </p>
             </section>
 

@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
       }
       const { data, error } = await supabase
         .from("businesses")
-        .select("id, name, expires_at, boost_expires_at, is_active")
+        .select("id, name, expires_at, is_active, is_verified")
         .eq("owner_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -55,15 +55,16 @@ export async function GET(req: NextRequest) {
         avg_rating,
         review_count,
         is_active,
-        boost_expires_at,
+        is_legacy_public,
         created_at,
         photos(id, business_id, url, is_primary, created_at)
       `)
+      .eq("is_verified", true)
       .eq("is_active", true)
       // This API can run with an owner's session. The owner SELECT policy lets
       // expired owners reach billing data, so public discovery must also apply
       // the expiry boundary explicitly instead of relying on RLS alone.
-      .or(`expires_at.is.null,expires_at.gt.${nowIso}`);
+      .or(`is_legacy_public.eq.true,expires_at.gt.${nowIso}`);
 
     // Full-text search via tsvector
     if (q) {
@@ -128,21 +129,14 @@ export async function GET(req: NextRequest) {
     const { data, error } = await query;
     if (error) throw error;
 
-    const nowMs = Date.now();
     const businesses = ((data ?? []) as BusinessWithSchedule[])
       .map((business) => ({
         ...business,
-        boosted:
-          !!business.boost_expires_at &&
-          Date.parse(business.boost_expires_at) > nowMs,
         photos: ((business.photos ?? []) as Photo[])
           .sort((a, b) => Number(b.is_primary) - Number(a.is_primary))
           .slice(0, 1),
       }))
-      .filter(isPublicReadyBusiness)
-      // Boosted businesses first; sort is stable, so DB ordering
-      // (rating / recency) is preserved within each group.
-      .sort((a, b) => Number(b.boosted) - Number(a.boosted));
+      .filter(isPublicReadyBusiness);
 
     if (!includeSchedule || businesses.length === 0) {
       return NextResponse.json({ businesses });
