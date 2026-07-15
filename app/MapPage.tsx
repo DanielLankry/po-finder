@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Map as MapIcon, List } from "lucide-react";
@@ -12,7 +12,8 @@ import FavoritesPanel from "@/components/business/FavoritesPanel";
 import { useFavorites } from "@/lib/hooks/useFavorites";
 import type { BusinessCategory, BusinessWithSchedule } from "@/lib/types";
 import type { LocationResult } from "@/components/map/PlacesSearchBar";
-import { isOpenNow } from "@/lib/utils/schedule";
+import { getBusinessAvailability } from "@/lib/utils/schedule";
+import { matchesBusinessDiscovery } from "@/lib/business-discovery";
 
 const BusinessMap = dynamic(() => import("@/components/map/BusinessMap"), {
   ssr: false,
@@ -35,12 +36,17 @@ export default function MapPage() {
   const [searchCenter, setSearchCenter] = useState<LocationResult | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadRequest, setLoadRequest] = useState(0);
   const [favoritesPanelOpen, setFavoritesPanelOpen] = useState(false);
   const searchQuery = searchParams.get("q")?.slice(0, 120) ?? "";
+  const [businessSearch, setBusinessSearch] = useState(searchQuery);
   const { favorites, toggle: toggleFavorite, count: favCount } = useFavorites();
 
   useEffect(() => {
     async function fetchBusinesses() {
+      setLoading(true);
+      setLoadError(null);
       try {
         const response = await fetch("/api/businesses?includeSchedule=1", {
           cache: "no-store",
@@ -51,22 +57,51 @@ export default function MapPage() {
       } catch (error) {
         console.error("Failed to load public businesses:", error);
         setBusinesses([]);
+        setLoadError("לא הצלחנו לטעון את העסקים. בדקו את החיבור ונסו שוב.");
       } finally {
         setLoading(false);
       }
     }
 
     fetchBusinesses();
-  }, []);
+  }, [loadRequest]);
 
-  // Count businesses open now
-  const openCount = businesses.filter((b) => isOpenNow(b.today_schedule ?? null)).length;
+  useEffect(() => {
+    setBusinessSearch(searchQuery);
+  }, [searchQuery]);
+
+  const visibleBusinesses = useMemo(
+    () => businesses.filter((business) =>
+      matchesBusinessDiscovery(business, {
+        activeCategory,
+        kashrut: filters.kashrut,
+        minRating: filters.minRating,
+        openNow: filters.openNow,
+        search: businessSearch,
+      }),
+    ),
+    [activeCategory, businessSearch, businesses, filters],
+  );
+
+  const openCount = visibleBusinesses.filter(
+    (business) => getBusinessAvailability(business) === "open",
+  ).length;
+
+  useEffect(() => {
+    if (
+      selectedBusinessId &&
+      !visibleBusinesses.some((business) => business.id === selectedBusinessId)
+    ) {
+      setSelectedBusinessId(null);
+    }
+  }, [selectedBusinessId, visibleBusinesses]);
 
   return (
     <div className="brand-canvas ambient-motion h-[100dvh] min-h-[520px] flex flex-col overflow-hidden" dir="rtl">
       <Navbar
         onLocationSelect={(loc) => {
           setSearchCenter(loc);
+          setUserLocation({ lat: loc.lat, lng: loc.lng });
           setMobileView("map");
         }}
         favCount={favCount}
@@ -79,6 +114,7 @@ export default function MapPage() {
         onFilterOpen={() => setFilterDrawerOpen(true)}
         onLocationSelect={(loc) => {
           setSearchCenter(loc);
+          setUserLocation({ lat: loc.lat, lng: loc.lng });
           setMobileView("map");
         }}
       />
@@ -94,9 +130,7 @@ export default function MapPage() {
             ${mobileView === "list" ? "flex flex-col" : "hidden min-[1440px]:flex min-[1440px]:flex-col"}`}
         >
           <BusinessListPanel
-            businesses={businesses}
-            activeCategory={activeCategory}
-            filters={filters}
+            businesses={visibleBusinesses}
             selectedBusinessId={selectedBusinessId}
             onBusinessSelect={(b) => setSelectedBusinessId(b.id)}
             onBackToList={() => setSelectedBusinessId(null)}
@@ -106,7 +140,10 @@ export default function MapPage() {
             userLocation={userLocation}
             favoriteIds={favorites}
             onFavoriteToggle={toggleFavorite}
-            searchQuery={searchQuery}
+            searchValue={businessSearch}
+            onSearchChange={setBusinessSearch}
+            error={loadError}
+            onRetry={() => setLoadRequest((request) => request + 1)}
           />
         </div>
 
@@ -124,11 +161,13 @@ export default function MapPage() {
               </div>
             </div>
           )}
-          <div className="w-full h-full rounded-[24px] overflow-hidden border-2 border-[#17402D]/15 shadow-[6px_6px_0_0_rgba(23,64,45,0.12)]" dir="ltr">
+          <div
+            className="w-full h-full rounded-[24px] overflow-hidden border-2 border-[#17402D]/15 shadow-[6px_6px_0_0_rgba(23,64,45,0.12)]"
+            dir="ltr"
+            data-testid="business-map-panel"
+          >
           <BusinessMap
-            businesses={businesses}
-            activeCategory={activeCategory}
-            filters={filters}
+            businesses={visibleBusinesses}
             selectedBusinessId={selectedBusinessId}
             onBusinessSelect={(b) => setSelectedBusinessId(b.id)}
             onBusinessClear={() => setSelectedBusinessId(null)}
@@ -136,6 +175,7 @@ export default function MapPage() {
             onBusinessHover={(id) => setHoveredBusinessId(id)}
             searchCenter={searchCenter}
             onUserLocationChange={setUserLocation}
+            isVisible={mobileView === "map"}
           />
           </div>
         </div>

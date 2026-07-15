@@ -6,9 +6,11 @@ test('home renders map and search', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('body')).toBeVisible();
 
-  const mapContainer = page.locator(
-    '[aria-label*="Map"], [aria-label*="מפה"], [class*="map" i], [data-testid*="map" i]'
-  ).first();
+  if ((page.viewportSize()?.width ?? 1440) < 1440) {
+    await page.getByRole('button', { name: 'עבור למפה' }).click();
+  }
+
+  const mapContainer = page.getByTestId('business-map-panel');
   await expect(mapContainer, 'map container should mount').toBeVisible({ timeout: 15_000 });
 
   const searchInput = page.getByRole('textbox').first();

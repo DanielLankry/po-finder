@@ -10,8 +10,8 @@ import {
   Navigation,
   Phone,
 } from "lucide-react";
-import type { Business, BusinessSchedule } from "@/lib/types";
-import { isOpenNow } from "@/lib/utils/schedule";
+import type { Business, BusinessHoursStatus, BusinessSchedule } from "@/lib/types";
+import { getBusinessAvailability } from "@/lib/utils/schedule";
 import { trackEvent } from "@/lib/analytics";
 import ShareButtons from "./ShareButtons";
 
@@ -21,10 +21,14 @@ interface StatusCardProps {
     "id" | "name" | "address" | "phone" | "whatsapp" | "website" | "instagram" | "is_verified"
   >;
   schedule: BusinessSchedule | null;
+  hoursStatus?: BusinessHoursStatus;
 }
 
-export default function StatusCard({ business, schedule }: StatusCardProps) {
-  const open = isOpenNow(schedule);
+export default function StatusCard({ business, schedule, hoursStatus }: StatusCardProps) {
+  const availability = getBusinessAvailability({
+    today_schedule: schedule,
+    hours_status: hoursStatus,
+  });
   const address = schedule?.address ?? business.address;
   const waNumber = business.whatsapp?.replace(/\D/g, "") ?? "";
   const mapsQuery = encodeURIComponent(address ?? business.name);
@@ -41,12 +45,20 @@ export default function StatusCard({ business, schedule }: StatusCardProps) {
           <div className="flex items-center gap-2">
             <span
               className={`h-3 w-3 shrink-0 rounded-full border-2 border-[#FFFDF7] shadow-[0_0_0_2px_#17402D] ${
-                open ? "bg-[#2D6A4F]" : "bg-[#C4552D]"
+                availability === "open"
+                  ? "bg-[#2D6A4F]"
+                  : availability === "closed"
+                    ? "bg-[#C4552D]"
+                    : "bg-[#F4B942]"
               }`}
               aria-hidden="true"
             />
             <h3 className="font-display text-xl text-[#17402D]">
-              {open ? "פתוח עכשיו" : schedule ? "סגור היום" : "שעות פעילות לא עודכנו"}
+              {availability === "open"
+                ? "פתוח עכשיו"
+                : availability === "closed"
+                  ? "סגור עכשיו"
+                  : "שעות פעילות לא עודכנו"}
             </h3>
           </div>
           {business.is_verified && (

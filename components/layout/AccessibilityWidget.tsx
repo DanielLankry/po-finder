@@ -119,7 +119,7 @@ export default function AccessibilityWidget() {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        className="fixed top-[84px] end-3 z-[55] h-11 w-11 rounded-full border-2 border-[#17402D] bg-[#2D6A4F] text-white shadow-[2px_2px_0_0_#17402D] hover:bg-[#1F5038] transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 select-none sm:top-auto sm:end-auto sm:bottom-20 sm:start-4 sm:h-12 sm:w-12 sm:cursor-grab sm:active:cursor-grabbing"
+        className="fixed bottom-40 end-3 z-40 h-11 w-11 rounded-full border-2 border-[#17402D] bg-[#2D6A4F] text-white shadow-[2px_2px_0_0_#17402D] hover:bg-[#1F5038] transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 select-none sm:bottom-20 sm:left-4 sm:right-auto sm:h-12 sm:w-12 sm:cursor-grab sm:active:cursor-grabbing"
         style={btnStyle}
         aria-label={open ? "סגירת תפריט נגישות" : "פתיחת תפריט נגישות"}
         aria-expanded={open}
@@ -131,7 +131,7 @@ export default function AccessibilityWidget() {
       {open && (
         <div
           id="accessibility-panel"
-          className="brand-panel fixed top-[136px] end-3 z-[55] max-h-[calc(100dvh-9.5rem)] w-[calc(100vw-1.5rem)] max-w-72 overflow-y-auto p-5 fade-in sm:top-auto sm:end-auto sm:bottom-[136px] sm:start-4 sm:max-h-[calc(100dvh-10rem)]"
+          className="brand-panel fixed bottom-[13.5rem] end-3 z-40 max-h-[calc(100dvh-15rem)] w-[calc(100vw-1.5rem)] max-w-72 overflow-y-auto p-5 fade-in sm:bottom-[136px] sm:left-4 sm:right-auto sm:max-h-[calc(100dvh-10rem)]"
           style={panelStyle}
           dir="rtl"
           role="dialog"

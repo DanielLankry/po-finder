@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, MapPinned } from "lucide-react";
 import type { BusinessSchedule, WeeklyScheduleEntry } from "@/lib/types";
+import { getLatestOwnedBusiness } from "@/lib/db/owned-businesses";
 
 const LIBRARIES: ("places")[] = ["places"];
 
@@ -72,13 +73,7 @@ export default function SchedulePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
 
-      const { data: biz } = await supabase
-        .from("businesses")
-        .select("id")
-        .eq("owner_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const biz = await getLatestOwnedBusiness(supabase);
 
       if (!biz) { setLoading(false); return; }
       setBusinessId(biz.id);
@@ -137,6 +132,20 @@ export default function SchedulePage() {
     setError(null);
     setSuccess(null);
 
+    const invalidDay = DAYS.find(({ dow }) => {
+      const day = weeklyForms[dow];
+      return day.is_active && (
+        !day.open_time ||
+        !day.close_time ||
+        day.open_time === day.close_time
+      );
+    });
+    if (invalidDay) {
+      setError(`ביום ${invalidDay.label} יש להזין שעת פתיחה ושעת סגירה שונות.`);
+      setSaving(false);
+      return;
+    }
+
     const rows = DAYS.map(({ dow }) => ({
       business_id: businessId,
       day_of_week: dow,
@@ -166,6 +175,17 @@ export default function SchedulePage() {
     setSaving(true);
     setError(null);
     setSuccess(null);
+
+    const hasOpenTime = Boolean(overrideForm.open_time);
+    const hasCloseTime = Boolean(overrideForm.close_time);
+    if (
+      hasOpenTime !== hasCloseTime ||
+      (hasOpenTime && overrideForm.open_time === overrideForm.close_time)
+    ) {
+      setError("יש להזין שעת פתיחה ושעת סגירה שונות, או להשאיר את שתיהן ריקות כדי לסמן שהעסק סגור היום.");
+      setSaving(false);
+      return;
+    }
 
     const todayStr = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
     const { data, error: err } = await supabase
@@ -266,7 +286,7 @@ export default function SchedulePage() {
       {tab === "weekly" && (
         <div className="brand-panel bg-[#FFFDF7] p-4 sm:p-6" data-tour="schedule-template">
           <h1 className="font-bold text-xl text-stone-900 mb-1">תבנית שבועית</h1>
-          <p className="text-stone-500 text-sm mb-6">הגדירו את ימי ושעות הפעילות הקבועים שלכם. ניתן לשנות יום ספציפי בטאב &quot;תיקון להיום&quot;.</p>
+          <p className="text-stone-500 text-sm mb-6">הגדירו את ימי ושעות הפעילות הקבועים שלכם. שעת סגירה מוקדמת משעת הפתיחה מסמנת פעילות שחוצה חצות. ניתן לשנות יום ספציפי בטאב &quot;תיקון להיום&quot;.</p>
 
           <div className="space-y-3">
             {DAYS.map(({ dow, label }) => {
@@ -379,6 +399,9 @@ export default function SchedulePage() {
           </div>
           <p className="text-stone-500 text-sm mb-6">
             {today} — משנה רק להיום, מחר יחזור לתבנית השבועית.
+          </p>
+          <p className="mb-5 rounded-xl border border-[#D9B44A]/40 bg-[#FFF8DC] px-3 py-2 text-sm text-[#72540C]">
+            כדי לסמן שהעסק סגור היום, השאירו את שתי השעות ריקות ושמרו. פעילות אחרי חצות נתמכת.
           </p>
 
           {!schedule && (

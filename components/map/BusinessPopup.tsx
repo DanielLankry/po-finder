@@ -12,8 +12,10 @@ import {
 } from "lucide-react";
 import type { BusinessWithSchedule } from "@/lib/types";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
-import { isOpenNow } from "@/lib/utils/schedule";
+import { getBusinessAvailability } from "@/lib/utils/schedule";
 import { trackEvent } from "@/lib/analytics";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import SafeBusinessImage from "@/components/business/SafeBusinessImage";
 
 interface BusinessPopupProps {
   business: BusinessWithSchedule;
@@ -27,7 +29,7 @@ export default function BusinessPopup({
   isMobile = false,
 }: BusinessPopupProps) {
   const schedule = business.today_schedule ?? null;
-  const open = isOpenNow(schedule);
+  const availability = getBusinessAvailability(business);
   const primaryPhoto = business.photos?.find((photo) => photo.is_primary) ?? business.photos?.[0];
   const address = schedule?.address ?? business.address;
   const mapsQuery = encodeURIComponent(address ?? business.name);
@@ -35,20 +37,13 @@ export default function BusinessPopup({
   const content = (
     <article className="brand-panel overflow-hidden bg-[#FFFDF7]" dir="rtl">
       <div className="relative h-32 border-b-2 border-[#17402D] bg-[#DDEBE0]">
-        {primaryPhoto ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={primaryPhoto.url}
-            alt={`תמונה של ${business.name}`}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="brand-map-grid flex h-full items-center justify-center text-[#17402D]">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-[#17402D] bg-[#FFF8DC] shadow-[3px_3px_0_0_#17402D]">
-              <MapPin className="h-7 w-7" aria-hidden="true" />
-            </div>
-          </div>
-        )}
+        <SafeBusinessImage
+          src={primaryPhoto?.url}
+          alt={`תמונה של ${business.name}`}
+          category={business.category}
+          className="h-full w-full object-cover"
+          loading="eager"
+        />
 
         <button
           type="button"
@@ -90,12 +85,18 @@ export default function BusinessPopup({
 
           <span
             className={`shrink-0 rounded-full border-2 px-2.5 py-1 text-xs font-black ${
-              open
+              availability === "open"
                 ? "border-[#17402D] bg-[#DDEBE0] text-[#17402D]"
-                : "border-[#8A3618]/40 bg-[#F7E7DE] text-[#8A3618]"
+                : availability === "closed"
+                  ? "border-[#8A3618]/40 bg-[#F7E7DE] text-[#8A3618]"
+                  : "border-[#8A6517]/40 bg-[#FFF3B0] text-[#72540C]"
             }`}
           >
-            {open ? "פתוח עכשיו" : schedule ? "סגור היום" : "שעות לא עודכנו"}
+            {availability === "open"
+              ? "פתוח עכשיו"
+              : availability === "closed"
+                ? "סגור עכשיו"
+                : "שעות לא עודכנו"}
           </span>
         </div>
 
@@ -146,24 +147,20 @@ export default function BusinessPopup({
 
   if (isMobile) {
     return (
-      <>
-        <div
-          className="fixed inset-0 z-30 bg-[#17402D]/35 backdrop-blur-[1px] fade-in"
-          onClick={onClose}
-          aria-hidden="true"
-        />
-        <div
-          className="fixed inset-x-0 bottom-0 z-40 popup-enter"
-          role="dialog"
-          aria-modal="true"
-          aria-label={`פרטי ${business.name}`}
+      <Sheet open onOpenChange={(open) => !open && onClose()}>
+        <SheetContent
+          side="bottom"
+          showCloseButton={false}
+          className="z-[70] border-0 bg-transparent p-0 shadow-none"
+          dir="rtl"
         >
+          <SheetTitle className="sr-only">פרטי {business.name}</SheetTitle>
           <div className="mx-auto max-w-md px-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-[#FFFDF7] shadow-sm" aria-hidden="true" />
             <div className="relative">{content}</div>
           </div>
-        </div>
-      </>
+        </SheetContent>
+      </Sheet>
     );
   }
 
