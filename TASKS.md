@@ -1,7 +1,7 @@
 # Po-Finder (פה קרוב) - Tasks
 
 > Small business discovery app (Next.js 16 + Supabase + Google Maps)
-> Last updated: 2026-05-17
+> Last updated: 2026-07-15
 
 ---
 
@@ -70,6 +70,9 @@
 - [x] Dynamic SEO metadata for business pages
 
 ### Launch Readiness
+- [x] Harden live discovery, schedule edge cases, map UX, and private business content — 2026-07-15
+  - Files modified: `app/MapPage.tsx`, `app/api/businesses/route.ts`, `app/api/businesses/[id]/events/route.ts`, `app/api/businesses/[id]/events/[eventId]/route.ts`, `app/api/payments/checkout/route.ts`, `app/businesses/[id]/page.tsx`, `app/dashboard/events/page.tsx`, `app/dashboard/photos/page.tsx`, `app/dashboard/profile/page.tsx`, `app/dashboard/schedule/page.tsx`, `app/sitemap.ts`, `components/business/BusinessCard.tsx`, `components/business/BusinessListPanel.tsx`, `components/business/PhotoGrid.tsx`, `components/business/SafeBusinessImage.tsx`, `components/business/StatusCard.tsx`, `components/layout/AccessibilityWidget.tsx`, `components/layout/CookieConsent.tsx`, `components/map/BusinessMap.tsx`, `components/map/BusinessPopup.tsx`, `components/map/PlacesSearchBar.tsx`, `components/ui/slider.tsx`, `lib/business-discovery.ts`, `lib/category-theme.ts`, `lib/db/businesses.ts`, `lib/db/owned-businesses.ts`, `lib/db/photos.ts`, `lib/db/schedules.ts`, `lib/storage/photo-urls.ts`, `lib/types.ts`, `lib/utils/schedule.ts`, `package.json`, `package-lock.json`, `supabase/migrations/20260715170000_launch_privacy_hardening.sql`, `tests/launch-privacy-migration.test.mjs`, `tests/photo-urls.test.mjs`, `tests/public/map-availability.spec.ts`, `tests/public/map.spec.ts`, `tests/schedule.test.mjs`, `TASKS.md`, `AGENTS.md`
+  - Summary: Centralized map/list filtering so confirmed-closed businesses disappear while unknown-hours businesses remain, fixed Israel midnight and overnight hours, restored mobile map markers with colorful category styling and accessible dialogs, added graceful themed fallbacks for failed legacy photos, repaired sitemap business URLs, added a private signed-photo/RLS migration for draft and expired content, and upgraded the production dependency chain until `npm audit --omit=dev` reported zero advisories.
 - [x] Hebrew visible brand standardized to "פה קרוב"
 - [x] Business-owner CTA standardized around one duration-based listing product
 - [x] About/contact trust copy uses configured business contact info without public placeholders
@@ -105,6 +108,9 @@
 ## TODO
 
 ### High Priority
+- [ ] **Apply and verify launch privacy migration in production** - Run `supabase/migrations/20260715170000_launch_privacy_hardening.sql` before deploying the matching app build, then verify anon clients cannot read `owner_id`, `business_number`, or private schedule/photo rows.
+- [ ] **Complete legal operator identity** - Fill the real legal name, registration/ID, postal address, and customer-service phone in `lib/site-config.ts` before accepting public payments.
+- [ ] **Reconcile pending HYP attempts** - Review the existing pending production payment and add provider transaction inquiry before treating lost browser returns as automatic.
 - [ ] **Replace `<img>` with `<Image>`** - Several components still use unoptimized `<img>` tags:
   - `components/business/BusinessCard.tsx`
   - `components/business/PhotoGrid.tsx`

@@ -51,7 +51,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid plan" }, { status: 400 });
   }
 
-  const { data: business } = await supabase
+  const admin = adminClient();
+  const { data: business } = await admin
     .from("businesses")
     .select("id, is_verified, is_active, expires_at")
     .eq("id", parsed.data.businessId)
@@ -66,7 +67,6 @@ export async function POST(req: NextRequest) {
       { status: 409 }
     );
   }
-  const admin = adminClient();
   try {
     await ensurePublicUser(admin, user, "business_owner");
   } catch (err) {

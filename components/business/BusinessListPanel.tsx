@@ -1,17 +1,16 @@
 "use client";
 
 import { useRef, useEffect, useCallback, useState } from "react";
-import Image from "next/image";
 import { NumberTicker } from "@/components/ui/number-ticker";
-import { CheckCircle2, ChevronRight, MapPin, Star, Search, X } from "lucide-react";
-import type { BusinessWithSchedule, BusinessCategory } from "@/lib/types";
+import { CheckCircle2, ChevronRight, MapPin, RefreshCw, Star, Search, X } from "lucide-react";
+import type { BusinessWithSchedule } from "@/lib/types";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
-import type { FilterState } from "@/components/filters/FilterDrawer";
-import { isOpenNow } from "@/lib/utils/schedule";
+import { getBusinessAvailability } from "@/lib/utils/schedule";
 import BusinessCard from "./BusinessCard";
 import StatusCard from "./StatusCard";
 import ReviewForm from "./ReviewForm";
 import ReviewsList from "./ReviewsList";
+import SafeBusinessImage from "./SafeBusinessImage";
 import type { Review } from "@/lib/types";
 
 const CATEGORY_CHIP: Record<string, { bg: string; text: string }> = {
@@ -28,8 +27,6 @@ const CATEGORY_CHIP: Record<string, { bg: string; text: string }> = {
 
 interface BusinessListPanelProps {
   businesses: BusinessWithSchedule[];
-  activeCategory: BusinessCategory | "all";
-  filters: FilterState;
   selectedBusinessId: string | null;
   onBusinessSelect: (b: BusinessWithSchedule) => void;
   onBackToList?: () => void;
@@ -39,9 +36,13 @@ interface BusinessListPanelProps {
   userLocation?: { lat: number; lng: number } | null;
   favoriteIds?: Set<string>;
   onFavoriteToggle?: (id: string) => void;
-  searchQuery?: string;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  error?: string | null;
+  onRetry?: () => void;
 }
 
+/** Calculates straight-line distance for optional nearest-first sorting. */
 function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -73,8 +74,6 @@ function SkeletonCard() {
 
 export default function BusinessListPanel({
   businesses,
-  activeCategory,
-  filters,
   selectedBusinessId,
   onBusinessSelect,
   onBackToList,
@@ -84,36 +83,26 @@ export default function BusinessListPanel({
   userLocation,
   favoriteIds,
   onFavoriteToggle,
-  searchQuery = "",
+  searchValue,
+  onSearchChange,
+  error,
+  onRetry,
 }: BusinessListPanelProps) {
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const detailScrollRef = useRef<HTMLDivElement>(null);
-  const [localSearch, setLocalSearch] = useState(searchQuery);
   const [panelReviews, setPanelReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
 
-  const q = localSearch.trim().toLowerCase();
   const filtered = businesses
-    .filter((b) => {
-      if (activeCategory !== "all" && b.category !== activeCategory) return false;
-      if (filters.kashrut !== "all" && b.kashrut !== filters.kashrut) return false;
-      if (filters.minRating > 0 && b.avg_rating < filters.minRating) return false;
-      if (filters.openNow && !isOpenNow(b.today_schedule ?? null)) return false;
-      if (q) {
-        const haystack = [b.name, b.description, b.address, b.today_schedule?.address]
-          .filter(Boolean).join(" ").toLowerCase();
-        if (!haystack.includes(q)) return false;
-      }
-      return true;
-    })
+    .slice()
     .sort((a, b) => {
       if (!userLocation) return 0;
       const latA = a.today_schedule?.lat ?? a.lat;
       const lngA = a.today_schedule?.lng ?? a.lng;
       const latB = b.today_schedule?.lat ?? b.lat;
       const lngB = b.today_schedule?.lng ?? b.lng;
-      const dA = latA && lngA ? getDistanceKm(userLocation.lat, userLocation.lng, latA, lngA) : Infinity;
-      const dB = latB && lngB ? getDistanceKm(userLocation.lat, userLocation.lng, latB, lngB) : Infinity;
+      const dA = latA != null && lngA != null ? getDistanceKm(userLocation.lat, userLocation.lng, latA, lngA) : Infinity;
+      const dB = latB != null && lngB != null ? getDistanceKm(userLocation.lat, userLocation.lng, latB, lngB) : Infinity;
       return dA - dB;
     });
 
@@ -173,7 +162,7 @@ export default function BusinessListPanel({
     if (selectedBusiness) {
       const primaryPhoto =
         selectedBusiness.photos?.find((photo) => photo.is_primary) ?? selectedBusiness.photos?.[0];
-      const selectedOpen = isOpenNow(selectedBusiness.today_schedule ?? null);
+      const selectedAvailability = getBusinessAvailability(selectedBusiness);
 
       return (
         <div className="brand-canvas flex h-full min-h-0 flex-col" dir="rtl">
@@ -200,30 +189,23 @@ export default function BusinessListPanel({
                 <div className="space-y-5">
                   <section className="brand-panel overflow-hidden bg-[#FFFDF7]">
                     <div className="relative h-48 border-b-2 border-[#17402D] bg-[#DDEBE0] lg:h-52">
-                      {primaryPhoto ? (
-                        <Image
-                          src={primaryPhoto.url}
-                          className="object-cover"
-                          alt={selectedBusiness.name}
-                          fill
-                          priority
-                          sizes="(max-width: 767px) 100vw, 430px"
-                        />
-                      ) : (
-                        <div className="brand-map-grid flex h-full items-center justify-center text-[#17402D]">
-                          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-[#17402D] bg-[#FFF8DC] shadow-[4px_4px_0_0_#17402D]">
-                            <MapPin className="h-8 w-8" aria-hidden="true" />
-                          </div>
-                        </div>
-                      )}
+                      <SafeBusinessImage
+                        src={primaryPhoto?.url}
+                        alt={`תמונה של ${selectedBusiness.name}`}
+                        category={selectedBusiness.category}
+                        className="h-full w-full object-cover"
+                        loading="eager"
+                      />
                       <span
                         className={`absolute bottom-3 right-3 rounded-full border-2 px-3 py-1 text-xs font-black shadow-[2px_2px_0_0_#17402D] ${
-                          selectedOpen
+                          selectedAvailability === "open"
                             ? "border-[#17402D] bg-[#DDEBE0] text-[#17402D]"
                             : "border-[#8A3618] bg-[#F7E7DE] text-[#8A3618]"
                         }`}
                       >
-                        {selectedOpen ? "פתוח עכשיו" : "לא פתוח כרגע"}
+                        {selectedAvailability === "open"
+                          ? "פתוח עכשיו"
+                          : "שעות הפעילות לא ידועות"}
                       </span>
                     </div>
 
@@ -275,7 +257,11 @@ export default function BusinessListPanel({
                   </section>
                 </div>
 
-                <StatusCard business={selectedBusiness} schedule={selectedBusiness.today_schedule ?? null} />
+                <StatusCard
+                  business={selectedBusiness}
+                  schedule={selectedBusiness.today_schedule ?? null}
+                  hoursStatus={selectedBusiness.hours_status}
+                />
               </div>
 
               <section className="brand-panel-soft mt-5 bg-[#FFFDF7] p-5 lg:p-6">
@@ -311,7 +297,9 @@ export default function BusinessListPanel({
     }
   }
 
-  const openCount = filtered.filter((b) => isOpenNow(b.today_schedule ?? null)).length;
+  const openCount = filtered.filter(
+    (business) => getBusinessAvailability(business) === "open",
+  ).length;
 
   return (
     <div className="flex flex-col h-full" dir="rtl">
@@ -322,18 +310,20 @@ export default function BusinessListPanel({
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#17402D]/60 pointer-events-none" />
           <input
             type="search"
-            value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
+            value={searchValue}
+            onChange={(e) => onSearchChange(e.target.value)}
             placeholder="חפש עסק, שכונה, מוצר..."
-            className="w-full h-11 rounded-xl border-2 border-[#17402D]/20 bg-white ps-9 pe-9 text-sm font-medium text-[#17402D] placeholder:text-[#17402D]/40 shadow-[2px_2px_0_0_rgba(23,64,45,0.12)] focus:outline-none focus:border-[#17402D] focus:shadow-[3px_3px_0_0_#17402D] transition-all"
+            className="w-full h-11 rounded-xl border-2 border-[#17402D]/20 bg-white ps-9 pe-12 text-base md:text-sm font-medium text-[#17402D] placeholder:text-[#17402D]/40 shadow-[2px_2px_0_0_rgba(23,64,45,0.12)] focus:outline-none focus:border-[#17402D] focus:shadow-[3px_3px_0_0_#17402D] transition-all"
             dir="rtl"
           />
-          {localSearch && (
+          {searchValue && (
             <button
-              onClick={() => setLocalSearch("")}
-              className="absolute end-3 top-1/2 -translate-y-1/2 text-[#17402D]/50 hover:text-[#C4552D] transition-colors"
+              type="button"
+              onClick={() => onSearchChange("")}
+              className="absolute end-0 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center text-[#17402D]/50 transition-colors hover:text-[#C4552D]"
+              aria-label="ניקוי חיפוש עסקים"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
           )}
         </div>
@@ -371,6 +361,22 @@ export default function BusinessListPanel({
         {loading ? (
           // Show 6 shimmer skeleton cards while data loads
           Array.from({ length: 6 }, (_, i) => <SkeletonCard key={i} />)
+        ) : error ? (
+          <div className="flex h-full flex-col items-center justify-center gap-4 px-8 py-16 text-center">
+            <div className="brand-panel-soft max-w-sm p-5">
+              <p className="text-sm font-bold text-[#8A3618]" role="alert">{error}</p>
+              {onRetry && (
+                <button
+                  type="button"
+                  onClick={onRetry}
+                  className="business-type-button mx-auto mt-4 flex min-h-11 items-center gap-2 px-5 text-sm font-black"
+                >
+                  <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                  נסו שוב
+                </button>
+              )}
+            </div>
+          </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 px-8 text-center py-16">
             <div className="h-14 w-14 rounded-full bg-[#EFF5F0] flex items-center justify-center">

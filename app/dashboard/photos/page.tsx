@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import { Upload, X, Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Photo } from "@/lib/types";
+import { getPhotoStoragePath, signPhotoRecords } from "@/lib/storage/photo-urls";
+import { getLatestOwnedBusiness } from "@/lib/db/owned-businesses";
+import SafeBusinessImage from "@/components/business/SafeBusinessImage";
 
 export default function PhotosPage() {
   const [businessId, setBusinessId] = useState<string | null>(null);
@@ -20,13 +23,7 @@ export default function PhotosPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: biz } = await supabase
-        .from("businesses")
-        .select("id")
-        .eq("owner_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const biz = await getLatestOwnedBusiness(supabase);
 
       if (!biz) { setLoading(false); return; }
       setBusinessId(biz.id);
@@ -37,7 +34,7 @@ export default function PhotosPage() {
         .eq("business_id", biz.id)
         .order("is_primary", { ascending: false });
 
-      setPhotos(ph ?? []);
+      setPhotos(await signPhotoRecords(supabase, (ph ?? []) as Photo[]));
       setLoading(false);
     }
     load();
@@ -73,12 +70,10 @@ export default function PhotosPage() {
         continue;
       }
 
-      const { data: { publicUrl } } = supabase.storage.from("photos").getPublicUrl(fileName);
-
       const isPrimary = photos.length === 0;
       const { data: photo, error: dbError } = await supabase
         .from("photos")
-        .insert({ business_id: businessId, url: publicUrl, is_primary: isPrimary })
+        .insert({ business_id: businessId, url: fileName, is_primary: isPrimary })
         .select()
         .single();
 
@@ -89,7 +84,10 @@ export default function PhotosPage() {
         continue;
       }
 
-      if (photo) setPhotos((prev) => [...prev, photo as Photo]);
+      if (photo) {
+        const [signedPhoto] = await signPhotoRecords(supabase, [photo as Photo]);
+        setPhotos((prev) => [...prev, signedPhoto]);
+      }
     }
     setUploading(false);
   }
@@ -118,13 +116,11 @@ export default function PhotosPage() {
       return;
     }
 
-    // Extract storage path from public URL — everything after /object/public/photos/
-    const match = photo.url.match(/\/object\/public\/photos\/(.+)$/);
-    const filePath = match?.[1];
+    const filePath = getPhotoStoragePath(photo.url);
     if (filePath) {
       const { error: storageError } = await supabase.storage
         .from("photos")
-        .remove([decodeURIComponent(filePath)]);
+        .remove([filePath]);
       if (storageError) {
         console.error("Failed to remove orphaned photo object:", storageError);
       }
@@ -206,8 +202,7 @@ export default function PhotosPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
             {photos.map((photo) => (
               <div key={photo.id} className="relative group rounded-xl overflow-hidden aspect-square border-2 border-[#17402D]/20 bg-[#EDE8DC]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <SafeBusinessImage
                   src={photo.url}
                   alt="תמונת עסק"
                   className="w-full h-full object-cover"

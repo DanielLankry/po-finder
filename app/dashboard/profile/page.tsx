@@ -19,6 +19,7 @@ import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import PlacesSearchBar from "@/components/map/PlacesSearchBar";
 import type { LocationResult } from "@/components/map/PlacesSearchBar";
 import { BadgeCheck, Beef, CakeSlice, Coffee, Eye, Flower2, Gem, Leaf, MapPin, MessageCircle, Phone, Shirt, UtensilsCrossed, Wheat } from "lucide-react";
+import { getLatestOwnedBusiness } from "@/lib/db/owned-businesses";
 
 const CATEGORY_ICONS: Record<BusinessCategory, React.ComponentType<{ className?: string }>> = {
   coffee: Coffee,
@@ -61,13 +62,7 @@ export default function ProfilePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data } = await supabase
-        .from("businesses")
-        .select("*")
-        .eq("owner_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const data = await getLatestOwnedBusiness(supabase);
 
       if (data) {
         setBusiness(data);
@@ -139,13 +134,12 @@ export default function ProfilePage() {
           .eq("id", business.id);
         if (updateError) throw updateError;
       } else {
-        const { data: inserted, error: insertError } = await supabase
+        const { error: insertError } = await supabase
           .from("businesses")
-          .insert({ owner_id: user.id, is_active: false, ...payload })
-          .select()
-          .single();
+          .insert({ owner_id: user.id, is_active: false, ...payload });
         if (insertError) throw insertError;
         // Update local state so next save does UPDATE not INSERT
+        const inserted = await getLatestOwnedBusiness(supabase);
         if (inserted) setBusiness(inserted);
       }
       setSuccess(true);

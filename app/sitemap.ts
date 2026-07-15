@@ -6,14 +6,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const { data: businesses } = await supabase
     .from("businesses")
-    .select("id, updated_at")
+    .select("id, created_at")
     .eq("is_verified", true)
     .eq("is_active", true)
     .or(`is_legacy_public.eq.true,expires_at.gt.${new Date().toISOString()}`);
 
   const businessUrls: MetadataRoute.Sitemap = (businesses ?? []).map((b) => ({
     url: `https://pokarov.co.il/businesses/${b.id}`,
-    lastModified: b.updated_at ?? new Date().toISOString(),
+    lastModified: b.created_at,
     changeFrequency: "daily",
     priority: 0.8,
   }));

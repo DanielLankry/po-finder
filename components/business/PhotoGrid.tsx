@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { X, ChevronRight, ChevronLeft } from "lucide-react";
-import type { Photo } from "@/lib/types";
+import type { BusinessCategory, Photo } from "@/lib/types";
+import SafeBusinessImage from "./SafeBusinessImage";
 
 interface PhotoGridProps {
   photos: Photo[];
   businessName: string;
+  category: BusinessCategory;
 }
 
-export default function PhotoGrid({ photos, businessName }: PhotoGridProps) {
+export default function PhotoGrid({ photos, businessName, category }: PhotoGridProps) {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -34,10 +36,10 @@ export default function PhotoGrid({ photos, businessName }: PhotoGridProps) {
       <div className="relative h-80 md:h-[420px] rounded-2xl overflow-hidden grid grid-cols-3 gap-1">
         {/* Primary photo — right column (2/3 width in RTL) */}
         <div className="col-span-2 order-last relative">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <SafeBusinessImage
             src={primary.url}
             alt={`תמונה ראשית של ${businessName}`}
+            category={category}
             className="w-full h-full object-cover cursor-pointer hover:brightness-95 transition-all"
             onClick={() => { setCurrentIndex(0); setGalleryOpen(true); }}
           />
@@ -47,10 +49,10 @@ export default function PhotoGrid({ photos, businessName }: PhotoGridProps) {
         <div className="flex flex-col gap-1">
           {secondary.slice(0, 2).map((photo, i) => (
             <div key={photo.id} className="flex-1 relative overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <SafeBusinessImage
                 src={photo.url}
                 alt={`תמונה ${i + 2} של ${businessName}`}
+                category={category}
                 className="w-full h-full object-cover cursor-pointer hover:brightness-95 transition-all"
                 onClick={() => { setCurrentIndex(i + 1); setGalleryOpen(true); }}
               />
@@ -92,11 +94,12 @@ export default function PhotoGrid({ photos, businessName }: PhotoGridProps) {
           </p>
 
           {/* Image */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <SafeBusinessImage
             src={sorted[currentIndex].url}
             alt={`תמונה ${currentIndex + 1} של ${businessName}`}
+            category={category}
             className="max-h-[80vh] max-w-[90vw] object-contain"
+            loading="eager"
           />
 
           {/* Prev (RTL: right = previous) */}

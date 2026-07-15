@@ -187,26 +187,39 @@ export default function PlacesSearchBar({
             className="w-full h-11 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] ps-9 pe-10 text-base md:text-sm text-[#222222] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:border-transparent focus:bg-white transition-all disabled:opacity-50"
             dir="rtl"
             aria-label="חיפוש מיקום"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={open}
+            aria-controls="location-predictions"
+            aria-activedescendant={activeIndex >= 0 ? `location-option-${activeIndex}` : undefined}
             autoComplete="off"
           />
           {query && (
             <button
               onClick={() => { setQuery(""); setPredictions([]); setOpen(false); inputRef.current?.focus(); }}
-              className="absolute end-3 top-1/2 -translate-y-1/2 text-[#AAA] hover:text-[#555] transition-colors"
+              className="absolute end-0 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center text-[#AAA] transition-colors hover:text-[#555]"
+              aria-label="ניקוי חיפוש מיקום"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
           )}
 
           {/* Custom dropdown */}
           {open && predictions.length > 0 && (
             <div
+              id="location-predictions"
+              role="listbox"
               className="absolute top-[calc(100%+6px)] right-0 left-0 z-50 bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-[#E7E1D3] overflow-hidden"
               dir="rtl"
             >
               {predictions.map((p, i) => (
                 <button
                   key={p.placeId}
+                  id={`location-option-${i}`}
+                  role="option"
+                  aria-selected={i === activeIndex}
+                  type="button"
+                  onClick={() => selectPrediction(p)}
                   onMouseDown={(e) => { e.preventDefault(); selectPrediction(p); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-right transition-colors ${
                     i === activeIndex ? "bg-[#F0FDF4]" : "hover:bg-[#FBF9F3]"

@@ -112,8 +112,12 @@ export interface WeeklyScheduleEntry {
   updated_at: string;
 }
 
+export type BusinessHoursStatus = "scheduled" | "closed" | "unknown";
+
 export interface BusinessWithSchedule extends Business {
   today_schedule?: BusinessSchedule | null;
+  /** Distinguishes an explicit closed day from a business with no hours data. */
+  hours_status?: BusinessHoursStatus;
   photos?: Photo[];
   /** Computed server-side: boost_expires_at is in the future. */
   boosted?: boolean;

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Tag, Trash2, Plus, PartyPopper } from "lucide-react";
 import type { BusinessEvent } from "@/lib/types";
+import { getLatestOwnedBusiness } from "@/lib/db/owned-businesses";
 
 function formatHebrewDate(dateStr: string): string {
   const date = new Date(dateStr + "T00:00:00");
@@ -45,13 +46,7 @@ export default function EventsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
 
-      const { data: biz } = await supabase
-        .from("businesses")
-        .select("id")
-        .eq("owner_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const biz = await getLatestOwnedBusiness(supabase);
 
       if (!biz) { setLoading(false); return; }
       setBusinessId(biz.id);

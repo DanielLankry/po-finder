@@ -34,7 +34,7 @@ export default function CookieConsent() {
 
   return (
     <div
-      className="pointer-events-none fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] inset-x-0 z-[60] p-3 sm:p-4 fade-in min-[1440px]:bottom-0"
+      className="pointer-events-none fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] inset-x-0 z-[45] p-3 sm:p-4 fade-in min-[1440px]:bottom-0"
       dir="rtl"
       role="dialog"
       aria-label="הסכמה לעוגיות"

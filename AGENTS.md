@@ -25,7 +25,7 @@ Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do
 - HYP checkout keeps the legacy `/p/` APISign flow but sends both legacy (`SuccessUrl`, `Order`) and CreditGuard-style (`successUrl`, `uniqueid`, `returnUrl`) return fields.
 - HYP completion redirects may arrive on page routes such as `/pricing`; `proxy.ts` detects HYP return parameters and redirects them to `/api/payments/return` for settlement.
 - Dashboard access is centralized in `lib/dashboard-access.ts`; the navbar reads `/api/account/status` instead of duplicating paid-state Supabase queries client-side.
-- Public map/list readiness lives in `lib/public-business.ts`; schedules should affect open-now/hours only, not whether an active business card exists.
+- Public map/list readiness lives in `lib/public-business.ts`; shared discovery filtering lives in `lib/business-discovery.ts`, hides only confirmed-closed businesses from both map and list, and keeps missing/unknown hours discoverable.
 - Shared product-paper UI primitives live in `app/globals.css` under `brand-*`; use `brand-canvas` for the common neighborhood-map paper pattern and the other utilities for ink-bordered panels, tactile controls, and hard-shadow CTAs instead of inventing page-local styles.
 - A succeeded, unconsumed `listing` payment attempt is the single-use business INSERT entitlement; the trigger links it to the new business, and `users.subscription_status` must not grant another listing.
 - Expired owners retain business/payment reads and normal profile edits, but authenticated clients have no UPDATE grant for `is_active`, `expires_at`, or `boost_expires_at`; current paid listings require approval plus future expiry, while pre-expiry active seed rows with `expires_at IS NULL` are deliberately grandfathered.
@@ -36,9 +36,13 @@ Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do
 - Product analytics are written server-side to `business_analytics_events`; `business_events` is reserved for owner-managed scheduled events.
 - Authentication return paths must pass through `safeRedirectPath`; public business selects must exclude owner and business-number fields.
 - HYP verification transport failures leave the payment attempt pending for reconciliation; only a completed negative verification marks it failed.
-- Review writes require an authenticated user, and the public `photos` bucket accepts only JPEG, PNG, or WebP files up to 10 MB without public object-listing access.
+- Review writes require an authenticated user; after `20260715170000_launch_privacy_hardening.sql`, the `photos` bucket is private and UI/API reads must convert stored object paths or legacy URLs into short-lived signed URLs through `lib/storage/photo-urls.ts`.
+- Israel schedule resolution is centralized in `lib/utils/schedule.ts`; never reparse `toLocaleString`, overnight hours belong to their start date, exact closing time is closed, and API responses use `hours_status` to distinguish confirmed closed from unknown hours.
+- Owner-only business reads use the `get_my_businesses` security-definer RPC because public column grants intentionally exclude `owner_id` and `business_number`; apply the matching migration before deploying code that calls the RPC.
+- Patched transitive production packages are pinned through `package.json` overrides; retain those pins unless a dependency upgrade proves `npm audit --omit=dev` stays at zero without them.
 
 ## Known Issues
+- Production still needs `20260715170000_launch_privacy_hardening.sql` applied and live anon regression checks before this launch-hardening build can be deployed safely.
 - If HYP charges a card but no browser return reaches `/api/payments/return`, existing pending attempts must be reconciled manually or via a future transaction inquiry integration.
 - Repo-wide `npm run lint` also scans historical `.claude/worktrees` and can fail on stale copies; run targeted ESLint for changed files alongside the production build until those worktrees are excluded.
 - The expiry reminder route returns `503` until `CRON_SECRET` is configured in the deployment; Vercel Cron sends it as the bearer token.
