@@ -67,6 +67,9 @@
 - [x] Repair and regression-test the mobile header and content overlays — 2026-07-16
   - Files modified: `components/business/PhotoGrid.tsx`, `components/filters/FilterDrawer.tsx`, `components/layout/AccessibilityWidget.tsx`, `components/layout/Navbar.tsx`, `components/map/BusinessPopup.tsx`, `tests/public/mobile-layout.spec.ts`, `TASKS.md`, `AGENTS.md`
   - Summary: Balanced the compact mobile header, removed redundant or inactive actions, moved accessibility into the mobile menu to prevent content overlap, made single-photo galleries full-width, completed sheet descriptions, and added 320px-plus layout regression coverage.
+- [x] Remove the visible navbar wordmark — 2026-07-16
+  - Files modified: `components/layout/Navbar.tsx`, `tests/public/mobile-layout.spec.ts`, `TASKS.md`, `AGENTS.md`
+  - Summary: Kept only the linked logo and rotating audience text in the top navbar, with focused mobile coverage at the 430px breakpoint where the fixed wordmark previously appeared.
 
 ### Static Pages
 - [x] Privacy policy page
@@ -76,6 +79,21 @@
 - [x] Dynamic SEO metadata for business pages
 
 ### Launch Readiness
+- [x] Complete the ordered production hardening rollout — 2026-07-16
+  - Files modified: `.vercelignore`, `TASKS.md`, `AGENTS.md`
+  - Summary: Applied the exact bounded-pricing migration, deployed and verified the compatible Vercel production build, then applied the final privacy migration; confirmed the live alias, all 16 ₪20–₪250 prices, database-enforced checkout amounts, anonymous REST denials for sensitive columns, clean Supabase privilege checks, and responsive mobile rendering.
+- [x] Complete the launch security and privacy hardening pass — 2026-07-16
+  - Files modified: `app/api/payments/cancel/route.ts`, `app/api/payments/return/route.ts`, `app/businesses/[id]/page.tsx`, `app/layout.tsx`, `lib/db/reviews.ts`, `lib/json-ld.ts`, `lib/payment-state.ts`, `lib/storage/photo-urls.ts`, `lib/supabase/admin.ts`, `supabase/migrations/20260716091648_move_policy_helpers_private.sql`, `tests/json-ld.test.mjs`, `tests/payment-route-security.test.mjs`, `tests/payment-state.test.mjs`, `tests/photo-urls.test.mjs`, `tests/private-policy-helpers.test.mjs`, `tests/public-data-grants.test.mjs`, `TASKS.md`, `AGENTS.md`
+  - Summary: Closed stored JSON-LD injection, payment-cancellation IDOR, callback order-rebinding and concurrent-settlement races, catalog/charge snapshot drift, public account/payment/analytics/coupon data exposure, unsafe callback retention, public helper RPCs, and photo fallback tracking paths with explicit database grants and focused regressions.
+- [x] Finish responsive public UI and the changing mobile navbar text — 2026-07-16
+  - Files modified: `app/about/page.tsx`, `app/auth/login/page.tsx`, `app/auth/register/page.tsx`, `app/contact/page.tsx`, `app/vendors/page.tsx`, `components/layout/CookiePreferencesButton.tsx`, `components/layout/Footer.tsx`, `components/layout/Navbar.tsx`, `components/ui/typewriter.tsx`, `tests/public/mobile-layout.spec.ts`, `tests/public/overlay-theme.spec.ts`, `TASKS.md`
+  - Summary: Kept the rotating audience text visible from 320px upward, added reduced-motion and screen-reader fallbacks, standardized 44px mobile controls and product-paper surfaces, optimized static logos, and verified public pages at phone, tablet, and desktop widths.
+- [x] Integrate duration labels and simplify pricing contact actions — 2026-07-16
+  - Files modified: `app/pricing/PricingClient.tsx`, `components/business/DurationSelectorCard.tsx`, `tests/public/pricing-v2.spec.ts`, `design-qa.md`, `TASKS.md`, `AGENTS.md`
+  - Summary: Removed separate duration pills and the pricing-page WhatsApp action so the labels belong to the slider scale and pricing support uses email only.
+- [x] Add autonomous engineering and Meta marketing operators — 2026-07-16
+  - Files modified: `.agents/README.md`, `.agents/site-engineer/AGENT.md`, `.agents/meta-marketing/AGENT.md`, `.agents/meta-marketing/TARGETS.md`, `TASKS.md`, `AGENTS.md`
+  - Summary: Added approval-gated production engineering and Facebook/Instagram marketing runbooks and registered ten recurring Israel-time health, QA, maintenance, performance, creative, attribution, and growth automations for the project.
 - [x] Convert the live site from QA data to a customer-ready launch funnel — 2026-07-16
   - Files modified: `app/MapPage.tsx`, `app/api/contact/route.ts`, `app/api/payments/checkout/route.ts`, `app/api/payments/return/route.ts`, `app/auth/callback/route.ts`, `app/auth/register/page.tsx`, `app/dashboard/billing/BillingClient.tsx`, `app/dashboard/billing/page.tsx`, `app/dashboard/profile/page.tsx`, `app/privacy/page.tsx`, `app/refund/page.tsx`, `app/terms/page.tsx`, `components/business/BusinessListPanel.tsx`, `components/providers/MetaPixelProvider.tsx`, `lib/meta-pixel.ts`, `tests/auth/auth-pages.spec.ts`, `tests/public/meta-pixel-consent.spec.ts`, `tests/public/mobile-layout.spec.ts`, `tests/utils/supabase-admin.ts`, `TASKS.md`, `AGENTS.md`
   - Summary: Removed every test business from production while preserving payment history, added a Hebrew first-business launch state, repaired pricing and Google signup roles, added consent-aware Meta registration/lead/checkout/purchase events, stopped customer-facing payment detail leaks, made contact delivery truthful, updated legal dates, and hard-blocked destructive tests from the live project.
@@ -85,6 +103,12 @@
 - [x] Add short-duration pricing, an operations dashboard, and full admin controls — 2026-07-16
   - Files modified: `app/admin/businesses/page.tsx`, `app/admin/content/page.tsx`, `app/admin/layout.tsx`, `app/admin/page.tsx`, `app/admin/pricing/PricingEditor.tsx`, `app/admin/stats/page.tsx`, `app/admin/users/page.tsx`, `app/api/admin/businesses/[id]/route.ts`, `app/api/admin/content/route.ts`, `app/api/admin/content/[type]/[id]/route.ts`, `app/api/admin/coupons/route.ts`, `app/api/admin/coupons/[id]/route.ts`, `app/api/admin/pricing/route.ts`, `app/api/admin/users/route.ts`, `app/api/admin/users/[id]/route.ts`, `app/dashboard/page.tsx`, `app/pricing/PricingClient.tsx`, `app/vendors/page.tsx`, `components/business/DurationSelectorCard.tsx`, `lib/plans.ts`, `lib/plans-server.ts`, `lib/site-config.ts`, `supabase/migrations/20260716045924_add_day_week_listing_plans.sql`, `tests/destructive/pricing-duration-products.spec.ts`, `tests/plans.test.mjs`, `tests/public/pricing-v2.spec.ts`, `tests/utils/supabase-admin.ts`, `TASKS.md`, `AGENTS.md`
   - Summary: Added ₪3 day and ₪8 week listings, raised monthly prices by ₪1, preserved exact mixed-duration refunds, created a verified Notion operations dashboard, fixed service-role admin data access, and added business visibility, user, and content moderation controls.
+- [x] Enforce the launch price ladder and audit the admin control surface — 2026-07-16
+  - Files modified: `app/admin/payments/page.tsx`, `app/admin/pricing/page.tsx`, `app/admin/pricing/PricingEditor.tsx`, `app/api/admin/businesses/route.ts`, `app/api/admin/pricing/route.ts`, `app/pricing/page.tsx`, `components/business/DurationSelectorCard.tsx`, `lib/plans.ts`, `lib/plans-server.ts`, `lib/site-config.ts`, `supabase/migrations/20260716071745_add_two_three_day_listing_plans.sql`, `supabase/migrations/20260716091547_enforce_duration_price_ladder.sql`, `tests/admin-control.test.mjs`, `tests/destructive/paid-listing-lifecycle.spec.ts`, `tests/destructive/pricing-duration-products.spec.ts`, `tests/plans.test.mjs`, `tests/public/pricing-v2.spec.ts`, `tests/utils/supabase-admin.ts`, `TASKS.md`, `AGENTS.md`
+  - Summary: Added the complete one-day through twelve-month ₪20–₪250 ladder, made admin pricing writes bounded and atomic, rejected partially migrated database catalogs as one unit, kept public and admin pricing live instead of build-time cached, hardened manual business creation, and surfaced pending HYP attempts for verified manual review without introducing an unsafe settlement shortcut.
+- [x] Make dormant coupon controls launch-safe — 2026-07-16
+  - Files modified: `app/admin/coupons/page.tsx`, `app/admin/layout.tsx`, `app/admin/page.tsx`, `app/api/admin/coupons/route.ts`, `app/api/admin/coupons/[id]/route.ts`, `app/api/payments/checkout/route.ts`, `tests/admin-control.test.mjs`, `TASKS.md`, `AGENTS.md`
+  - Summary: Blocked coupon creation and reactivation on the server, labeled legacy records as nonfunctional, retained cleanup actions, and made checkout reject unrecognized coupon input until atomic reservation, settlement, cancellation, and refund rules exist.
 - [x] Harden live discovery, schedule edge cases, map UX, and private business content — 2026-07-15
   - Files modified: `app/MapPage.tsx`, `app/api/businesses/route.ts`, `app/api/businesses/[id]/events/route.ts`, `app/api/businesses/[id]/events/[eventId]/route.ts`, `app/api/payments/checkout/route.ts`, `app/businesses/[id]/page.tsx`, `app/dashboard/events/page.tsx`, `app/dashboard/photos/page.tsx`, `app/dashboard/profile/page.tsx`, `app/dashboard/schedule/page.tsx`, `app/sitemap.ts`, `components/business/BusinessCard.tsx`, `components/business/BusinessListPanel.tsx`, `components/business/PhotoGrid.tsx`, `components/business/SafeBusinessImage.tsx`, `components/business/StatusCard.tsx`, `components/layout/AccessibilityWidget.tsx`, `components/layout/CookieConsent.tsx`, `components/map/BusinessMap.tsx`, `components/map/BusinessPopup.tsx`, `components/map/PlacesSearchBar.tsx`, `components/ui/slider.tsx`, `lib/business-discovery.ts`, `lib/category-theme.ts`, `lib/db/businesses.ts`, `lib/db/owned-businesses.ts`, `lib/db/photos.ts`, `lib/db/schedules.ts`, `lib/storage/photo-urls.ts`, `lib/types.ts`, `lib/utils/schedule.ts`, `package.json`, `package-lock.json`, `supabase/migrations/20260715144513_launch_privacy_hardening.sql`, `tests/launch-privacy-migration.test.mjs`, `tests/photo-urls.test.mjs`, `tests/public/map-availability.spec.ts`, `tests/public/map.spec.ts`, `tests/schedule.test.mjs`, `TASKS.md`, `AGENTS.md`
   - Summary: Centralized map/list filtering so confirmed-closed businesses disappear while unknown-hours businesses remain, fixed Israel midnight and overnight hours, restored mobile map markers with colorful category styling and accessible dialogs, added graceful themed fallbacks for failed legacy photos, repaired sitemap business URLs, added a private signed-photo/RLS migration for draft and expired content, and upgraded the production dependency chain until `npm audit --omit=dev` reported zero advisories.
@@ -131,16 +155,19 @@
   - Files modified: `lib/site-config.ts`, `TASKS.md`
   - Summary: Completed the public legal operator disclosure so the legal pages identify the registered operator and support contact.
 - [ ] **Reconcile pending HYP attempts** - Review the existing pending production payment and add provider transaction inquiry before treating lost browser returns as automatic.
-- [ ] **Replace `<img>` with `<Image>`** - Several components still use unoptimized `<img>` tags:
-  - `components/business/BusinessCard.tsx`
-  - `components/business/PhotoGrid.tsx`
-  - `components/business/BusinessListPanel.tsx`
-  - `app/dashboard/photos/page.tsx`
+- [x] **Apply and verify the bounded pricing migration** - Production has exact version `20260716091547_enforce_duration_price_ladder.sql`; all 16 prices match the ₪20–₪250 ladder and only `service_role` can execute the atomic admin pricing RPC — 2026-07-16.
+- [x] **Apply and verify the final privacy migration** - Production has exact version `20260716091648_move_policy_helpers_private.sql`; policy helpers are private and both privilege introspection and anonymous REST probes deny review account IDs, provider callback fields, analytics session IDs, and coupons — 2026-07-16.
+- [ ] **Design atomic coupon redemption** - Decide per-user reuse, pending reservation expiry, minimum charge, plan eligibility, and whether cancellation/refund restores quota before reconnecting coupon issuance to checkout.
+- [x] **Optimize static images** - Static logos use `next/image`; expiring signed business photos intentionally stay inside `SafeBusinessImage` so load failures can switch to the branded fallback.
 
 ### Medium Priority
 - [x] **Fix search on non-homepage** - Navbar search returns to the map with a shareable `q` parameter.
 - [x] **Verify storage bucket migration** - Production `photos` bucket is limited to 10 MB JPEG, PNG, and WebP uploads.
-- [ ] **Resolve remaining repo-wide ESLint debt** - Full `npm run lint` still reports pre-existing React Compiler issues in admin, map, cookie, and UI utility files.
+- [x] **Resolve remaining repo-wide ESLint debt** — 2026-07-16
+  - Files modified: `.gitignore`, `eslint.config.mjs`, `tests/public/link-crawl.spec.ts`, `tsconfig.json`, `TASKS.md`
+  - Summary: Full `npm run lint` passes after excluding historical `.claude` worktrees and `.codex-release` staging from project tooling and removing the final unused catch binding.
+- [ ] **Strengthen production authentication controls** - Enable Supabase leaked-password protection and replace the shared admin secret with individual, MFA-capable admin identities plus an audit trail.
+- [ ] **Use durable rate limiting** - Move sensitive login/contact/analytics throttles from per-instance memory to a shared production store or edge firewall.
 
 ### Low Priority
 - [ ] **Image fill parent styling** - Some `<Image fill>` usage may need explicit `position: relative` on parent
@@ -158,7 +185,7 @@
 | Dashboard | Done |
 | Reviews | Done |
 | RTL / i18n | Done |
-| Image Optimization | ~70% (config done, components need `<Image>`) |
+| Image Optimization | Done (signed business photos use an intentional fallback component) |
 | SEO | ~90% (static + business metadata done, content should be rechecked after real inventory) |
 | Mobile Nav | Done |
 | **Overall** | **~90% complete** |

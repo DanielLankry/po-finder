@@ -66,7 +66,7 @@ test('listing grant is consumed once and expiry removes every public surface', a
       kind: 'listing',
       plan_days: 180,
       duration_months: 6,
-      amount_agorot: 4000,
+      amount_agorot: 16000,
     });
     expect(paidBusiness?.is_verified).toBe(true);
     expect(paidBusiness?.is_active).toBe(true);
@@ -105,19 +105,19 @@ test('listing grant is consumed once and expiry removes every public surface', a
     ).not.toContain(`/businesses/${business.id}`);
 
     const { data: ownerBusinesses, error: ownerReadError } = await ownerClient
-      .from('businesses')
-      .select('id, name, expires_at, is_active')
-      .eq('owner_id', user.id);
+      .rpc('get_my_businesses');
     expect(ownerReadError).toBeNull();
     expect(
-      ownerBusinesses?.some((item) => item.id === business.id),
+      (ownerBusinesses as Array<{ id: string }> | null)?.some(
+        (item) => item.id === business.id
+      ),
       'expired owner must still be able to read billing data'
     ).toBe(true);
 
     const { data: ownerPayments, error: paymentReadError } = await ownerClient
       .from('payment_attempts')
       .select('id, business_id, status, kind, plan_days')
-      .eq('user_id', user.id);
+      .eq('id', grant.id);
     expect(paymentReadError).toBeNull();
     expect(ownerPayments?.some((item) => item.id === grant.id)).toBe(true);
 

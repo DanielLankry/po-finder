@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { Mail, MessageCircle, PenLine, MapPin, Handshake, Search, Clock3, Percent, Heart } from "lucide-react";
 import Reveal from "@/components/ui/reveal";
 import { Marquee } from "@/components/ui/marquee";
@@ -250,6 +251,7 @@ export default function VendorsPage() {
           </Reveal>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

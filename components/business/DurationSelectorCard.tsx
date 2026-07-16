@@ -52,6 +52,13 @@ export default function DurationSelectorCard({
     0,
     catalog.findIndex((plan) => plan.code === selected.code)
   );
+  // Derive label positions from the catalog so the visual scale stays correct
+  // when exact-day plans are added without turning labels into separate controls.
+  const weekIndex = catalog.findIndex((plan) => plan.months === null && plan.days === 7);
+  const firstMonthIndex = catalog.findIndex((plan) => plan.months === 1);
+  const shortDayCount = catalog.filter(
+    (plan) => plan.months === null && plan.days < 7
+  ).length;
 
   const now = new Date(nowIso);
   const existingExpiry = baseExpiry ? new Date(baseExpiry) : null;
@@ -86,19 +93,45 @@ export default function DurationSelectorCard({
         </div>
 
         <div className="mt-8 rounded-2xl border-2 border-[#17402D]/20 bg-[#FFFDF7]/85 p-4 sm:p-5" dir="ltr">
-          <div className="mb-3 flex items-center justify-between gap-4 text-xs font-bold text-[#17402D]">
-            <span className="inline-flex items-center gap-1.5" dir="rtl">
-              <span className="rounded-full border border-[#8A3618]/30 bg-[#F7E7DE] px-2 py-1 text-[#8A3618]">
-                1–3 ימים
-              </span>
-              <span className="rounded-full border border-[#8A3618]/30 bg-[#F7E7DE] px-2 py-1 text-[#8A3618]">
-                שבוע
-              </span>
-              <span className="rounded-full border border-[#17402D]/20 bg-[#DDEBE0] px-2 py-1">
-                חודשים
-              </span>
+          <div
+            data-testid="duration-scale-labels"
+            className="mb-2 grid items-end px-1 text-[10px] font-bold text-[#17402D] sm:text-xs"
+            style={{ gridTemplateColumns: `repeat(${catalog.length}, minmax(0, 1fr))` }}
+            aria-hidden="true"
+          >
+            <span
+              className="whitespace-nowrap text-start text-[#8A3618]"
+              style={{ gridColumn: `1 / span ${Math.max(weekIndex, 1)}` }}
+              dir="rtl"
+            >
+              {shortDayCount > 1 ? "1–3 ימים" : "יום"}
             </span>
-            <span>12 חודשים</span>
+            <span
+              className="whitespace-nowrap text-center text-[#8A3618]"
+              style={{ gridColumn: `${weekIndex + 1}` }}
+              dir="rtl"
+            >
+              שבוע
+            </span>
+            <span
+              className="text-center"
+              style={{
+                gridColumn: `${firstMonthIndex + 1} / span ${Math.max(
+                  catalog.length - firstMonthIndex - 1,
+                  1
+                )}`,
+              }}
+              dir="rtl"
+            >
+              חודשים
+            </span>
+            <span
+              className="whitespace-nowrap text-end"
+              style={{ gridColumn: `${catalog.length}` }}
+              dir="rtl"
+            >
+              12 חודשים
+            </span>
           </div>
           <input
             aria-label="משך הפרסום"
@@ -123,7 +156,7 @@ export default function DurationSelectorCard({
                 key={plan.code}
                 className={`mx-auto rounded-full transition-all ${
                   index <= selectedIndex
-                    ? index < 4
+                    ? plan.months === null
                       ? "h-2.5 w-2.5 bg-[#C4552D]"
                       : "h-2 w-2 bg-[#2D6A4F]"
                     : "h-1.5 w-1.5 bg-[#C3DCC9]"

@@ -114,8 +114,13 @@ function RegisterForm() {
         <div className="absolute -right-12 top-20 h-32 w-32 rotate-12 rounded-[2rem] border-2 border-[#8A3618] bg-[#F6E3D9] shadow-[5px_5px_0_0_#8A3618]" aria-hidden="true" />
         <div className="absolute -left-8 bottom-16 h-24 w-24 -rotate-12 rounded-full border-2 border-[#17402D] bg-[#FFF3B0] shadow-[4px_4px_0_0_#17402D]" aria-hidden="true" />
         <div className="relative z-10 text-center max-w-sm">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="פה קרוב" className="h-20 w-auto mx-auto mb-6 drop-shadow-md" />
+          <Image
+            src="/logo.png"
+            alt="פה קרוב"
+            width={80}
+            height={80}
+            className="mx-auto mb-6 h-20 w-auto drop-shadow-md"
+          />
           <h2 className="font-display text-6xl text-[#17402D] mb-2 leading-none">הפלטפורמה</h2>
           <div className="font-display text-6xl text-[#2D6A4F] mb-4 h-16 flex items-center justify-center">
             <Typewriter
@@ -143,8 +148,7 @@ function RegisterForm() {
           {/* Mobile logo */}
           <div className="flex justify-center mb-6 lg:hidden">
             <Link href="/">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="פה קרוב" className="h-12 w-auto" />
+              <Image src="/logo.png" alt="פה קרוב" width={48} height={48} className="h-12 w-auto" />
             </Link>
           </div>
 

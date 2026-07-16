@@ -25,7 +25,7 @@ test('nav and footer links return 2xx/3xx', async ({ page, baseURL }) => {
     try {
       const res = await ctx.get(url, { maxRedirects: 5, timeout: 15_000 });
       results.push({ url, status: res.status() });
-    } catch (e) {
+    } catch {
       results.push({ url, status: 0 });
     }
   }

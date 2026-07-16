@@ -20,6 +20,7 @@ import Footer from "@/components/layout/Footer";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import type { WeeklyScheduleEntry } from "@/lib/types";
 import { getIsraelDateContext, resolveEffectiveSchedule } from "@/lib/utils/schedule";
+import { serializeJsonLd } from "@/lib/json-ld";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -119,7 +120,7 @@ export default async function BusinessPage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(localBusinessSchema) }}
       />
       <Navbar />
       <ViewTracker businessId={id} />

@@ -6,8 +6,13 @@ test.describe("duration pricing", () => {
     await expect(page.getByRole("heading", { level: 1 })).toContainText("משלמים פעם אחת");
     await expect(page.getByText(/6 חודשים — ₪\d+/)).toBeVisible();
     await expect(page.getByRole("slider", { name: "משך הפרסום" })).toHaveValue("9");
-    await expect(page.getByRole("button", { name: /יום אחד.*₪3/ })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: /שבוע אחד.*₪8/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /יום אחד.*₪20/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /שבוע אחד.*₪40/ })).toHaveCount(0);
+    const scaleLabels = page.getByTestId("duration-scale-labels");
+    await expect(scaleLabels).toContainText(/יום|ימים/);
+    await expect(scaleLabels).toContainText("שבוע");
+    await expect(scaleLabels.locator(".rounded-full")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /WhatsApp/i })).toHaveCount(0);
     await expect(page.getByText("בתשלום חד־פעמי").first()).toBeVisible();
     await expect(page.getByText("ללא חידוש אוטומטי").first()).toBeVisible();
     await expect(page.getByText(/קידום ל־30|קידום ל-30|מסלול השקה/)).toHaveCount(0);
@@ -18,22 +23,22 @@ test.describe("duration pricing", () => {
     const slider = page.getByRole("slider", { name: "משך הפרסום" });
 
     await slider.fill("0");
-    await expect(page.getByText("יום אחד — ₪3")).toBeVisible();
+    await expect(page.getByText("יום אחד — ₪20")).toBeVisible();
 
     await slider.fill("1");
-    await expect(page.getByText("יומיים — ₪5")).toBeVisible();
+    await expect(page.getByText("יומיים — ₪25")).toBeVisible();
 
     await slider.fill("2");
-    await expect(page.getByText("3 ימים — ₪6")).toBeVisible();
+    await expect(page.getByText("3 ימים — ₪30")).toBeVisible();
 
     await slider.fill("3");
-    await expect(page.getByText("שבוע אחד — ₪8")).toBeVisible();
+    await expect(page.getByText("שבוע אחד — ₪40")).toBeVisible();
 
     await slider.fill("4");
-    await expect(page.getByText(/חודש אחד — ₪\d+/)).toBeVisible();
+    await expect(page.getByText("חודש אחד — ₪60")).toBeVisible();
 
     await slider.fill("15");
-    await expect(page.getByText(/12 חודשים — ₪\d+/)).toBeVisible();
+    await expect(page.getByText("12 חודשים — ₪250")).toBeVisible();
     await expect(page.getByText("הכי משתלם")).toBeVisible();
     await expect(page.getByRole("button", { name: "פרסום העסק ל־12 חודשים" })).toBeVisible();
   });

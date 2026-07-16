@@ -161,41 +161,55 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
         aria-label="ניווט ראשי"
         dir="rtl"
       >
-        {/* Logo + tagline — RIGHT in RTL (start) */}
-        <div className="flex items-center gap-3 flex-shrink-0">
+        {/* Logo + rotating audience — RIGHT in RTL (start) */}
+        <div className="flex flex-shrink-0 items-center gap-2">
           <Link
             href="/"
-            className="flex items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
+            className="flex min-h-11 min-w-11 items-center gap-2 rounded-xl p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
             aria-label="פה קרוב — דף הבית"
           >
-            <Image src="/logo.png" alt="פה קרוב" width={52} height={52} className="rounded-xl w-10 h-10 sm:w-[52px] sm:h-[52px]" />
-            <span className="hidden text-[17px] font-black text-[#17402D] min-[360px]:inline min-[560px]:hidden">
-              פה קרוב
-            </span>
+            <Image src="/logo.png" alt="פה קרוב" width={52} height={52} priority className="rounded-xl w-10 h-10 sm:w-[52px] sm:h-[52px]" />
           </Link>
-          {/* Typewriter tagline */}
-          <div className="hidden min-[560px]:flex items-center border-r border-[#E5E7EB] pr-3 overflow-hidden w-[130px] sm:w-[175px] md:w-[295px]">
-            <Typewriter
-              text={[
-                "לעסקים קטנים",
-                "לדוכנים",
-                "לעגלות קפה",
-                "ליוצרים",
-                "לשווקים ניידים",
-                "לבעלי קיוסקים",
-                "לאופים ביתיים",
-                "למוכרי פרחים",
-                "לסוחרי וינטג׳",
-                "לקייטרינג",
-                "לחקלאים",
-                "לישראלים",
-              ]}
-              speed={60}
-              deleteSpeed={35}
-              waitTime={2200}
-              className="font-display text-[#2D6A4F] font-bold text-[20px] sm:text-[24px] md:text-[30px] whitespace-nowrap"
-              wordColors={{ "לישראלים": "text-[#C4552D]" }}
-            />
+          {/* The changing audience stays visible on phones, with a static
+              equivalent when the visitor has requested reduced motion. */}
+          <div
+            className="flex h-11 w-[86px] items-center overflow-hidden border-r-2 border-[#17402D]/15 pr-2 min-[360px]:w-[100px] min-[560px]:w-[130px] sm:w-[160px] md:w-[190px] lg:w-[260px] xl:w-[295px]"
+            data-testid="navbar-changing-text"
+          >
+            <span className="sr-only">פה קרוב לעסקים קטנים, דוכנים, עגלות קפה ויוצרים</span>
+            <div
+              className="flex min-w-0 items-center overflow-hidden"
+              data-testid="navbar-changing-text-visual"
+              aria-hidden="true"
+            >
+              <span className="hidden whitespace-nowrap font-display text-[clamp(0.875rem,4.4vw,1.875rem)] font-bold leading-none text-[#2D6A4F] motion-reduce:inline">
+                לעסקים קטנים
+              </span>
+              <div className="min-w-0 overflow-hidden motion-reduce:hidden">
+                <Typewriter
+                  text={[
+                    "לעסקים קטנים",
+                    "לדוכנים",
+                    "לעגלות קפה",
+                    "ליוצרים",
+                    "לשווקים ניידים",
+                    "לבעלי קיוסקים",
+                    "לאופים ביתיים",
+                    "למוכרי פרחים",
+                    "לסוחרי וינטג׳",
+                    "לקייטרינג",
+                    "לחקלאים",
+                    "לישראלים",
+                  ]}
+                  speed={60}
+                  startWithFullText
+                  deleteSpeed={35}
+                  waitTime={2200}
+                  className="whitespace-nowrap font-display text-[clamp(0.875rem,4.4vw,1.875rem)] font-bold leading-none text-[#2D6A4F]"
+                  wordColors={{ "לישראלים": "text-[#C4552D]" }}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -242,19 +256,21 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
         {/* Actions */}
         <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-3" data-testid="navbar-actions">
           {/* Small-phone search icon. Tablet and desktop use the real search bar above. */}
-          <button
-            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#17402D]/20 bg-white text-[#17402D] shadow-[2px_2px_0_0_rgba(23,64,45,0.18)] transition-all hover:-translate-y-0.5 hover:border-[#17402D] hover:bg-[#EFF5F0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] md:hidden sm:h-11 sm:w-11"
-            onClick={() => setMobileSearchOpen(true)}
-            aria-label="פתיחת חיפוש"
-          >
-            <Search className="h-[18px] w-[18px]" />
-          </button>
+          <div className="h-11 w-11 flex-shrink-0 md:hidden">
+            <button
+              className="brand-icon-button h-11 w-11"
+              onClick={() => setMobileSearchOpen(true)}
+              aria-label="פתיחת חיפוש"
+            >
+              <Search className="h-[18px] w-[18px]" />
+            </button>
+          </div>
 
           {/* Favorites button */}
           {onFavoritesOpen && (
             <button
               onClick={onFavoritesOpen}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#17402D]/20 bg-white text-[#17402D] shadow-[2px_2px_0_0_rgba(23,64,45,0.18)] transition-all hover:-translate-y-0.5 hover:border-rose-400 hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 sm:h-11 sm:w-11"
+              className="brand-icon-button relative h-11 w-11 flex-shrink-0 hover:border-rose-400 hover:bg-rose-50 focus-visible:ring-rose-400"
               aria-label="מועדפים"
             >
               <Heart className={`h-[18px] w-[18px] transition-colors duration-200 ${favCount > 0 ? "fill-rose-500 text-rose-500" : "text-[#17402D]"}`} />
@@ -333,19 +349,21 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
           )}
 
           {/* Mobile hamburger */}
-          <button
-            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#17402D]/20 bg-white text-[#17402D] shadow-[2px_2px_0_0_rgba(23,64,45,0.18)] transition-all hover:-translate-y-0.5 hover:border-[#17402D] hover:bg-[#EFF5F0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] min-[1440px]:hidden sm:h-11 sm:w-11"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? "סגירת תפריט" : "פתיחת תפריט"}
-            aria-expanded={mobileMenuOpen}
-            aria-controls="mobile-navigation-sheet"
-          >
-            {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </button>
+          <div className="h-11 w-11 flex-shrink-0 min-[1440px]:hidden">
+            <button
+              className="brand-icon-button h-11 w-11"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "סגירת תפריט" : "פתיחת תפריט"}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation-sheet"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </div>
       </nav>
 

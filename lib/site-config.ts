@@ -13,8 +13,7 @@ export const BUSINESS_INFO = {
 };
 
 export const LAUNCH_OFFER = {
-  regularPriceText: "₪3–₪61 לפי משך ההופעה",
-  launchPriceText: "6 חודשים ב־₪41",
+  regularPriceText: "₪20–₪250 לפי משך ההופעה",
   noCommitmentText: "ללא חידוש אוטומטי",
   mainCtaText: "טיוטה בחינם, ואז בוחרים מיום אחד עד 12 חודשי הופעה.",
   primaryButtonText: "יצירת טיוטה בחינם",

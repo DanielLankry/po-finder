@@ -31,12 +31,12 @@ export default function AboutPage() {
           </p>
 
           <div className="space-y-8 text-stone-700 leading-relaxed">
-            <section className="bg-white rounded-3xl border border-stone-200 p-6">
+            <section className="brand-panel-soft bg-[#FFFDF7] p-6">
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border-2 border-[#17402D] bg-[#DDEBE0] shadow-[2px_2px_0_0_#17402D]">
                   <Users className="h-5 w-5 text-[#2D6A4F]" aria-hidden="true" />
                 </div>
-                <h2 className="font-display font-bold text-xl text-stone-900">מי אנחנו</h2>
+                <h2 className="font-display font-bold text-xl text-[#17402D]">מי אנחנו</h2>
               </div>
               <p>
                 {BRAND_NAME} עוזרת לאנשים למצוא עסקים קטנים, דוכנים, עגלות קפה ועסקים ניידים
@@ -45,12 +45,12 @@ export default function AboutPage() {
               </p>
             </section>
 
-            <section className="bg-white rounded-3xl border border-stone-200 p-6">
+            <section className="brand-panel-soft bg-[#FFFDF7] p-6">
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border-2 border-[#17402D] bg-[#DDEBE0] shadow-[2px_2px_0_0_#17402D]">
                   <MapPin className="h-5 w-5 text-[#2D6A4F]" aria-hidden="true" />
                 </div>
-                <h2 className="font-display font-bold text-xl text-stone-900">למי הפלטפורמה מתאימה</h2>
+                <h2 className="font-display font-bold text-xl text-[#17402D]">למי הפלטפורמה מתאימה</h2>
               </div>
               <p>
                 השירות מתאים לדוכנים, עגלות קפה, ירידים, שווקים, עסקים ניידים ועסקים מקומיים
@@ -58,12 +58,12 @@ export default function AboutPage() {
               </p>
             </section>
 
-            <section className="bg-white rounded-3xl border border-stone-200 p-6">
+            <section className="brand-panel-soft bg-[#FFFDF7] p-6">
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border-2 border-[#17402D] bg-[#DDEBE0] shadow-[2px_2px_0_0_#17402D]">
                   <ArrowLeft className="h-5 w-5 text-[#2D6A4F]" aria-hidden="true" />
                 </div>
-                <h2 className="font-display font-bold text-xl text-stone-900">איך השירות עובד</h2>
+                <h2 className="font-display font-bold text-xl text-[#17402D]">איך השירות עובד</h2>
               </div>
               <div className="space-y-3">
                 <p>1. פותחים חשבון עסקי ומצטרפים דרך עמוד ההצטרפות.</p>
@@ -72,23 +72,23 @@ export default function AboutPage() {
               </div>
             </section>
 
-            <section className="bg-white rounded-3xl border border-stone-200 p-6">
+            <section className="brand-panel-soft bg-[#FFFDF7] p-6">
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border-2 border-[#17402D] bg-[#DDEBE0] shadow-[2px_2px_0_0_#17402D]">
                   <CreditCard className="h-5 w-5 text-[#2D6A4F]" aria-hidden="true" />
                 </div>
-                <h2 className="font-display font-bold text-xl text-stone-900">איך התשלום עובד</h2>
+                <h2 className="font-display font-bold text-xl text-[#17402D]">איך התשלום עובד</h2>
               </div>
               <p>{LAUNCH_OFFER.pricingSummary}</p>
               <p className="mt-3">{LAUNCH_OFFER.secondaryText}</p>
             </section>
 
-            <section className="bg-white rounded-3xl border border-stone-200 p-6">
+            <section className="brand-panel-soft bg-[#FFFDF7] p-6">
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border-2 border-[#17402D] bg-[#DDEBE0] shadow-[2px_2px_0_0_#17402D]">
                   <CircleHelp className="h-5 w-5 text-[#2D6A4F]" aria-hidden="true" />
                 </div>
-                <h2 className="font-display font-bold text-xl text-stone-900">איך מבטלים</h2>
+                <h2 className="font-display font-bold text-xl text-[#17402D]">איך מבטלים</h2>
               </div>
               <p>
                 אפשר לבטל בהתאם למדיניות הביטולים וההחזרים המפורסמת באתר. בתקופת ההשקה אין
@@ -99,8 +99,8 @@ export default function AboutPage() {
               </Link>
             </section>
 
-            <section className="bg-stone-50 rounded-3xl p-6 border border-stone-200">
-              <h2 className="font-display font-bold text-xl text-stone-900 mb-3">יצירת קשר</h2>
+            <section className="brand-panel-orange bg-[#FFFDF7] p-6">
+              <h2 className="font-display font-bold text-xl text-[#17402D] mb-3">יצירת קשר</h2>
               <p className="text-stone-700">
                 {whatsappHref
                   ? "לפרטים, הצטרפות או שאלות לגבי השירות ניתן לפנות אלינו בוואטסאפ או במייל."
@@ -120,7 +120,7 @@ export default function AboutPage() {
                 ) : null}
                 <a
                   href={`mailto:${BUSINESS_INFO.contactEmail}`}
-                  className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-full border border-stone-200 bg-white text-stone-700 font-semibold hover:bg-stone-50 transition-colors"
+                  className="brand-control inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-6 font-semibold text-[#17402D]"
                 >
                   <Mail className="h-4 w-4" />
                   {BUSINESS_INFO.contactEmail}
@@ -146,7 +146,7 @@ export default function AboutPage() {
                   {LAUNCH_OFFER.primaryButtonText}
                   <ArrowLeft className="h-4 w-4" />
                 </Link>
-                <Link href="/" className="inline-flex items-center gap-2 h-11 px-6 rounded-full border border-stone-200 bg-white text-stone-700 text-sm font-medium hover:bg-stone-50 transition-colors">
+                <Link href="/" className="business-type-button inline-flex min-h-11 items-center gap-2 px-6 text-sm font-black">
                   חזרה למפה
                 </Link>
               </div>
