@@ -207,7 +207,7 @@ export default function TourController({ shouldRun }: TourControllerProps) {
   return (
     <button
       onClick={handleSkip}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] bg-white/90 backdrop-blur-sm border border-stone-200 text-stone-500 text-sm font-medium px-4 py-2 rounded-full shadow-md hover:bg-stone-50 hover:text-stone-700 transition-colors"
+      className="brand-control fixed bottom-6 left-1/2 z-[99999] min-h-11 -translate-x-1/2 rounded-full px-4 py-2 text-sm font-black text-[#17402D]"
       aria-label="דלג על הסיור"
     >
       דלג על הסיור ✕

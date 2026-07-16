@@ -20,7 +20,7 @@ export default function PrivacyPage() {
             מדיניות פרטיות
           </h1>
           <p className="text-stone-500 text-sm mb-8">
-            עדכון אחרון: מאי 2026 · בתוקף מיום פרסומה
+            עדכון אחרון: יולי 2026 · בתוקף מיום פרסומה
           </p>
 
           <div className="space-y-8 text-stone-700 leading-relaxed">

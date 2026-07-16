@@ -5,21 +5,28 @@ test.describe("duration pricing", () => {
     await page.goto("/pricing");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("משלמים פעם אחת");
     await expect(page.getByText(/6 חודשים — ₪\d+/)).toBeVisible();
-    await expect(page.getByRole("button", { name: /יום אחד.*₪3/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: /שבוע אחד.*₪8/ })).toBeVisible();
+    await expect(page.getByRole("slider", { name: "משך הפרסום" })).toHaveValue("7");
+    await expect(page.getByRole("button", { name: /יום אחד.*₪3/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /שבוע אחד.*₪8/ })).toHaveCount(0);
     await expect(page.getByText("בתשלום חד־פעמי").first()).toBeVisible();
     await expect(page.getByText("ללא חידוש אוטומטי").first()).toBeVisible();
     await expect(page.getByText(/קידום ל־30|קידום ל-30|מסלול השקה/)).toHaveCount(0);
   });
 
-  test("slider covers all twelve prices and labels twelve months as best value", async ({ page }) => {
+  test("one slider covers day, week, and all twelve month prices", async ({ page }) => {
     await page.goto("/pricing");
-    const slider = page.getByRole("slider", { name: "משך הפרסום בחודשים" });
+    const slider = page.getByRole("slider", { name: "משך הפרסום" });
+
+    await slider.fill("0");
+    await expect(page.getByText("יום אחד — ₪3")).toBeVisible();
 
     await slider.fill("1");
+    await expect(page.getByText("שבוע אחד — ₪8")).toBeVisible();
+
+    await slider.fill("2");
     await expect(page.getByText(/חודש אחד — ₪\d+/)).toBeVisible();
 
-    await slider.fill("12");
+    await slider.fill("13");
     await expect(page.getByText(/12 חודשים — ₪\d+/)).toBeVisible();
     await expect(page.getByText("הכי משתלם")).toBeVisible();
     await expect(page.getByRole("button", { name: "פרסום העסק ל־12 חודשים" })).toBeVisible();

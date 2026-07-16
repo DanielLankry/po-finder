@@ -27,6 +27,10 @@ Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do
 - Dashboard access is centralized in `lib/dashboard-access.ts`; the navbar reads `/api/account/status` instead of duplicating paid-state Supabase queries client-side.
 - Public map/list readiness lives in `lib/public-business.ts`; shared discovery filtering lives in `lib/business-discovery.ts`, hides only confirmed-closed businesses from both map and list, and keeps missing/unknown hours discoverable.
 - Shared product-paper UI primitives live in `app/globals.css` under `brand-*`; use `brand-canvas` for the common neighborhood-map paper pattern and the other utilities for ink-bordered panels, tactile controls, and hard-shadow CTAs instead of inventing page-local styles.
+- Transient UI must use the same product-paper language: build custom overlays with `brand-modal-overlay`, `brand-dialog-surface`, and `brand-icon-button`, and keep the shared Radix dialog, sheet, select, dropdown, and slider primitives themed. Photo lightboxes are the intentional dark exception, but their controls still use the branded icon treatment.
+- The pricing duration slider indexes the ordered `PLAN_CODES` catalog directly: day, week, then one through twelve months. Keep all durations inside that single discrete slider instead of restoring separate short-plan buttons.
+- Mobile navbar layout keeps the brand at the RTL start and a compact action group at the opposite edge; account details live in the navigation sheet below 1440px, and favorites render only when a working `onFavoritesOpen` handler is supplied.
+- Below 640px, accessibility is reached through the mobile navigation sheet instead of a floating control that can cover card ratings or calls to action. A `PhotoGrid` with one image must render that image at full gallery width rather than reserving an empty secondary column.
 - A succeeded, unconsumed `listing` payment attempt is the single-use business INSERT entitlement; the trigger links it to the new business, and `users.subscription_status` must not grant another listing.
 - Expired owners retain business/payment reads and normal profile edits, but authenticated clients have no UPDATE grant for `is_active`, `expires_at`, or `boost_expires_at`; current paid listings require approval plus future expiry, while pre-expiry active seed rows with `expires_at IS NULL` are deliberately grandfathered.
 - Public discovery queries must always apply the expiry predicate explicitly because the permissive owner SELECT policy intentionally exposes an owner's expired row for dashboard and billing continuity.
@@ -42,13 +46,16 @@ Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do
 - Patched transitive production packages are pinned through `package.json` overrides; retain those pins unless a dependency upgrade proves `npm audit --omit=dev` stays at zero without them.
 - Admin authentication is the signed `admin_session` cookie, independent of Supabase user auth; admin pages and APIs that need private data must use `adminClient()` server-side, and the browser must never receive the service-role key.
 - Meta Pixel is mounted through `components/providers/MetaPixelProvider.tsx`; it must remain gated by `po-cookie-consent`, track App Router navigation without duplicate initial page views, and revoke tracking on the existing decline event. Do not add the raw `noscript` image because it cannot honor the JavaScript-stored consent choice.
+- Meta standard events remain browser-side and consent-aware: `CompleteRegistration` follows the verified signup callback, `Lead` follows the first real business draft insert, `InitiateCheckout` fires immediately before HYP, and `Purchase` is hydrated only from a succeeded payment owned by the signed-in user. Keep the payment-attempt ID as the Meta event ID and preserve client-side deduplication.
+- Pricing registrations redirect toward `/dashboard/billing` and must default to `business_owner`; email and Google signup callbacks carry only the allowlisted `customer` or `business_owner` role, never an admin role.
+- The public empty-launch invitation is shown only when the unfiltered platform result is truly empty. A zero-result search or filter must keep the ordinary “change filters” state.
+- Destructive Playwright helpers must hard-fail against the production Supabase project or `pokarov.co.il`; production must never be reseeded with QA businesses.
 
 ## Known Issues
 - Production has `20260715144513_launch_privacy_hardening.sql` applied; preserve that migration version so future CLI pushes do not try to replay the policy cutover.
 - If HYP charges a card but no browser return reaches `/api/payments/return`, existing pending attempts must be reconciled manually or via a future transaction inquiry integration.
 - Repo-wide `npm run lint` also scans historical `.claude/worktrees` and can fail on stale copies; run targeted ESLint for changed files alongside the production build until those worktrees are excluded.
 - `CRON_SECRET` is configured in production; an unauthenticated expiry-reminder request returns `401`, and Vercel Cron supplies the bearer token for authorized runs.
-- Legal pages still require the operator's real legal name, registration/ID number, postal address, and customer-service phone before a public launch announcement.
 - Production has `20260716045924_add_day_week_listing_plans.sql` applied; preserve that version so future pushes keep the day/week catalog and exact refund functions aligned with migration history.
 
 ## Architecture Decisions

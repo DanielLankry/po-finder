@@ -14,7 +14,7 @@ import type { BusinessWithSchedule } from "@/lib/types";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import { getBusinessAvailability } from "@/lib/utils/schedule";
 import { trackEvent } from "@/lib/analytics";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import SafeBusinessImage from "@/components/business/SafeBusinessImage";
 
 interface BusinessPopupProps {
@@ -155,6 +155,9 @@ export default function BusinessPopup({
           dir="rtl"
         >
           <SheetTitle className="sr-only">פרטי {business.name}</SheetTitle>
+          <SheetDescription className="sr-only">
+            פרטי העסק, שעות פעילות וקישורים לניווט ולכרטיס המלא
+          </SheetDescription>
           <div className="mx-auto max-w-md px-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-[#FFFDF7] shadow-sm" aria-hidden="true" />
             <div className="relative">{content}</div>

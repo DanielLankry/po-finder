@@ -1,7 +1,7 @@
 "use client";
 
-import { X } from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Check, Clock3, RotateCcw, SlidersHorizontal, Star, X } from "lucide-react";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
 import type { KashrutStatus } from "@/lib/types";
 
@@ -41,76 +41,99 @@ export default function FilterDrawer({
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent side="right" className="w-[min(22rem,calc(100vw-1rem))] p-0" dir="rtl" showCloseButton={false}>
-        <div className="flex flex-col h-full">
-          <SheetHeader className="flex flex-row items-center justify-between p-6 border-b border-stone-200">
-            <SheetTitle className="font-display font-bold text-lg text-stone-900">
-              סינון
-            </SheetTitle>
+      <SheetContent side="right" className="w-[min(24rem,calc(100vw-0.75rem))] gap-0 p-0" dir="rtl" showCloseButton={false}>
+        <div className="brand-canvas flex h-full flex-col">
+          <SheetHeader className="flex flex-row items-center justify-between border-b-2 border-[#17402D] bg-[#FFFDF7]/90 p-5 text-right">
+            <div className="flex items-center gap-3">
+              <span className="brand-chip flex h-11 w-11 justify-center p-0" aria-hidden="true">
+                <SlidersHorizontal className="h-5 w-5" />
+              </span>
+              <div>
+                <SheetTitle className="font-display text-3xl leading-none text-[#17402D]">
+                  סינון המפה
+                </SheetTitle>
+                <SheetDescription className="mt-1 text-xs font-bold text-[#8A3618]">
+                  מוצאים בדיוק את מה שקרוב
+                </SheetDescription>
+              </div>
+            </div>
             <button
               onClick={onClose}
-              className="rounded-full h-11 w-11 flex items-center justify-center hover:bg-[#EFF5F0] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
+              className="business-type-button flex h-11 w-11 min-h-11 items-center justify-center p-0"
               aria-label="סגירת סינון"
             >
-              <X className="h-4 w-4 text-stone-600" />
+              <X className="h-4 w-4" />
             </button>
           </SheetHeader>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-8">
-            {/* Open Now toggle */}
-            <div>
-              <div className="flex items-center justify-between">
-                <label htmlFor="open-now-toggle" className="font-medium text-stone-900">
-                  פתוח עכשיו
-                </label>
+          <div className="flex-1 space-y-5 overflow-y-auto p-4 sm:p-5">
+            <section className="brand-panel-soft p-4" aria-labelledby="open-now-label">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#DDEBE0] text-[#17402D]">
+                    <Clock3 className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <p id="open-now-label" className="font-display text-2xl leading-none text-[#17402D]">
+                      פתוח עכשיו
+                    </p>
+                    <p className="mt-1 text-xs text-stone-500">רק עסקים שפתוחים ברגע זה</p>
+                  </div>
+                </div>
                 <button
                   id="open-now-toggle"
                   role="switch"
                   aria-checked={filters.openNow}
                   onClick={() => update({ openNow: !filters.openNow })}
-                  className="inline-flex h-11 w-12 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2"
+                  className="inline-flex h-11 w-14 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#2D6A4F]/35"
                 >
-                  <span className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${filters.openNow ? "bg-[#2D6A4F]" : "bg-stone-200"}`}>
+                  <span className={`relative inline-flex h-7 w-13 items-center rounded-full border-2 transition-all ${filters.openNow ? "border-[#17402D] bg-[#2D6A4F] shadow-[2px_2px_0_0_#17402D]" : "border-[#17402D]/25 bg-[#F7F3EA]"}`}>
                     <span
-                      className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                        filters.openNow ? "-translate-x-[22px]" : "-translate-x-[2px]"
+                      className={`inline-flex h-5 w-5 transform items-center justify-center rounded-full bg-white text-[#17402D] shadow transition-transform ${
+                        filters.openNow ? "-translate-x-[25px]" : "-translate-x-[2px]"
                       }`}
-                    />
+                    >
+                      {filters.openNow ? <Check className="h-3 w-3" /> : null}
+                    </span>
                   </span>
                 </button>
               </div>
-              <p className="text-stone-500 text-sm mt-1">הצגת עסקים שפתוחים כרגע</p>
-            </div>
+            </section>
 
-            {/* Kashrut */}
-            <div>
-              <p className="font-medium text-stone-900 mb-3">כשרות</p>
-              <div className="space-y-2">
+            <section className="brand-panel-soft p-4" aria-labelledby="kashrut-label">
+              <div className="mb-4 flex items-end justify-between gap-3">
+                <div>
+                  <p id="kashrut-label" className="font-display text-2xl leading-none text-[#17402D]">כשרות</p>
+                  <p className="mt-1 text-xs text-stone-500">בחרו אפשרות אחת</p>
+                </div>
+                <span className="brand-chip px-2.5 py-1 text-xs">{KASHRUT_OPTIONS.find((option) => option.value === filters.kashrut)?.label}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
                 {KASHRUT_OPTIONS.map(({ value, label }) => (
                   <button
                     key={value}
+                    type="button"
                     onClick={() => update({ kashrut: value })}
                     aria-pressed={filters.kashrut === value}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] btn-press ${
-                      filters.kashrut === value
-                        ? "border-[#2D6A4F] bg-[#EFF5F0] text-[#1F5038]"
-                        : "border-stone-200 text-stone-600 hover:border-[#C3DCC9] hover:bg-[#EFF5F0]/50"
-                    }`}
+                    data-active={filters.kashrut === value}
+                    className="business-type-button flex min-h-12 w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-black"
                   >
                     {label}
-                    {filters.kashrut === value && (
-                      <span className="h-2 w-2 rounded-full bg-[#2D6A4F]" aria-hidden="true" />
-                    )}
+                    <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${filters.kashrut === value ? "border-white bg-white/20" : "border-[#17402D]/25"}`} aria-hidden="true">
+                      {filters.kashrut === value ? <Check className="h-3 w-3" /> : null}
+                    </span>
                   </button>
                 ))}
               </div>
-            </div>
+            </section>
 
-            {/* Minimum Rating */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <p className="font-medium text-stone-900">דירוג מינימלי</p>
-                <span className="text-[#2D6A4F] font-bold">
+            <section className="brand-panel-soft p-4" aria-labelledby="rating-label">
+              <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Star className="h-5 w-5 fill-[#F4B942] text-[#8A3618]" aria-hidden="true" />
+                  <p id="rating-label" className="font-display text-2xl leading-none text-[#17402D]">דירוג מינימלי</p>
+                </div>
+                <span className="brand-chip px-2.5 py-1 text-xs">
                   {filters.minRating > 0 ? `★ ${filters.minRating}+` : "הכל"}
                 </span>
               </div>
@@ -123,24 +146,24 @@ export default function FilterDrawer({
                 className="w-full"
                 aria-label="דירוג מינימלי"
               />
-              <div className="flex justify-between text-xs text-stone-400 mt-1">
+              <div className="mt-1 flex justify-between text-xs font-bold text-[#17402D]/50">
                 <span>5 ★</span>
                 <span>הכל</span>
               </div>
-            </div>
+            </section>
           </div>
 
-          {/* Footer */}
-          <div className="p-6 border-t border-stone-200 flex gap-3">
+          <div className="flex gap-3 border-t-2 border-[#17402D] bg-[#FFFDF7]/95 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <button
               onClick={handleReset}
-              className="flex-1 h-11 rounded-xl border border-stone-200 text-stone-600 font-medium text-sm hover:bg-stone-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] btn-press"
+              className="brand-control flex h-12 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-sm font-black text-[#17402D]"
             >
+              <RotateCcw className="h-4 w-4" aria-hidden="true" />
               איפוס
             </button>
             <button
               onClick={onClose}
-              className="flex-1 h-11 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 btn-press shadow-sm"
+              className="brand-button flex h-12 flex-[1.35] items-center justify-center rounded-xl px-3 text-sm font-black"
             >
               החל סינון
             </button>
