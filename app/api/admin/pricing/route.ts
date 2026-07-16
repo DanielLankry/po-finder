@@ -9,7 +9,8 @@ export const runtime = "nodejs";
 
 const planSchema = z.object({
   code: z.enum(PLAN_CODES),
-  months: z.number().int().min(1).max(12),
+  months: z.number().int().min(1).max(12).nullable(),
+  days: z.number().int().min(1).max(360),
   label: z.string().min(1).max(100),
   price: z.number().int().positive(),
 });
@@ -31,7 +32,14 @@ export async function POST(req: NextRequest) {
   if (receivedCodes.size !== PLAN_CODES.length || PLAN_CODES.some((code) => !receivedCodes.has(code))) {
     return NextResponse.json({ error: "catalog must contain every product exactly once" }, { status: 400 });
   }
-  if (parsed.data.plans.some((plan) => plan.code !== `listing_${plan.months}m`)) {
+  const hasInvalidDuration = parsed.data.plans.some((plan) => {
+    if (plan.code === "listing_1d") return plan.months !== null || plan.days !== 1;
+    if (plan.code === "listing_7d") return plan.months !== null || plan.days !== 7;
+    return plan.months === null
+      || plan.code !== `listing_${plan.months}m`
+      || plan.days !== plan.months * 30;
+  });
+  if (hasInvalidDuration) {
     return NextResponse.json({ error: "duration must match the immutable product code" }, { status: 400 });
   }
 
@@ -40,7 +48,7 @@ export async function POST(req: NextRequest) {
     db.from("plans").update({
       label: plan.label,
       price: plan.price,
-    }).eq("code", plan.code).eq("duration_months", plan.months)
+    }).eq("code", plan.code)
   ));
   const error = results.find((result) => result.error)?.error;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

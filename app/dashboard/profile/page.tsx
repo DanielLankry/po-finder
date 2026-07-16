@@ -19,6 +19,8 @@ import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import PlacesSearchBar from "@/components/map/PlacesSearchBar";
 import type { LocationResult } from "@/components/map/PlacesSearchBar";
 import { BadgeCheck, Beef, CakeSlice, Coffee, Eye, Flower2, Gem, Leaf, MapPin, MessageCircle, Phone, Shirt, UtensilsCrossed, Wheat } from "lucide-react";
+import { getLatestOwnedBusiness } from "@/lib/db/owned-businesses";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 
 const CATEGORY_ICONS: Record<BusinessCategory, React.ComponentType<{ className?: string }>> = {
   coffee: Coffee,
@@ -61,13 +63,7 @@ export default function ProfilePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data } = await supabase
-        .from("businesses")
-        .select("*")
-        .eq("owner_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const data = await getLatestOwnedBusiness(supabase);
 
       if (data) {
         setBusiness(data);
@@ -139,14 +135,17 @@ export default function ProfilePage() {
           .eq("id", business.id);
         if (updateError) throw updateError;
       } else {
-        const { data: inserted, error: insertError } = await supabase
+        const { error: insertError } = await supabase
           .from("businesses")
-          .insert({ owner_id: user.id, is_active: false, ...payload })
-          .select()
-          .single();
+          .insert({ owner_id: user.id, is_active: false, ...payload });
         if (insertError) throw insertError;
         // Update local state so next save does UPDATE not INSERT
+        const inserted = await getLatestOwnedBusiness(supabase);
         if (inserted) setBusiness(inserted);
+        trackMetaEvent("Lead", {
+          content_name: "business_draft",
+          content_category: form.category,
+        });
       }
       setSuccess(true);
     } catch (err: unknown) {
@@ -177,8 +176,9 @@ export default function ProfilePage() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div data-tour="profile-name">
-          <FormField label="שם העסק" required>
+          <FormField label="שם העסק" htmlFor="business-name" required>
             <Input
+              id="business-name"
               value={form.name}
               onChange={(e) => update("name", e.target.value)}
               placeholder="קפה של דני"
@@ -189,8 +189,9 @@ export default function ProfilePage() {
           </FormField>
         </div>
 
-        <FormField label="תיאור">
+        <FormField label="תיאור" htmlFor="business-description">
           <Textarea
+            id="business-description"
             value={form.description}
             onChange={(e) => update("description", e.target.value)}
             placeholder="ספרו על העסק שלכם..."
@@ -248,12 +249,12 @@ export default function ProfilePage() {
           </FormField>
           </div>
 
-          <FormField label="כשרות">
+          <FormField label="כשרות" htmlFor="business-kashrut">
             <Select
               value={form.kashrut}
               onValueChange={(v) => update("kashrut", v)}
             >
-              <SelectTrigger className="h-11 rounded-xl border-stone-200 focus:ring-[#2D6A4F]">
+              <SelectTrigger id="business-kashrut" className="h-11 rounded-xl border-stone-200 focus:ring-[#2D6A4F]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -268,8 +269,9 @@ export default function ProfilePage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField label="טלפון">
+          <FormField label="טלפון" htmlFor="business-phone">
             <Input
+              id="business-phone"
               value={form.phone}
               onChange={(e) => update("phone", e.target.value)}
               placeholder="05X-XXXXXXX"
@@ -279,8 +281,9 @@ export default function ProfilePage() {
             />
           </FormField>
 
-          <FormField label="WhatsApp">
+          <FormField label="WhatsApp" htmlFor="business-whatsapp">
             <Input
+              id="business-whatsapp"
               value={form.whatsapp}
               onChange={(e) => update("whatsapp", e.target.value)}
               placeholder="972XXXXXXXXX"
@@ -292,10 +295,11 @@ export default function ProfilePage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField label="אינסטגרם">
+          <FormField label="אינסטגרם" htmlFor="business-instagram">
             <div className="relative">
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm">@</span>
               <Input
+                id="business-instagram"
                 value={form.instagram}
                 onChange={(e) => update("instagram", e.target.value)}
                 placeholder="username"
@@ -305,8 +309,9 @@ export default function ProfilePage() {
             </div>
           </FormField>
 
-          <FormField label="אתר אינטרנט">
+          <FormField label="אתר אינטרנט" htmlFor="business-website">
             <Input
+              id="business-website"
               value={form.website}
               onChange={(e) => update("website", e.target.value)}
               placeholder="https://..."
@@ -317,8 +322,9 @@ export default function ProfilePage() {
           </FormField>
         </div>
 
-        <FormField label="מספר עוסק (ח.פ. / ע.מ.)" hint="הצגת תג 'עסק מאומת' על המפה">
+        <FormField label="מספר עוסק (ח.פ. / ע.מ.)" htmlFor="business-number" hint="הצגת תג 'עסק מאומת' על המפה">
           <Input
+            id="business-number"
             value={form.business_number}
             onChange={(e) => update("business_number", e.target.value)}
             placeholder="אופציונלי"
@@ -330,8 +336,8 @@ export default function ProfilePage() {
         {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
         {success && (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            <span className="font-medium">✓ הטיוטה נשמרה בהצלחה</span>
-            <Link href="/dashboard/billing" className="font-bold underline">למסלולים ותשלום</Link>
+            <span className="flex items-center gap-2 font-medium"><BadgeCheck className="h-4 w-4" aria-hidden="true" /> הטיוטה נשמרה בהצלחה</span>
+            <Link href="/dashboard/billing" className="font-bold underline">לבחירת תקופה ותשלום</Link>
           </div>
         )}
 
@@ -372,7 +378,7 @@ export default function ProfilePage() {
             {form.whatsapp ? <p className="flex items-center gap-2 text-xs text-stone-600" dir="ltr"><MessageCircle className="h-3.5 w-3.5 text-[#2D6A4F]" />WhatsApp {form.whatsapp}</p> : null}
           </div>
         </div>
-        <p className="mt-4 text-xs leading-relaxed text-stone-600">אפשר לערוך ולצפות בטיוטה בלי לשלם. אחרי אימות, בוחרים מסלול ורק אז הכרטיס נכנס למפה ולרשימה.</p>
+        <p className="mt-4 text-xs leading-relaxed text-stone-600">אפשר לערוך ולצפות בטיוטה בלי לשלם. אחרי אימות, בוחרים משך הופעה ורק אז הכרטיס נכנס למפה ולרשימה.</p>
       </aside>
     </div>
   );
@@ -382,16 +388,18 @@ function FormField({
   label,
   hint,
   required,
+  htmlFor,
   children,
 }: {
   label: string;
   hint?: string;
   required?: boolean;
+  htmlFor?: string;
   children: React.ReactNode;
 }) {
   return (
     <div>
-      <Label className="block text-stone-700 font-medium text-sm mb-1.5">
+      <Label htmlFor={htmlFor} className="block text-stone-700 font-medium text-sm mb-1.5">
         {label}
         {required && <span className="text-red-500 me-1"> *</span>}
       </Label>

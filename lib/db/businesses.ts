@@ -3,6 +3,33 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Business, BusinessCategory, KashrutStatus } from "@/lib/types";
 import { revalidatePath } from "next/cache";
+import { signPhotoRecords } from "@/lib/storage/photo-urls";
+import { getLatestOwnedBusiness, getOwnedBusinesses } from "@/lib/db/owned-businesses";
+
+// Keep public reads compatible with column-level privacy grants in the launch migration.
+const PUBLIC_BUSINESS_SELECT = `
+  id,
+  name,
+  description,
+  category,
+  address,
+  lat,
+  lng,
+  weekly_hours,
+  phone,
+  whatsapp,
+  website,
+  instagram,
+  kashrut,
+  avg_rating,
+  review_count,
+  is_active,
+  created_at,
+  expires_at,
+  is_verified,
+  is_legacy_public,
+  photos(id, business_id, url, is_primary, created_at)
+`;
 
 
 export async function getBusinesses(filters?: {
@@ -16,7 +43,7 @@ export async function getBusinesses(filters?: {
   const nowIso = new Date().toISOString();
   let query = supabase
     .from("businesses")
-    .select("*, photos(url, is_primary)")
+    .select(PUBLIC_BUSINESS_SELECT)
     .eq("is_verified", true)
     .eq("is_active", true)
     .or(`is_legacy_public.eq.true,expires_at.gt.${nowIso}`);
@@ -33,14 +60,37 @@ export async function getBusinesses(filters?: {
 
   const { data, error } = await query;
   if (error) throw error;
-  return data;
+  return Promise.all(
+    (data ?? []).map(async (business) => ({
+      ...business,
+      photos: await signPhotoRecords(supabase, business.photos ?? []),
+    })),
+  );
 }
 
 export async function getBusinessById(id: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("businesses")
-    .select("*, photos(*)")
+    .select(`
+      id,
+      name,
+      description,
+      category,
+      address,
+      lat,
+      lng,
+      weekly_hours,
+      phone,
+      whatsapp,
+      website,
+      instagram,
+      kashrut,
+      avg_rating,
+      review_count,
+      is_verified,
+      photos(id, business_id, url, is_primary, created_at)
+    `)
     .eq("id", id)
     .eq("is_verified", true)
     .eq("is_active", true)
@@ -48,19 +98,17 @@ export async function getBusinessById(id: string) {
     .single();
 
   if (error) throw error;
-  return data;
+  return {
+    ...data,
+    photos: await signPhotoRecords(supabase, data.photos ?? []),
+  };
 }
 
 export async function getBusinessesByOwner(ownerId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("businesses")
-    .select("*")
-    .eq("owner_id", ownerId)
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-  return data ?? [];
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user || user.id !== ownerId) throw new Error("Not authorized");
+  return getOwnedBusinesses(supabase);
 }
 
 /** @deprecated Use getBusinessesByOwner instead */
@@ -88,13 +136,13 @@ export async function createBusiness(formData: FormData) {
     is_active: false, // Requires admin approval before going live
   };
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("businesses")
-    .insert(businessData)
-    .select()
-    .single();
+    .insert(businessData);
 
   if (error) throw error;
+  const data = await getLatestOwnedBusiness(supabase);
+  if (!data) throw new Error("Created business was not returned");
 
   // Email notification moved to webhook after payment
   revalidatePath("/dashboard");
@@ -118,15 +166,14 @@ export async function updateBusiness(id: string, formData: FormData) {
     business_number: formData.get("business_number") as string | null,
   };
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("businesses")
     .update(updates)
-    .eq("id", id)
-    .eq("owner_id", user.id)
-    .select()
-    .single();
+    .eq("id", id);
 
   if (error) throw error;
+  const data = (await getOwnedBusinesses(supabase)).find((business) => business.id === id);
+  if (!data) throw new Error("Updated business was not returned");
   revalidatePath(`/businesses/${id}`);
   revalidatePath("/dashboard/profile");
   return data as Business;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
+import { adminClient } from "@/lib/supabase/admin";
 
 const eventSchema = z.object({
   title: z.string().min(1, "Title is required").max(200),
@@ -48,7 +49,7 @@ export async function POST(
   }
 
   // Verify ownership
-  const { data: business } = await supabase
+  const { data: business } = await adminClient()
     .from("businesses")
     .select("id")
     .eq("id", id)

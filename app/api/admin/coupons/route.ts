@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { adminClient } from "@/lib/supabase/admin";
 import { isAdminRequest } from "@/lib/admin-session";
 import { z } from "zod";
 
@@ -18,8 +18,7 @@ const couponSchema = z.object({
 export async function GET(req: NextRequest) {
   if (!(await checkAdmin(req))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
+  const { data, error } = await adminClient()
     .from("coupons")
     .select("*")
     .order("created_at", { ascending: false });
@@ -40,8 +39,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
+  const { data, error } = await adminClient()
     .from("coupons")
     .insert({
       code: parsed.data.code,

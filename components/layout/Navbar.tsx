@@ -2,8 +2,21 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Search, Menu, X, Plus, Heart, LayoutDashboard } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  Accessibility,
+  BadgeDollarSign,
+  Heart,
+  Info,
+  LayoutDashboard,
+  LogOut,
+  Mail,
+  Menu,
+  Plus,
+  Search,
+  Store,
+  X,
+} from "lucide-react";
 import { Typewriter } from "@/components/ui/typewriter";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import Image from "next/image";
@@ -22,12 +35,14 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [siteSearch, setSiteSearch] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [hasDashboardAccess, setHasDashboardAccess] = useState<boolean | null>(null);
   const supabase = useMemo(() => createClient(), []);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const router = useRouter();
   const isDashboardRoute = pathname?.startsWith("/dashboard") ?? false;
   const showDashboardCta = authChecked && !!user && (isDashboardRoute || hasDashboardAccess !== false);
 
@@ -101,9 +116,36 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
     return () => document.removeEventListener("mousedown", closeUserMenu);
   }, []);
 
+  useEffect(() => {
+    if (!mobileMenuOpen && !mobileSearchOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function closeOverlay(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      setMobileMenuOpen(false);
+      setMobileSearchOpen(false);
+    }
+
+    window.addEventListener("keydown", closeOverlay);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOverlay);
+    };
+  }, [mobileMenuOpen, mobileSearchOpen]);
+
   async function handleSignOut() {
     await supabase.auth.signOut();
     window.location.href = "/";
+  }
+
+  /** Sends navbar searches back to the map while preserving a shareable query. */
+  function submitSiteSearch(event: React.FormEvent) {
+    event.preventDefault();
+    const query = siteSearch.trim();
+    router.push(query ? `/?q=${encodeURIComponent(query)}` : "/");
+    setMobileSearchOpen(false);
   }
 
   return (
@@ -115,7 +157,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
       }`}
     >
       <nav
-        className="w-full px-5 flex items-center gap-4"
+        className="flex w-full items-center justify-between gap-2 px-3 sm:gap-4 sm:px-5"
         aria-label="ניווט ראשי"
         dir="rtl"
       >
@@ -123,13 +165,16 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
         <div className="flex items-center gap-3 flex-shrink-0">
           <Link
             href="/"
-            className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] rounded-lg"
+            className="flex items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
             aria-label="פה קרוב — דף הבית"
           >
             <Image src="/logo.png" alt="פה קרוב" width={52} height={52} className="rounded-xl w-10 h-10 sm:w-[52px] sm:h-[52px]" />
+            <span className="hidden text-[17px] font-black text-[#17402D] min-[360px]:inline min-[560px]:hidden">
+              פה קרוב
+            </span>
           </Link>
           {/* Typewriter tagline */}
-          <div className="hidden xs:flex items-center border-r border-[#E5E7EB] pr-3 overflow-hidden w-[130px] sm:w-[175px] md:w-[295px]">
+          <div className="hidden min-[560px]:flex items-center border-r border-[#E5E7EB] pr-3 overflow-hidden w-[130px] sm:w-[175px] md:w-[295px]">
             <Typewriter
               text={[
                 "לעסקים קטנים",
@@ -195,29 +240,31 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+        <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-3" data-testid="navbar-actions">
           {/* Small-phone search icon. Tablet and desktop use the real search bar above. */}
           <button
-            className="md:hidden flex items-center justify-center h-9 w-9 rounded-full hover:bg-[#EFF5F0] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
+            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#17402D]/20 bg-white text-[#17402D] shadow-[2px_2px_0_0_rgba(23,64,45,0.18)] transition-all hover:-translate-y-0.5 hover:border-[#17402D] hover:bg-[#EFF5F0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] md:hidden sm:h-11 sm:w-11"
             onClick={() => setMobileSearchOpen(true)}
             aria-label="פתיחת חיפוש"
           >
-            <Search className="h-[18px] w-[18px] text-slate-600" />
+            <Search className="h-[18px] w-[18px]" />
           </button>
 
           {/* Favorites button */}
-          <button
-            onClick={onFavoritesOpen}
-            className="relative flex items-center justify-center h-9 w-9 rounded-full border-2 border-[#17402D]/15 bg-white/60 hover:border-rose-400 hover:bg-rose-50 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
-            aria-label="מועדפים"
-          >
-            <Heart className={`h-[18px] w-[18px] transition-colors duration-200 ${favCount > 0 ? "fill-rose-500 text-rose-500" : "text-slate-500"}`} />
-            {favCount > 0 && (
-              <span className="absolute -top-1 -left-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-rose-500 text-white text-[10px] font-bold px-1 shadow-sm">
-                {favCount > 99 ? "99+" : favCount}
-              </span>
-            )}
-          </button>
+          {onFavoritesOpen && (
+            <button
+              onClick={onFavoritesOpen}
+              className="relative flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#17402D]/20 bg-white text-[#17402D] shadow-[2px_2px_0_0_rgba(23,64,45,0.18)] transition-all hover:-translate-y-0.5 hover:border-rose-400 hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 sm:h-11 sm:w-11"
+              aria-label="מועדפים"
+            >
+              <Heart className={`h-[18px] w-[18px] transition-colors duration-200 ${favCount > 0 ? "fill-rose-500 text-rose-500" : "text-[#17402D]"}`} />
+              {favCount > 0 && (
+                <span className="absolute -left-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-sm">
+                  {favCount > 99 ? "99+" : favCount}
+                </span>
+              )}
+            </button>
+          )}
 
           {/* CTA — swaps to "לוח בקרה" once the user owns an active paid business.
               Otherwise routes to /pricing where they start with the launch offer. */}
@@ -233,7 +280,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
                   ) : (
                     <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform duration-300" aria-hidden="true" />
                   )}
-                  <span>{showDashboardCta ? "לוח בקרה" : "הצטרפו במחיר השקה"}</span>
+                  <span>{showDashboardCta ? "לוח בקרה" : "פרסום עסק"}</span>
                 </Link>
               </MagneticButton>
             ) : (
@@ -242,7 +289,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
           </div>
 
           {user ? (
-            <div className="relative" ref={userMenuRef}>
+            <div className="relative hidden min-[1440px]:block" ref={userMenuRef}>
               <button
                 className="flex items-center justify-center h-10 w-10 rounded-full bg-[#2D6A4F] text-white font-medium text-sm hover:bg-[#1F5038] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 shadow-sm"
                 aria-label="תפריט משתמש"
@@ -264,7 +311,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
                       className="block rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-[#EFF5F0] hover:text-[#1F5038]"
                       onClick={() => setUserMenuOpen(false)}
                     >
-                      {showDashboardCta ? "לוח בקרה" : "הצטרפו במחיר השקה"}
+                      {showDashboardCta ? "לוח בקרה" : "פרסום עסק"}
                     </Link>
                     <button
                       onClick={handleSignOut}
@@ -287,15 +334,16 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
 
           {/* Mobile hamburger */}
           <button
-            className="min-[1440px]:hidden flex items-center justify-center h-9 w-9 rounded-full hover:bg-[#EFF5F0] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
+            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#17402D]/20 bg-white text-[#17402D] shadow-[2px_2px_0_0_rgba(23,64,45,0.18)] transition-all hover:-translate-y-0.5 hover:border-[#17402D] hover:bg-[#EFF5F0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] min-[1440px]:hidden sm:h-11 sm:w-11"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? "סגירת תפריט" : "פתיחת תפריט"}
             aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-navigation-sheet"
           >
             {mobileMenuOpen ? (
-              <X className="h-5 w-5 text-slate-600" />
+              <X className="h-5 w-5" />
             ) : (
-              <Menu className="h-5 w-5 text-slate-600" />
+              <Menu className="h-5 w-5" />
             )}
           </button>
         </div>
@@ -303,7 +351,12 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
 
       {/* Mobile search overlay */}
       {mobileSearchOpen && (
-        <div className="fixed inset-0 z-50 bg-[#F7F3EA]/98 backdrop-blur-sm flex items-start pt-4 px-4 fade-in">
+        <div
+          className="brand-canvas fixed inset-0 z-50 flex items-start border-b-2 border-[#17402D] px-4 pt-[max(1rem,env(safe-area-inset-top))] fade-in"
+          role="dialog"
+          aria-modal="true"
+          aria-label="חיפוש מיקום"
+        >
           <div className="flex-1">
             {onLocationSelect ? (
               <PlacesSearchBar
@@ -313,20 +366,28 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
                 }}
               />
             ) : (
-              <div className="relative">
+              <form onSubmit={submitSiteSearch} className="relative">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" aria-hidden="true" />
                 <input
                   type="search"
-                  placeholder="חפשו עיר או שכונה..."
+                  placeholder="חפשו עסק, שכונה או מוצר..."
                   autoFocus
-                  className="w-full h-12 rounded-full border border-slate-200 pe-10 ps-4 text-base focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]"
+                  value={siteSearch}
+                  onChange={(event) => setSiteSearch(event.target.value)}
+                  className="brand-control h-12 w-full rounded-full pe-10 ps-20 text-base"
                   aria-label="חיפוש"
                 />
-              </div>
+                <button
+                  type="submit"
+                  className="brand-button absolute left-1 top-1/2 h-10 -translate-y-1/2 rounded-full px-4 text-sm font-black"
+                >
+                  חיפוש
+                </button>
+              </form>
             )}
           </div>
           <button
-            className="ms-3 h-12 px-4 text-slate-600 font-medium text-sm hover:text-[#2D6A4F] transition-colors"
+            className="brand-control ms-3 h-12 rounded-full px-4 text-sm font-black text-[#17402D]"
             onClick={() => setMobileSearchOpen(false)}
           >
             ביטול
@@ -340,14 +401,19 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
         <>
           {/* Backdrop */}
           <div
-            className="min-[1440px]:hidden fixed inset-x-0 bottom-0 top-[72px] z-40 bg-black/40 backdrop-blur-sm"
+            className="brand-modal-overlay min-[1440px]:hidden fixed inset-x-0 bottom-0 top-[72px] z-40"
             onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
           />
           {/* Sheet */}
           <div
-            className="min-[1440px]:hidden fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-[28px] shadow-[0_-8px_40px_rgba(0,0,0,0.15)] pt-3 pb-8 px-5"
+            id="mobile-navigation-sheet"
+            className="brand-canvas min-[1440px]:hidden fixed inset-x-0 bottom-0 z-50 max-h-[calc(100dvh-72px)] overflow-y-auto rounded-t-[28px] border-t-2 border-[#17402D] px-5 pt-3 pb-[max(2rem,env(safe-area-inset-bottom))] shadow-[0_-8px_40px_rgba(0,0,0,0.15)]"
             dir="rtl"
             style={{ animation: "slideUp 0.25s ease-out" }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="תפריט ראשי"
           >
             {/* Handle */}
             <div className="w-10 h-1 rounded-full bg-[#E5E7EB] mx-auto mb-5" />
@@ -356,7 +422,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
               <div className="flex gap-3 mb-5">
                 <Link
                   href="/auth/login"
-                  className="flex-1 h-12 flex items-center justify-center rounded-2xl bg-[#2D6A4F] text-white font-bold text-sm shadow-md"
+                  className="brand-button flex h-12 flex-1 items-center justify-center rounded-2xl text-sm font-black"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   כניסה
@@ -382,14 +448,15 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
               </div>
             )}
 
-            <nav className="grid grid-cols-2 gap-2.5">
+            <nav className="grid grid-cols-2 gap-2.5" aria-label="קישורי אתר">
               {[
-                { id: "primary-cta", href: showDashboardCta ? "/dashboard" : "/pricing", label: showDashboardCta ? "לוח בקרה" : "הצטרפו במחיר השקה", emoji: "🏪", bg: "#EFF5F0", border: "#17402D", text: "#17402D" },
-                { id: "vendors", href: "/vendors", label: "לעסקים", emoji: "🛒", bg: "#FFFFFF", border: "#17402D", text: "#17402D" },
-                { id: "pricing", href: "/pricing", label: "מחירים", emoji: "💳", bg: "#FFFFFF", border: "#17402D", text: "#17402D" },
-                { id: "about", href: "/about", label: "אודות", emoji: "ℹ️", bg: "#FFFFFF", border: "#17402D", text: "#17402D" },
-                { id: "contact", href: "/contact", label: "צרו קשר", emoji: "📬", bg: "#FBF1EA", border: "#8A3618", text: "#8A3618" },
-              ].map(({ id, href, label, emoji, bg, border, text }) => (
+                { id: "primary-cta", href: showDashboardCta ? "/dashboard" : "/pricing", label: showDashboardCta ? "לוח בקרה" : "פרסום עסק", icon: showDashboardCta ? LayoutDashboard : Store, bg: "#EFF5F0", border: "#17402D", text: "#17402D" },
+                { id: "vendors", href: "/vendors", label: "לעסקים", icon: Store, bg: "#FFFFFF", border: "#17402D", text: "#17402D" },
+                { id: "pricing", href: "/pricing", label: "מחירים", icon: BadgeDollarSign, bg: "#FFFFFF", border: "#17402D", text: "#17402D" },
+                { id: "about", href: "/about", label: "אודות", icon: Info, bg: "#FFFFFF", border: "#17402D", text: "#17402D" },
+                { id: "contact", href: "/contact", label: "צרו קשר", icon: Mail, bg: "#FBF1EA", border: "#8A3618", text: "#8A3618" },
+                { id: "accessibility", href: "/accessibility", label: "נגישות", icon: Accessibility, bg: "#FFF8DC", border: "#17402D", text: "#17402D" },
+              ].map(({ id, href, label, icon: Icon, bg, border, text }) => (
                 <Link
                   key={id}
                   href={href}
@@ -397,7 +464,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
                   style={{ backgroundColor: bg, borderColor: border, color: text }}
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <span className="text-2xl">{emoji}</span>
+                  <Icon className="h-6 w-6" aria-hidden="true" />
                   {label}
                 </Link>
               ))}
@@ -408,7 +475,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
                 onClick={() => { supabase.auth.signOut(); setMobileMenuOpen(false); }}
                 className="mt-2.5 w-full flex items-center justify-center gap-2 py-3 px-3 rounded-2xl text-rose-500 font-semibold text-sm border border-rose-200 bg-rose-50 transition-colors active:scale-95"
               >
-                <span className="text-lg">🚪</span>
+                <LogOut className="h-5 w-5" aria-hidden="true" />
                 יציאה
               </button>
             )}

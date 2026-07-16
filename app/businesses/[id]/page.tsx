@@ -4,7 +4,7 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessById } from "@/lib/db/businesses";
-import { getTodaySchedule, getWeeklySchedule } from "@/lib/db/schedules";
+import { getScheduleForDate, getTodaySchedule, getWeeklySchedule } from "@/lib/db/schedules";
 import { getReviews } from "@/lib/db/reviews";
 import { getBusinessEvents } from "@/lib/db/events";
 import PhotoGrid from "@/components/business/PhotoGrid";
@@ -18,6 +18,8 @@ import EventsSection from "@/components/business/EventsSection";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
+import type { WeeklyScheduleEntry } from "@/lib/types";
+import { getIsraelDateContext, resolveEffectiveSchedule } from "@/lib/utils/schedule";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -60,29 +62,27 @@ export default async function BusinessPage({ params }: Props) {
     notFound();
   }
 
-  const [schedule, weeklySchedule, reviews, events, { data: authData }] = await Promise.all([
+  const now = new Date();
+  const israelContext = getIsraelDateContext(now);
+  const [schedule, previousSchedule, weeklySchedule, reviews, events, { data: authData }] = await Promise.all([
     getTodaySchedule(id),
+    getScheduleForDate(id, israelContext.previousDate),
     getWeeklySchedule(id),
     getReviews(id),
     getBusinessEvents(id),
     (await createClient()).auth.getUser(),
   ]);
 
-  // If there's no daily override for today, derive it from the weekly template
-  const todayDow = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jerusalem" })).getDay();
-  const todayWeekly = weeklySchedule?.find((w) => w.day_of_week === todayDow);
-  const effectiveSchedule = schedule ?? (todayWeekly?.is_active ? {
-    id: todayWeekly.id,
-    business_id: todayWeekly.business_id,
-    date: new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" }),
-    address: todayWeekly.address,
-    lat: todayWeekly.lat,
-    lng: todayWeekly.lng,
-    open_time: todayWeekly.open_time,
-    close_time: todayWeekly.close_time,
-    note: todayWeekly.note,
-    created_at: todayWeekly.created_at,
-  } : null);
+  const weeklyEntries = (weeklySchedule ?? []) as WeeklyScheduleEntry[];
+  const effective = resolveEffectiveSchedule({
+    now,
+    todayDate: israelContext.date,
+    previousDate: israelContext.previousDate,
+    todayDaily: schedule ?? undefined,
+    previousDaily: previousSchedule ?? undefined,
+    todayWeekly: weeklyEntries.find((entry) => entry.day_of_week === israelContext.dayOfWeek),
+    previousWeekly: weeklyEntries.find((entry) => entry.day_of_week === israelContext.previousDayOfWeek),
+  });
 
   const isLoggedIn = !!authData.user;
   const photos = business.photos ?? [];
@@ -136,7 +136,11 @@ export default async function BusinessPage({ params }: Props) {
 
           {/* Photo grid */}
           <div className="mb-8">
-            <PhotoGrid photos={photos} businessName={business.name} />
+            <PhotoGrid
+              photos={photos}
+              businessName={business.name}
+              category={business.category}
+            />
           </div>
 
           {/* 2-column layout: content right (60%), sticky card left (38%) */}
@@ -154,7 +158,7 @@ export default async function BusinessPage({ params }: Props) {
                       {KASHRUT_LABELS[business.kashrut as keyof typeof KASHRUT_LABELS]}
                     </span>
                   )}
-                  {business.business_number && (
+                  {business.is_verified && (
                     <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 font-medium">
                       <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
                       עסק מאומת
@@ -211,7 +215,11 @@ export default async function BusinessPage({ params }: Props) {
 
             {/* Sticky status card — LEFT (narrower) */}
             <div className="lg:w-[360px] flex-shrink-0">
-              <StatusCard business={business} schedule={effectiveSchedule} />
+              <StatusCard
+                business={business}
+                schedule={effective.schedule}
+                hoursStatus={effective.hoursStatus}
+              />
             </div>
           </div>
         </div>
@@ -231,6 +239,9 @@ export default async function BusinessPage({ params }: Props) {
         )}
       </div>
       <Footer />
+      {business.whatsapp && (
+        <div className="h-[calc(5rem+env(safe-area-inset-bottom))] lg:hidden" aria-hidden="true" />
+      )}
     </>
   );
 }

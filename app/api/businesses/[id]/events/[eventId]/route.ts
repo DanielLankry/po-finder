@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { adminClient } from "@/lib/supabase/admin";
 
 export async function DELETE(
   _req: NextRequest,
@@ -14,7 +15,7 @@ export async function DELETE(
   }
 
   // Verify ownership
-  const { data: business } = await supabase
+  const { data: business } = await adminClient()
     .from("businesses")
     .select("id")
     .eq("id", id)

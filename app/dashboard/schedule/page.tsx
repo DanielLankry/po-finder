@@ -7,7 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { CalendarDays, MapPinned } from "lucide-react";
 import type { BusinessSchedule, WeeklyScheduleEntry } from "@/lib/types";
+import { getLatestOwnedBusiness } from "@/lib/db/owned-businesses";
 
 const LIBRARIES: ("places")[] = ["places"];
 
@@ -71,13 +73,7 @@ export default function SchedulePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
 
-      const { data: biz } = await supabase
-        .from("businesses")
-        .select("id")
-        .eq("owner_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const biz = await getLatestOwnedBusiness(supabase);
 
       if (!biz) { setLoading(false); return; }
       setBusinessId(biz.id);
@@ -136,6 +132,20 @@ export default function SchedulePage() {
     setError(null);
     setSuccess(null);
 
+    const invalidDay = DAYS.find(({ dow }) => {
+      const day = weeklyForms[dow];
+      return day.is_active && (
+        !day.open_time ||
+        !day.close_time ||
+        day.open_time === day.close_time
+      );
+    });
+    if (invalidDay) {
+      setError(`ביום ${invalidDay.label} יש להזין שעת פתיחה ושעת סגירה שונות.`);
+      setSaving(false);
+      return;
+    }
+
     const rows = DAYS.map(({ dow }) => ({
       business_id: businessId,
       day_of_week: dow,
@@ -165,6 +175,17 @@ export default function SchedulePage() {
     setSaving(true);
     setError(null);
     setSuccess(null);
+
+    const hasOpenTime = Boolean(overrideForm.open_time);
+    const hasCloseTime = Boolean(overrideForm.close_time);
+    if (
+      hasOpenTime !== hasCloseTime ||
+      (hasOpenTime && overrideForm.open_time === overrideForm.close_time)
+    ) {
+      setError("יש להזין שעת פתיחה ושעת סגירה שונות, או להשאיר את שתיהן ריקות כדי לסמן שהעסק סגור היום.");
+      setSaving(false);
+      return;
+    }
 
     const todayStr = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
     const { data, error: err } = await supabase
@@ -233,7 +254,7 @@ export default function SchedulePage() {
   );
 
   if (!businessId) return (
-    <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center" dir="rtl">
+    <div className="brand-panel p-8 text-center" dir="rtl">
       <p className="text-stone-600 mb-4">יש ליצור פרופיל עסק תחילה</p>
       <a href="/dashboard/profile" className="text-[#2D6A4F] font-medium hover:underline">עריכת פרופיל ←</a>
     </div>
@@ -242,15 +263,20 @@ export default function SchedulePage() {
   return (
     <div className="space-y-5" dir="rtl">
       {/* Tabs */}
-      <div className="flex gap-1 bg-stone-100 rounded-2xl p-1 w-fit">
-        {([["weekly", "📅 תבנית שבועית"], ["override", "📌 תיקון להיום"]] as const).map(([key, label]) => (
+      <div className="brand-panel-soft flex w-full gap-1 p-1 sm:w-fit">
+        {([
+          { key: "weekly", label: "תבנית שבועית", icon: CalendarDays },
+          { key: "override", label: "תיקון להיום", icon: MapPinned },
+        ] as const).map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             onClick={() => { setTab(key); setSuccess(null); setError(null); }}
-            className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${
+            className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all sm:flex-none ${
               tab === key ? "bg-white text-[#2D6A4F] shadow-sm" : "text-stone-500 hover:text-stone-700"
             }`}
+            aria-pressed={tab === key}
           >
+            <Icon className="h-4 w-4" aria-hidden="true" />
             {label}
           </button>
         ))}
@@ -258,9 +284,9 @@ export default function SchedulePage() {
 
       {/* ── WEEKLY TEMPLATE ─────────────────────────────────────────────────── */}
       {tab === "weekly" && (
-        <div className="bg-white rounded-2xl border border-stone-200 p-6" data-tour="schedule-template">
+        <div className="brand-panel bg-[#FFFDF7] p-4 sm:p-6" data-tour="schedule-template">
           <h1 className="font-bold text-xl text-stone-900 mb-1">תבנית שבועית</h1>
-          <p className="text-stone-500 text-sm mb-6">הגדירו את ימי ושעות הפעילות הקבועים שלכם. ניתן לשנות יום ספציפי בטאב &quot;תיקון להיום&quot;.</p>
+          <p className="text-stone-500 text-sm mb-6">הגדירו את ימי ושעות הפעילות הקבועים שלכם. שעת סגירה מוקדמת משעת הפתיחה מסמנת פעילות שחוצה חצות. ניתן לשנות יום ספציפי בטאב &quot;תיקון להיום&quot;.</p>
 
           <div className="space-y-3">
             {DAYS.map(({ dow, label }) => {
@@ -268,33 +294,40 @@ export default function SchedulePage() {
               return (
                 <div key={dow} className={`rounded-xl border transition-all ${f.is_active ? "border-[#2D6A4F]/30 bg-[#EFF5F0]/40" : "border-stone-100 bg-stone-50/50"}`}>
                   {/* Day header row */}
-                  <div className="flex items-center gap-3 p-3">
+                  <div className="flex flex-wrap items-center gap-2 p-3 sm:gap-3">
                     <button
                       type="button"
                       onClick={() => setWeeklyForms((p) => ({ ...p, [dow]: { ...p[dow], is_active: !p[dow].is_active } }))}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 flex-shrink-0 ${f.is_active ? "bg-[#2D6A4F]" : "bg-stone-300"}`}
+                      className="flex h-11 w-12 flex-shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
                       role="switch"
                       aria-checked={f.is_active}
+                      aria-label={`הפעלת יום ${label}`}
                     >
-                      <span className={`inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${f.is_active ? "ltr:translate-x-[22px] rtl:-translate-x-[22px]" : "ltr:translate-x-[2px] rtl:-translate-x-[2px]"}`} />
+                      <span className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${f.is_active ? "bg-[#2D6A4F]" : "bg-stone-300"}`}>
+                        <span className={`inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${f.is_active ? "ltr:translate-x-[22px] rtl:-translate-x-[22px]" : "ltr:translate-x-[2px] rtl:-translate-x-[2px]"}`} />
+                      </span>
                     </button>
-                    <span className={`font-bold text-sm w-16 ${f.is_active ? "text-stone-800" : "text-stone-400"}`}>{label}</span>
+                    <span className={`min-w-14 font-bold text-sm ${f.is_active ? "text-stone-800" : "text-stone-400"}`}>{label}</span>
 
                     {f.is_active && (
-                      <div className="flex items-center gap-2 flex-1">
+                      <div className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 sm:ms-auto sm:w-auto">
+                        <label className="sr-only" htmlFor={`open-time-${dow}`}>שעת פתיחה ביום {label}</label>
                         <input
+                          id={`open-time-${dow}`}
                           type="time"
                           value={f.open_time}
                           onChange={(e) => setWeeklyForms((p) => ({ ...p, [dow]: { ...p[dow], open_time: e.target.value } }))}
-                          className="h-8 rounded-lg border border-stone-200 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] w-[100px]"
+                          className="brand-control h-11 min-w-0 w-full rounded-xl px-2 text-sm focus:outline-none sm:w-[110px]"
                           dir="ltr"
                         />
                         <span className="text-stone-400 text-sm">—</span>
+                        <label className="sr-only" htmlFor={`close-time-${dow}`}>שעת סגירה ביום {label}</label>
                         <input
+                          id={`close-time-${dow}`}
                           type="time"
                           value={f.close_time}
                           onChange={(e) => setWeeklyForms((p) => ({ ...p, [dow]: { ...p[dow], close_time: e.target.value } }))}
-                          className="h-8 rounded-lg border border-stone-200 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] w-[100px]"
+                          className="brand-control h-11 min-w-0 w-full rounded-xl px-2 text-sm focus:outline-none sm:w-[110px]"
                           dir="ltr"
                         />
                       </div>
@@ -312,22 +345,26 @@ export default function SchedulePage() {
                           options={{ componentRestrictions: { country: "il" }, fields: ["formatted_address", "geometry"] }}
                         >
                           <input
+                            id={`weekly-address-${dow}`}
                             type="text"
                             value={f.address}
                             onChange={(e) => setWeeklyForms((p) => ({ ...p, [dow]: { ...p[dow], address: e.target.value } }))}
                             placeholder="כתובת קבועה ליום זה (אופציונלי)"
-                            className="w-full h-9 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] px-3 text-sm"
+                            className="brand-control w-full h-11 rounded-xl px-3 text-sm"
+                            aria-label={`כתובת קבועה ביום ${label}`}
                           />
                         </Autocomplete>
                       ) : (
-                        <input type="text" disabled placeholder="טוען..." className="w-full h-9 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm" />
+                        <input type="text" disabled placeholder="טוען..." className="w-full h-11 rounded-xl border border-stone-200 bg-stone-50 px-3 text-sm" aria-label={`טעינת כתובת ביום ${label}`} />
                       )}
                       <input
+                        id={`weekly-note-${dow}`}
                         type="text"
                         value={f.note}
                         onChange={(e) => setWeeklyForms((p) => ({ ...p, [dow]: { ...p[dow], note: e.target.value } }))}
                         placeholder="הערה קבועה (אופציונלי)"
-                        className="w-full h-9 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] px-3 text-sm"
+                        className="brand-control w-full h-11 rounded-xl px-3 text-sm"
+                        aria-label={`הערה קבועה ביום ${label}`}
                       />
                     </div>
                   )}
@@ -362,6 +399,9 @@ export default function SchedulePage() {
           </div>
           <p className="text-stone-500 text-sm mb-6">
             {today} — משנה רק להיום, מחר יחזור לתבנית השבועית.
+          </p>
+          <p className="mb-5 rounded-xl border border-[#D9B44A]/40 bg-[#FFF8DC] px-3 py-2 text-sm text-[#72540C]">
+            כדי לסמן שהעסק סגור היום, השאירו את שתי השעות ריקות ושמרו. פעילות אחרי חצות נתמכת.
           </p>
 
           {!schedule && (

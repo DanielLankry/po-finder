@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { adminClient } from "@/lib/supabase/admin";
 import { isAdminRequest } from "@/lib/admin-session";
 import { z } from "zod";
 
@@ -24,8 +24,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     );
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase
+  const { error } = await adminClient()
     .from("coupons")
     .update({ is_active: parsed.data.is_active })
     .eq("id", id);
@@ -38,9 +37,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (!(await checkAdmin(req))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  const supabase = await createClient();
-
-  const { error } = await supabase
+  const { error } = await adminClient()
     .from("coupons")
     .delete()
     .eq("id", id);

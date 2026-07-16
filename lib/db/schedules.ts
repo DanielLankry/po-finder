@@ -2,13 +2,12 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { BusinessSchedule } from "@/lib/types";
+import { getTodayDateString } from "@/lib/utils/schedule";
 import { revalidatePath } from "next/cache";
 
 export async function getTodaySchedule(businessId: string) {
   const supabase = await createClient();
-  const today = new Date().toLocaleDateString("en-CA", {
-    timeZone: "Asia/Jerusalem",
-  });
+  const today = getTodayDateString();
 
   const { data, error } = await supabase
     .from("business_schedules")
@@ -52,9 +51,7 @@ export async function upsertSchedule(formData: FormData) {
   if (!user) throw new Error("Not authenticated");
 
   const businessId = formData.get("business_id") as string;
-  const today = new Date().toLocaleDateString("en-CA", {
-    timeZone: "Asia/Jerusalem",
-  });
+  const today = getTodayDateString();
 
   const scheduleData = {
     business_id: businessId,

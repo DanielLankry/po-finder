@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Coffee, CakeSlice, Beef, UtensilsCrossed, Leaf, Wheat, Flower2, Gem, Shirt, SlidersHorizontal } from "lucide-react";
 import type { BusinessCategory } from "@/lib/types";
 import PlacesSearchBar, { type LocationResult } from "@/components/map/PlacesSearchBar";
@@ -60,8 +61,30 @@ export default function FilterBar({
   onFilterOpen,
   onLocationSelect,
 }: FilterBarProps) {
+  const barRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const node = barRef.current;
+    if (!node) return;
+
+    const updateHeight = () => {
+      document.documentElement.style.setProperty(
+        "--public-filter-height",
+        `${Math.ceil(node.getBoundingClientRect().height)}px`,
+      );
+    };
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+      document.documentElement.style.removeProperty("--public-filter-height");
+    };
+  }, []);
+
   return (
     <div
+      ref={barRef}
       className="fixed top-[72px] inset-x-0 z-10 bg-[#F7F3EA] border-b-2 border-[#17402D]/10 transition-all duration-300"
       dir="rtl"
     >
@@ -72,7 +95,7 @@ export default function FilterBar({
         </div>
       )}
 
-      <div className="flex items-center justify-between gap-4 py-3 px-5">
+      <div className="flex items-center justify-between gap-3 py-3 px-3 sm:px-5">
         {/* Category pills */}
         <div className="flex-1 overflow-hidden py-1 -my-1">
 
@@ -98,7 +121,7 @@ export default function FilterBar({
         {/* Filter button */}
         <button
           onClick={onFilterOpen}
-          className="flex items-center gap-2 h-11 px-5 rounded-full border-2 border-[#17402D]/15 bg-white text-[#17402D] text-sm font-bold shadow-[2px_2px_0_0_rgba(23,64,45,0.15)] hover:border-[#17402D] hover:shadow-[3px_3px_0_0_#17402D] hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 flex-shrink-0"
+          className="flex items-center gap-2 h-11 px-4 sm:px-5 rounded-full border-2 border-[#17402D]/15 bg-white text-[#17402D] text-sm font-bold shadow-[2px_2px_0_0_rgba(23,64,45,0.15)] hover:border-[#17402D] hover:shadow-[3px_3px_0_0_#17402D] hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 flex-shrink-0"
           aria-label="פתיחת סינון מתקדם"
         >
           <SlidersHorizontal className="h-4.5 w-4.5" aria-hidden="true" />
