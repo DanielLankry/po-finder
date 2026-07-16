@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { isAdminRequest } from "@/lib/admin-session";
+import { addCalendarMonths } from "@/lib/plans";
 import { adminClient } from "@/lib/supabase/admin";
 
 async function isAdmin(req: NextRequest) {
@@ -7,6 +9,37 @@ async function isAdmin(req: NextRequest) {
 }
 
 export const runtime = "nodejs";
+
+/** Normalizes optional admin text fields to null while enforcing DB-safe lengths. */
+const nullableText = (max: number) =>
+  z.preprocess(
+    (value) => value === "" || value == null ? null : value,
+    z.string().trim().max(max).nullable()
+  );
+
+/** Coerces optional coordinates and rejects values outside geographic bounds. */
+const nullableCoordinate = (min: number, max: number) =>
+  z.preprocess(
+    (value) => value === "" || value == null ? null : value,
+    z.coerce.number().min(min).max(max).nullable()
+  );
+
+const createBusinessSchema = z.object({
+  owner_id: z.string().uuid(),
+  name: z.string().trim().min(1).max(160),
+  description: nullableText(4000),
+  category: z.enum(["coffee", "food", "sweets", "meat", "vegan", "celiac", "flowers", "jewelry", "vintage"]),
+  kashrut: z.enum(["kosher", "kosher_mehadrin", "none"]),
+  phone: nullableText(40),
+  whatsapp: nullableText(40),
+  website: nullableText(500),
+  instagram: nullableText(160),
+  business_number: nullableText(80),
+  address: nullableText(500),
+  lat: nullableCoordinate(-90, 90),
+  lng: nullableCoordinate(-180, 180),
+  duration_months: z.coerce.number().int().min(1).max(120),
+}).strict();
 
 // GET /api/admin/businesses — list all businesses (active + pending)
 export async function GET(req: NextRequest) {
@@ -31,18 +64,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json().catch(() => ({}));
-  const { owner_id, name, description, category, kashrut, phone, whatsapp,
-          website, instagram, business_number, address, lat, lng,
-          duration_months } = body;
-
-  if (!name || !owner_id) {
-    return NextResponse.json({ error: "name and owner_id are required" }, { status: 400 });
+  const parsed = createBusinessSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const months = parseInt(duration_months) || 1;
-  const expires = new Date();
-  expires.setMonth(expires.getMonth() + months);
+  const {
+    owner_id, name, description, category, kashrut, phone, whatsapp,
+    website, instagram, business_number, address, lat, lng, duration_months,
+  } = parsed.data;
+  const expires = addCalendarMonths(new Date(), duration_months);
 
   const admin = adminClient();
   const { data, error } = await admin
@@ -50,17 +81,17 @@ export async function POST(req: NextRequest) {
     .insert({
       owner_id,
       name,
-      description: description || null,
-      category: category || "food",
-      kashrut: kashrut || "none",
-      phone: phone || null,
-      whatsapp: whatsapp || null,
-      website: website || null,
-      instagram: instagram || null,
-      business_number: business_number || null,
-      address: address || null,
-      lat: lat ? parseFloat(lat) : null,
-      lng: lng ? parseFloat(lng) : null,
+      description,
+      category,
+      kashrut,
+      phone,
+      whatsapp,
+      website,
+      instagram,
+      business_number,
+      address,
+      lat,
+      lng,
       is_verified: true,
       is_active: true,
       expires_at: expires.toISOString(),
@@ -69,5 +100,5 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ business: data });
+  return NextResponse.json({ business: data }, { status: 201 });
 }

@@ -8,11 +8,8 @@ function getReturnValue(params: URLSearchParams, names: string[], fallback = "")
   return fallback;
 }
 
-function getPaymentAttemptId(params: URLSearchParams): string {
+function getProviderPaymentAttemptId(params: URLSearchParams): string {
   return getReturnValue(params, [
-    "attempt",
-    "paymentAttempt",
-    "payment_attempt",
     "Order",
     "order",
     "uniqueid",
@@ -36,7 +33,7 @@ export function buildCreditGuardResponseMac(
   const cardToken = getReturnValue(params, ["cardToken", "cardtoken"]);
   const cardExp = getReturnValue(params, ["cardExp", "cardexp"]);
   const personalId = getReturnValue(params, ["personalId", "personalid"]);
-  const uniqueId = getPaymentAttemptId(params);
+  const uniqueId = getProviderPaymentAttemptId(params);
 
   return createHash("sha256")
     .update(`${merchantPassword}${txId}${errorCode}${cardToken}${cardExp}${personalId}${uniqueId}`, "utf8")

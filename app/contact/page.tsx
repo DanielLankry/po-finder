@@ -50,15 +50,15 @@ export default function ContactPage() {
       <main className="brand-canvas min-h-screen pt-[88px] pb-20" dir="rtl">
         <div className="max-w-2xl mx-auto px-4">
           <div className="text-center mb-10">
-            <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EFF5F0] mb-4">
-              <Mail className="h-7 w-7 text-[#2D6A4F]" />
+            <div className="stamp-wiggle mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-[#17402D] bg-[#DDEBE0] shadow-[3px_3px_0_0_#17402D]">
+              <Mail className="h-7 w-7 text-[#2D6A4F]" aria-hidden="true" />
             </div>
-            <h1 className="font-extrabold text-3xl text-[#111] mb-2">צרו קשר</h1>
-            <p className="text-[#888] text-base">שאלות, הצטרפות לעסק או בירור על השירות מתחילים כאן.</p>
+            <h1 className="mb-2 font-display text-5xl text-[#17402D]">צרו קשר</h1>
+            <p className="text-base text-[#17402D]/65">שאלות, הצטרפות לעסק או בירור על השירות מתחילים כאן.</p>
           </div>
 
-          <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden mb-6">
-            <div className="bg-[#EFF5F0] border-b border-[#DDEBE0] px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="brand-panel mb-6 overflow-hidden bg-[#FFFDF7]">
+            <div className="flex flex-col gap-3 border-b-2 border-[#17402D] bg-[#DDEBE0] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
               <p className="text-sm text-[#17402D]">
                 {whatsappHref
                   ? "לפרטים, הצטרפות או שאלות לגבי השירות ניתן לפנות אלינו בוואטסאפ או במייל."
@@ -70,7 +70,7 @@ export default function ContactPage() {
                     href={whatsappHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-full bg-[#25D366] text-white text-sm font-semibold hover:bg-[#1EB856] transition-colors"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border-2 border-[#168A42] bg-[#25D366] px-4 text-sm font-semibold text-white shadow-[2px_2px_0_0_#168A42] transition-colors hover:bg-[#1EB856]"
                   >
                     <MessageCircle className="h-4 w-4" />
                     דברו איתנו בוואטסאפ
@@ -78,7 +78,7 @@ export default function ContactPage() {
                 ) : null}
                 <a
                   href={`mailto:${BUSINESS_INFO.contactEmail}`}
-                  className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-full border border-[#C3DCC9] bg-white text-[#17402D] text-sm font-semibold hover:bg-[#F9FFF9] transition-colors"
+                  className="brand-control inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold text-[#17402D]"
                 >
                   <Mail className="h-4 w-4" />
                   {BUSINESS_INFO.contactEmail}
@@ -87,11 +87,11 @@ export default function ContactPage() {
             </div>
 
             {formState === "sent" ? (
-              <div className="p-12 text-center">
-                <div className="h-16 w-16 rounded-full bg-[#EFF5F0] flex items-center justify-center mx-auto mb-4">
-                  <Send className="h-8 w-8 text-[#2D6A4F]" />
+              <div className="p-8 text-center sm:p-12">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-[#17402D] bg-[#FFF3B0] shadow-[3px_3px_0_0_#17402D]">
+                  <Send className="h-8 w-8 text-[#2D6A4F]" aria-hidden="true" />
                 </div>
-                <h2 className="font-bold text-xl text-[#111] mb-2">ההודעה נשלחה</h2>
+                <h2 className="font-display font-bold text-3xl text-[#17402D] mb-2">ההודעה נשלחה</h2>
                 <p className="text-[#888]">נחזור אליכם תוך 3 ימי עסקים.</p>
                 <button
                   onClick={() => {
@@ -104,7 +104,7 @@ export default function ContactPage() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="p-8 space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-5 p-5 sm:p-8">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="name" className="block text-sm font-semibold text-[#111] mb-1.5">
@@ -117,7 +117,7 @@ export default function ContactPage() {
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
                       placeholder="השם שלכם"
-                      className="w-full h-11 rounded-xl border border-[#E5E7EB] bg-[#F7F3EA] px-4 text-sm text-[#111] placeholder:text-[#AAA] focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:border-transparent focus:bg-white transition-all"
+                      className="brand-control h-11 w-full rounded-xl px-4 text-base text-[#17402D] placeholder:text-[#17402D]/40 md:text-sm"
                     />
                   </div>
                   <div>
@@ -132,7 +132,7 @@ export default function ContactPage() {
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                       placeholder="your@email.com"
                       dir="ltr"
-                      className="w-full h-11 rounded-xl border border-[#E5E7EB] bg-[#F7F3EA] px-4 text-sm text-[#111] placeholder:text-[#AAA] focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:border-transparent focus:bg-white transition-all"
+                      className="brand-control h-11 w-full rounded-xl px-4 text-base text-[#17402D] placeholder:text-[#17402D]/40 md:text-sm"
                     />
                   </div>
                 </div>
@@ -147,11 +147,8 @@ export default function ContactPage() {
                       return (
                         <label
                           key={s.value}
-                          className={`flex min-h-11 cursor-pointer items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium transition-all focus-within:ring-2 focus-within:ring-[#2D6A4F] focus-within:ring-offset-2 ${
-                            form.subject === s.value
-                              ? "bg-[#2D6A4F] text-white border-[#2D6A4F] shadow-sm"
-                              : "bg-white text-[#555] border-[#E5E7EB] hover:border-[#2D6A4F]/40 hover:text-[#2D6A4F]"
-                          }`}
+                          className="business-type-button flex min-h-11 cursor-pointer items-center gap-1.5 px-3 py-2 text-sm font-bold focus-within:outline focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-[#2D6A4F]/35"
+                          data-active={form.subject === s.value}
                         >
                           <input
                             type="radio"
@@ -181,11 +178,11 @@ export default function ContactPage() {
                     value={form.message}
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
                     placeholder="כתבו את ההודעה שלכם..."
-                    className="w-full rounded-xl border border-[#E5E7EB] bg-[#F7F3EA] px-4 py-3 text-sm text-[#111] placeholder:text-[#AAA] focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:border-transparent focus:bg-white transition-all resize-none"
+                    className="brand-control w-full resize-none rounded-xl px-4 py-3 text-base text-[#17402D] placeholder:text-[#17402D]/40 md:text-sm"
                   />
                 </div>
 
-                <label className="flex items-start gap-3 rounded-xl border border-[#E5E7EB] bg-[#F7F3EA] p-3 text-xs text-[#666]">
+                <label className="brand-panel-soft flex items-start gap-3 rounded-xl bg-[#FFFDF7] p-3 text-xs text-[#17402D]/70">
                   <input
                     type="checkbox"
                     required
@@ -205,8 +202,7 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={formState === "sending" || !form.subject || !form.privacyAccepted}
-                  className="w-full h-12 rounded-2xl text-white font-bold text-base flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ background: "linear-gradient(135deg, #2D6A4F 0%, #1F5038 100%)", boxShadow: "0 4px 16px rgba(45,106,79,0.3)" }}
+                  className="brand-button flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-base font-bold disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {formState === "sending" ? (
                     <><span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />שולח...</>

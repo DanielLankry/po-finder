@@ -7,26 +7,41 @@ const PHOTO_URL_MARKERS = [
   "/object/authenticated/photos/",
 ];
 
+function normalizePhotoPath(value: string): string | null {
+  try {
+    const decoded = decodeURIComponent(value).replace(/^\/+/, "");
+    if (!decoded || decoded.length > 1024 || /[\u0000-\u001f\u007f]/.test(decoded)) {
+      return null;
+    }
+    if (decoded.split("/").some((segment) => segment === "." || segment === "..")) {
+      return null;
+    }
+    return decoded;
+  } catch {
+    return null;
+  }
+}
+
 /** Extracts the bucket-relative object path from legacy URLs or new path rows. */
 export function getPhotoStoragePath(value: string): string | null {
   for (const marker of PHOTO_URL_MARKERS) {
     const markerIndex = value.indexOf(marker);
     if (markerIndex >= 0) {
       const pathWithQuery = value.slice(markerIndex + marker.length);
-      return decodeURIComponent(pathWithQuery.split("?")[0]);
+      return normalizePhotoPath(pathWithQuery.split("?")[0]);
     }
   }
 
   if (!value.includes("://")) {
-    return value.replace(/^\/+/, "") || null;
+    return normalizePhotoPath(value);
   }
   return null;
 }
 
 /**
  * Replaces stored photo paths/legacy public URLs with short-lived signed URLs.
- * A failed signature keeps the original URL so current public-bucket installs
- * remain backwards compatible until the privacy migration is applied.
+ * A missing/failed signature never falls back to a stored public, expired, or
+ * arbitrary external URL. Callers render the normal branded image fallback.
  */
 export async function signPhotoRecords(
   supabase: SupabaseClient,
@@ -36,7 +51,9 @@ export async function signPhotoRecords(
   const paths = photos
     .map((photo) => getPhotoStoragePath(photo.url))
     .filter((path): path is string => Boolean(path));
-  if (paths.length === 0) return photos;
+  if (paths.length === 0) {
+    return photos.map((photo) => ({ ...photo, url: "" }));
+  }
 
   const uniquePaths = [...new Set(paths)];
   const { data } = await supabase.storage
@@ -51,6 +68,6 @@ export async function signPhotoRecords(
   return photos.map((photo) => {
     const path = getPhotoStoragePath(photo.url);
     const signedUrl = path ? signedByPath.get(path) : null;
-    return signedUrl ? { ...photo, url: signedUrl } : photo;
+    return { ...photo, url: signedUrl ?? "" };
   });
 }

@@ -10,65 +10,107 @@ const MOBILE_ROUTES = [
   "/auth/register",
 ];
 
+const RESPONSIVE_VIEWPORTS = [
+  { width: 320, height: 700 },
+  { width: 375, height: 760 },
+  { width: 768, height: 900 },
+] as const;
+
+const NAVBAR_VIEWPORTS = [
+  ...RESPONSIVE_VIEWPORTS,
+  { width: 430, height: 860 },
+] as const;
+
 test.describe("mobile layout regression coverage", () => {
   test.beforeEach(async ({ page }, testInfo) => {
     test.skip((testInfo.project.use.viewport?.width ?? 1440) >= 1440, "mobile-only layout check");
     await page.addInitScript(() => localStorage.setItem("po-cookie-consent", "accepted"));
   });
 
-  test("navbar is balanced and contained", async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 700 });
-    await page.goto("/");
+  for (const viewport of NAVBAR_VIEWPORTS) {
+    test(`navbar changing text is visible and contained at ${viewport.width}px`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await page.goto("/");
 
-    const header = page.locator("header").first();
-    const nav = page.getByRole("navigation", { name: "ניווט ראשי" });
-    const logo = page.getByRole("link", { name: /פה קרוב — דף הבית/ });
-    const actions = page.getByTestId("navbar-actions");
+      const header = page.locator("header").first();
+      const nav = page.getByRole("navigation", { name: "ניווט ראשי" });
+      const logo = page.getByRole("link", { name: /פה קרוב — דף הבית/ });
+      const actions = page.getByTestId("navbar-actions");
+      const changingText = page.getByTestId("navbar-changing-text");
+      const changingTextVisual = page.getByTestId("navbar-changing-text-visual");
 
-    await expect(header).toBeVisible();
-    await expect(nav).toBeVisible();
-    await expect(page.getByRole("button", { name: "פתיחת חיפוש" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "מועדפים" })).toBeVisible();
-    const menuButton = page.getByRole("button", { name: "פתיחת תפריט", exact: true });
-    await expect(menuButton).toBeVisible();
-    await expect(page.getByRole("button", { name: "פתיחת תפריט נגישות" })).toBeHidden();
+      await expect(header).toBeVisible();
+      await expect(nav).toBeVisible();
+      await expect(logo.getByRole("img", { name: "פה קרוב" })).toBeVisible();
+      await expect(logo.locator("span")).toHaveCount(0);
+      await expect(changingText).toBeVisible();
+      await expect(changingTextVisual).toContainText("ל");
+      await expect(page.getByRole("button", { name: "מועדפים" })).toBeVisible();
+      const menuButton = page.getByRole("button", { name: "פתיחת תפריט", exact: true });
+      await expect(menuButton).toBeVisible();
 
-    const [headerBox, logoBox, actionsBox] = await Promise.all([
-      header.boundingBox(),
-      logo.boundingBox(),
-      actions.boundingBox(),
-    ]);
+      if (viewport.width < 768) {
+        await expect(page.getByRole("button", { name: "פתיחת חיפוש" })).toBeVisible();
+      } else {
+        await expect(page.getByRole("button", { name: "פתיחת חיפוש" })).toBeHidden();
+      }
 
-    expect(headerBox?.height).toBeLessThanOrEqual(74);
-    expect(actionsBox!.x).toBeGreaterThanOrEqual(0);
-    expect(logoBox!.x + logoBox!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
-    expect(actionsBox!.x + actionsBox!.width).toBeLessThan(logoBox!.x);
+      if (viewport.width < 640) {
+        await expect(page.getByRole("button", { name: "פתיחת תפריט נגישות" })).toBeHidden();
+      } else {
+        await expect(page.getByRole("button", { name: "פתיחת תפריט נגישות" })).toBeVisible();
+      }
 
-    await menuButton.click();
-    await expect(page.getByRole("link", { name: "נגישות", exact: true })).toBeVisible();
-  });
+      const [headerBox, logoBox, actionsBox, changingTextBox] = await Promise.all([
+        header.boundingBox(),
+        logo.boundingBox(),
+        actions.boundingBox(),
+        changingText.boundingBox(),
+      ]);
 
-  for (const route of MOBILE_ROUTES) {
-    test(`${route} stays inside the mobile viewport`, async ({ page }) => {
-      const response = await page.goto(route, { waitUntil: "domcontentloaded" });
-      expect(response?.status()).toBeLessThan(400);
-      await expect(page.locator("body")).toBeVisible();
+      expect(headerBox?.height).toBeLessThanOrEqual(74);
+      expect(actionsBox!.x).toBeGreaterThanOrEqual(0);
+      expect(actionsBox!.height).toBeGreaterThanOrEqual(44);
+      expect(changingTextBox!.width).toBeGreaterThanOrEqual(80);
+      expect(changingTextBox!.x).toBeGreaterThanOrEqual(0);
+      expect(changingTextBox!.x + changingTextBox!.width).toBeLessThanOrEqual(viewport.width);
+      expect(logoBox!.x + logoBox!.width).toBeLessThanOrEqual(viewport.width);
 
       const dimensions = await page.evaluate(() => ({
-        bodyWidth: document.body.scrollWidth,
         documentWidth: document.documentElement.scrollWidth,
         viewportWidth: window.innerWidth,
       }));
-
-      expect(dimensions.bodyWidth).toBeLessThanOrEqual(dimensions.viewportWidth);
       expect(dimensions.documentWidth).toBeLessThanOrEqual(dimensions.viewportWidth);
 
-      if (route.startsWith("/auth/")) {
-        const panelBox = await page.locator(".brand-panel").first().boundingBox();
-        expect(panelBox?.x).toBeGreaterThanOrEqual(0);
-        expect(panelBox!.x + panelBox!.width).toBeLessThanOrEqual(dimensions.viewportWidth);
-      }
+      await menuButton.click();
+      await expect(page.getByRole("link", { name: "נגישות", exact: true })).toBeVisible();
     });
+  }
+
+  for (const viewport of RESPONSIVE_VIEWPORTS) {
+    for (const route of MOBILE_ROUTES) {
+      test(`${route} stays inside the ${viewport.width}px viewport`, async ({ page }) => {
+        await page.setViewportSize(viewport);
+        const response = await page.goto(route, { waitUntil: "domcontentloaded" });
+        expect(response?.status(), route).toBeLessThan(400);
+        await expect(page.locator("body")).toBeVisible();
+
+        const dimensions = await page.evaluate(() => ({
+          bodyWidth: document.body.scrollWidth,
+          documentWidth: document.documentElement.scrollWidth,
+          viewportWidth: window.innerWidth,
+        }));
+
+        expect(dimensions.bodyWidth, route).toBeLessThanOrEqual(dimensions.viewportWidth);
+        expect(dimensions.documentWidth, route).toBeLessThanOrEqual(dimensions.viewportWidth);
+
+        if (route.startsWith("/auth/")) {
+          const panelBox = await page.locator(".brand-panel").first().boundingBox();
+          expect(panelBox?.x, route).toBeGreaterThanOrEqual(0);
+          expect(panelBox!.x + panelBox!.width, route).toBeLessThanOrEqual(dimensions.viewportWidth);
+        }
+      });
+    }
   }
 
   test("a single business photo fills its mobile gallery", async ({ page }) => {

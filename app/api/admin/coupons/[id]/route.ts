@@ -9,7 +9,7 @@ async function checkAdmin(req: NextRequest) {
 
 const patchSchema = z.object({
   is_active: z.boolean(),
-});
+}).strict();
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!(await checkAdmin(req))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,6 +21,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json(
       { error: parsed.error.flatten() },
       { status: 400 }
+    );
+  }
+
+  if (parsed.data.is_active) {
+    return NextResponse.json(
+      {
+        error: "coupon_checkout_not_enabled",
+        message: "Coupon activation is disabled until checkout redemption is implemented atomically.",
+      },
+      { status: 409 }
     );
   }
 
