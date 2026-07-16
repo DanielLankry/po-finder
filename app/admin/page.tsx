@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/supabase/admin";
 import { Store, Clock, CheckCircle, Ticket, Sparkles, Banknote, CreditCard, Hand } from "lucide-react";
 
@@ -12,7 +11,6 @@ const STATUS_META: Record<string, { label: string; cls: string }> = {
 };
 
 export default async function AdminPage() {
-  const supabase = await createClient();
   const admin = adminClient();
 
   const monthStart = new Date();
@@ -28,10 +26,10 @@ export default async function AdminPage() {
     { data: monthPayments },
     { data: recentPayments },
   ] = await Promise.all([
-    supabase.from("businesses").select("*", { count: "exact", head: true }),
-    supabase.from("businesses").select("*", { count: "exact", head: true }).eq("is_verified", false),
-    supabase.from("businesses").select("*", { count: "exact", head: true }).eq("is_verified", true).eq("is_active", true).or(`is_legacy_public.eq.true,expires_at.gt.${nowIso}`),
-    supabase.from("coupons").select("*", { count: "exact", head: true }).eq("is_active", true),
+    admin.from("businesses").select("*", { count: "exact", head: true }),
+    admin.from("businesses").select("*", { count: "exact", head: true }).eq("is_verified", false),
+    admin.from("businesses").select("*", { count: "exact", head: true }).eq("is_verified", true).eq("is_active", true).or(`is_legacy_public.eq.true,expires_at.gt.${nowIso}`),
+    admin.from("coupons").select("*", { count: "exact", head: true }).eq("is_active", true),
     admin
       .from("payment_attempts")
       .select("amount_agorot")

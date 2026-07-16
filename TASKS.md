@@ -1,7 +1,7 @@
 # Po-Finder (פה קרוב) - Tasks
 
 > Small business discovery app (Next.js 16 + Supabase + Google Maps)
-> Last updated: 2026-07-15
+> Last updated: 2026-07-16
 
 ---
 
@@ -70,6 +70,12 @@
 - [x] Dynamic SEO metadata for business pages
 
 ### Launch Readiness
+- [x] Add a consent-aware Meta Pixel integration — 2026-07-16
+  - Files modified: `.env.local.example`, `app/layout.tsx`, `app/privacy/page.tsx`, `components/layout/CookieConsent.tsx`, `components/providers/MetaPixelProvider.tsx`, `lib/meta-pixel.ts`, `tests/public/meta-pixel-consent.spec.ts`, `TASKS.md`, `AGENTS.md`
+  - Summary: Added Meta Pixel `27527545196939763`, deferred all Meta network activity until optional-cookie approval, tracked App Router page views, and revoked tracking when consent is withdrawn.
+- [x] Add short-duration pricing, an operations dashboard, and full admin controls — 2026-07-16
+  - Files modified: `app/admin/businesses/page.tsx`, `app/admin/content/page.tsx`, `app/admin/layout.tsx`, `app/admin/page.tsx`, `app/admin/pricing/PricingEditor.tsx`, `app/admin/stats/page.tsx`, `app/admin/users/page.tsx`, `app/api/admin/businesses/[id]/route.ts`, `app/api/admin/content/route.ts`, `app/api/admin/content/[type]/[id]/route.ts`, `app/api/admin/coupons/route.ts`, `app/api/admin/coupons/[id]/route.ts`, `app/api/admin/pricing/route.ts`, `app/api/admin/users/route.ts`, `app/api/admin/users/[id]/route.ts`, `app/dashboard/page.tsx`, `app/pricing/PricingClient.tsx`, `app/vendors/page.tsx`, `components/business/DurationSelectorCard.tsx`, `lib/plans.ts`, `lib/plans-server.ts`, `lib/site-config.ts`, `supabase/migrations/20260716045924_add_day_week_listing_plans.sql`, `tests/destructive/pricing-duration-products.spec.ts`, `tests/plans.test.mjs`, `tests/public/pricing-v2.spec.ts`, `tests/utils/supabase-admin.ts`, `TASKS.md`, `AGENTS.md`
+  - Summary: Added ₪3 day and ₪8 week listings, raised monthly prices by ₪1, preserved exact mixed-duration refunds, created a verified Notion operations dashboard, fixed service-role admin data access, and added business visibility, user, and content moderation controls.
 - [x] Harden live discovery, schedule edge cases, map UX, and private business content — 2026-07-15
   - Files modified: `app/MapPage.tsx`, `app/api/businesses/route.ts`, `app/api/businesses/[id]/events/route.ts`, `app/api/businesses/[id]/events/[eventId]/route.ts`, `app/api/payments/checkout/route.ts`, `app/businesses/[id]/page.tsx`, `app/dashboard/events/page.tsx`, `app/dashboard/photos/page.tsx`, `app/dashboard/profile/page.tsx`, `app/dashboard/schedule/page.tsx`, `app/sitemap.ts`, `components/business/BusinessCard.tsx`, `components/business/BusinessListPanel.tsx`, `components/business/PhotoGrid.tsx`, `components/business/SafeBusinessImage.tsx`, `components/business/StatusCard.tsx`, `components/layout/AccessibilityWidget.tsx`, `components/layout/CookieConsent.tsx`, `components/map/BusinessMap.tsx`, `components/map/BusinessPopup.tsx`, `components/map/PlacesSearchBar.tsx`, `components/ui/slider.tsx`, `lib/business-discovery.ts`, `lib/category-theme.ts`, `lib/db/businesses.ts`, `lib/db/owned-businesses.ts`, `lib/db/photos.ts`, `lib/db/schedules.ts`, `lib/storage/photo-urls.ts`, `lib/types.ts`, `lib/utils/schedule.ts`, `package.json`, `package-lock.json`, `supabase/migrations/20260715144513_launch_privacy_hardening.sql`, `tests/launch-privacy-migration.test.mjs`, `tests/photo-urls.test.mjs`, `tests/public/map-availability.spec.ts`, `tests/public/map.spec.ts`, `tests/schedule.test.mjs`, `TASKS.md`, `AGENTS.md`
   - Summary: Centralized map/list filtering so confirmed-closed businesses disappear while unknown-hours businesses remain, fixed Israel midnight and overnight hours, restored mobile map markers with colorful category styling and accessible dialogs, added graceful themed fallbacks for failed legacy photos, repaired sitemap business URLs, added a private signed-photo/RLS migration for draft and expired content, and upgraded the production dependency chain until `npm audit --omit=dev` reported zero advisories.

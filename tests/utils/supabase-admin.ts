@@ -75,6 +75,8 @@ export async function createConfirmedUser(opts: {
  * consumed by the business INSERT trigger.
  */
 export type DurationPlanCode =
+  | 'listing_1d'
+  | 'listing_7d'
   | 'listing_1m'
   | 'listing_2m'
   | 'listing_3m'

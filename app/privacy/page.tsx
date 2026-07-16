@@ -72,7 +72,7 @@ export default function PrivacyPage() {
                       ["תשלומים וחיוב", "הפניה לדף תשלום מאובטח, בדיקת סטטוס עסקה, החזרים ותיעוד חשבונאי"],
                       ["שירות לקוחות", "מענה לפניות, טיפול בבקשות פרטיות, נגישות, חיוב ותמיכה"],
                       ["אבטחה ומניעת שימוש לרעה", "הגבלת קצב, לוגים, איתור תקלות ושמירה על תקינות השירות"],
-                      ["אנליטיקה ושיפור", "מדידת שימוש באתר רק לאחר הסכמה לעוגיות אנליטיקה"],
+                      ["אנליטיקה, פרסום ושיפור", "מדידת שימוש באתר וביצועי פרסום רק לאחר הסכמה לעוגיות אופציונליות"],
                       ["חובות חוקיות", "שמירת רשומות תשלום וחשבונאות, מענה לרשות מוסמכת לפי דין"],
                     ].map(([purpose, examples]) => (
                       <tr key={purpose} className="even:bg-stone-50">
@@ -113,6 +113,7 @@ export default function PrivacyPage() {
                   ["Supabase", "מסד נתונים, אימות משתמשים ואחסון תמונות", "https://supabase.com/privacy"],
                   ["Vercel", "אחסון, פריסה, תשתית אתר ואנליטיקה לאחר הסכמה", "https://vercel.com/legal/privacy-policy"],
                   ["PostHog", "אנליטיקה התנהגותית לאחר הסכמה", "https://posthog.com/privacy"],
+                  ["Meta Pixel", "מדידת פרסום והמרות לאחר הסכמה", "https://www.facebook.com/privacy/policy/"],
                   ["Google Maps Platform", "מפה, חיפוש כתובות ותצוגת מיקומים", "https://policies.google.com/privacy"],
                   ["Resend", "שליחת הודעות שירות ודוא\"ל תמיכה", "https://resend.com/privacy"],
                   ["HYP / YaadPay", "דף תשלום מאובטח, אימות עסקה, ביטול והחזר", "https://yaadpay.co.il"],
@@ -141,7 +142,7 @@ export default function PrivacyPage() {
               <ul className="list-disc list-inside space-y-2 text-stone-600">
                 <li>עוגיות הכרחיות: סשן התחברות, אבטחה ותפעול בסיסי. לא ניתן לספק חשבון משתמש בלעדיהן.</li>
                 <li>אחסון מקומי הכרחי/פונקציונלי: העדפות נגישות, מועדפים לאורחים, מצב סיור והעדפת עוגיות.</li>
-                <li>אנליטיקה: PostHog ו-Vercel Analytics מופעלים רק לאחר לחיצה על &quot;אישור&quot; בבאנר העוגיות.</li>
+                <li>אנליטיקה ופרסום: PostHog, Vercel Analytics ו-Meta Pixel מופעלים רק לאחר לחיצה על &quot;אישור&quot; בבאנר העוגיות.</li>
               </ul>
               <p className="mt-3 text-sm text-stone-500">
                 אפשר לפתוח מחדש את בחירת העוגיות דרך הקישור &quot;העדפות עוגיות&quot; בתחתית האתר.
