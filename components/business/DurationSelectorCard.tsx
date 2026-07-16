@@ -5,8 +5,9 @@ import { BadgeCheck, CalendarDays, Check } from "lucide-react";
 import {
   PLAN_CODES,
   PLANS,
-  addCalendarMonths,
+  addPlanDuration,
   getPlanByCode,
+  getPlanDurationLabel,
 } from "@/lib/plans";
 import type { Plan, PlanCode } from "@/lib/plans";
 
@@ -20,9 +21,9 @@ interface DurationSelectorCardProps {
   onAction: (plan: Plan) => void;
 }
 
-/** Renders the single duration product and keeps price/expiry preview in sync.
- * The database owns final entitlement dates; this UTC preview mirrors its
- * calendar-month arithmetic so owners see the date they are buying.
+/** Renders day, week, and month choices with a synchronized price/expiry preview.
+ * The database owns final entitlement dates; this UTC preview mirrors its day
+ * and calendar-month arithmetic so owners see the date they are buying.
  */
 export default function DurationSelectorCard({
   plans,
@@ -40,12 +41,11 @@ export default function DurationSelectorCard({
       ),
     [plans]
   );
-  const initialIndex = Math.max(
-    0,
-    catalog.findIndex((plan) => plan.code === initialCode)
-  );
-  const [index, setIndex] = useState(initialIndex);
-  const selected = catalog[index] ?? catalog[5];
+  const monthPlans = catalog.filter((plan) => plan.months !== null);
+  const quickPlans = catalog.filter((plan) => plan.months === null);
+  const initialPlan = getPlanByCode(catalog, initialCode) ?? monthPlans[5] ?? catalog[0];
+  const [selectedCode, setSelectedCode] = useState<PlanCode>(initialPlan.code);
+  const selected = getPlanByCode(catalog, selectedCode) ?? initialPlan;
 
   const now = new Date(nowIso);
   const existingExpiry = baseExpiry ? new Date(baseExpiry) : null;
@@ -53,9 +53,8 @@ export default function DurationSelectorCard({
     existingExpiry && existingExpiry.getTime() > now.getTime()
       ? existingExpiry
       : now;
-  const visibleUntil = addCalendarMonths(base, selected.months);
-  const durationLabel =
-    selected.months === 1 ? "חודש אחד" : `${selected.months} חודשים`;
+  const visibleUntil = addPlanDuration(base, selected);
+  const durationLabel = getPlanDurationLabel(selected);
 
   return (
     <article className="brand-panel poster-hover relative overflow-hidden p-6 md:p-8">
@@ -73,16 +72,38 @@ export default function DurationSelectorCard({
               לכמה זמן תרצו להופיע באתר?
             </h2>
           </div>
-          {selected.months === 12 ? (
+          {selected.code === "listing_12m" ? (
             <span className="pop-in inline-flex items-center gap-1.5 rounded-full border-2 border-[#8A3618] bg-[#C4552D] px-3 py-1.5 text-xs font-bold text-white shadow-[2px_2px_0_0_#8A3618]">
               <BadgeCheck className="h-4 w-4" /> הכי משתלם
             </span>
           ) : null}
         </div>
 
-        <div className="mt-8" dir="ltr">
+        <div className="mt-7 grid gap-3 sm:grid-cols-2" dir="rtl">
+          {quickPlans.map((plan) => {
+            const active = selected.code === plan.code;
+            return (
+              <button
+                key={plan.code}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setSelectedCode(plan.code)}
+                className={`min-h-16 rounded-xl border-2 px-4 py-3 text-right transition-all ${
+                  active
+                    ? "border-[#8A3618] bg-[#F6E3D9] text-[#8A3618] shadow-[3px_3px_0_0_#8A3618]"
+                    : "border-[#17402D]/20 bg-[#FFFDF7] text-[#17402D] hover:border-[#17402D]/45"
+                }`}
+              >
+                <span className="block font-display text-2xl">{getPlanDurationLabel(plan)}</span>
+                <span className="text-xs font-bold">₪{plan.price / 100} · התנסות קצרה</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-7" dir="ltr">
           <div className="mb-2 flex items-center justify-between text-xs font-bold text-[#17402D]">
-            <span>חודש</span>
+            <span>חודש אחד</span>
             <span>12 חודשים</span>
           </div>
           <input
@@ -90,17 +111,22 @@ export default function DurationSelectorCard({
             className="duration-slider w-full"
             type="range"
             min={1}
-            max={catalog.length}
+            max={monthPlans.length}
             step={1}
-            value={selected.months}
-            onChange={(event) => setIndex(Number(event.target.value) - 1)}
+            value={selected.months ?? 1}
+            onChange={(event) => {
+              const plan = monthPlans[Number(event.target.value) - 1];
+              if (plan) setSelectedCode(plan.code);
+            }}
           />
           <div className="mt-2 grid grid-cols-12 px-1" aria-hidden="true">
-            {catalog.map((plan) => (
+            {monthPlans.map((plan) => (
               <span
                 key={plan.code}
                 className={`mx-auto h-1.5 w-1.5 rounded-full transition-colors ${
-                  plan.months <= selected.months ? "bg-[#C4552D]" : "bg-[#C3DCC9]"
+                  selected.months && plan.months && plan.months <= selected.months
+                    ? "bg-[#C4552D]"
+                    : "bg-[#C3DCC9]"
                 }`}
               />
             ))}

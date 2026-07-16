@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { LayoutDashboard, Store, Tag, BarChart3, LogOut, Ticket, Menu, X, CreditCard } from "lucide-react";
+import { LayoutDashboard, Store, Tag, BarChart3, LogOut, Ticket, Menu, X, CreditCard, Users, MessagesSquare } from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "ראשי", icon: LayoutDashboard },
   { href: "/admin/businesses", label: "עסקים", icon: Store },
+  { href: "/admin/users", label: "משתמשים", icon: Users },
+  { href: "/admin/content", label: "תוכן", icon: MessagesSquare },
   { href: "/admin/payments", label: "תשלומים", icon: CreditCard },
   { href: "/admin/pricing", label: "מחירון", icon: Tag },
   { href: "/admin/coupons", label: "קופונים", icon: Ticket },

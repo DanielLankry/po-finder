@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import type { BusinessCategory, KashrutStatus } from "@/lib/types";
-import { CheckCircle, XCircle, Phone, ExternalLink, RefreshCw, Plus, X, Pencil, MapPin } from "lucide-react";
+import { CheckCircle, XCircle, Phone, ExternalLink, RefreshCw, Plus, X, Pencil, MapPin, PauseCircle, PlayCircle } from "lucide-react";
 
 interface Business {
   id: string;
@@ -73,7 +73,7 @@ export default function AdminBusinessesPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ businessId }),
     });
-    if (res.ok) setBusinesses((prev) => prev.map((b) => b.id === businessId ? { ...b, is_verified: true } : b));
+    if (res.ok) fetchAll();
     else alert("שגיאה באישור העסק");
     setActionLoading(null);
   }
@@ -84,6 +84,38 @@ export default function AdminBusinessesPage() {
     const res = await fetch(`/api/admin/businesses/${businessId}`, { method: "DELETE" });
     if (res.ok) setBusinesses((prev) => prev.filter((b) => b.id !== businessId));
     else alert("שגיאה במחיקה");
+    setActionLoading(null);
+  }
+
+  /** Pause a public listing or reactivate it with a fresh 30-day window when expired. */
+  async function toggleVisibility(business: Business) {
+    const currentlyPublic = isCurrentlyPublic(business);
+    const updates: { is_active: boolean; is_verified?: boolean; expires_at?: string } = {
+      is_active: !currentlyPublic,
+    };
+    if (!currentlyPublic) {
+      updates.is_verified = true;
+      const hasFutureExpiry = !!business.expires_at && Date.parse(business.expires_at) > Date.now();
+      if (!business.is_legacy_public && !hasFutureExpiry) {
+        updates.expires_at = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      }
+    }
+
+    const message = currentlyPublic
+      ? `להסתיר את ${business.name} מהאתר?`
+      : `להציג את ${business.name}${updates.expires_at ? " ל־30 יום" : ""}?`;
+    if (!confirm(message)) return;
+
+    setActionLoading(business.id);
+    const response = await fetch(`/api/admin/businesses/${business.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    });
+    const body = await response.json().catch(() => ({}));
+    if (response.ok) {
+      setBusinesses((current) => current.map((item) => item.id === business.id ? body.business as Business : item));
+    } else alert(body.error ?? "שגיאה בעדכון מצב העסק");
     setActionLoading(null);
   }
 
@@ -128,6 +160,9 @@ export default function AdminBusinessesPage() {
           address: editBiz.address,
           lat: editBiz.lat,
           lng: editBiz.lng,
+          is_active: editBiz.is_active,
+          is_verified: editBiz.is_verified,
+          expires_at: editBiz.expires_at,
         }),
       });
       const data = await res.json();
@@ -341,6 +376,24 @@ export default function AdminBusinessesPage() {
                   <textarea value={editBiz.description ?? ""} onChange={(e) => setEditBiz({...editBiz, description: e.target.value})} rows={3}
                     className="w-full rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] resize-none" />
                 </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold text-[#111] mb-1">תאריך תפוגה</label>
+                  <input
+                    type="datetime-local"
+                    value={toLocalDateTimeValue(editBiz.expires_at)}
+                    onChange={(e) => setEditBiz({ ...editBiz, expires_at: fromLocalDateTimeValue(e.target.value) })}
+                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]"
+                    dir="ltr"
+                  />
+                </div>
+                <label className="flex min-h-11 items-center gap-2 rounded-xl border border-[#E5E7EB] px-4 text-sm font-semibold text-[#111]">
+                  <input type="checkbox" checked={editBiz.is_verified} onChange={(e) => setEditBiz({ ...editBiz, is_verified: e.target.checked })} />
+                  מאומת על ידי מנהל
+                </label>
+                <label className="flex min-h-11 items-center gap-2 rounded-xl border border-[#E5E7EB] px-4 text-sm font-semibold text-[#111]">
+                  <input type="checkbox" checked={editBiz.is_active} onChange={(e) => setEditBiz({ ...editBiz, is_active: e.target.checked })} />
+                  מסומן כפעיל
+                </label>
               </div>
               <button type="submit" disabled={editLoading}
                 className="w-full h-12 rounded-xl text-white font-bold text-base disabled:opacity-50"
@@ -358,7 +411,7 @@ export default function AdminBusinessesPage() {
           <h2 className="font-bold text-lg text-[#D97706] mb-3">⏳ ממתינים לאישור ({pending.length})</h2>
           <div className="flex flex-col gap-3">
             {pending.map((biz) => (
-              <BusinessCard key={biz.id} biz={biz} onApprove={approve} onDelete={deleteBiz} onEdit={setEditBiz} actionLoading={actionLoading} />
+              <BusinessCard key={biz.id} biz={biz} onApprove={approve} onDelete={deleteBiz} onEdit={setEditBiz} onToggleVisibility={toggleVisibility} actionLoading={actionLoading} />
             ))}
           </div>
         </div>
@@ -372,7 +425,7 @@ export default function AdminBusinessesPage() {
         ) : (
           <div className="flex flex-col gap-3">
             {verified.map((biz) => (
-              <BusinessCard key={biz.id} biz={biz} onApprove={approve} onDelete={deleteBiz} onEdit={setEditBiz} actionLoading={actionLoading} />
+              <BusinessCard key={biz.id} biz={biz} onApprove={approve} onDelete={deleteBiz} onEdit={setEditBiz} onToggleVisibility={toggleVisibility} actionLoading={actionLoading} />
             ))}
           </div>
         )}
@@ -381,9 +434,10 @@ export default function AdminBusinessesPage() {
   );
 }
 
-function BusinessCard({ biz, onApprove, onDelete, onEdit, actionLoading }: {
+function BusinessCard({ biz, onApprove, onDelete, onEdit, onToggleVisibility, actionLoading }: {
   biz: Business; onApprove: (id: string) => void;
-  onDelete: (id: string) => void; onEdit: (b: Business) => void; actionLoading: string | null;
+  onDelete: (id: string) => void; onEdit: (b: Business) => void;
+  onToggleVisibility: (b: Business) => void; actionLoading: string | null;
 }) {
   const isLoading = actionLoading === biz.id;
   const currentlyPublic = isCurrentlyPublic(biz);
@@ -420,6 +474,13 @@ function BusinessCard({ biz, onApprove, onDelete, onEdit, actionLoading }: {
           className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#DDEBE0] text-[#1F5038] font-semibold text-sm hover:bg-[#C3DCC9] transition-colors disabled:opacity-50">
           <Pencil className="h-3.5 w-3.5" />ערוך
         </button>
+        {biz.is_verified && (
+          <button onClick={() => onToggleVisibility(biz)} disabled={isLoading}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-sm transition-colors disabled:opacity-50 ${currentlyPublic ? "bg-amber-100 text-amber-800 hover:bg-amber-200" : "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"}`}>
+            {currentlyPublic ? <PauseCircle className="h-3.5 w-3.5" /> : <PlayCircle className="h-3.5 w-3.5" />}
+            {currentlyPublic ? "הסתר" : "הפעל"}
+          </button>
+        )}
         <button onClick={() => onDelete(biz.id)} disabled={isLoading}
           className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-red-100 text-red-700 font-semibold text-sm hover:bg-red-200 transition-colors disabled:opacity-50">
           <XCircle className="h-3.5 w-3.5" />מחק
@@ -427,4 +488,18 @@ function BusinessCard({ biz, onApprove, onDelete, onEdit, actionLoading }: {
       </div>
     </div>
   );
+}
+
+/** Convert an ISO expiry to the local value expected by datetime-local inputs. */
+function toLocalDateTimeValue(value: string | null): string {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 16);
+}
+
+/** Convert a datetime-local field back into an exact ISO timestamp for Supabase. */
+function fromLocalDateTimeValue(value: string): string | null {
+  return value ? new Date(value).toISOString() : null;
 }

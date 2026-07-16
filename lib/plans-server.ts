@@ -6,7 +6,7 @@ interface PlanRow {
   code: PlanCode;
   kind: "listing";
   days: number;
-  duration_months: number;
+  duration_months: number | null;
   boost_days: number;
   label: string;
   price: number;

@@ -13,14 +13,14 @@ export const BUSINESS_INFO = {
 };
 
 export const LAUNCH_OFFER = {
-  regularPriceText: "₪10–₪60 לפי משך ההופעה",
-  launchPriceText: "6 חודשים ב־₪40",
+  regularPriceText: "₪3–₪61 לפי משך ההופעה",
+  launchPriceText: "6 חודשים ב־₪41",
   noCommitmentText: "ללא חידוש אוטומטי",
-  mainCtaText: "טיוטה בחינם, ואז בוחרים 1–12 חודשי הופעה.",
+  mainCtaText: "טיוטה בחינם, ואז בוחרים מיום אחד עד 12 חודשי הופעה.",
   primaryButtonText: "יצירת טיוטה בחינם",
   secondaryText: "תשלום חד־פעמי בלבד — בלי מנוי, בלי קידום ובלי חיוב חוזר.",
   pricingSummary:
-    "יוצרים טיוטת עסק בחינם. לאחר אימות בוחרים בין חודש ל־12 חודשים ומשלמים פעם אחת עבור זמן ההופעה באתר.",
+    "יוצרים טיוטת עסק בחינם. לאחר אימות בוחרים מיום אחד ועד 12 חודשים ומשלמים פעם אחת עבור זמן ההופעה באתר.",
 };
 
 export const VENDOR_FAQS = [

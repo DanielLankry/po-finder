@@ -148,7 +148,7 @@ async function DashboardContent({
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FFF3B0]"><Clock3 className="h-5 w-5 text-[#8A3618]" /></div>
           <div className="flex-1">
             <p className="text-sm font-semibold text-stone-950">העסק מאומת, אבל לא מופיע לציבור</p>
-            <p className="mt-1 text-xs leading-relaxed text-stone-600">בחרו בין חודש ל־12 חודשים ושלמו פעם אחת עבור זמן ההופעה.</p>
+            <p className="mt-1 text-xs leading-relaxed text-stone-600">בחרו מיום אחד ועד 12 חודשים ושלמו פעם אחת עבור זמן ההופעה.</p>
             <Link href="/dashboard/billing" className="mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#8A3618] px-4 py-2 text-xs font-bold text-white">לבחירת משך הופעה</Link>
           </div>
         </div>

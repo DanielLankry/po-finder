@@ -1,10 +1,10 @@
-import { createClient } from "@/lib/supabase/server";
+import { adminClient } from "@/lib/supabase/admin";
 import { BarChart3, TrendingUp, Calendar } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminStatsPage() {
-  const supabase = await createClient();
+  const admin = adminClient();
 
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -18,11 +18,11 @@ export default async function AdminStatsPage() {
     { count: last7 },
     { data: categories },
   ] = await Promise.all([
-    supabase.from("businesses").select("*", { count: "exact", head: true }),
-    supabase.from("businesses").select("*", { count: "exact", head: true }).eq("is_verified", true).eq("is_active", true).or(`is_legacy_public.eq.true,expires_at.gt.${nowIso}`),
-    supabase.from("businesses").select("*", { count: "exact", head: true }).gte("created_at", thirtyDaysAgo),
-    supabase.from("businesses").select("*", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
-    supabase.from("businesses").select("category"),
+    admin.from("businesses").select("*", { count: "exact", head: true }),
+    admin.from("businesses").select("*", { count: "exact", head: true }).eq("is_verified", true).eq("is_active", true).or(`is_legacy_public.eq.true,expires_at.gt.${nowIso}`),
+    admin.from("businesses").select("*", { count: "exact", head: true }).gte("created_at", thirtyDaysAgo),
+    admin.from("businesses").select("*", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
+    admin.from("businesses").select("category"),
   ]);
 
   // Count by category

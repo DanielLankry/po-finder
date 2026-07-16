@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { BadgeCheck, Info, Save } from "lucide-react";
-import { PLANS, getPlanByCode } from "@/lib/plans";
+import { PLANS, getPlanByCode, getPlanDurationLabel } from "@/lib/plans";
 import type { Plan, PlanCode } from "@/lib/plans";
 
-type EditablePlan = Pick<Plan, "code" | "months" | "label" | "price">;
+type EditablePlan = Pick<Plan, "code" | "months" | "days" | "label" | "price">;
 
 function toEditable(plans: Plan[]): EditablePlan[] {
   return PLANS.map((fallback) => {
@@ -13,6 +13,7 @@ function toEditable(plans: Plan[]): EditablePlan[] {
     return {
       code: plan.code,
       months: plan.months,
+      days: plan.days,
       label: plan.label,
       price: plan.price,
     };
@@ -59,7 +60,7 @@ export default function PricingEditor({ initialPlans }: { initialPlans: Plan[] }
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-[#111]">מחירי זמן ההופעה</h1>
-          <p className="text-sm text-[#888]">מוצר אחד עם 12 משכי הופעה חד־פעמיים</p>
+          <p className="text-sm text-[#888]">מוצר אחד עם יום, שבוע ו־12 משכי חודש חד־פעמיים</p>
         </div>
         <button
           onClick={handleSave}
@@ -74,7 +75,7 @@ export default function PricingEditor({ initialPlans }: { initialPlans: Plan[] }
       <div className="mb-6 flex items-start gap-3 rounded-2xl border border-[#C3DCC9] bg-[#EFF5F0] p-4">
         <Info className="mt-0.5 h-5 w-5 shrink-0 text-[#4A8B66]" />
         <p className="text-sm text-[#1F5038]">
-          מספר החודשים וקוד המוצר נעולים כדי לשמור על חידושים והחזרים מדויקים.
+          משך הזמן וקוד המוצר נעולים כדי לשמור על חידושים והחזרים מדויקים.
           שינוי מחיר או שם חל רק על רכישות חדשות.
         </p>
       </div>
@@ -91,7 +92,7 @@ export default function PricingEditor({ initialPlans }: { initialPlans: Plan[] }
               </div>
               <div>
                 <p className="font-mono text-[11px] text-[#888]" dir="ltr">{plan.code}</p>
-                <p className="text-xs font-bold text-[#8A3618]">{plan.months} חודשים</p>
+                <p className="text-xs font-bold text-[#8A3618]">{getPlanDurationLabel(plan)}</p>
               </div>
             </div>
             <Field label="שם מוצג">

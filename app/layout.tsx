@@ -6,6 +6,7 @@ import CookieConsent from "@/components/layout/CookieConsent";
 import AccessibilityWidget from "@/components/layout/AccessibilityWidget";
 import PostHogProvider from "@/components/providers/PostHogProvider";
 import ConsentAnalytics from "@/components/providers/ConsentAnalytics";
+import MetaPixelProvider from "@/components/providers/MetaPixelProvider";
 import { BRAND_NAME, SITE_URL } from "@/lib/site-config";
 
 const BASE_URL = SITE_URL;
@@ -146,6 +147,7 @@ export default function RootLayout({
         <AccessibilityWidget />
         <CookieConsent />
         <ConsentAnalytics />
+        <MetaPixelProvider />
       </body>
     </html>
   );
