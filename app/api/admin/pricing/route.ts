@@ -33,8 +33,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "catalog must contain every product exactly once" }, { status: 400 });
   }
   const hasInvalidDuration = parsed.data.plans.some((plan) => {
-    if (plan.code === "listing_1d") return plan.months !== null || plan.days !== 1;
-    if (plan.code === "listing_7d") return plan.months !== null || plan.days !== 7;
+    const dayMatch = plan.code.match(/^listing_(\d+)d$/);
+    if (dayMatch) {
+      return plan.months !== null || plan.days !== Number(dayMatch[1]);
+    }
     return plan.months === null
       || plan.code !== `listing_${plan.months}m`
       || plan.days !== plan.months * 30;

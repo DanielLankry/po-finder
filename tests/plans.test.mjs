@@ -3,11 +3,13 @@ import assert from "node:assert/strict";
 
 import { PLANS, addCalendarMonths, addPlanDuration } from "../lib/plans.ts";
 
-test("duration catalog includes day and week plus the slightly raised month prices", () => {
+test("duration catalog includes one, two, three days and week plus all month prices", () => {
   assert.deepEqual(
     PLANS.map((plan) => ({ days: plan.days, months: plan.months, price: plan.price })),
     [
       { days: 1, months: null, price: 300 },
+      { days: 2, months: null, price: 500 },
+      { days: 3, months: null, price: 600 },
       { days: 7, months: null, price: 800 },
       { days: 30, months: 1, price: 1100 },
       { days: 60, months: 2, price: 1900 },
@@ -25,10 +27,12 @@ test("duration catalog includes day and week plus the slightly raised month pric
   );
 });
 
-test("day and week previews use exact UTC day arithmetic", () => {
+test("short-day and week previews use exact UTC day arithmetic", () => {
   const base = new Date("2027-01-31T12:00:00.000Z");
   assert.equal(addPlanDuration(base, PLANS[0]).toISOString(), "2027-02-01T12:00:00.000Z");
-  assert.equal(addPlanDuration(base, PLANS[1]).toISOString(), "2027-02-07T12:00:00.000Z");
+  assert.equal(addPlanDuration(base, PLANS[1]).toISOString(), "2027-02-02T12:00:00.000Z");
+  assert.equal(addPlanDuration(base, PLANS[2]).toISOString(), "2027-02-03T12:00:00.000Z");
+  assert.equal(addPlanDuration(base, PLANS[3]).toISOString(), "2027-02-07T12:00:00.000Z");
 });
 
 test("calendar month preview clamps month-end instead of overflowing", () => {
