@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { X, ChevronRight, ChevronLeft } from "lucide-react";
-import type { Photo } from "@/lib/types";
+import type { BusinessCategory, Photo } from "@/lib/types";
+import SafeBusinessImage from "./SafeBusinessImage";
 
 interface PhotoGridProps {
   photos: Photo[];
   businessName: string;
+  category: BusinessCategory;
 }
 
-export default function PhotoGrid({ photos, businessName }: PhotoGridProps) {
+export default function PhotoGrid({ photos, businessName, category }: PhotoGridProps) {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -19,6 +21,7 @@ export default function PhotoGrid({ photos, businessName }: PhotoGridProps) {
 
   const primary = sorted[0];
   const secondary = sorted.slice(1, 5);
+  const hasSecondaryPhotos = secondary.length > 0;
 
   if (!primary) {
     return (
@@ -31,32 +34,38 @@ export default function PhotoGrid({ photos, businessName }: PhotoGridProps) {
   return (
     <>
       {/* Grid — RTL: primary on RIGHT, secondary on LEFT */}
-      <div className="relative h-80 md:h-[420px] rounded-2xl overflow-hidden grid grid-cols-3 gap-1">
-        {/* Primary photo — right column (2/3 width in RTL) */}
-        <div className="col-span-2 order-last relative">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+      <div
+        className={`relative grid h-80 overflow-hidden rounded-2xl md:h-[420px] ${hasSecondaryPhotos ? "grid-cols-3 gap-1" : "grid-cols-1"}`}
+        data-testid="photo-grid"
+        data-photo-count={sorted.length}
+      >
+        {/* A lone image fills the card; gallery layouts reserve 2/3 for the primary. */}
+        <div className={`${hasSecondaryPhotos ? "col-span-2" : "col-span-1"} relative order-last`} data-testid="photo-grid-primary">
+          <SafeBusinessImage
             src={primary.url}
             alt={`תמונה ראשית של ${businessName}`}
+            category={category}
             className="w-full h-full object-cover cursor-pointer hover:brightness-95 transition-all"
             onClick={() => { setCurrentIndex(0); setGalleryOpen(true); }}
           />
         </div>
 
         {/* Secondary photos — left column */}
-        <div className="flex flex-col gap-1">
-          {secondary.slice(0, 2).map((photo, i) => (
-            <div key={photo.id} className="flex-1 relative overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={photo.url}
-                alt={`תמונה ${i + 2} של ${businessName}`}
-                className="w-full h-full object-cover cursor-pointer hover:brightness-95 transition-all"
-                onClick={() => { setCurrentIndex(i + 1); setGalleryOpen(true); }}
-              />
-            </div>
-          ))}
-        </div>
+        {hasSecondaryPhotos && (
+          <div className="flex flex-col gap-1">
+            {secondary.slice(0, 2).map((photo, i) => (
+              <div key={photo.id} className="flex-1 relative overflow-hidden">
+                <SafeBusinessImage
+                  src={photo.url}
+                  alt={`תמונה ${i + 2} של ${businessName}`}
+                  category={category}
+                  className="w-full h-full object-cover cursor-pointer hover:brightness-95 transition-all"
+                  onClick={() => { setCurrentIndex(i + 1); setGalleryOpen(true); }}
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* "Show all photos" button */}
         {sorted.length > 3 && (
@@ -80,7 +89,7 @@ export default function PhotoGrid({ photos, businessName }: PhotoGridProps) {
           {/* Close */}
           <button
             onClick={() => setGalleryOpen(false)}
-            className="absolute top-4 right-4 h-10 w-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            className="brand-icon-button absolute top-4 right-4 h-11 w-11"
             aria-label="סגירת גלריה"
           >
             <X className="h-5 w-5" />
@@ -92,18 +101,19 @@ export default function PhotoGrid({ photos, businessName }: PhotoGridProps) {
           </p>
 
           {/* Image */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <SafeBusinessImage
             src={sorted[currentIndex].url}
             alt={`תמונה ${currentIndex + 1} של ${businessName}`}
+            category={category}
             className="max-h-[80vh] max-w-[90vw] object-contain"
+            loading="eager"
           />
 
           {/* Prev (RTL: right = previous) */}
           {currentIndex > 0 && (
             <button
               onClick={() => setCurrentIndex((i) => i - 1)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="brand-icon-button absolute right-4 top-1/2 h-11 w-11 -translate-y-1/2"
               aria-label="תמונה קודמת"
             >
               <ChevronRight className="h-5 w-5" />
@@ -114,7 +124,7 @@ export default function PhotoGrid({ photos, businessName }: PhotoGridProps) {
           {currentIndex < sorted.length - 1 && (
             <button
               onClick={() => setCurrentIndex((i) => i + 1)}
-              className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="brand-icon-button absolute left-4 top-1/2 h-11 w-11 -translate-y-1/2"
               aria-label="תמונה הבאה"
             >
               <ChevronLeft className="h-5 w-5" />

@@ -32,3 +32,10 @@ test('register form validates empty submit (no network)', async ({ page }) => {
   }
   await expect(page.locator('form').first()).toBeVisible();
 });
+
+test('pricing registration defaults to a business owner', async ({ page }) => {
+  await page.goto('/auth/register?redirectTo=%2Fdashboard%2Fbilling%3Fplan%3Dlisting_1m');
+
+  await expect(page.getByRole('button', { name: /בעל עסק/ })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: /לקוח/ })).toHaveAttribute('aria-pressed', 'false');
+});

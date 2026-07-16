@@ -2,37 +2,12 @@
 
 import {
   Star, Heart,
-  Coffee, CakeSlice, Beef, UtensilsCrossed, Leaf, Wheat, Flower2, Gem, Shirt, MapPin,
 } from "lucide-react";
 import type { BusinessWithSchedule } from "@/lib/types";
 import { CATEGORY_LABELS } from "@/lib/types";
-import { isOpenNow } from "@/lib/utils/schedule";
-
-// ── SVG icons per category ────────────────────────────────────────────────────
-const CATEGORY_ICON_LG: Record<string, React.ReactNode> = {
-  coffee:  <Coffee className="h-8 w-8" />,
-  food:    <UtensilsCrossed className="h-8 w-8" />,
-  sweets:  <CakeSlice className="h-8 w-8" />,
-  meat:    <Beef className="h-8 w-8" />,
-  vegan:   <Leaf className="h-8 w-8" />,
-  celiac:  <Wheat className="h-8 w-8" />,
-  flowers: <Flower2 className="h-8 w-8" />,
-  jewelry: <Gem className="h-8 w-8" />,
-  vintage: <Shirt className="h-8 w-8" />,
-};
-
-// Color-coded chips per category
-const CATEGORY_CHIP: Record<string, { bg: string; text: string }> = {
-  coffee:  { bg: "#FEF3C7", text: "#92400E" },
-  food:    { bg: "#FFEDD5", text: "#C2410C" },
-  sweets:  { bg: "#FCE7F3", text: "#BE185D" },
-  meat:    { bg: "#FEE2E2", text: "#991B1B" },
-  vegan:   { bg: "#DCFCE7", text: "#166534" },
-  celiac:  { bg: "#FEF9C3", text: "#78350F" },
-  flowers: { bg: "#FDF2F8", text: "#9D174D" },
-  jewelry: { bg: "#EDE9FE", text: "#5B21B6" },
-  vintage: { bg: "#F5F0FF", text: "#6D28D9" },
-};
+import { getBusinessAvailability } from "@/lib/utils/schedule";
+import { CATEGORY_THEME } from "@/lib/category-theme";
+import SafeBusinessImage from "./SafeBusinessImage";
 
 interface BusinessCardProps {
   business: BusinessWithSchedule;
@@ -57,16 +32,16 @@ export default function BusinessCard({
   onFavoriteToggle,
 }: BusinessCardProps) {
   const schedule = business.today_schedule ?? null;
-  const open = isOpenNow(schedule);
+  const availability = getBusinessAvailability(business);
   const primaryPhoto =
     business.photos?.find((p) => p.is_primary) ?? business.photos?.[0];
   const address = schedule?.address ?? business.address;
-  const chip = CATEGORY_CHIP[business.category];
+  const chip = CATEGORY_THEME[business.category];
 
   return (
-    <div 
+    <div
       ref={scrollRef} 
-      className="px-2 py-2" 
+      className="relative px-2 py-2"
       onMouseEnter={onMouseEnter} 
       onMouseLeave={onMouseLeave}
     >
@@ -85,54 +60,18 @@ export default function BusinessCard({
         <div className="flex flex-col gap-3.5" dir="rtl">
           {/* ── Photo wrapper (aspect square) ───────────────────────────────── */}
           <div className="relative w-full aspect-[4/3] rounded-[16px] overflow-hidden bg-[#EDE8DC] isolate">
-            {primaryPhoto ? (
-              <>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={primaryPhoto.url}
-                  alt={`תמונה של ${business.name}`}
-                  className={`w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] ${isHovered ? 'scale-105' : 'group-hover:scale-105'}`}
-                  loading="lazy"
-                />
-                <div className={`absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 to-transparent transition-opacity duration-300 pointer-events-none ${isHovered ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
-              </>
-            ) : (
-              <div
-                className={`w-full h-full flex items-center justify-center transition-transform duration-500 ${isHovered ? 'scale-105' : 'group-hover:scale-105'}`}
-                style={{ backgroundColor: chip?.bg ?? "#F3F4F6" }}
-                aria-hidden="true"
-              >
-                <span style={{ color: chip?.text ?? "#6B7280" }}>
-                  {CATEGORY_ICON_LG[business.category] ?? <MapPin className="h-8 w-8" />}
-                </span>
-              </div>
+            <SafeBusinessImage
+              src={primaryPhoto?.url}
+              alt={`תמונה של ${business.name}`}
+              category={business.category}
+              className={`h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] ${isHovered ? "scale-105" : "group-hover:scale-105"}`}
+            />
+            {primaryPhoto && (
+              <div className={`absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 to-transparent transition-opacity duration-300 pointer-events-none ${isHovered ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} />
             )}
             
-            {/* Heart button overlay */}
-            <div
-              className={`absolute top-3 left-3 z-10 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 ${
-                isFavorited
-                  ? "opacity-100 bg-white/90"
-                  : `bg-white/10 hover:bg-white/30 ${isHovered ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`
-              }`}
-              onClick={(e) => {
-                e.stopPropagation();
-                onFavoriteToggle?.();
-              }}
-              role="button"
-              aria-label={isFavorited ? "הסר ממועדפים" : "שמור למועדפים"}
-            >
-              <Heart
-                className={`h-5 w-5 transition-all duration-200 drop-shadow-md ${
-                  isFavorited
-                    ? "fill-rose-500 text-rose-500 scale-110"
-                    : "text-white stroke-[2px]"
-                }`}
-              />
-            </div>
-
             {/* Optional "Open Now" badge over image */}
-            {open && (
+            {availability === "open" && (
               <div className="absolute top-3 right-3 z-10 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg pointer-events-none transition-transform duration-300 group-hover:-translate-y-0.5 border border-white/20">
                  <span className="text-[12px] font-bold tracking-wide text-[#2D6A4F]">
                    פתוח עכשיו
@@ -171,7 +110,7 @@ export default function BusinessCard({
             <p className="text-[14px] text-[#717171] mt-1 font-medium flex gap-1.5 items-center">
                <span
                  className="font-semibold px-2 py-0.5 rounded-md text-[13px]"
-                 style={{ backgroundColor: chip?.bg ?? "#F3F4F6", color: chip?.text ?? "#374151" }}
+                 style={{ backgroundColor: chip?.background ?? "#F3F4F6", color: chip?.ink ?? "#374151" }}
                >
                  {CATEGORY_LABELS[business.category]}
                </span>
@@ -186,6 +125,20 @@ export default function BusinessCard({
             </p>
           </div>
         </div>
+      </button>
+      <button
+        type="button"
+        onClick={onFavoriteToggle}
+        className="absolute left-7 top-7 z-10 flex h-11 w-11 items-center justify-center rounded-full border-2 border-white/80 bg-white/95 text-stone-600 shadow-md backdrop-blur-md transition-all hover:scale-105 hover:text-rose-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+        aria-label={isFavorited ? "הסר ממועדפים" : "שמור למועדפים"}
+        aria-pressed={isFavorited}
+      >
+        <Heart
+          className={`h-5 w-5 transition-all duration-200 ${
+            isFavorited ? "scale-110 fill-rose-500 text-rose-500" : "text-stone-600"
+          }`}
+          aria-hidden="true"
+        />
       </button>
     </div>
   );

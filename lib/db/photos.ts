@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Photo } from "@/lib/types";
 import { revalidatePath } from "next/cache";
+import { getPhotoStoragePath, signPhotoRecords } from "@/lib/storage/photo-urls";
 
 export async function getPhotos(businessId: string) {
   const supabase = await createClient();
@@ -14,7 +15,7 @@ export async function getPhotos(businessId: string) {
     .order("created_at", { ascending: true });
 
   if (error) throw error;
-  return data as Photo[];
+  return signPhotoRecords(supabase, data as Photo[]);
 }
 
 export async function uploadPhoto(
@@ -35,10 +36,6 @@ export async function uploadPhoto(
 
   if (uploadError) throw uploadError;
 
-  const { data: { publicUrl } } = supabase.storage
-    .from("photos")
-    .getPublicUrl(fileName);
-
   if (isPrimary) {
     // Unset existing primary
     await supabase
@@ -50,14 +47,15 @@ export async function uploadPhoto(
 
   const { data, error } = await supabase
     .from("photos")
-    .insert({ business_id: businessId, url: publicUrl, is_primary: isPrimary })
+    .insert({ business_id: businessId, url: fileName, is_primary: isPrimary })
     .select()
     .single();
 
   if (error) throw error;
   revalidatePath(`/businesses/${businessId}`);
   revalidatePath("/dashboard/photos");
-  return data as Photo;
+  const [signedPhoto] = await signPhotoRecords(supabase, [data as Photo]);
+  return signedPhoto;
 }
 
 export async function setPrimaryPhoto(photoId: string, businessId: string) {
@@ -84,7 +82,7 @@ export async function deletePhoto(photoId: string, businessId: string, url: stri
   const supabase = await createClient();
 
   // Delete from storage
-  const filePath = url.split("/photos/")[1];
+  const filePath = getPhotoStoragePath(url);
   if (filePath) {
     await supabase.storage.from("photos").remove([filePath]);
   }

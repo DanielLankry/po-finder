@@ -5,8 +5,9 @@ import { BadgeCheck, CalendarDays, Check } from "lucide-react";
 import {
   PLAN_CODES,
   PLANS,
-  addCalendarMonths,
+  addPlanDuration,
   getPlanByCode,
+  getPlanDurationLabel,
 } from "@/lib/plans";
 import type { Plan, PlanCode } from "@/lib/plans";
 
@@ -20,9 +21,10 @@ interface DurationSelectorCardProps {
   onAction: (plan: Plan) => void;
 }
 
-/** Renders the single duration product and keeps price/expiry preview in sync.
- * The database owns final entitlement dates; this UTC preview mirrors its
- * calendar-month arithmetic so owners see the date they are buying.
+/** Renders every listing duration as one continuous, synchronized slider.
+ * The database owns final entitlement dates; this UTC preview mirrors its day
+ * and calendar-month arithmetic so owners see the date they are buying while
+ * day, week, and month plans remain part of the same interaction.
  */
 export default function DurationSelectorCard({
   plans,
@@ -40,12 +42,13 @@ export default function DurationSelectorCard({
       ),
     [plans]
   );
-  const initialIndex = Math.max(
+  const initialPlan = getPlanByCode(catalog, initialCode) ?? catalog[7] ?? catalog[0];
+  const [selectedCode, setSelectedCode] = useState<PlanCode>(initialPlan.code);
+  const selected = getPlanByCode(catalog, selectedCode) ?? initialPlan;
+  const selectedIndex = Math.max(
     0,
-    catalog.findIndex((plan) => plan.code === initialCode)
+    catalog.findIndex((plan) => plan.code === selected.code)
   );
-  const [index, setIndex] = useState(initialIndex);
-  const selected = catalog[index] ?? catalog[5];
 
   const now = new Date(nowIso);
   const existingExpiry = baseExpiry ? new Date(baseExpiry) : null;
@@ -53,9 +56,8 @@ export default function DurationSelectorCard({
     existingExpiry && existingExpiry.getTime() > now.getTime()
       ? existingExpiry
       : now;
-  const visibleUntil = addCalendarMonths(base, selected.months);
-  const durationLabel =
-    selected.months === 1 ? "חודש אחד" : `${selected.months} חודשים`;
+  const visibleUntil = addPlanDuration(base, selected);
+  const durationLabel = getPlanDurationLabel(selected);
 
   return (
     <article className="brand-panel poster-hover relative overflow-hidden p-6 md:p-8">
@@ -73,38 +75,62 @@ export default function DurationSelectorCard({
               לכמה זמן תרצו להופיע באתר?
             </h2>
           </div>
-          {selected.months === 12 ? (
+          {selected.code === "listing_12m" ? (
             <span className="pop-in inline-flex items-center gap-1.5 rounded-full border-2 border-[#8A3618] bg-[#C4552D] px-3 py-1.5 text-xs font-bold text-white shadow-[2px_2px_0_0_#8A3618]">
               <BadgeCheck className="h-4 w-4" /> הכי משתלם
             </span>
           ) : null}
         </div>
 
-        <div className="mt-8" dir="ltr">
-          <div className="mb-2 flex items-center justify-between text-xs font-bold text-[#17402D]">
-            <span>1 month</span>
-            <span>12 months</span>
+        <div className="mt-8 rounded-2xl border-2 border-[#17402D]/20 bg-[#FFFDF7]/85 p-4 sm:p-5" dir="ltr">
+          <div className="mb-3 flex items-center justify-between gap-4 text-xs font-bold text-[#17402D]">
+            <span className="inline-flex items-center gap-1.5" dir="rtl">
+              <span className="rounded-full border border-[#8A3618]/30 bg-[#F7E7DE] px-2 py-1 text-[#8A3618]">
+                יום
+              </span>
+              <span className="rounded-full border border-[#8A3618]/30 bg-[#F7E7DE] px-2 py-1 text-[#8A3618]">
+                שבוע
+              </span>
+              <span className="rounded-full border border-[#17402D]/20 bg-[#DDEBE0] px-2 py-1">
+                חודש
+              </span>
+            </span>
+            <span>12 חודשים</span>
           </div>
           <input
-            aria-label="משך הפרסום בחודשים"
+            aria-label="משך הפרסום"
             className="duration-slider w-full"
             type="range"
-            min={1}
-            max={catalog.length}
+            min={0}
+            max={catalog.length - 1}
             step={1}
-            value={selected.months}
-            onChange={(event) => setIndex(Number(event.target.value) - 1)}
+            value={selectedIndex}
+            onChange={(event) => {
+              const plan = catalog[Number(event.target.value)];
+              if (plan) setSelectedCode(plan.code);
+            }}
           />
-          <div className="mt-2 grid grid-cols-12 px-1" aria-hidden="true">
-            {catalog.map((plan) => (
+          <div
+            className="mt-3 grid px-1"
+            style={{ gridTemplateColumns: `repeat(${catalog.length}, minmax(0, 1fr))` }}
+            aria-hidden="true"
+          >
+            {catalog.map((plan, index) => (
               <span
                 key={plan.code}
-                className={`mx-auto h-1.5 w-1.5 rounded-full transition-colors ${
-                  plan.months <= selected.months ? "bg-[#C4552D]" : "bg-[#C3DCC9]"
+                className={`mx-auto rounded-full transition-all ${
+                  index <= selectedIndex
+                    ? index < 2
+                      ? "h-2.5 w-2.5 bg-[#C4552D]"
+                      : "h-2 w-2 bg-[#2D6A4F]"
+                    : "h-1.5 w-1.5 bg-[#C3DCC9]"
                 }`}
               />
             ))}
           </div>
+          <p className="mt-3 text-center text-xs font-bold text-[#17402D]/65" dir="rtl">
+            הזיזו בין יום אחד, שבוע אחד ועד שנה שלמה
+          </p>
         </div>
 
         <div className="mt-7 rounded-2xl border-2 border-[#17402D]/25 bg-[#FFFDF7] p-5 text-center">

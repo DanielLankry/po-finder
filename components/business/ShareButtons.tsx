@@ -77,30 +77,30 @@ export default function ShareButtons({ businessId, businessName }: ShareButtonsP
       {/* QR Modal */}
       {showQR && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          className="brand-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
           dir="rtl"
           onClick={(e) => { if (e.target === e.currentTarget) setShowQR(false); }}
           role="dialog"
           aria-modal="true"
           aria-label="קוד QR לשיתוף"
         >
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xs flex flex-col items-center gap-4 relative">
+          <div className="brand-dialog-surface relative flex w-full max-w-xs flex-col items-center gap-4 p-6">
             {/* Close button */}
             <button
               onClick={() => setShowQR(false)}
-              className="absolute top-3 left-3 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+              className="brand-icon-button absolute top-3 left-3 h-11 w-11"
               aria-label="סגור"
             >
               <X className="h-4 w-4" />
             </button>
 
-            <h3 className="font-bold text-base text-slate-900">{businessName}</h3>
+            <h3 className="font-display text-3xl leading-none text-[#17402D]">{businessName}</h3>
             <p className="text-xs text-slate-500 text-center">סרוק כדי לפתוח את הדף</p>
 
             {/* QR Code */}
             <div
               ref={qrRef}
-              className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm"
+              className="rounded-xl border-2 border-[#17402D]/25 bg-white p-3 shadow-[3px_3px_0_0_rgba(23,64,45,0.16)]"
             >
               <QRCode
                 value={businessUrl}
@@ -118,7 +118,7 @@ export default function ShareButtons({ businessId, businessName }: ShareButtonsP
             {/* Download button */}
             <button
               onClick={downloadQR}
-              className="flex items-center gap-2 w-full h-10 rounded-xl bg-[#2D6A4F] hover:bg-[#1F5038] text-white font-medium text-sm transition-colors justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2"
+              className="brand-button flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-black"
             >
               <Download className="h-4 w-4" aria-hidden="true" />
               הורד QR

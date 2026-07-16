@@ -5,12 +5,14 @@ export const dynamic = "force-dynamic";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Store, ShoppingCart } from "lucide-react";
+import Image from "next/image";
+import { Eye, EyeOff, MailCheck, Store, ShoppingCart } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Typewriter } from "@/components/ui/typewriter";
 import type { UserRole } from "@/lib/types";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 export default function RegisterPage() {
   return (
@@ -23,10 +25,13 @@ export default function RegisterPage() {
 function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // /pricing pushes new visitors here with ?redirectTo=/pricing so they land
-  // back on checkout the moment their session exists.
-  const redirectTo = searchParams.get("redirectTo");
-  const isPricingSignup = redirectTo?.startsWith("/pricing") ?? false;
+  // Pricing sends new advertisers directly toward billing after registration.
+  const rawRedirect = searchParams.get("redirectTo");
+  const redirectTo = rawRedirect ? safeRedirectPath(rawRedirect, "/") : null;
+  const isPricingSignup =
+    redirectTo?.startsWith("/pricing") ||
+    redirectTo?.startsWith("/dashboard/billing") ||
+    false;
   const [role, setRole] = useState<UserRole>(() => (isPricingSignup ? "business_owner" : "customer"));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -43,14 +48,28 @@ function RegisterForm() {
     return role === "business_owner" ? "/dashboard" : "/";
   }
 
+  /** Builds the verified auth callback while preserving signup intent and role. */
+  function registrationCallbackUrl() {
+    const callback = new URL("/auth/callback", window.location.origin);
+    callback.searchParams.set("signup", "1");
+    callback.searchParams.set("role", role);
+    if (redirectTo) callback.searchParams.set("next", redirectTo);
+    return callback.toString();
+  }
+
+  /** Marks the first post-signup page so consent-aware conversion tracking can run. */
+  function registrationDestination() {
+    const destination = new URL(defaultRoute(), window.location.origin);
+    destination.searchParams.set("registration", role);
+    return `${destination.pathname}${destination.search}${destination.hash}`;
+  }
+
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const callbackUrl = redirectTo
-      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`
-      : `${window.location.origin}/auth/callback`;
+    const callbackUrl = registrationCallbackUrl();
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
@@ -67,7 +86,7 @@ function RegisterForm() {
 
     if (data.user && data.session) {
       await supabase.from("users").insert({ id: data.user.id, email, role, name });
-      router.push(defaultRoute());
+      router.push(registrationDestination());
       router.refresh();
     }
     setLoading(false);
@@ -75,12 +94,10 @@ function RegisterForm() {
 
   async function handleGoogleRegister() {
     setLoading(true);
-    const callbackUrl = redirectTo
-      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`
-      : `${window.location.origin}/auth/callback`;
+    const callbackUrl = registrationCallbackUrl();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: callbackUrl, queryParams: { role } },
+      options: { redirectTo: callbackUrl },
     });
     if (error) setError("שגיאה בהרשמה עם גוגל.");
     setLoading(false);
@@ -134,7 +151,7 @@ function RegisterForm() {
           {/* Email sent screen */}
           {emailSent && (
             <div className="text-center py-8 bg-white rounded-3xl p-8 shadow-sm border border-[#17402D]/20">
-              <div className="text-5xl mb-4">📬</div>
+              <MailCheck className="mx-auto mb-4 h-12 w-12 text-[#2D6A4F]" aria-hidden="true" />
               <h2 className="font-bold text-2xl text-[#111111] mb-2">בדקו את המייל שלכם</h2>
               <p className="text-[#78716C] text-sm leading-relaxed">
                 שלחנו קישור אימות לכתובת <strong>{email}</strong>.<br />
@@ -151,7 +168,7 @@ function RegisterForm() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2D6A4F] opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[#2D6A4F]" />
                 </span>
-                {isPricingSignup ? "המשך להצטרפות במחיר השקה" : "פתיחת חשבון לעסקים ולקוחות"}
+                {isPricingSignup ? "המשך לבחירת משך ההופעה" : "פתיחת חשבון לעסקים ולקוחות"}
               </div>
 
               <h1 className="font-display text-5xl text-[#17402D] mb-2 leading-none">
@@ -170,7 +187,7 @@ function RegisterForm() {
                 <p className="text-[#17402D] font-semibold text-sm mb-3">אני מצטרף/ת בתור:</p>
                 <div className="grid grid-cols-2 gap-3">
                   <RoleCard active={role === "business_owner"} onClick={() => setRole("business_owner")}
-                    icon={<Store className="h-5 w-5" />} title="בעל עסק" description="הצטרפו במחיר השקה" />
+                    icon={<Store className="h-5 w-5" />} title="בעל עסק" description="פרסום בתשלום חד־פעמי" />
                   <RoleCard active={role === "customer"} onClick={() => setRole("customer")}
                     icon={<ShoppingCart className="h-5 w-5" />} title="לקוח" description="גלשו והשאירו ביקורת" />
                 </div>
@@ -251,12 +268,5 @@ function RoleCard({ active, onClick, icon, title, description }: {
 }
 
 function GoogleIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-      <path d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z" fill="#4285F4" />
-      <path d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z" fill="#34A853" />
-      <path d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z" fill="#FBBC05" />
-      <path d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z" fill="#EA4335" />
-    </svg>
-  );
+  return <Image src="/google-g.svg" alt="" width={18} height={18} aria-hidden="true" />;
 }

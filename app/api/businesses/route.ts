@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isPublicReadyBusiness } from "@/lib/public-business";
+import { getIsraelDateContext, resolveEffectiveSchedule } from "@/lib/utils/schedule";
+import { signPhotoRecords } from "@/lib/storage/photo-urls";
 import type { BusinessSchedule, BusinessWithSchedule, Photo, WeeklyScheduleEntry } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -24,13 +26,17 @@ export async function GET(req: NextRequest) {
       if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
-      const { data, error } = await supabase
-        .from("businesses")
-        .select("id, name, expires_at, is_active, is_verified")
-        .eq("owner_id", user.id)
-        .order("created_at", { ascending: false });
+      const { data, error } = await supabase.rpc("get_my_businesses");
       if (error) throw error;
-      return NextResponse.json({ businesses: data ?? [] });
+      return NextResponse.json({
+        businesses: (data ?? []).map((business: BusinessWithSchedule) => ({
+          id: business.id,
+          name: business.name,
+          expires_at: business.expires_at,
+          is_active: business.is_active,
+          is_verified: business.is_verified,
+        })),
+      });
     }
 
     const nowIso = new Date().toISOString();
@@ -38,7 +44,6 @@ export async function GET(req: NextRequest) {
       .from("businesses")
       .select(`
         id,
-        owner_id,
         name,
         description,
         category,
@@ -51,13 +56,10 @@ export async function GET(req: NextRequest) {
         website,
         instagram,
         kashrut,
-        business_number,
+        is_verified,
         avg_rating,
         review_count,
-        is_active,
-        is_legacy_public,
-        created_at,
-        photos(id, business_id, url, is_primary, created_at)
+        photos(id, url, is_primary)
       `)
       .eq("is_verified", true)
       .eq("is_active", true)
@@ -105,22 +107,21 @@ export async function GET(req: NextRequest) {
 
     const scheduleRequest = includeSchedule
       ? (() => {
-        const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jerusalem" }));
-        const today = now.toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
-        const todayDow = now.getDay();
+        const now = new Date();
+        const context = getIsraelDateContext(now);
 
         return {
-          today,
+          now,
+          context,
           schedules: Promise.all([
             supabase
               .from("business_schedules")
               .select("id, business_id, date, address, lat, lng, open_time, close_time, note, created_at")
-              .eq("date", today),
+              .in("date", [context.date, context.previousDate]),
             supabase
               .from("business_weekly_schedule")
               .select("id, business_id, day_of_week, is_active, open_time, close_time, address, lat, lng, note, created_at, updated_at")
-              .eq("day_of_week", todayDow)
-              .eq("is_active", true),
+              .in("day_of_week", [context.dayOfWeek, context.previousDayOfWeek]),
           ]),
         };
       })()
@@ -129,7 +130,7 @@ export async function GET(req: NextRequest) {
     const { data, error } = await query;
     if (error) throw error;
 
-    const businesses = ((data ?? []) as BusinessWithSchedule[])
+    const publicBusinesses = ((data ?? []) as BusinessWithSchedule[])
       .map((business) => ({
         ...business,
         photos: ((business.photos ?? []) as Photo[])
@@ -137,6 +138,12 @@ export async function GET(req: NextRequest) {
           .slice(0, 1),
       }))
       .filter(isPublicReadyBusiness);
+    const businesses = await Promise.all(
+      publicBusinesses.map(async (business) => ({
+        ...business,
+        photos: await signPhotoRecords(supabase, business.photos ?? []),
+      })),
+    );
 
     if (!includeSchedule || businesses.length === 0) {
       return NextResponse.json({ businesses });
@@ -153,33 +160,30 @@ export async function GET(req: NextRequest) {
     const dailyMap = new Map(
       ((schedData ?? []) as BusinessSchedule[])
         .filter((schedule) => businessIds.has(schedule.business_id))
-        .map((schedule) => [schedule.business_id, schedule])
+        .map((schedule) => [`${schedule.business_id}:${schedule.date}`, schedule])
     );
     const weeklyMap = new Map(
       ((weeklyData ?? []) as WeeklyScheduleEntry[])
         .filter((schedule) => businessIds.has(schedule.business_id))
-        .map((schedule) => [schedule.business_id, schedule])
+        .map((schedule) => [`${schedule.business_id}:${schedule.day_of_week}`, schedule])
     );
 
     const businessesWithSchedule = businesses.map((business) => {
-      const daily = dailyMap.get(business.id);
-      const weekly = weeklyMap.get(business.id);
-      const todaySchedule: BusinessSchedule | null = daily ?? (weekly ? {
-        id: weekly.id,
-        business_id: weekly.business_id,
-        date: scheduleRequest!.today,
-        address: weekly.address,
-        lat: weekly.lat,
-        lng: weekly.lng,
-        open_time: weekly.open_time,
-        close_time: weekly.close_time,
-        note: weekly.note,
-        created_at: weekly.created_at,
-      } : null);
+      const { context, now } = scheduleRequest!;
+      const effective = resolveEffectiveSchedule({
+        now,
+        todayDate: context.date,
+        previousDate: context.previousDate,
+        todayDaily: dailyMap.get(`${business.id}:${context.date}`),
+        previousDaily: dailyMap.get(`${business.id}:${context.previousDate}`),
+        todayWeekly: weeklyMap.get(`${business.id}:${context.dayOfWeek}`),
+        previousWeekly: weeklyMap.get(`${business.id}:${context.previousDayOfWeek}`),
+      });
 
       return {
         ...business,
-        today_schedule: todaySchedule,
+        today_schedule: effective.schedule,
+        hours_status: effective.hoursStatus,
       };
     });
 

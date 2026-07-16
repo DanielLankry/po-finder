@@ -18,7 +18,7 @@ export default function TermsPage() {
           <h1 className="font-display font-extrabold text-3xl text-stone-900 mb-2">
             תנאי שימוש
           </h1>
-          <p className="text-stone-500 text-sm mb-8">עדכון אחרון: מאי 2026</p>
+          <p className="text-stone-500 text-sm mb-8">עדכון אחרון: יולי 2026</p>
 
           <div className="space-y-8 text-stone-700 leading-relaxed">
             <section>

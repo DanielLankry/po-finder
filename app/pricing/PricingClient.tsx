@@ -80,7 +80,7 @@ export default function PricingClient({
               <span className="marker-highlight">משלמים פעם אחת.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-stone-600">
-              יוצרים טיוטת עסק בחינם. אחרי אימות בוחרים בין חודש ל־12 חודשים,
+              יוצרים טיוטת עסק בחינם. אחרי אימות בוחרים מיום אחד ועד 12 חודשים,
               בלי מנוי, בלי חידוש אוטומטי ובלי חבילות קידום.
             </p>
           </div>

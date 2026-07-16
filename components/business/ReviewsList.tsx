@@ -42,7 +42,7 @@ function UserAvatar({ name }: { name: string }) {
 export default function ReviewsList({ reviews }: ReviewsListProps) {
   if (reviews.length === 0) {
     return (
-      <p className="text-slate-400 text-sm py-4 text-center">
+      <p className="py-4 text-center text-sm text-[#17402D]/50">
         אין ביקורות עדיין. היו הראשונים!
       </p>
     );
@@ -51,17 +51,17 @@ export default function ReviewsList({ reviews }: ReviewsListProps) {
   return (
     <div className="space-y-6" dir="rtl">
       {reviews.map((review, i) => (
-        <div
+        <article
           key={review.id}
-          className={`flex gap-4 fade-in-up stagger-${Math.min(i + 1, 6)}`}
+          className={`flex gap-4 rounded-2xl border-2 border-[#17402D]/10 bg-white/70 p-4 fade-in-up stagger-${Math.min(i + 1, 6)}`}
         >
           <UserAvatar name={review.reviewer_name ?? review.user?.name ?? "משתמש"} />
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
-              <span className="font-semibold text-sm text-slate-900">
+              <span className="text-sm font-black text-[#17402D]">
                 {review.reviewer_name ?? review.user?.name ?? "משתמש אנונימי"}
               </span>
-              <span className="text-slate-400 text-xs tabular-nums">
+              <span className="text-xs tabular-nums text-[#17402D]/45">
                 {formatHebrewDate(review.created_at)}
               </span>
             </div>
@@ -85,12 +85,12 @@ export default function ReviewsList({ reviews }: ReviewsListProps) {
             </div>
 
             {review.comment && (
-              <p className="text-slate-600 text-sm leading-relaxed">
+              <p className="text-sm leading-relaxed text-[#17402D]/75">
                 {review.comment}
               </p>
             )}
           </div>
-        </div>
+        </article>
       ))}
     </div>
   );

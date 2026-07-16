@@ -1,6 +1,4 @@
 "use client";
-import { createClient } from "@/lib/supabase/client";
-
 export type EventType = "view" | "call_click" | "whatsapp_click" | "directions_click";
 
 function hasAnalyticsConsent(): boolean {
@@ -23,11 +21,15 @@ export async function trackEvent(businessId: string, eventType: EventType) {
   try {
     if (!hasAnalyticsConsent()) return;
 
-    const supabase = createClient();
-    await supabase.from("business_events").insert({
-      business_id: businessId,
-      event_type: eventType,
-      session_id: getSessionId(),
+    await fetch("/api/analytics/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify({
+        businessId,
+        eventType,
+        sessionId: getSessionId(),
+      }),
     });
   } catch {
     // Silently fail — analytics should never break UX

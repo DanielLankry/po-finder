@@ -19,6 +19,7 @@ import { verifyCreditGuardResponseMac } from "@/lib/hyp-verification";
  */
 
 const HYP_ENDPOINT = "https://pay.hyp.co.il/p/";
+const HYP_REQUEST_TIMEOUT_MS = 12_000;
 
 function requireEnv(name: string): string {
   const v = process.env[name];
@@ -158,6 +159,7 @@ export async function createSignedCheckoutUrl(p: CheckoutParams): Promise<string
   const res = await fetch(`${HYP_ENDPOINT}?${signParams.toString()}`, {
     method: "GET",
     headers: hypHeaders(),
+    signal: AbortSignal.timeout(HYP_REQUEST_TIMEOUT_MS),
   });
 
   if (!res.ok) {
@@ -244,7 +246,11 @@ export async function debugSignCheckoutRaw(): Promise<{
     .replace(/KEY=[^&]+/, "KEY=<redacted>")
     .replace(/PassP=[^&]+/, "PassP=<redacted>");
 
-  const res = await fetch(fullUrl, { method: "GET", headers });
+  const res = await fetch(fullUrl, {
+    method: "GET",
+    headers,
+    signal: AbortSignal.timeout(HYP_REQUEST_TIMEOUT_MS),
+  });
   const body = (await res.text()).trim();
   const bodyIsHtml = /^\s*<(!doctype|html)/i.test(body);
   const parsed = bodyIsHtml ? null : new URLSearchParams(body);
@@ -257,7 +263,11 @@ export async function debugSignCheckoutRaw(): Promise<{
   // received. If "Referer" is missing here, the runtime is stripping it.
   let outboundHeadersAsSeenByEcho: Record<string, string> | null = null;
   try {
-    const echoRes = await fetch("https://httpbin.org/anything", { method: "GET", headers });
+    const echoRes = await fetch("https://httpbin.org/anything", {
+      method: "GET",
+      headers,
+      signal: AbortSignal.timeout(HYP_REQUEST_TIMEOUT_MS),
+    });
     if (echoRes.ok) {
       const echoJson = (await echoRes.json()) as { headers?: Record<string, string> };
       outboundHeadersAsSeenByEcho = echoJson.headers ?? null;
@@ -310,9 +320,14 @@ export async function verifyReturnSignature(returnQuery: URLSearchParams): Promi
   const res = await fetch(`${HYP_ENDPOINT}?${verifyParams.toString()}`, {
     method: "GET",
     headers: hypHeaders(),
+    signal: AbortSignal.timeout(HYP_REQUEST_TIMEOUT_MS),
   });
 
-  if (!res.ok) return false;
+  // A verifier outage is not proof that the redirect is invalid. Throw so the
+  // return route can keep the attempt pending for safe retry/reconciliation.
+  if (!res.ok) {
+    throw new Error(`HYP verify HTTP ${res.status}`);
+  }
 
   const body = (await res.text()).trim();
   const parsed = new URLSearchParams(body);
@@ -342,6 +357,7 @@ export async function refundTransaction(transId: string): Promise<{
   const res = await fetch(`${HYP_ENDPOINT}?${params.toString()}`, {
     method: "GET",
     headers: hypHeaders(),
+    signal: AbortSignal.timeout(HYP_REQUEST_TIMEOUT_MS),
   });
 
   const raw = (await res.text()).trim();

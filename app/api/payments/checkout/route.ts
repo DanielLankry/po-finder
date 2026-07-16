@@ -30,6 +30,12 @@ export async function POST(req: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+  if (!user.email) {
+    return NextResponse.json(
+      { ok: false, error: "verified email required" },
+      { status: 400 }
+    );
+  }
 
   const body = await req.json().catch(() => ({}));
   const parsed = checkoutSchema.safeParse(body);
@@ -45,7 +51,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid plan" }, { status: 400 });
   }
 
-  const { data: business } = await supabase
+  const admin = adminClient();
+  const { data: business } = await admin
     .from("businesses")
     .select("id, is_verified, is_active, expires_at")
     .eq("id", parsed.data.businessId)
@@ -60,14 +67,12 @@ export async function POST(req: NextRequest) {
       { status: 409 }
     );
   }
-  const admin = adminClient();
   try {
     await ensurePublicUser(admin, user, "business_owner");
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
     console.error("[/api/payments/checkout] ensure public user failed:", err);
     return NextResponse.json(
-      { ok: false, error: "internal error", detail: message },
+      { ok: false, error: "internal error" },
       { status: 200 }
     );
   }
@@ -94,7 +99,7 @@ export async function POST(req: NextRequest) {
     // doesn't replace our JSON with its own 5xx HTML page (which the FE
     // would then fail to JSON.parse and surface as an empty alert).
     return NextResponse.json(
-      { ok: false, error: "internal error", detail: insertErr?.message ?? "could not record attempt" },
+      { ok: false, error: "internal error" },
       { status: 200 }
     );
   }
@@ -107,15 +112,24 @@ export async function POST(req: NextRequest) {
   cancelUrl.searchParams.set("attempt", attempt.id);
 
   try {
+    const { data: profile } = await admin
+      .from("users")
+      .select("name")
+      .eq("id", user.id)
+      .maybeSingle();
+    const nameParts = (profile?.name ?? "").trim().split(/\s+/).filter(Boolean);
+    const firstName = nameParts.shift() ?? "";
+    const lastName = nameParts.join(" ");
+
     const url = await createSignedCheckoutUrl({
       amount: Math.round(plan.price / 100), // HYP expects whole shekels
       // Plain hyphen — HYP's downstream description field uses windows-1255
       // and renders an em-dash as "?" on the hosted payment page.
       info: `${BRAND_NAME} - ${plan.label}`,
       order: attempt.id,
-      email: "",
-      firstName: "",
-      lastName: "",
+      email: user.email,
+      firstName,
+      lastName,
       successUrl: returnUrl.toString(),
       errorUrl: returnUrl.toString(),
       cancelUrl: cancelUrl.toString(),
@@ -142,7 +156,7 @@ export async function POST(req: NextRequest) {
     // of pokarov.co.il was rewriting our 502 JSON to its own HTML page,
     // breaking the FE's res.json() and producing a detail-less alert.
     return NextResponse.json(
-      { ok: false, error: "payment provider error", detail: message },
+      { ok: false, error: "payment provider error" },
       { status: 200 }
     );
   }

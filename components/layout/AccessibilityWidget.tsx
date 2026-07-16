@@ -52,8 +52,8 @@ export default function AccessibilityWidget() {
             setSettings(savedSettings);
             applySettings(savedSettings);
           }
-          // Mobile uses a predictable top-corner anchor so the control never
-          // covers full-width checkout or authentication actions.
+          // The floating control starts at tablet width; mobile reaches the
+          // accessibility page through the navigation sheet without covering content.
           if (savedPosition && window.innerWidth >= 640) setPos(savedPosition);
         });
       }
@@ -119,23 +119,28 @@ export default function AccessibilityWidget() {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        className="fixed top-[84px] end-3 z-[55] h-10 w-10 rounded-full border-2 border-[#17402D] bg-[#2D6A4F] text-white shadow-[2px_2px_0_0_#17402D] hover:bg-[#1F5038] transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 select-none sm:top-auto sm:end-auto sm:bottom-20 sm:start-4 sm:h-12 sm:w-12 sm:cursor-grab sm:active:cursor-grabbing"
+        className="fixed bottom-20 left-4 z-40 hidden h-12 w-12 select-none items-center justify-center rounded-full border-2 border-[#17402D] bg-[#2D6A4F] text-white shadow-[2px_2px_0_0_#17402D] transition-colors hover:bg-[#1F5038] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] focus-visible:ring-offset-2 sm:flex sm:cursor-grab sm:active:cursor-grabbing"
         style={btnStyle}
         aria-label={open ? "סגירת תפריט נגישות" : "פתיחת תפריט נגישות"}
         aria-expanded={open}
+        aria-controls="accessibility-panel"
       >
         {open ? <X className="h-5 w-5" /> : <Accessibility className="h-6 w-6" />}
       </button>
 
       {open && (
         <div
-          className="brand-panel fixed top-[136px] end-3 z-[55] w-[calc(100vw-1.5rem)] max-w-72 p-5 fade-in sm:top-auto sm:end-auto sm:bottom-[136px] sm:start-4"
+          id="accessibility-panel"
+          className="brand-dialog-surface fixed bottom-[13.5rem] end-3 z-40 max-h-[calc(100dvh-15rem)] w-[calc(100vw-1.5rem)] max-w-72 overflow-y-auto p-5 fade-in sm:bottom-[136px] sm:left-4 sm:right-auto sm:max-h-[calc(100dvh-10rem)]"
           style={panelStyle}
           dir="rtl"
           role="dialog"
           aria-label="הגדרות נגישות"
         >
-          <h2 className="font-display font-bold text-lg text-stone-900 mb-4">נגישות</h2>
+          <div className="mb-4">
+            <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#8A3618]">התאמה אישית</p>
+            <h2 className="font-display text-3xl leading-none text-[#17402D]">נגישות</h2>
+          </div>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -144,12 +149,12 @@ export default function AccessibilityWidget() {
               </div>
               <div className="flex items-center gap-1">
                 <button onClick={() => update({ fontSize: Math.max(0, settings.fontSize - 1) })} disabled={settings.fontSize === 0}
-                  className="h-8 w-8 rounded-lg border border-stone-300 flex items-center justify-center text-stone-600 hover:bg-stone-50 disabled:opacity-30 transition-colors" aria-label="הקטנת טקסט">
+                  className="brand-control flex h-11 w-11 items-center justify-center rounded-xl text-[#17402D] disabled:opacity-30" aria-label="הקטנת טקסט">
                   <Minus className="h-3.5 w-3.5" />
                 </button>
                 <span className="text-xs text-stone-500 w-6 text-center" aria-live="polite">{["א", "א+", "א++"][settings.fontSize]}</span>
                 <button onClick={() => update({ fontSize: Math.min(2, settings.fontSize + 1) })} disabled={settings.fontSize === 2}
-                  className="h-8 w-8 rounded-lg border border-stone-300 flex items-center justify-center text-stone-600 hover:bg-stone-50 disabled:opacity-30 transition-colors" aria-label="הגדלת טקסט">
+                  className="brand-control flex h-11 w-11 items-center justify-center rounded-xl text-[#17402D] disabled:opacity-30" aria-label="הגדלת טקסט">
                   <Plus className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -159,7 +164,7 @@ export default function AccessibilityWidget() {
             <ToggleRow icon={<Link2 className="h-4 w-4 text-[#2D6A4F]" />} label="הדגשת קישורים" active={settings.highlightLinks} onToggle={() => update({ highlightLinks: !settings.highlightLinks })} />
             <ToggleRow icon={<Space className="h-4 w-4 text-[#2D6A4F]" />} label="ריווח אותיות" active={settings.letterSpacing} onToggle={() => update({ letterSpacing: !settings.letterSpacing })} />
           </div>
-          <button onClick={reset} className="mt-4 w-full h-9 rounded-lg border border-stone-300 text-stone-600 text-sm font-medium hover:bg-stone-50 transition-colors">
+          <button onClick={reset} className="brand-control mt-4 h-11 w-full rounded-xl text-sm font-black text-[#17402D]">
             איפוס הגדרות
           </button>
           <a href="/accessibility" className="block mt-2 text-center text-xs text-[#2D6A4F] hover:underline">הצהרת נגישות מלאה</a>
@@ -174,8 +179,10 @@ function ToggleRow({ icon, label, active, onToggle }: { icon: React.ReactNode; l
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">{icon}<span className="text-sm text-stone-700">{label}</span></div>
       <button onClick={onToggle} role="switch" aria-checked={active} aria-label={label}
-        className={`relative h-6 w-11 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] ${active ? "bg-[#2D6A4F]" : "bg-stone-300"}`}>
-        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${active ? "start-[22px]" : "start-0.5"}`} />
+        className="flex h-11 w-12 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]">
+        <span className={`relative h-7 w-11 rounded-full border-2 transition-all ${active ? "border-[#17402D] bg-[#2D6A4F] shadow-[2px_2px_0_0_#17402D]" : "border-[#17402D]/25 bg-[#F7F3EA]"}`}>
+          <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${active ? "start-[22px]" : "start-0.5"}`} />
+        </span>
       </button>
     </div>
   );
