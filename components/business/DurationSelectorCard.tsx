@@ -24,7 +24,7 @@ interface DurationSelectorCardProps {
 /** Renders every listing duration as one continuous, synchronized slider.
  * The database owns final entitlement dates; this UTC preview mirrors its day
  * and calendar-month arithmetic so owners see the date they are buying while
- * day, week, and month plans remain part of the same interaction.
+ * short-day, week, and month plans remain part of the same interaction.
  */
 export default function DurationSelectorCard({
   plans,
@@ -42,7 +42,10 @@ export default function DurationSelectorCard({
       ),
     [plans]
   );
-  const initialPlan = getPlanByCode(catalog, initialCode) ?? catalog[7] ?? catalog[0];
+  const initialPlan =
+    getPlanByCode(catalog, initialCode) ??
+    getPlanByCode(catalog, "listing_6m") ??
+    catalog[0];
   const [selectedCode, setSelectedCode] = useState<PlanCode>(initialPlan.code);
   const selected = getPlanByCode(catalog, selectedCode) ?? initialPlan;
   const selectedIndex = Math.max(
@@ -86,13 +89,13 @@ export default function DurationSelectorCard({
           <div className="mb-3 flex items-center justify-between gap-4 text-xs font-bold text-[#17402D]">
             <span className="inline-flex items-center gap-1.5" dir="rtl">
               <span className="rounded-full border border-[#8A3618]/30 bg-[#F7E7DE] px-2 py-1 text-[#8A3618]">
-                יום
+                1–3 ימים
               </span>
               <span className="rounded-full border border-[#8A3618]/30 bg-[#F7E7DE] px-2 py-1 text-[#8A3618]">
                 שבוע
               </span>
               <span className="rounded-full border border-[#17402D]/20 bg-[#DDEBE0] px-2 py-1">
-                חודש
+                חודשים
               </span>
             </span>
             <span>12 חודשים</span>
@@ -120,7 +123,7 @@ export default function DurationSelectorCard({
                 key={plan.code}
                 className={`mx-auto rounded-full transition-all ${
                   index <= selectedIndex
-                    ? index < 2
+                    ? index < 4
                       ? "h-2.5 w-2.5 bg-[#C4552D]"
                       : "h-2 w-2 bg-[#2D6A4F]"
                     : "h-1.5 w-1.5 bg-[#C3DCC9]"
@@ -129,7 +132,7 @@ export default function DurationSelectorCard({
             ))}
           </div>
           <p className="mt-3 text-center text-xs font-bold text-[#17402D]/65" dir="rtl">
-            הזיזו בין יום אחד, שבוע אחד ועד שנה שלמה
+            יום אחד · יומיים · 3 ימים · שבוע · 1–12 חודשים
           </p>
         </div>
 

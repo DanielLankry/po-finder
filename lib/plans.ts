@@ -1,5 +1,7 @@
 export const PLAN_CODES = [
   "listing_1d",
+  "listing_2d",
+  "listing_3d",
   "listing_7d",
   "listing_1m",
   "listing_2m",
@@ -34,6 +36,8 @@ export type Plan = {
 
 const CATALOG = [
   { code: "listing_1d", months: null, days: 1, label: "יום אחד", price: 300 },
+  { code: "listing_2d", months: null, days: 2, label: "יומיים", price: 500 },
+  { code: "listing_3d", months: null, days: 3, label: "3 ימים", price: 600 },
   { code: "listing_7d", months: null, days: 7, label: "שבוע אחד", price: 800 },
   { code: "listing_1m", months: 1, days: 30, label: "חודש אחד", price: 1100 },
   { code: "listing_2m", months: 2, days: 60, label: "2 חודשים", price: 1900 },
@@ -89,6 +93,7 @@ export function getPlanDurationLabel(plan: Pick<Plan, "days" | "months">): strin
   if (plan.months === 1) return "חודש אחד";
   if (plan.months) return `${plan.months} חודשים`;
   if (plan.days === 1) return "יום אחד";
+  if (plan.days === 2) return "יומיים";
   if (plan.days === 7) return "שבוע אחד";
   return `${plan.days} ימים`;
 }

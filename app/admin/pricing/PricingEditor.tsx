@@ -60,7 +60,7 @@ export default function PricingEditor({ initialPlans }: { initialPlans: Plan[] }
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-[#111]">מחירי זמן ההופעה</h1>
-          <p className="text-sm text-[#888]">מוצר אחד עם יום, שבוע ו־12 משכי חודש חד־פעמיים</p>
+          <p className="text-sm text-[#888]">מוצר אחד עם 1–3 ימים, שבוע ו־12 משכי חודש חד־פעמיים</p>
         </div>
         <button
           onClick={handleSave}

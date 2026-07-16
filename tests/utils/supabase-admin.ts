@@ -91,6 +91,8 @@ export async function createConfirmedUser(opts: {
  */
 export type DurationPlanCode =
   | 'listing_1d'
+  | 'listing_2d'
+  | 'listing_3d'
   | 'listing_7d'
   | 'listing_1m'
   | 'listing_2m'
