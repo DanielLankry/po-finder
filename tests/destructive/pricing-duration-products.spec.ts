@@ -29,6 +29,8 @@ test("duration catalog, renewal, month-end, and LIFO refund are enforced by Post
   expect(catalogError).toBeNull();
   expect(catalog).toEqual([
     { code: "listing_1d", kind: "listing", duration_months: null, boost_days: 0, price: 300 },
+    { code: "listing_2d", kind: "listing", duration_months: null, boost_days: 0, price: 500 },
+    { code: "listing_3d", kind: "listing", duration_months: null, boost_days: 0, price: 600 },
     { code: "listing_7d", kind: "listing", duration_months: null, boost_days: 0, price: 800 },
     ...[1100, 1900, 2600, 3100, 3600, 4100, 4500, 4900, 5200, 5500, 5800, 6100].map(
       (price, index) => ({
