@@ -7,12 +7,27 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local'), quiet: true });
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const PRODUCTION_PROJECT_REF = 'ymqlqdhelsocibhnanjy';
 
 if (!URL || !KEY) {
   throw new Error(
     'Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local — required for destructive tests'
   );
 }
+
+/** Prevents destructive Playwright helpers from ever targeting the live project. */
+function assertSafeDestructiveTarget(): void {
+  if (process.env.RUN_DESTRUCTIVE !== '1') return;
+
+  const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? '';
+  if (URL!.includes(PRODUCTION_PROJECT_REF) || /pokarov\.co\.il/i.test(baseUrl)) {
+    throw new Error(
+      'Destructive tests are blocked against the production Supabase project and pokarov.co.il. Configure a dedicated test project first.'
+    );
+  }
+}
+
+assertSafeDestructiveTarget();
 
 export const TEST_EMAIL_PREFIX = 'qa+';
 export const TEST_EMAIL_DOMAIN = 'pokarov.test';

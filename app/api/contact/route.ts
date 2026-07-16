@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     const safeMessage = escapeHtml(message);
 
     // Send to support
-    await resend.emails.send({
+    const { error: supportError } = await resend.emails.send({
       from: "פה קרוב <noreply@pokarov.co.il>",
       to: "support@pokarov.co.il",
       replyTo: email,
@@ -88,14 +88,20 @@ export async function POST(req: NextRequest) {
         </div>
       `,
     });
+    if (supportError) {
+      throw new Error(`Support email failed: ${supportError.message}`);
+    }
 
     // Auto-reply to sender with beautiful template
-    await resend.emails.send({
+    const { error: autoReplyError } = await resend.emails.send({
       from: "פה קרוב <noreply@pokarov.co.il>",
       to: email,
       subject: "קיבלנו את פנייתך — פה קרוב",
       html: contactAutoReplyTemplate(name, subjectLabel),
     });
+    if (autoReplyError) {
+      console.error("Contact auto-reply failed:", autoReplyError);
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {

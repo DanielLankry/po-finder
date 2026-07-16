@@ -70,10 +70,9 @@ export async function POST(req: NextRequest) {
   try {
     await ensurePublicUser(admin, user, "business_owner");
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
     console.error("[/api/payments/checkout] ensure public user failed:", err);
     return NextResponse.json(
-      { ok: false, error: "internal error", detail: message },
+      { ok: false, error: "internal error" },
       { status: 200 }
     );
   }
@@ -100,7 +99,7 @@ export async function POST(req: NextRequest) {
     // doesn't replace our JSON with its own 5xx HTML page (which the FE
     // would then fail to JSON.parse and surface as an empty alert).
     return NextResponse.json(
-      { ok: false, error: "internal error", detail: insertErr?.message ?? "could not record attempt" },
+      { ok: false, error: "internal error" },
       { status: 200 }
     );
   }
@@ -157,7 +156,7 @@ export async function POST(req: NextRequest) {
     // of pokarov.co.il was rewriting our 502 JSON to its own HTML page,
     // breaking the FE's res.json() and producing a detail-less alert.
     return NextResponse.json(
-      { ok: false, error: "payment provider error", detail: message },
+      { ok: false, error: "payment provider error" },
       { status: 200 }
     );
   }

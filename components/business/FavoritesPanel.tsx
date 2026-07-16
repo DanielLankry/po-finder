@@ -50,7 +50,7 @@ export default function FavoritesPanel({
       {/* Backdrop */}
       {open && (
         <div
-          className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-[2px]"
+          className="brand-modal-overlay fixed inset-0 z-[60]"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -60,16 +60,16 @@ export default function FavoritesPanel({
       {open && (
         <div
           dir="rtl"
-          className="brand-canvas fixed top-0 right-0 h-[100dvh] w-full max-w-sm z-[70] border-l-2 border-[#17402D] shadow-2xl flex flex-col slide-in-right"
+          className="brand-canvas fixed top-0 right-0 z-[70] flex h-[100dvh] w-full max-w-sm flex-col border-l-2 border-[#17402D] shadow-[8px_0_0_0_#17402D] slide-in-right"
           role="dialog"
           aria-modal="true"
           aria-labelledby="favorites-panel-title"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+          <div className="brand-dialog-header flex items-center justify-between px-5 py-4">
             <div className="flex items-center gap-2">
               <Heart className="h-5 w-5 fill-rose-500 text-rose-500" />
-              <span id="favorites-panel-title" className="font-bold text-[#111] text-lg">מועדפים</span>
+              <span id="favorites-panel-title" className="font-display text-3xl leading-none text-[#17402D]">מועדפים</span>
               {saved.length > 0 && (
                 <span className="text-xs font-semibold bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full">
                   {saved.length}
@@ -79,10 +79,10 @@ export default function FavoritesPanel({
             <button
               ref={closeButtonRef}
               onClick={onClose}
-              className="h-11 w-11 flex items-center justify-center rounded-full hover:bg-[#EFF5F0] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
+              className="brand-icon-button h-11 w-11"
               aria-label="סגור"
             >
-              <X className="h-5 w-5 text-slate-500" />
+              <X className="h-5 w-5" />
             </button>
           </div>
 
@@ -90,11 +90,11 @@ export default function FavoritesPanel({
           <div className="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)]">
             {saved.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-8">
-                <div className="h-16 w-16 rounded-full bg-rose-50 flex items-center justify-center">
+                <div className="brand-chip flex h-16 w-16 justify-center rounded-full bg-rose-50 p-0">
                   <Heart className="h-8 w-8 text-rose-300" />
                 </div>
                 <div>
-                  <p className="font-semibold text-[#222] mb-1">אין מועדפים עדיין</p>
+                  <p className="font-display mb-1 text-2xl text-[#17402D]">אין מועדפים עדיין</p>
                   <p className="text-sm text-[#888] leading-relaxed">
                     לחצו על סמל הלב בכרטיסיית עסק כדי לשמור אותו לכאן
                   </p>

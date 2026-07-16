@@ -211,11 +211,11 @@ export default function AdminBusinessesPage() {
 
       {/* Add Business Modal */}
       {showAddForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={() => setShowAddForm(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b border-[#E5E7EB]">
-              <h2 className="font-bold text-lg text-[#111]">הוספת עסק ידני</h2>
-              <button onClick={() => setShowAddForm(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-[#F3F4F6]">
+        <div className="brand-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowAddForm(false)}>
+          <div className="brand-dialog-surface max-h-[90vh] w-full max-w-xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="brand-dialog-header flex items-center justify-between p-5">
+              <h2 className="font-display text-3xl leading-none text-[#17402D]">הוספת עסק ידני</h2>
+              <button onClick={() => setShowAddForm(false)} className="brand-icon-button h-11 w-11">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -291,8 +291,7 @@ export default function AdminBusinessesPage() {
                 </div>
               </div>
               <button type="submit" disabled={addLoading || !form.name || !form.owner_id}
-                className="w-full h-12 rounded-xl text-white font-bold text-base disabled:opacity-50 transition-all"
-                style={{ background: "linear-gradient(135deg, #2D6A4F, #1F5038)" }}>
+                className="brand-button h-12 w-full rounded-xl text-base font-black disabled:opacity-50">
                 {addLoading ? "מוסיף..." : "הוסף עסק לאתר"}
               </button>
             </form>
@@ -302,11 +301,11 @@ export default function AdminBusinessesPage() {
 
       {/* Edit Modal */}
       {editBiz && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={() => setEditBiz(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b border-[#E5E7EB]">
-              <h2 className="font-bold text-lg text-[#111]">עריכת עסק — {editBiz.name}</h2>
-              <button onClick={() => setEditBiz(null)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-[#F3F4F6]">
+        <div className="brand-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setEditBiz(null)}>
+          <div className="brand-dialog-surface max-h-[90vh] w-full max-w-xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="brand-dialog-header flex items-center justify-between p-5">
+              <h2 className="font-display text-3xl leading-none text-[#17402D]">עריכת עסק — {editBiz.name}</h2>
+              <button onClick={() => setEditBiz(null)} className="brand-icon-button h-11 w-11">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -396,8 +395,7 @@ export default function AdminBusinessesPage() {
                 </label>
               </div>
               <button type="submit" disabled={editLoading}
-                className="w-full h-12 rounded-xl text-white font-bold text-base disabled:opacity-50"
-                style={{ background: "linear-gradient(135deg, #2D6A4F, #1F5038)" }}>
+                className="brand-button h-12 w-full rounded-xl text-base font-black disabled:opacity-50">
                 {editLoading ? "שומר..." : "שמור שינויים"}
               </button>
             </form>

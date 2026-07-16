@@ -21,3 +21,26 @@ test("declining optional cookies does not initialize Meta Pixel", async ({ page 
   expect(await page.evaluate(() => Boolean(window.fbq))).toBe(false);
   await expect(page.locator("#meta-pixel-script")).toHaveCount(0);
 });
+
+test("accepted business registration queues a standard conversion event", async ({ page }) => {
+  await page.route("https://connect.facebook.net/**", (route) => route.abort());
+  await page.addInitScript(() =>
+    localStorage.setItem("po-cookie-consent", "accepted")
+  );
+
+  await page.goto("/?registration=business_owner");
+
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const metaWindow = window as typeof window & {
+          fbq?: { queue?: unknown[][] };
+        };
+        return metaWindow.fbq?.queue?.some(
+          (command) =>
+            command[0] === "track" && command[1] === "CompleteRegistration"
+        );
+      })
+    )
+    .toBe(true);
+});

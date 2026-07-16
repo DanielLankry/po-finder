@@ -20,6 +20,7 @@ import PlacesSearchBar from "@/components/map/PlacesSearchBar";
 import type { LocationResult } from "@/components/map/PlacesSearchBar";
 import { BadgeCheck, Beef, CakeSlice, Coffee, Eye, Flower2, Gem, Leaf, MapPin, MessageCircle, Phone, Shirt, UtensilsCrossed, Wheat } from "lucide-react";
 import { getLatestOwnedBusiness } from "@/lib/db/owned-businesses";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 
 const CATEGORY_ICONS: Record<BusinessCategory, React.ComponentType<{ className?: string }>> = {
   coffee: Coffee,
@@ -141,6 +142,10 @@ export default function ProfilePage() {
         // Update local state so next save does UPDATE not INSERT
         const inserted = await getLatestOwnedBusiness(supabase);
         if (inserted) setBusiness(inserted);
+        trackMetaEvent("Lead", {
+          content_name: "business_draft",
+          content_category: form.category,
+        });
       }
       setSuccess(true);
     } catch (err: unknown) {

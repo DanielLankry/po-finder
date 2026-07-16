@@ -144,6 +144,7 @@ export default function MapPage() {
             onSearchChange={setBusinessSearch}
             error={loadError}
             onRetry={() => setLoadRequest((request) => request + 1)}
+            isPlatformEmpty={!loading && !loadError && businesses.length === 0}
           />
         </div>
 

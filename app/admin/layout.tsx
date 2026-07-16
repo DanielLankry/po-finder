@@ -90,7 +90,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]" onClick={() => setSidebarOpen(false)} aria-hidden="true" />
+        <div className="brand-modal-overlay md:hidden fixed inset-0 z-40" onClick={() => setSidebarOpen(false)} aria-hidden="true" />
       )}
 
       {/* Sidebar */}

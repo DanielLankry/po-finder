@@ -1,8 +1,9 @@
 "use client";
 
 import { useRef, useEffect, useCallback, useState } from "react";
+import Link from "next/link";
 import { NumberTicker } from "@/components/ui/number-ticker";
-import { CheckCircle2, ChevronRight, MapPin, RefreshCw, Star, Search, X } from "lucide-react";
+import { CheckCircle2, ChevronRight, MapPin, RefreshCw, Star, Search, Store, X } from "lucide-react";
 import type { BusinessWithSchedule } from "@/lib/types";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import { getBusinessAvailability } from "@/lib/utils/schedule";
@@ -40,6 +41,7 @@ interface BusinessListPanelProps {
   onSearchChange: (value: string) => void;
   error?: string | null;
   onRetry?: () => void;
+  isPlatformEmpty?: boolean;
 }
 
 /** Calculates straight-line distance for optional nearest-first sorting. */
@@ -87,6 +89,7 @@ export default function BusinessListPanel({
   onSearchChange,
   error,
   onRetry,
+  isPlatformEmpty = false,
 }: BusinessListPanelProps) {
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const detailScrollRef = useRef<HTMLDivElement>(null);
@@ -340,7 +343,9 @@ export default function BusinessListPanel({
                 <span>עסקים</span>
               </p>
             ) : (
-              <p className="font-display text-2xl text-[#17402D]">לא נמצאו עסקים זמינים כרגע</p>
+              <p className="font-display text-2xl text-[#17402D]">
+                {isPlatformEmpty ? "היו העסק הראשון בפלטפורמה החדשה שלנו" : "לא נמצאו עסקים זמינים כרגע"}
+              </p>
             )}
             {openCount > 0 && (
               <span className="inline-flex items-center gap-2 text-sm font-bold px-3.5 py-1.5 rounded-full bg-white text-[#1F5038] border-2 border-[#17402D] shadow-[2px_2px_0_0_#17402D]">
@@ -379,18 +384,36 @@ export default function BusinessListPanel({
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 px-8 text-center py-16">
-            <div className="h-14 w-14 rounded-full bg-[#EFF5F0] flex items-center justify-center">
-              <MapPin className="h-7 w-7 text-[#2D6A4F]" aria-hidden="true" />
+            <div className={`flex h-14 w-14 items-center justify-center rounded-full ${isPlatformEmpty ? "border-2 border-[#17402D] bg-[#FFF3B0] shadow-[3px_3px_0_0_#17402D]" : "bg-[#EFF5F0]"}`}>
+              {isPlatformEmpty ? (
+                <Store className="h-7 w-7 text-[#17402D]" aria-hidden="true" />
+              ) : (
+                <MapPin className="h-7 w-7 text-[#2D6A4F]" aria-hidden="true" />
+              )}
             </div>
             <div>
-              <p className="text-[#222222] font-semibold text-sm mb-1">
-                לא נמצאו עסקים זמינים כרגע
+              <p className={`${isPlatformEmpty ? "font-display text-3xl leading-none text-[#17402D]" : "text-sm font-semibold text-[#222222]"} mb-2`}>
+                {isPlatformEmpty ? "היו העסק הראשון בפלטפורמה החדשה שלנו" : "לא נמצאו עסקים זמינים כרגע"}
               </p>
               <p className="text-[#717171] text-xs leading-relaxed">
-                נסו לשנות את הפילטרים
-                <br />
-                או לחזור מאוחר יותר
+                {isPlatformEmpty ? (
+                  <>הצטרפו עכשיו והופיעו ראשונים במפה של פה קרוב.</>
+                ) : (
+                  <>
+                    נסו לשנות את הפילטרים
+                    <br />
+                    או לחזור מאוחר יותר
+                  </>
+                )}
               </p>
+              {isPlatformEmpty && (
+                <Link
+                  href="/pricing"
+                  className="brand-button mt-5 inline-flex min-h-11 items-center justify-center rounded-full px-6 text-sm font-black"
+                >
+                  פרסמו את העסק הראשון
+                </Link>
+              )}
             </div>
           </div>
         ) : (

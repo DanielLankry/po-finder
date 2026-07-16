@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import {
   disableMetaPixel,
   initMetaPixel,
+  trackMetaEvent,
   trackMetaPageView,
 } from "@/lib/meta-pixel";
 
@@ -31,6 +32,34 @@ function MetaPixelTracker() {
   useEffect(() => {
     if (pathname) trackMetaPageView();
   }, [pathname, searchParams]);
+
+  useEffect(() => {
+    const registrationRole = searchParams.get("registration");
+    if (
+      registrationRole !== "business_owner" &&
+      registrationRole !== "customer"
+    ) {
+      return;
+    }
+
+    const storageKey = `po-meta-complete-registration:${registrationRole}`;
+    function sendRegistration() {
+      if (sessionStorage.getItem(storageKey)) return;
+      if (
+        trackMetaEvent("CompleteRegistration", {
+          content_name: `${registrationRole}_account`,
+          status: true,
+        })
+      ) {
+        sessionStorage.setItem(storageKey, "1");
+      }
+    }
+
+    sendRegistration();
+    window.addEventListener("po-cookie-consent-accepted", sendRegistration);
+    return () =>
+      window.removeEventListener("po-cookie-consent-accepted", sendRegistration);
+  }, [searchParams]);
 
   return null;
 }

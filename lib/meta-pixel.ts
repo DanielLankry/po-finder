@@ -23,6 +23,13 @@ declare global {
 let initialized = false;
 let enabled = false;
 
+export type MetaStandardEvent =
+  | "CompleteRegistration"
+  | "InitiateCheckout"
+  | "Lead"
+  | "Purchase"
+  | "ViewContent";
+
 /** Creates Meta's command queue and loads the Pixel library asynchronously. */
 function loadMetaPixelLibrary(): MetaPixelFunction {
   if (window.fbq) return window.fbq;
@@ -80,6 +87,29 @@ export function trackMetaPageView() {
   ) {
     window.fbq?.("track", "PageView");
   }
+}
+
+/** Sends a consent-aware standard Meta event and reports whether it was queued. */
+export function trackMetaEvent(
+  eventName: MetaStandardEvent,
+  parameters: Record<string, unknown> = {},
+  options?: { eventID?: string }
+): boolean {
+  if (
+    !enabled ||
+    typeof window === "undefined" ||
+    localStorage.getItem(CONSENT_KEY) !== "accepted" ||
+    !window.fbq
+  ) {
+    return false;
+  }
+
+  if (options) {
+    window.fbq("track", eventName, parameters, options);
+  } else {
+    window.fbq("track", eventName, parameters);
+  }
+  return true;
 }
 
 /** Revokes Meta tracking and removes accessible first-party Meta cookies. */

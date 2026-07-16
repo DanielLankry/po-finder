@@ -6,6 +6,7 @@ import { AlertCircle, Calendar, Plus, Receipt } from "lucide-react";
 import DurationSelectorCard from "@/components/business/DurationSelectorCard";
 import { PLAN_CODES } from "@/lib/plans";
 import type { Plan, PlanCode } from "@/lib/plans";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 
 interface BusinessLite {
   id: string;
@@ -15,12 +16,21 @@ interface BusinessLite {
   is_verified: boolean;
 }
 
+export interface PurchaseEvent {
+  id: string;
+  planCode: string;
+  value: number;
+  currency: "ILS";
+}
+
 export default function BillingClient({
   plans,
   nowIso,
+  purchaseEvent,
 }: {
   plans: Plan[];
   nowIso: string;
+  purchaseEvent: PurchaseEvent | null;
 }) {
   const [businesses, setBusinesses] = useState<BusinessLite[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,6 +61,35 @@ export default function BillingClient({
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (!purchaseEvent) return;
+
+    const storageKey = `po-meta-purchase:${purchaseEvent.id}`;
+    function sendPurchase() {
+      if (localStorage.getItem(storageKey)) return;
+      if (
+        trackMetaEvent(
+          "Purchase",
+          {
+            value: purchaseEvent!.value,
+            currency: purchaseEvent!.currency,
+            content_ids: [purchaseEvent!.planCode],
+            content_type: "product",
+            num_items: 1,
+          },
+          { eventID: purchaseEvent!.id }
+        )
+      ) {
+        localStorage.setItem(storageKey, "1");
+      }
+    }
+
+    sendPurchase();
+    window.addEventListener("po-cookie-consent-accepted", sendPurchase);
+    return () =>
+      window.removeEventListener("po-cookie-consent-accepted", sendPurchase);
+  }, [purchaseEvent]);
+
   async function startCheckout(plan: Plan, businessId: string) {
     setCheckoutLoading(`${plan.code}:${businessId}`);
     try {
@@ -60,7 +99,7 @@ export default function BillingClient({
         body: JSON.stringify({ planCode: plan.code, businessId }),
       });
       const raw = await response.text();
-      let data: { ok?: boolean; url?: string; detail?: string; error?: string } = {};
+      let data: { ok?: boolean; url?: string; error?: string } = {};
       try {
         data = JSON.parse(raw);
       } catch {
@@ -72,14 +111,21 @@ export default function BillingClient({
           data.error === "business_not_verified"
             ? "העסק עדיין ממתין לאימות."
             : "לא הצלחנו להתחיל את התשלום.";
-        setError(`${knownMessage}${data.detail ? ` (${data.detail})` : ""}`);
+        setError(knownMessage);
         setCheckoutLoading(null);
         return;
       }
+      trackMetaEvent("InitiateCheckout", {
+        value: plan.price / 100,
+        currency: "ILS",
+        content_ids: [plan.code],
+        content_type: "product",
+        num_items: 1,
+      });
       window.location.assign(data.url);
     } catch (caught) {
-      const message = caught instanceof Error ? caught.message : String(caught);
-      setError(`לא הצלחנו להתחיל את התשלום. (${message})`);
+      console.error("Checkout start failed:", caught);
+      setError("לא הצלחנו להתחיל את התשלום. נסו שוב או פנו לתמיכה.");
       setCheckoutLoading(null);
     }
   }

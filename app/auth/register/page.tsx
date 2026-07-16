@@ -25,11 +25,13 @@ export default function RegisterPage() {
 function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // /pricing pushes new visitors here with ?redirectTo=/pricing so they land
-  // back on checkout the moment their session exists.
+  // Pricing sends new advertisers directly toward billing after registration.
   const rawRedirect = searchParams.get("redirectTo");
   const redirectTo = rawRedirect ? safeRedirectPath(rawRedirect, "/") : null;
-  const isPricingSignup = redirectTo?.startsWith("/pricing") ?? false;
+  const isPricingSignup =
+    redirectTo?.startsWith("/pricing") ||
+    redirectTo?.startsWith("/dashboard/billing") ||
+    false;
   const [role, setRole] = useState<UserRole>(() => (isPricingSignup ? "business_owner" : "customer"));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -46,14 +48,28 @@ function RegisterForm() {
     return role === "business_owner" ? "/dashboard" : "/";
   }
 
+  /** Builds the verified auth callback while preserving signup intent and role. */
+  function registrationCallbackUrl() {
+    const callback = new URL("/auth/callback", window.location.origin);
+    callback.searchParams.set("signup", "1");
+    callback.searchParams.set("role", role);
+    if (redirectTo) callback.searchParams.set("next", redirectTo);
+    return callback.toString();
+  }
+
+  /** Marks the first post-signup page so consent-aware conversion tracking can run. */
+  function registrationDestination() {
+    const destination = new URL(defaultRoute(), window.location.origin);
+    destination.searchParams.set("registration", role);
+    return `${destination.pathname}${destination.search}${destination.hash}`;
+  }
+
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const callbackUrl = redirectTo
-      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`
-      : `${window.location.origin}/auth/callback`;
+    const callbackUrl = registrationCallbackUrl();
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
@@ -70,7 +86,7 @@ function RegisterForm() {
 
     if (data.user && data.session) {
       await supabase.from("users").insert({ id: data.user.id, email, role, name });
-      router.push(defaultRoute());
+      router.push(registrationDestination());
       router.refresh();
     }
     setLoading(false);
@@ -78,12 +94,10 @@ function RegisterForm() {
 
   async function handleGoogleRegister() {
     setLoading(true);
-    const callbackUrl = redirectTo
-      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`
-      : `${window.location.origin}/auth/callback`;
+    const callbackUrl = registrationCallbackUrl();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: callbackUrl, queryParams: { role } },
+      options: { redirectTo: callbackUrl },
     });
     if (error) setError("שגיאה בהרשמה עם גוגל.");
     setLoading(false);
