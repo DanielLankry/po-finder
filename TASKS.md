@@ -115,7 +115,9 @@
 
 ### High Priority
 - [x] **Apply and verify launch privacy migration in production** - Applied `supabase/migrations/20260715144513_launch_privacy_hardening.sql`; verified the owner RPC exists, private business columns are not selectable by anonymous clients, and the photos bucket is private.
-- [ ] **Complete legal operator identity** - Fill the real legal name, registration/ID, postal address, and customer-service phone in `lib/site-config.ts` before accepting public payments.
+- [x] **Complete legal operator identity** - Added the registered legal name, registration/ID, public address, and customer-service phone to `lib/site-config.ts` — 2026-07-16.
+  - Files modified: `lib/site-config.ts`, `TASKS.md`
+  - Summary: Completed the public legal operator disclosure so the legal pages identify the registered operator and support contact.
 - [ ] **Reconcile pending HYP attempts** - Review the existing pending production payment and add provider transaction inquiry before treating lost browser returns as automatic.
 - [ ] **Replace `<img>` with `<Image>`** - Several components still use unoptimized `<img>` tags:
   - `components/business/BusinessCard.tsx`

@@ -4,10 +4,10 @@ export const SITE_URL = `https://${SITE_DOMAIN}`;
 
 export const BUSINESS_INFO = {
   businessDisplayName: BRAND_NAME,
-  legalBusinessName: null as string | null,
-  businessId: null as string | null,
-  address: null as string | null,
-  whatsappNumber: null as string | null,
+  legalBusinessName: "דניאל לונקרי",
+  businessId: "322303736",
+  address: "האירוס, מטולה",
+  whatsappNumber: "+972-58-424-2554",
   contactEmail: "support@pokarov.co.il",
   founderName: null as string | null,
 };
