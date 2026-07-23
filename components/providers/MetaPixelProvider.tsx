@@ -8,6 +8,7 @@ import {
   trackMetaEvent,
   trackMetaPageView,
 } from "@/lib/meta-pixel";
+import { trackPostHogEvent } from "@/lib/posthog";
 
 /** Synchronizes Meta Pixel with consent changes and App Router navigation. */
 function MetaPixelTracker() {
@@ -42,16 +43,25 @@ function MetaPixelTracker() {
       return;
     }
 
-    const storageKey = `po-meta-complete-registration:${registrationRole}`;
+    const metaStorageKey = `po-meta-complete-registration:${registrationRole}`;
+    const postHogStorageKey = `po-posthog-complete-registration:${registrationRole}`;
     function sendRegistration() {
-      if (sessionStorage.getItem(storageKey)) return;
       if (
+        !sessionStorage.getItem(metaStorageKey) &&
         trackMetaEvent("CompleteRegistration", {
           content_name: `${registrationRole}_account`,
           status: true,
         })
       ) {
-        sessionStorage.setItem(storageKey, "1");
+        sessionStorage.setItem(metaStorageKey, "1");
+      }
+      if (
+        !sessionStorage.getItem(postHogStorageKey) &&
+        trackPostHogEvent("registration_completed", {
+          role: registrationRole,
+        })
+      ) {
+        sessionStorage.setItem(postHogStorageKey, "1");
       }
     }
 

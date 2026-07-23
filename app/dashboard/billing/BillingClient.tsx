@@ -7,6 +7,7 @@ import DurationSelectorCard from "@/components/business/DurationSelectorCard";
 import { PLAN_CODES } from "@/lib/plans";
 import type { Plan, PlanCode } from "@/lib/plans";
 import { trackMetaEvent } from "@/lib/meta-pixel";
+import { trackPostHogEvent } from "@/lib/posthog";
 
 interface BusinessLite {
   id: string;
@@ -64,10 +65,11 @@ export default function BillingClient({
   useEffect(() => {
     if (!purchaseEvent) return;
 
-    const storageKey = `po-meta-purchase:${purchaseEvent.id}`;
+    const metaStorageKey = `po-meta-purchase:${purchaseEvent.id}`;
+    const postHogStorageKey = `po-posthog-purchase:${purchaseEvent.id}`;
     function sendPurchase() {
-      if (localStorage.getItem(storageKey)) return;
       if (
+        !localStorage.getItem(metaStorageKey) &&
         trackMetaEvent(
           "Purchase",
           {
@@ -80,7 +82,18 @@ export default function BillingClient({
           { eventID: purchaseEvent!.id }
         )
       ) {
-        localStorage.setItem(storageKey, "1");
+        localStorage.setItem(metaStorageKey, "1");
+      }
+      if (
+        !localStorage.getItem(postHogStorageKey) &&
+        trackPostHogEvent("listing_purchased", {
+          event_id: purchaseEvent!.id,
+          plan_code: purchaseEvent!.planCode,
+          value: purchaseEvent!.value,
+          currency: purchaseEvent!.currency,
+        })
+      ) {
+        localStorage.setItem(postHogStorageKey, "1");
       }
     }
 
@@ -121,6 +134,11 @@ export default function BillingClient({
         content_ids: [plan.code],
         content_type: "product",
         num_items: 1,
+      });
+      trackPostHogEvent("checkout_started", {
+        plan_code: plan.code,
+        value: plan.price / 100,
+        currency: "ILS",
       });
       window.location.assign(data.url);
     } catch (caught) {
