@@ -15,7 +15,7 @@ export const runtime = "nodejs";
 const checkoutSchema = z.object({
   planCode: z.enum(PLAN_CODES),
   businessId: z.string().uuid(),
-});
+}).strict();
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for") ?? "unknown";
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       kind: plan.kind,
       status: "pending",
     })
-    .select("id")
+    .select("id, amount_agorot")
     .single();
 
   if (insertErr || !attempt) {
@@ -101,6 +101,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { ok: false, error: "internal error" },
       { status: 200 }
+    );
+  }
+
+  // The database trigger snapshots the authoritative catalog price. Refuse to
+  // charge if a concurrent admin edit or unapplied migration made it differ
+  // from the price shown to the buyer.
+  if (
+    attempt.amount_agorot !== plan.price ||
+    !Number.isInteger(attempt.amount_agorot) ||
+    attempt.amount_agorot <= 0 ||
+    attempt.amount_agorot % 100 !== 0
+  ) {
+    console.error("[/api/payments/checkout] catalog price mismatch", {
+      attemptId: attempt.id,
+      requestedPlan: plan.code,
+    });
+    await admin
+      .from("payment_attempts")
+      .update({ status: "failed", completed_at: new Date().toISOString() })
+      .eq("id", attempt.id)
+      .eq("status", "pending");
+    return NextResponse.json(
+      { ok: false, error: "pricing configuration unavailable" },
+      { status: 409 }
     );
   }
 
@@ -122,7 +146,7 @@ export async function POST(req: NextRequest) {
     const lastName = nameParts.join(" ");
 
     const url = await createSignedCheckoutUrl({
-      amount: Math.round(plan.price / 100), // HYP expects whole shekels
+      amount: attempt.amount_agorot / 100, // HYP expects whole shekels
       // Plain hyphen — HYP's downstream description field uses windows-1255
       // and renders an em-dash as "?" on the hosted payment page.
       info: `${BRAND_NAME} - ${plan.label}`,

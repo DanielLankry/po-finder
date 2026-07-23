@@ -48,6 +48,7 @@ next-env.d.ts
 # local tooling / scratch
 .claude/
 .codex/
+.codex-release/
 .playwright-mcp/
 *.log
 tsc_output.txt

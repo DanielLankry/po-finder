@@ -87,8 +87,13 @@ function LoginForm() {
 
         {/* Big center text */}
         <div className="relative z-10 text-center max-w-sm">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="פה קרוב" className="h-20 w-auto mx-auto mb-6 drop-shadow-md" />
+          <Image
+            src="/logo.png"
+            alt="פה קרוב"
+            width={80}
+            height={80}
+            className="mx-auto mb-6 h-20 w-auto drop-shadow-md"
+          />
           <h2 className="font-display text-6xl text-[#17402D] mb-2 leading-none">
             הפלטפורמה
           </h2>
@@ -120,8 +125,7 @@ function LoginForm() {
           {/* Mobile logo */}
           <div className="flex justify-center mb-8 lg:hidden">
             <Link href="/">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="פה קרוב" className="h-14 w-auto" />
+              <Image src="/logo.png" alt="פה קרוב" width={56} height={56} className="h-14 w-auto" />
             </Link>
           </div>
 
