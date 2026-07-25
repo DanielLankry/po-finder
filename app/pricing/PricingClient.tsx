@@ -3,18 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, MessageCircle, Zap } from "lucide-react";
+import { Mail, Zap } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import DurationSelectorCard from "@/components/business/DurationSelectorCard";
 import { createClient } from "@/lib/supabase/client";
-import {
-  BUSINESS_INFO,
-  VENDOR_FAQS,
-  getWhatsAppHref,
-} from "@/lib/site-config";
+import { BUSINESS_INFO, VENDOR_FAQS } from "@/lib/site-config";
 import type { Plan } from "@/lib/plans";
-
-const whatsappHref = getWhatsAppHref();
 
 export default function PricingClient({
   plans,
@@ -110,16 +104,6 @@ export default function PricingClient({
               </p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
-              {whatsappHref ? (
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 font-semibold text-white hover:bg-[#1EB856]"
-                >
-                  <MessageCircle className="h-4 w-4" /> WhatsApp
-                </a>
-              ) : null}
               <a
                 href={`mailto:${BUSINESS_INFO.contactEmail}`}
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-stone-300 bg-white px-5 font-semibold text-stone-700 hover:bg-stone-50"
