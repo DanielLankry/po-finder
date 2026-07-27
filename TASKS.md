@@ -1,11 +1,16 @@
 # Po-Finder (פה קרוב) - Tasks
 
 > Small business discovery app (Next.js 16 + Supabase + Google Maps)
-> Last updated: 2026-07-16
+> Last updated: 2026-07-27
 
 ---
 
 ## DONE
+
+### Nightly Quality
+- [x] Patch production dependencies and isolate safe Playwright teardown — 2026-07-27
+  - Files modified: `package.json`, `package-lock.json`, `tests/destructive/global-teardown.ts`, `tests/public/pricing-v2.spec.ts`, `TASKS.md`, `AGENTS.md`
+  - Summary: Upgraded Next.js and vulnerable transitive packages, aligned pricing assertions with the enforced launch ladder, and prevented public/auth runs from loading destructive Supabase helpers.
 
 ### Authentication & Users
 - [x] Supabase Auth integration (email/password + Google OAuth)
