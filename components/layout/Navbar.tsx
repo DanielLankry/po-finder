@@ -161,41 +161,53 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
         aria-label="ניווט ראשי"
         dir="rtl"
       >
-        {/* Logo + tagline — RIGHT in RTL (start) */}
-        <div className="flex items-center gap-3 flex-shrink-0">
+        {/* Logo + rotating audience — RIGHT in RTL (start) */}
+        <div className="flex flex-shrink-0 items-center gap-2">
           <Link
             href="/"
-            className="flex items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
+            className="flex min-h-11 min-w-11 items-center rounded-xl p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
             aria-label="פה קרוב — דף הבית"
           >
-            <Image src="/logo.png" alt="פה קרוב" width={52} height={52} className="rounded-xl w-10 h-10 sm:w-[52px] sm:h-[52px]" />
-            <span className="hidden text-[17px] font-black text-[#17402D] min-[360px]:inline min-[560px]:hidden">
-              פה קרוב
-            </span>
+            <Image src="/logo.png" alt="פה קרוב" width={52} height={52} priority className="rounded-xl w-10 h-10 sm:w-[52px] sm:h-[52px]" />
           </Link>
-          {/* Typewriter tagline */}
-          <div className="hidden min-[560px]:flex items-center border-r border-[#E5E7EB] pr-3 overflow-hidden w-[130px] sm:w-[175px] md:w-[295px]">
-            <Typewriter
-              text={[
-                "לעסקים קטנים",
-                "לדוכנים",
-                "לעגלות קפה",
-                "ליוצרים",
-                "לשווקים ניידים",
-                "לבעלי קיוסקים",
-                "לאופים ביתיים",
-                "למוכרי פרחים",
-                "לסוחרי וינטג׳",
-                "לקייטרינג",
-                "לחקלאים",
-                "לישראלים",
-              ]}
-              speed={60}
-              deleteSpeed={35}
-              waitTime={2200}
-              className="font-display text-[#2D6A4F] font-bold text-[20px] sm:text-[24px] md:text-[30px] whitespace-nowrap"
-              wordColors={{ "לישראלים": "text-[#C4552D]" }}
-            />
+          <div
+            className="flex h-11 w-[86px] items-center overflow-hidden border-r-2 border-[#17402D]/15 pr-2 min-[360px]:w-[100px] min-[560px]:w-[130px] sm:w-[160px] md:w-[190px] lg:w-[260px] xl:w-[295px]"
+            data-testid="navbar-changing-text"
+          >
+            <span className="sr-only">פה קרוב לעסקים קטנים, דוכנים, עגלות קפה ויוצרים</span>
+            <div
+              className="flex min-w-0 items-center overflow-hidden"
+              data-testid="navbar-changing-text-visual"
+              aria-hidden="true"
+            >
+              <span className="hidden whitespace-nowrap font-display text-[clamp(0.875rem,4.4vw,1.875rem)] font-bold leading-none text-[#2D6A4F] motion-reduce:inline">
+                לעסקים קטנים
+              </span>
+              <div className="min-w-0 overflow-hidden motion-reduce:hidden">
+                <Typewriter
+                  text={[
+                    "לעסקים קטנים",
+                    "לדוכנים",
+                    "לעגלות קפה",
+                    "ליוצרים",
+                    "לשווקים ניידים",
+                    "לבעלי קיוסקים",
+                    "לאופים ביתיים",
+                    "למוכרי פרחים",
+                    "לסוחרי וינטג׳",
+                    "לקייטרינג",
+                    "לחקלאים",
+                    "לישראלים",
+                  ]}
+                  speed={60}
+                  startWithFullText
+                  deleteSpeed={35}
+                  waitTime={2200}
+                  className="whitespace-nowrap font-display text-[clamp(0.875rem,4.4vw,1.875rem)] font-bold leading-none text-[#2D6A4F]"
+                  wordColors={{ "לישראלים": "text-[#C4552D]" }}
+                />
+              </div>
+            </div>
           </div>
         </div>
 

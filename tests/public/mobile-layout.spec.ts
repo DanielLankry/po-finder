@@ -10,46 +10,65 @@ const MOBILE_ROUTES = [
   "/auth/register",
 ];
 
+const CUSTOMER_FLOW_VIEWPORTS = [320, 390, 430] as const;
+
 test.describe("mobile layout regression coverage", () => {
   test.beforeEach(async ({ page }, testInfo) => {
     test.skip((testInfo.project.use.viewport?.width ?? 1440) >= 1440, "mobile-only layout check");
     await page.addInitScript(() => localStorage.setItem("po-cookie-consent", "accepted"));
   });
 
-  test("navbar is balanced and contained", async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 700 });
-    await page.goto("/");
+  for (const width of CUSTOMER_FLOW_VIEWPORTS) {
+    test(`navbar keeps logo-only branding and rotating text at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 860 });
+      await page.goto("/");
 
-    const header = page.locator("header").first();
-    const nav = page.getByRole("navigation", { name: "ניווט ראשי" });
-    const logo = page.getByRole("link", { name: /פה קרוב — דף הבית/ });
-    const actions = page.getByTestId("navbar-actions");
+      const header = page.locator("header").first();
+      const nav = page.getByRole("navigation", { name: "ניווט ראשי" });
+      const logo = page.getByRole("link", { name: /פה קרוב — דף הבית/ });
+      const actions = page.getByTestId("navbar-actions");
+      const changingText = page.getByTestId("navbar-changing-text");
 
-    await expect(header).toBeVisible();
-    await expect(nav).toBeVisible();
-    await expect(page.getByRole("button", { name: "פתיחת חיפוש" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "מועדפים" })).toBeVisible();
-    const menuButton = page.getByRole("button", { name: "פתיחת תפריט", exact: true });
-    await expect(menuButton).toBeVisible();
-    await expect(page.getByRole("button", { name: "פתיחת תפריט נגישות" })).toBeHidden();
+      await expect(header).toBeVisible();
+      await expect(nav).toBeVisible();
+      await expect(logo.getByRole("img", { name: "פה קרוב" })).toBeVisible();
+      await expect(logo.locator("span")).toHaveCount(0);
+      await expect(changingText).toBeVisible();
+      await expect(page.getByTestId("navbar-changing-text-visual")).toContainText("ל");
+      await expect(page.getByRole("button", { name: "פתיחת חיפוש" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "מועדפים" })).toBeVisible();
+      const menuButton = page.getByRole("button", { name: "פתיחת תפריט", exact: true });
+      await expect(menuButton).toBeVisible();
+      await expect(page.getByRole("button", { name: "פתיחת תפריט נגישות" })).toBeHidden();
 
-    const [headerBox, logoBox, actionsBox] = await Promise.all([
-      header.boundingBox(),
-      logo.boundingBox(),
-      actions.boundingBox(),
-    ]);
+      const [headerBox, logoBox, actionsBox, changingTextBox] = await Promise.all([
+        header.boundingBox(),
+        logo.boundingBox(),
+        actions.boundingBox(),
+        changingText.boundingBox(),
+      ]);
 
-    expect(headerBox?.height).toBeLessThanOrEqual(74);
-    expect(actionsBox!.x).toBeGreaterThanOrEqual(0);
-    expect(logoBox!.x + logoBox!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
-    expect(actionsBox!.x + actionsBox!.width).toBeLessThan(logoBox!.x);
+      expect(headerBox?.height).toBeLessThanOrEqual(74);
+      expect(actionsBox!.x).toBeGreaterThanOrEqual(0);
+      expect(changingTextBox!.x).toBeGreaterThanOrEqual(0);
+      expect(changingTextBox!.x + changingTextBox!.width).toBeLessThanOrEqual(width);
+      expect(logoBox!.x + logoBox!.width).toBeLessThanOrEqual(width);
 
-    await menuButton.click();
-    await expect(page.getByRole("link", { name: "נגישות", exact: true })).toBeVisible();
-  });
+      const dimensions = await page.evaluate(() => ({
+        documentWidth: document.documentElement.scrollWidth,
+        viewportWidth: window.innerWidth,
+      }));
+      expect(dimensions.documentWidth).toBeLessThanOrEqual(dimensions.viewportWidth);
 
-  for (const route of MOBILE_ROUTES) {
-    test(`${route} stays inside the mobile viewport`, async ({ page }) => {
+      await menuButton.click();
+      await expect(page.getByRole("link", { name: "נגישות", exact: true })).toBeVisible();
+    });
+  }
+
+  for (const width of CUSTOMER_FLOW_VIEWPORTS) {
+    for (const route of MOBILE_ROUTES) {
+      test(`${route} stays inside the ${width}px viewport`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 860 });
       const response = await page.goto(route, { waitUntil: "domcontentloaded" });
       expect(response?.status()).toBeLessThan(400);
       await expect(page.locator("body")).toBeVisible();
@@ -68,7 +87,8 @@ test.describe("mobile layout regression coverage", () => {
         expect(panelBox?.x).toBeGreaterThanOrEqual(0);
         expect(panelBox!.x + panelBox!.width).toBeLessThanOrEqual(dimensions.viewportWidth);
       }
-    });
+      });
+    }
   }
 
   test("a single business photo fills its mobile gallery", async ({ page }) => {
