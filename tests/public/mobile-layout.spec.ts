@@ -50,6 +50,7 @@ test.describe("mobile layout regression coverage", () => {
 
       expect(headerBox?.height).toBeLessThanOrEqual(74);
       expect(actionsBox!.x).toBeGreaterThanOrEqual(0);
+      expect(actionsBox!.height).toBeGreaterThanOrEqual(44);
       expect(changingTextBox!.x).toBeGreaterThanOrEqual(0);
       expect(changingTextBox!.x + changingTextBox!.width).toBeLessThanOrEqual(width);
       expect(logoBox!.x + logoBox!.width).toBeLessThanOrEqual(width);

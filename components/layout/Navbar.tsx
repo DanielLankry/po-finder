@@ -255,7 +255,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
         <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-3" data-testid="navbar-actions">
           {/* Small-phone search icon. Tablet and desktop use the real search bar above. */}
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#17402D]/20 bg-white text-[#17402D] shadow-[2px_2px_0_0_rgba(23,64,45,0.18)] transition-all hover:-translate-y-0.5 hover:border-[#17402D] hover:bg-[#EFF5F0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] md:hidden sm:h-11 sm:w-11"
+            className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#17402D]/20 bg-white text-[#17402D] shadow-[2px_2px_0_0_rgba(23,64,45,0.18)] transition-all hover:-translate-y-0.5 hover:border-[#17402D] hover:bg-[#EFF5F0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] md:hidden"
             onClick={() => setMobileSearchOpen(true)}
             aria-label="פתיחת חיפוש"
           >
@@ -266,7 +266,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
           {onFavoritesOpen && (
             <button
               onClick={onFavoritesOpen}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#17402D]/20 bg-white text-[#17402D] shadow-[2px_2px_0_0_rgba(23,64,45,0.18)] transition-all hover:-translate-y-0.5 hover:border-rose-400 hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 sm:h-11 sm:w-11"
+              className="relative flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#17402D]/20 bg-white text-[#17402D] shadow-[2px_2px_0_0_rgba(23,64,45,0.18)] transition-all hover:-translate-y-0.5 hover:border-rose-400 hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
               aria-label="מועדפים"
             >
               <Heart className={`h-[18px] w-[18px] transition-colors duration-200 ${favCount > 0 ? "fill-rose-500 text-rose-500" : "text-[#17402D]"}`} />
@@ -346,7 +346,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
 
           {/* Mobile hamburger */}
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#17402D]/20 bg-white text-[#17402D] shadow-[2px_2px_0_0_rgba(23,64,45,0.18)] transition-all hover:-translate-y-0.5 hover:border-[#17402D] hover:bg-[#EFF5F0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] min-[1440px]:hidden sm:h-11 sm:w-11"
+            className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#17402D]/20 bg-white text-[#17402D] shadow-[2px_2px_0_0_rgba(23,64,45,0.18)] transition-all hover:-translate-y-0.5 hover:border-[#17402D] hover:bg-[#EFF5F0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] min-[1440px]:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? "סגירת תפריט" : "פתיחת תפריט"}
             aria-expanded={mobileMenuOpen}
