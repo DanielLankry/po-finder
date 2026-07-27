@@ -7,6 +7,8 @@ interface TypewriterProps {
   text: string | string[]
   speed?: number
   initialDelay?: number
+  /** Render the first phrase immediately, then continue the normal loop. */
+  startWithFullText?: boolean
   waitTime?: number
   deleteSpeed?: number
   loop?: boolean
@@ -29,6 +31,7 @@ const Typewriter = ({
   text,
   speed = 50,
   initialDelay = 0,
+  startWithFullText = false,
   waitTime = 2000,
   deleteSpeed = 30,
   loop = true,
@@ -52,12 +55,12 @@ const Typewriter = ({
     },
   },
 }: TypewriterProps) => {
-  const [displayText, setDisplayText] = useState("")
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const texts = useMemo(() => Array.isArray(text) ? text : [text], [text])
+  const initialText = startWithFullText ? (texts[0] ?? "") : ""
+  const [displayText, setDisplayText] = useState(initialText)
+  const [currentIndex, setCurrentIndex] = useState(initialText.length)
   const [isDeleting, setIsDeleting] = useState(false)
   const [currentTextIndex, setCurrentTextIndex] = useState(0)
-
-  const texts = useMemo(() => Array.isArray(text) ? text : [text], [text])
 
   useEffect(() => {
     let timeout: NodeJS.Timeout

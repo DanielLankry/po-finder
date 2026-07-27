@@ -8,6 +8,10 @@ test.describe("duration pricing", () => {
     await expect(page.getByRole("slider", { name: "משך הפרסום" })).toHaveValue("9");
     await expect(page.getByRole("button", { name: /יום אחד.*₪20/ })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /שבוע אחד.*₪40/ })).toHaveCount(0);
+    const scaleLabels = page.getByTestId("duration-scale-labels");
+    await expect(scaleLabels).toContainText(/יום|ימים/);
+    await expect(scaleLabels).toContainText("שבוע");
+    await expect(scaleLabels.locator(".rounded-full")).toHaveCount(0);
     await expect(page.getByText("בתשלום חד־פעמי").first()).toBeVisible();
     await expect(page.getByText("ללא חידוש אוטומטי").first()).toBeVisible();
     await expect(page.getByText(/קידום ל־30|קידום ל-30|מסלול השקה/)).toHaveCount(0);
@@ -77,5 +81,17 @@ test.describe("duration pricing", () => {
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth
     );
     expect(overflow).toBe(false);
+  });
+
+  test("pricing CTA preserves the selected plan for business-owner registration", async ({ page }) => {
+    await page.goto("/pricing");
+    await page.getByRole("button", { name: "פרסום העסק ל־6 חודשים" }).click();
+    await expect(page).toHaveURL(
+      /\/auth\/register\?redirectTo=%2Fdashboard%2Fbilling%3Fplan%3Dlisting_6m$/
+    );
+    await expect(page.getByRole("button", { name: /בעל עסק/ })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
   });
 });
