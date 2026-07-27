@@ -72,6 +72,9 @@
 - [x] Repair and regression-test the mobile header and content overlays — 2026-07-16
   - Files modified: `components/business/PhotoGrid.tsx`, `components/filters/FilterDrawer.tsx`, `components/layout/AccessibilityWidget.tsx`, `components/layout/Navbar.tsx`, `components/map/BusinessPopup.tsx`, `tests/public/mobile-layout.spec.ts`, `TASKS.md`, `AGENTS.md`
   - Summary: Balanced the compact mobile header, removed redundant or inactive actions, moved accessibility into the mobile menu to prevent content overlap, made single-photo galleries full-width, completed sheet descriptions, and added 320px-plus layout regression coverage.
+- [x] Restore mobile navbar touch targets in production — 2026-07-27
+  - Files modified: `components/layout/Navbar.tsx`, `tests/public/mobile-layout.spec.ts`, `TASKS.md`, `AGENTS.md`
+  - Summary: Kept search, favorites, and menu controls at 44×44 px on the smallest screens and added regression coverage so compact mobile layouts remain accessible without overflowing.
 
 ### Static Pages
 - [x] Privacy policy page
