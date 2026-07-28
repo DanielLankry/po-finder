@@ -51,6 +51,15 @@ test.describe("duration pricing", () => {
     expect(overflow).toBe(false);
   });
 
+  test("pricing contact panel offers email without WhatsApp", async ({ page }) => {
+    await page.goto("/pricing");
+    await expect(page.getByRole("link", { name: "support@pokarov.co.il" })).toHaveAttribute(
+      "href",
+      "mailto:support@pokarov.co.il"
+    );
+    await expect(page.getByRole("link", { name: "WhatsApp" })).toHaveCount(0);
+  });
+
   test("checkout rejects retired boost and legacy plan bodies", async ({ request }) => {
     const boost = await request.post("/api/payments/checkout", {
       data: { planCode: "boost_30", businessId: "00000000-0000-0000-0000-000000000000" },
