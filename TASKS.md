@@ -84,6 +84,9 @@
 - [x] Dynamic SEO metadata for business pages
 
 ### Launch Readiness
+- [x] Restore the email-only pricing contact panel — 2026-07-28
+  - Files modified: `app/pricing/PricingClient.tsx`, `tests/public/pricing-v2.spec.ts`, `TASKS.md`
+  - Summary: Removed the unintended WhatsApp action from pricing and added regression coverage so pre-payment contact stays email-only.
 - [x] Convert the live site from QA data to a customer-ready launch funnel — 2026-07-16
   - Files modified: `app/MapPage.tsx`, `app/api/contact/route.ts`, `app/api/payments/checkout/route.ts`, `app/api/payments/return/route.ts`, `app/auth/callback/route.ts`, `app/auth/register/page.tsx`, `app/dashboard/billing/BillingClient.tsx`, `app/dashboard/billing/page.tsx`, `app/dashboard/profile/page.tsx`, `app/privacy/page.tsx`, `app/refund/page.tsx`, `app/terms/page.tsx`, `components/business/BusinessListPanel.tsx`, `components/providers/MetaPixelProvider.tsx`, `lib/meta-pixel.ts`, `tests/auth/auth-pages.spec.ts`, `tests/public/meta-pixel-consent.spec.ts`, `tests/public/mobile-layout.spec.ts`, `tests/utils/supabase-admin.ts`, `TASKS.md`, `AGENTS.md`
   - Summary: Removed every test business from production while preserving payment history, added a Hebrew first-business launch state, repaired pricing and Google signup roles, added consent-aware Meta registration/lead/checkout/purchase events, stopped customer-facing payment detail leaks, made contact delivery truthful, updated legal dates, and hard-blocked destructive tests from the live project.
