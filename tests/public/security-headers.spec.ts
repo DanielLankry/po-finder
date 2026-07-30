@@ -10,9 +10,13 @@ const expectedHeaders = {
 };
 
 test("responses include the baseline browser security headers", async ({ request }) => {
-  for (const route of ["/", "/auth/login", "/api/account/status"]) {
-    const response = await request.get(route);
+  const homepage = await request.get("/");
+  const protectedRedirect = await request.get("/admin", { maxRedirects: 0 });
+  const jsonApi = await request.get("/api/account/status");
 
-    expect(response.headers()).toMatchObject(expectedHeaders);
-  }
+  expect(homepage.headers()).toMatchObject(expectedHeaders);
+  expect(protectedRedirect.status()).toBeGreaterThanOrEqual(300);
+  expect(protectedRedirect.status()).toBeLessThan(400);
+  expect(protectedRedirect.headers()).toMatchObject(expectedHeaders);
+  expect(jsonApi.headers()).toMatchObject(expectedHeaders);
 });
