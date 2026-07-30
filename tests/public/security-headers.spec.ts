@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const expectedHeaders = {
   "content-security-policy": "frame-ancestors 'none'",
-  "permissions-policy": "camera=(), microphone=(), geolocation=()",
+  "permissions-policy": "camera=(), microphone=(), geolocation=(self)",
   "referrer-policy": "strict-origin-when-cross-origin",
   "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
   "x-content-type-options": "nosniff",
