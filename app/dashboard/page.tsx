@@ -1,43 +1,13 @@
 import Link from "next/link";
-import { Plus, Clock, Star, Camera, MapPin, MessageCircle, Eye, Phone, Clock3, Hand } from "lucide-react";
+import { Plus, Clock, Star, Camera, MapPin, MessageCircle, Eye, Phone, Hand } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessesByOwner } from "@/lib/db/businesses";
 import { getTodaySchedule } from "@/lib/db/schedules";
 import { isOpenNow } from "@/lib/utils/schedule";
 import type { Business } from "@/lib/types";
 import BusinessSelector from "@/components/dashboard/BusinessSelector";
+import { OwnerLifecycleBanner } from "@/components/dashboard/OwnerLifecycleStatus";
 import ShareButtons from "@/components/business/ShareButtons";
-
-function ExpiryBadge({ expiresAt }: { expiresAt: string | null }) {
-  if (!expiresAt) return null;
-  const exp = new Date(expiresAt);
-  const now = new Date();
-  const daysLeft = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-  const formatted = exp.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" });
-
-  if (daysLeft <= 0) {
-    return (
-      <Link
-        href="/pricing"
-        className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border-2 border-red-700 bg-red-100 text-red-700 shadow-[2px_2px_0_0_#B91C1C] hover:bg-red-200 transition-colors"
-      >
-        תוקף פג — חדשו עכשיו
-      </Link>
-    );
-  }
-  if (daysLeft <= 7) {
-    return (
-      <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border-2 border-amber-700 bg-amber-100 text-amber-700 shadow-[2px_2px_0_0_#B45309]">
-        פעיל עד {formatted}
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border-2 border-[#2D6A4F] bg-emerald-100 text-[#2D6A4F] shadow-[2px_2px_0_0_#2D6A4F]">
-      פעיל עד {formatted}
-    </span>
-  );
-}
 
 export default async function DashboardPage({
   searchParams,
@@ -93,6 +63,7 @@ async function DashboardContent({
 
   const schedule = await getTodaySchedule(business.id);
   const isOpen = isOpenNow(schedule);
+  const nowIso = new Date().toISOString();
 
   // Analytics: last 30 days
   const supabase = await createClient();
@@ -120,7 +91,6 @@ async function DashboardContent({
           <h1 className="font-display text-4xl text-[#17402D]">
             שלום! <Hand className="inline-block h-7 w-7 text-[#C4552D]" aria-hidden="true" />
           </h1>
-          <ExpiryBadge expiresAt={(business as unknown as Record<string, unknown>).expires_at as string | null} />
         </div>
         <p className="relative text-stone-600 text-sm mt-1">
           ברוכים הבאים ללוח הבקרה של{" "}
@@ -128,31 +98,7 @@ async function DashboardContent({
         </p>
       </div>
 
-      {/* Verification and paid visibility are separate lifecycle states. */}
-      {!business.is_verified && (
-        <div className="flex items-start gap-3 bg-amber-50 border-2 border-amber-700 rounded-[18px] p-5 shadow-[3px_3px_0_0_#B45309]">
-          <div className="h-10 w-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-            <Clock3 className="h-5 w-5 text-amber-600" aria-hidden="true" />
-          </div>
-          <div>
-            <p className="font-semibold text-amber-900 text-sm">הטיוטה ממתינה לאימות</p>
-            <p className="text-amber-700 text-xs mt-1 leading-relaxed">
-              פרטי העסק נשמרו באופן פרטי. הצוות יאמת את העסק, ואז יהיה אפשר לבחור את משך ההופעה ולהעלות אותו לאוויר.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {business.is_verified && !business.is_active && (
-        <div className="brand-panel-orange flex items-start gap-3 p-5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FFF3B0]"><Clock3 className="h-5 w-5 text-[#8A3618]" /></div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-stone-950">העסק מאומת, אבל לא מופיע לציבור</p>
-            <p className="mt-1 text-xs leading-relaxed text-stone-600">בחרו מיום אחד ועד 12 חודשים ושלמו פעם אחת עבור זמן ההופעה.</p>
-            <Link href="/dashboard/billing" className="mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#8A3618] px-4 py-2 text-xs font-bold text-white">לבחירת משך הופעה</Link>
-          </div>
-        </div>
-      )}
+      <OwnerLifecycleBanner business={business} nowIso={nowIso} />
 
       {/* Today's status card */}
       <div
