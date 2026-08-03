@@ -160,4 +160,3 @@ This table preserves the time and counting-method difference: npm's `metadata.vu
 - Mobile performance: **FAIL**
 - Migration reproducibility: **FAIL / release-blocking for future DB work**
 - Backup/recovery proof: **UNKNOWN / unverified**
-

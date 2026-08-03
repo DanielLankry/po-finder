@@ -240,4 +240,3 @@
 - `reports/DAN-65/production-probes-reviewed.csv` — מלאי ציבורי וחשיפה במפת האתר (1.8.2026).
 - `source/lib/plans.ts`, `source/lib/site-config.ts`, `source/app/vendors/page.tsx` — עובדות המוצר והקופי הנוכחי.
 
-
