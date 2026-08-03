@@ -2,8 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertCircle, Calendar, Plus, Receipt } from "lucide-react";
+import { Calendar, Plus, Receipt } from "lucide-react";
 import DurationSelectorCard from "@/components/business/DurationSelectorCard";
+import {
+  OwnerLifecycleBanner,
+  OwnerLifecycleLoading,
+  OwnerLifecycleNotice,
+  OwnerLifecyclePills,
+} from "@/components/dashboard/OwnerLifecycleStatus";
 import { PLAN_CODES } from "@/lib/plans";
 import type { Plan, PlanCode } from "@/lib/plans";
 import { trackMetaEvent } from "@/lib/meta-pixel";
@@ -14,6 +20,7 @@ interface BusinessLite {
   name: string;
   expires_at: string | null;
   is_active: boolean;
+  is_legacy_public?: boolean | null;
   is_verified: boolean;
 }
 
@@ -160,14 +167,14 @@ export default function BillingClient({
       </div>
 
       {paymentState === "success" ? (
-        <Notice tone="success" text="התשלום נקלט והזמן נוסף לעסק." />
+        <OwnerLifecycleNotice tone="success" text="התשלום נקלט והזמן נוסף לעסק." />
       ) : paymentState === "processing" ? (
-        <Notice
+        <OwnerLifecycleNotice
           tone="warning"
           text="התשלום התקבל ונמצא בבדיקה. לא צריך לשלם שוב — התמיכה קיבלה התראה."
         />
       ) : null}
-      {error ? <Notice tone="error" text={error} /> : null}
+      {error ? <OwnerLifecycleNotice tone="error" text={error} /> : null}
 
       <section className="brand-panel overflow-hidden">
         <div className="flex items-center gap-2 border-b-2 border-[#17402D] bg-[#FFF3B0] px-6 py-4">
@@ -175,7 +182,7 @@ export default function BillingClient({
           <h2 className="font-display text-2xl font-bold text-[#17402D]">העסק שלי</h2>
         </div>
         {loading ? (
-          <div className="p-10 text-center text-sm text-stone-400">טוען...</div>
+          <OwnerLifecycleLoading />
         ) : businesses.length === 0 ? (
           <div className="p-10 text-center">
             <p className="text-sm text-stone-600">לפני תשלום יוצרים טיוטת עסק בחינם.</p>
@@ -189,34 +196,18 @@ export default function BillingClient({
         ) : (
           <div className="divide-y-2 divide-stone-200">
             {businesses.map((business) => {
-              const active =
-                business.is_active &&
-                !!business.expires_at &&
-                Date.parse(business.expires_at) > Date.parse(nowIso);
               return (
                 <article key={business.id} className="space-y-5 p-5 md:p-7">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <h3 className="font-display text-3xl text-stone-950">{business.name}</h3>
-                      <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold">
-                        <StatusPill
-                          active={business.is_verified}
-                          activeText="מאומת"
-                          inactiveText="ממתין לאימות"
-                        />
-                        <StatusPill
-                          active={active}
-                          activeText={`מופיע עד ${formatDate(business.expires_at)}`}
-                          inactiveText="לא מופיע לציבור"
-                        />
+                      <div className="mt-2">
+                        <OwnerLifecyclePills business={business} nowIso={nowIso} />
                       </div>
                     </div>
-                    {!business.is_verified ? (
-                      <p className="max-w-sm rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-900">
-                        הטיוטה נשמרה. אחרי שהצוות יאמת את העסק אפשר יהיה לבחור זמן ולשלם.
-                      </p>
-                    ) : null}
                   </div>
+
+                  <OwnerLifecycleBanner business={business} nowIso={nowIso} compact />
 
                   <DurationSelectorCard
                     plans={plans}
@@ -257,60 +248,4 @@ export default function BillingClient({
       </section>
     </div>
   );
-}
-
-function StatusPill({
-  active,
-  activeText,
-  inactiveText,
-}: {
-  active: boolean;
-  activeText: string;
-  inactiveText: string;
-}) {
-  return (
-    <span
-      className={`rounded-full px-3 py-1.5 ${
-        active
-          ? "bg-emerald-100 text-emerald-800"
-          : "bg-stone-200 text-stone-700"
-      }`}
-    >
-      {active ? activeText : inactiveText}
-    </span>
-  );
-}
-
-function Notice({
-  tone,
-  text,
-}: {
-  tone: "success" | "warning" | "error";
-  text: string;
-}) {
-  const classes =
-    tone === "success"
-      ? "border-emerald-300 bg-emerald-50 text-emerald-900"
-      : tone === "warning"
-        ? "border-amber-300 bg-amber-50 text-amber-900"
-        : "border-red-300 bg-red-50 text-red-900";
-  return (
-    <div
-      className={`flex items-start gap-3 rounded-xl border p-4 ${classes}`}
-      role={tone === "error" ? "alert" : "status"}
-      aria-live={tone === "error" ? "assertive" : "polite"}
-    >
-      <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-      <p className="text-sm">{text}</p>
-    </div>
-  );
-}
-
-function formatDate(value: string | null): string {
-  if (!value) return "—";
-  return new Date(value).toLocaleDateString("he-IL", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
 }
