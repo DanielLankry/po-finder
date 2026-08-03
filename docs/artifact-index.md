@@ -6,6 +6,8 @@ This document maps Paperclip issue review artifacts that were mirrored into this
 
 The live Paperclip project inventory was re-run at `2026-08-03T11:08:45.126Z`: 34 issues, 33 attachments, and 7 documents.
 
+DAN-105 recovered the DAN-79 work-product bytes from the project-managed workspace at `2026-08-03T11:30:33.100Z`. The registered artifact and retained source copy are byte-identical at 19,200 bytes and SHA-256 `7be6076729325c947a9fe680c98eb2ad1962a1c6cabf07dff3c89b92781c5fe0`.
+
 ## Mirrored artifacts
 
 | Source Issue | Source Type | Repository Path | Source SHA-256 | Source Revision | Source Issue ID / Attachment IDs |
@@ -37,6 +39,7 @@ The live Paperclip project inventory was re-run at `2026-08-03T11:08:45.126Z`: 3
 | DAN-77 | attachment | docs/review-artifacts/DAN-77/attachments/weekly-metrics-reviewed.csv | 23c8ba0e13f437076c78987a34e73c67b113f1f90f27d6c67a3df454120a9a9c | - | 808b7d11-bdc5-4471-bb03-6d5ece70895a/ded56c04-7914-424d-acb9-510d14874bbd |
 | DAN-78 | attachment | docs/review-artifacts/DAN-78/attachments/weekly-content-market-plan-2026-08-03.md | 996afc3033a4d98ea4c6fa6481f0cd71dfed8563bf7822cb5d6ce46214e8a0ec | - | a6cd8362-41e0-4db7-8bcd-e788c134ab61/32366ec3-c872-4dc4-8b03-41ba1c5bd027 |
 | DAN-78 | document | docs/review-artifacts/DAN-78/documents/plan.md | 996afc3033a4d98ea4c6fa6481f0cd71dfed8563bf7822cb5d6ce46214e8a0ec | 12ea2a2a-4d87-44ce-b705-95b062f52fd1 | a6cd8362-41e0-4db7-8bcd-e788c134ab61 |
+| DAN-79 | workspace work product | docs/growth/research/dan-79-weekly-seo-competitor-scan-2026-08-02.md | 7be6076729325c947a9fe680c98eb2ad1962a1c6cabf07dff3c89b92781c5fe0 | work product `eddd5d5b-08b6-43fc-8c4d-c1c06f03d480` | 60adbcbc-5ce9-429f-8f3d-f2af354bb58a/eddd5d5b-08b6-43fc-8c4d-c1c06f03d480 |
 | DAN-7 | attachment | docs/review-artifacts/DAN-7/attachments/01-home-desktop.png | cba397f19a1b35264e553fce9f4681ff050c0628dafc293364a5ae84ac8225f9 | - | 206289b0-81e2-4b18-a0f7-7c437630d268/13a13f6f-d163-4ff8-9e9e-291b396d4dbb |
 | DAN-7 | attachment | docs/review-artifacts/DAN-7/attachments/02-home-mobile.png | 3f2c587a59528af1514b92ad06b55cf3b20bb3508e6047b94fb035f3dbc6320a | - | 206289b0-81e2-4b18-a0f7-7c437630d268/2236d495-bfe2-4cac-884f-ac63f8909a09 |
 | DAN-7 | attachment | docs/review-artifacts/DAN-7/attachments/03-vendors-desktop.png | b25a824d83175058b9a108485d90359c463cf36ea56a1f24d9de82c24b74cbbb | - | 206289b0-81e2-4b18-a0f7-7c437630d268/319b5591-b096-4d0f-8fdf-c0928a39f11c |
@@ -51,8 +54,8 @@ The live Paperclip project inventory was re-run at `2026-08-03T11:08:45.126Z`: 3
 | DAN-8 | attachment | docs/review-artifacts/DAN-8/attachments/DAN-8-meta-access-recommendation.md | 0e8e13dd9a6f56221efcb60f6b41f4e9fb4b0f49ca66bd8d4eec29d95448935c | - | 95d7063a-c920-41cb-82c9-d0551d193d34/1bc001db-651f-4201-9b44-3b82a2e423ec |
 | DAN-9 | attachment | docs/review-artifacts/DAN-9/attachments/FACEBOOK-PAGE-OPERATING-PLAYBOOK.md | 9ec38c60aed3d43117008a9c809240b16497abbce6dd5ad706917c5828967b3a | - | ce623a15-d754-480b-98e3-a3d8887f1145/d4424f74-8f3f-45b3-87fe-ade3879346e3 |
 
-## Not mirrored
+## Private-link manifests
 
-| Source Issue | Source Type | Source Kind | Notes |
-| --- | --- | --- | --- |
-| DAN-79 | document | workspace | Work product exists but API snapshot reports `provider: workspace` and no accessible `contentPath`/artifact content, so no file payload is available to mirror into GitHub from this run. |
+| Source | Sensitivity | Durable private link | Source fingerprint | Disposition |
+| --- | --- | --- | --- | --- |
+| Notion `פה קרוב — Site Operations Dashboard` | Medium/high — internal admin paths and operations runbook | [Private Notion page](https://app.notion.com/p/39fe4037cb6c8134b267c146ef2e9154) | page `39fe4037-cb6c-8134-b267-c146ef2e9154`; connector snapshot `2026-07-27T10:02:55.653Z`; no stable revision hash exposed | Manifest only. Full page bytes are intentionally excluded from this public repository pending explicit public-disclosure approval. |
