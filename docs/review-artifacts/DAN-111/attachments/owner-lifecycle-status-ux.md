@@ -13,6 +13,7 @@ Current states:
 
 Usage:
 - Dashboard overview renders `OwnerLifecycleBanner` below the greeting.
+- Profile renders `OwnerLifecycleLoading` while fetching, `OwnerLifecycleBanner` above the edit form, and `OwnerLifecyclePills` in the preview header.
 - Billing renders `OwnerLifecycleNotice` for payment callbacks, `OwnerLifecycleLoading` while fetching, `OwnerLifecyclePills` in each business header, and a compact `OwnerLifecycleBanner` above the duration selector.
 
 Verification:
