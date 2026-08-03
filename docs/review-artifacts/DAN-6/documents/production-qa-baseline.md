@@ -123,4 +123,3 @@ The home route and `/vendors` expose header/navigation but no semantic `<main>`/
 - No contact request, account creation, database write, payment, deployment, migration, or secret change was performed.
 - Firefox/WebKit binaries were unavailable in this run; those engines remain untested.
 - The managed checkout contains no repository files or Git metadata, so source diff, code-line attribution, unit tests, and local build verification were not possible for this production-baseline issue.
-

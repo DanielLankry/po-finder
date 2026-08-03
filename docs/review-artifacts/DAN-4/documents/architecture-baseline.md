@@ -367,4 +367,3 @@ Recommendation: **do not pursue now**.
 ## Decision
 
 The architecture is viable and currently healthy. The largest risks are not framework choice; they are configuration drift, an ungated production branch, payment reconciliation, and cross-region runtime placement. Address those in that order, preserving the existing maintained services.
-

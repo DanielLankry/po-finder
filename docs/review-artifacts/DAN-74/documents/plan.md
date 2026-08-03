@@ -190,4 +190,3 @@ Approve this plan as the recovery design, then choose one protection path before
 - **Low-data-loss:** approve paid tier + Small compute + PITR only if the business requires the documented worst-case two-minute RPO.
 
 Unresolved approval-dependent facts are the exact current cost preview, desired business loss tolerance, operator identities, drill date, and target deletion authority.
-
