@@ -66,7 +66,7 @@ test('listing grant is consumed once and expiry removes every public surface', a
       kind: 'listing',
       plan_days: 180,
       duration_months: 6,
-      amount_agorot: 4000,
+      amount_agorot: 4100,
     });
     expect(paidBusiness?.is_verified).toBe(true);
     expect(paidBusiness?.is_active).toBe(true);
