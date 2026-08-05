@@ -10,21 +10,28 @@
     "width": 1080,
     "height": 1350,
     "file": "exports/owner_map_l3_v1_feed_4x5_1080x1350.png",
-    "sha256": "ecf621c45fd180fd3e020545b599b7f68c02cf2587f2f61bb1c7de711e13e306",
-    "safeZoneCheck": "96px side margins; no critical text in bottom 140px",
+    "sha256": "7054dc9a74076b7bad32a063ab45f4117f4e935d3e7b0947e984a2ca78a320c6",
+    "sourceCandidate": "06-publish-candidate-owner-ads/publish-candidates/owner-map-feed-4x5-1080x1350-publish-candidate.png",
+    "sourceSha256": "7054dc9a74076b7bad32a063ab45f4117f4e935d3e7b0947e984a2ca78a320c6",
+    "safeZoneCheck": "96px side margins; no critical content in bottom 140px",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 92,
+      "yMax": 1200
+    },
     "rightsSources": [
       "01-logos/pokarov-logo-main-transparent-2400x700.png",
       "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
       "03-fonts/Karantina-Hebrew-700.woff2",
-      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
-      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
       "source/build-dan133-publish-candidates.mjs",
       "source/build-dan135-meta-exports.mjs"
     ],
     "excludedSources": [
+      "04-product-screenshots/**/*.png (including all Google Maps captures)",
       "05-ad-creatives/01-platform-launch/*.png",
       "05-ad-creatives/02-stories/*.png",
-      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+      "No third-party map tiles, illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
     ]
   },
   {
@@ -38,21 +45,28 @@
     "width": 1080,
     "height": 1080,
     "file": "exports/owner_map_l3_v1_square_1x1_1080x1080.png",
-    "sha256": "7d4422c761d5e807938ebef15f9505e729eb6b9d796946d63bf110418dfcffa7",
-    "safeZoneCheck": "96px perimeter for critical text",
+    "sha256": "b55c7e5ab1e2b1509f33f808edd5bf919589205fe7eacccd4fedcf0a2eb60255",
+    "sourceCandidate": "06-publish-candidate-owner-ads/publish-candidates/owner-map-square-1x1-1080x1080-publish-candidate.png",
+    "sourceSha256": "b55c7e5ab1e2b1509f33f808edd5bf919589205fe7eacccd4fedcf0a2eb60255",
+    "safeZoneCheck": "96px perimeter for critical content",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 110,
+      "yMax": 965
+    },
     "rightsSources": [
       "01-logos/pokarov-logo-main-transparent-2400x700.png",
       "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
       "03-fonts/Karantina-Hebrew-700.woff2",
-      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
-      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
       "source/build-dan133-publish-candidates.mjs",
       "source/build-dan135-meta-exports.mjs"
     ],
     "excludedSources": [
+      "04-product-screenshots/**/*.png (including all Google Maps captures)",
       "05-ad-creatives/01-platform-launch/*.png",
       "05-ad-creatives/02-stories/*.png",
-      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+      "No third-party map tiles, illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
     ]
   },
   {
@@ -66,21 +80,28 @@
     "width": 1080,
     "height": 1920,
     "file": "exports/owner_map_l3_v1_story_9x16_1080x1920.png",
-    "sha256": "08017a0fceb3a10c161e5523e50c59a29c27eb7e4173e564087c0f4d684dcbdf",
-    "safeZoneCheck": "no critical text in top 250px or bottom 340px; right-side UI rail avoided",
+    "sha256": "ce729365b4656838779bb00a80cec2f4aa41d950cd49d69db89a224b6edd0c3e",
+    "sourceCandidate": "06-publish-candidate-owner-ads/publish-candidates/owner-map-story-9x16-1080x1920-publish-candidate.png",
+    "sourceSha256": "ce729365b4656838779bb00a80cec2f4aa41d950cd49d69db89a224b6edd0c3e",
+    "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 820,
+      "yMin": 270,
+      "yMax": 1540
+    },
     "rightsSources": [
       "01-logos/pokarov-logo-main-transparent-2400x700.png",
       "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
       "03-fonts/Karantina-Hebrew-700.woff2",
-      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
-      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
       "source/build-dan133-publish-candidates.mjs",
       "source/build-dan135-meta-exports.mjs"
     ],
     "excludedSources": [
+      "04-product-screenshots/**/*.png (including all Google Maps captures)",
       "05-ad-creatives/01-platform-launch/*.png",
       "05-ad-creatives/02-stories/*.png",
-      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+      "No third-party map tiles, illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
     ]
   },
   {
@@ -94,21 +115,28 @@
     "width": 1080,
     "height": 1350,
     "file": "exports/free_draft_process_v1_feed_4x5_1080x1350.png",
-    "sha256": "4b305bee854bc1d1075ac857ecbc25d14d0429fd8f0b9358557dc020b4158ce3",
-    "safeZoneCheck": "96px side margins; no critical text in bottom 140px",
+    "sha256": "c2ac70fbebb42e52d324f64d21c7cbd291e93bdc77929bac095e4af45a226850",
+    "sourceCandidate": "06-publish-candidate-owner-ads/publish-candidates/free-draft-feed-4x5-1080x1350-publish-candidate.png",
+    "sourceSha256": "c2ac70fbebb42e52d324f64d21c7cbd291e93bdc77929bac095e4af45a226850",
+    "safeZoneCheck": "96px side margins; no critical content in bottom 140px",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 92,
+      "yMax": 1200
+    },
     "rightsSources": [
       "01-logos/pokarov-logo-main-transparent-2400x700.png",
       "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
       "03-fonts/Karantina-Hebrew-700.woff2",
-      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
-      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
       "source/build-dan133-publish-candidates.mjs",
       "source/build-dan135-meta-exports.mjs"
     ],
     "excludedSources": [
+      "04-product-screenshots/**/*.png (including all Google Maps captures)",
       "05-ad-creatives/01-platform-launch/*.png",
       "05-ad-creatives/02-stories/*.png",
-      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+      "No third-party map tiles, illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
     ]
   },
   {
@@ -122,21 +150,28 @@
     "width": 1080,
     "height": 1080,
     "file": "exports/free_draft_process_v1_square_1x1_1080x1080.png",
-    "sha256": "7eb8f34a1e00a72e55fab25f360e136b18244cd56fdaf0db64ab58f32bf2ecc9",
-    "safeZoneCheck": "96px perimeter for critical text",
+    "sha256": "dee93dfee124ebd24d8429b3558d78d36036551d4e8431801b89bd78bfc346ab",
+    "sourceCandidate": "06-publish-candidate-owner-ads/publish-candidates/free-draft-square-1x1-1080x1080-publish-candidate.png",
+    "sourceSha256": "dee93dfee124ebd24d8429b3558d78d36036551d4e8431801b89bd78bfc346ab",
+    "safeZoneCheck": "96px perimeter for critical content",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 110,
+      "yMax": 965
+    },
     "rightsSources": [
       "01-logos/pokarov-logo-main-transparent-2400x700.png",
       "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
       "03-fonts/Karantina-Hebrew-700.woff2",
-      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
-      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
       "source/build-dan133-publish-candidates.mjs",
       "source/build-dan135-meta-exports.mjs"
     ],
     "excludedSources": [
+      "04-product-screenshots/**/*.png (including all Google Maps captures)",
       "05-ad-creatives/01-platform-launch/*.png",
       "05-ad-creatives/02-stories/*.png",
-      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+      "No third-party map tiles, illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
     ]
   },
   {
@@ -150,21 +185,28 @@
     "width": 1080,
     "height": 1920,
     "file": "exports/free_draft_process_v1_story_9x16_1080x1920.png",
-    "sha256": "79411f243b041e8ee48a0f8a2bcd49298f0f2908d280eb0ef0addb951df067a4",
-    "safeZoneCheck": "no critical text in top 250px or bottom 340px; right-side UI rail avoided",
+    "sha256": "193624300d6ebcd57fe4eb02f01f739c5bc98367c84b7099e3438ed7200d9bc5",
+    "sourceCandidate": "06-publish-candidate-owner-ads/publish-candidates/free-draft-story-9x16-1080x1920-publish-candidate.png",
+    "sourceSha256": "193624300d6ebcd57fe4eb02f01f739c5bc98367c84b7099e3438ed7200d9bc5",
+    "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 820,
+      "yMin": 270,
+      "yMax": 1540
+    },
     "rightsSources": [
       "01-logos/pokarov-logo-main-transparent-2400x700.png",
       "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
       "03-fonts/Karantina-Hebrew-700.woff2",
-      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
-      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
       "source/build-dan133-publish-candidates.mjs",
       "source/build-dan135-meta-exports.mjs"
     ],
     "excludedSources": [
+      "04-product-screenshots/**/*.png (including all Google Maps captures)",
       "05-ad-creatives/01-platform-launch/*.png",
       "05-ad-creatives/02-stories/*.png",
-      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+      "No third-party map tiles, illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
     ]
   },
   {
@@ -178,21 +220,28 @@
     "width": 1080,
     "height": 1350,
     "file": "exports/mobile_hours_s5_v1_feed_4x5_1080x1350.png",
-    "sha256": "354fe8d367dc8573798bac41dc5c6404cc7fb67951d42bcfcc56d83a4f309210",
-    "safeZoneCheck": "96px side margins; no critical text in bottom 140px",
+    "sha256": "4d95c96142181e2bdcd1dbe3f20aee14cca790de14b83a0579b3b436e6c2ed4c",
+    "sourceCandidate": "06-publish-candidate-owner-ads/publish-candidates/location-hours-feed-4x5-1080x1350-publish-candidate.png",
+    "sourceSha256": "4d95c96142181e2bdcd1dbe3f20aee14cca790de14b83a0579b3b436e6c2ed4c",
+    "safeZoneCheck": "96px side margins; no critical content in bottom 140px",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 92,
+      "yMax": 1200
+    },
     "rightsSources": [
       "01-logos/pokarov-logo-main-transparent-2400x700.png",
       "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
       "03-fonts/Karantina-Hebrew-700.woff2",
-      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
-      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
       "source/build-dan133-publish-candidates.mjs",
       "source/build-dan135-meta-exports.mjs"
     ],
     "excludedSources": [
+      "04-product-screenshots/**/*.png (including all Google Maps captures)",
       "05-ad-creatives/01-platform-launch/*.png",
       "05-ad-creatives/02-stories/*.png",
-      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+      "No third-party map tiles, illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
     ]
   },
   {
@@ -206,21 +255,28 @@
     "width": 1080,
     "height": 1080,
     "file": "exports/mobile_hours_s5_v1_square_1x1_1080x1080.png",
-    "sha256": "9c0dd7d68dda55073b47a2590668e7fefc11b362001acfb0112df061aa9dd84b",
-    "safeZoneCheck": "96px perimeter for critical text",
+    "sha256": "aa131b9aeaf3af201a07949aa5c6fef213f2c123d3e88aa07ea2c078e21d6df6",
+    "sourceCandidate": "06-publish-candidate-owner-ads/publish-candidates/location-hours-square-1x1-1080x1080-publish-candidate.png",
+    "sourceSha256": "aa131b9aeaf3af201a07949aa5c6fef213f2c123d3e88aa07ea2c078e21d6df6",
+    "safeZoneCheck": "96px perimeter for critical content",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 110,
+      "yMax": 965
+    },
     "rightsSources": [
       "01-logos/pokarov-logo-main-transparent-2400x700.png",
       "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
       "03-fonts/Karantina-Hebrew-700.woff2",
-      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
-      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
       "source/build-dan133-publish-candidates.mjs",
       "source/build-dan135-meta-exports.mjs"
     ],
     "excludedSources": [
+      "04-product-screenshots/**/*.png (including all Google Maps captures)",
       "05-ad-creatives/01-platform-launch/*.png",
       "05-ad-creatives/02-stories/*.png",
-      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+      "No third-party map tiles, illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
     ]
   },
   {
@@ -234,21 +290,28 @@
     "width": 1080,
     "height": 1920,
     "file": "exports/mobile_hours_s5_v1_story_9x16_1080x1920.png",
-    "sha256": "fe61c48772ea0e24945bdfea6ebba86394d5f050af8adb9fedb7ab7a479134ba",
-    "safeZoneCheck": "no critical text in top 250px or bottom 340px; right-side UI rail avoided",
+    "sha256": "24e80924dd2276309e5d908919a38db34b9ef7fb76aeaa6ba91e41027580b5f1",
+    "sourceCandidate": "06-publish-candidate-owner-ads/publish-candidates/location-hours-story-9x16-1080x1920-publish-candidate.png",
+    "sourceSha256": "24e80924dd2276309e5d908919a38db34b9ef7fb76aeaa6ba91e41027580b5f1",
+    "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 820,
+      "yMin": 270,
+      "yMax": 1540
+    },
     "rightsSources": [
       "01-logos/pokarov-logo-main-transparent-2400x700.png",
       "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
       "03-fonts/Karantina-Hebrew-700.woff2",
-      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
-      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
       "source/build-dan133-publish-candidates.mjs",
       "source/build-dan135-meta-exports.mjs"
     ],
     "excludedSources": [
+      "04-product-screenshots/**/*.png (including all Google Maps captures)",
       "05-ad-creatives/01-platform-launch/*.png",
       "05-ad-creatives/02-stories/*.png",
-      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+      "No third-party map tiles, illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
     ]
   },
   {
@@ -262,21 +325,28 @@
     "width": 1080,
     "height": 1350,
     "file": "exports/local_makers_s7_v1_feed_4x5_1080x1350.png",
-    "sha256": "49be93224f4747cb8d36e8bb8e12b764e3c5b1660357eb44e771da1fea56c303",
-    "safeZoneCheck": "96px side margins; no critical text in bottom 140px",
+    "sha256": "2ffb83cd3e5605b0548ba8969d67692b5ab8e75ed3e5d689c024f218748bb26f",
+    "sourceCandidate": "06-publish-candidate-owner-ads/publish-candidates/local-makers-feed-4x5-1080x1350-publish-candidate.png",
+    "sourceSha256": "2ffb83cd3e5605b0548ba8969d67692b5ab8e75ed3e5d689c024f218748bb26f",
+    "safeZoneCheck": "96px side margins; no critical content in bottom 140px",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 92,
+      "yMax": 1200
+    },
     "rightsSources": [
       "01-logos/pokarov-logo-main-transparent-2400x700.png",
       "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
       "03-fonts/Karantina-Hebrew-700.woff2",
-      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
-      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
       "source/build-dan133-publish-candidates.mjs",
       "source/build-dan135-meta-exports.mjs"
     ],
     "excludedSources": [
+      "04-product-screenshots/**/*.png (including all Google Maps captures)",
       "05-ad-creatives/01-platform-launch/*.png",
       "05-ad-creatives/02-stories/*.png",
-      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+      "No third-party map tiles, illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
     ]
   },
   {
@@ -290,21 +360,28 @@
     "width": 1080,
     "height": 1080,
     "file": "exports/local_makers_s7_v1_square_1x1_1080x1080.png",
-    "sha256": "a645a81545ad6dd869e09d40ff505b4e8d41d7b82ff8fc22e41866b465297134",
-    "safeZoneCheck": "96px perimeter for critical text",
+    "sha256": "a6af5048c7149e1d7bcabbb5be6c3b980332fd098d3ec4ead5989c4876ee4ee4",
+    "sourceCandidate": "06-publish-candidate-owner-ads/publish-candidates/local-makers-square-1x1-1080x1080-publish-candidate.png",
+    "sourceSha256": "a6af5048c7149e1d7bcabbb5be6c3b980332fd098d3ec4ead5989c4876ee4ee4",
+    "safeZoneCheck": "96px perimeter for critical content",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 110,
+      "yMax": 965
+    },
     "rightsSources": [
       "01-logos/pokarov-logo-main-transparent-2400x700.png",
       "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
       "03-fonts/Karantina-Hebrew-700.woff2",
-      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
-      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
       "source/build-dan133-publish-candidates.mjs",
       "source/build-dan135-meta-exports.mjs"
     ],
     "excludedSources": [
+      "04-product-screenshots/**/*.png (including all Google Maps captures)",
       "05-ad-creatives/01-platform-launch/*.png",
       "05-ad-creatives/02-stories/*.png",
-      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+      "No third-party map tiles, illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
     ]
   },
   {
@@ -318,21 +395,28 @@
     "width": 1080,
     "height": 1920,
     "file": "exports/local_makers_s7_v1_story_9x16_1080x1920.png",
-    "sha256": "a5702d916085940b02f292cc319455b2ad7bc05760d4471de9ea282a80e5b473",
-    "safeZoneCheck": "no critical text in top 250px or bottom 340px; right-side UI rail avoided",
+    "sha256": "3fc8a519b05b40604fa570ffe53c8fd9e81534dc6d66c0ba0760e378affba323",
+    "sourceCandidate": "06-publish-candidate-owner-ads/publish-candidates/local-makers-story-9x16-1080x1920-publish-candidate.png",
+    "sourceSha256": "3fc8a519b05b40604fa570ffe53c8fd9e81534dc6d66c0ba0760e378affba323",
+    "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 820,
+      "yMin": 270,
+      "yMax": 1540
+    },
     "rightsSources": [
       "01-logos/pokarov-logo-main-transparent-2400x700.png",
       "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
       "03-fonts/Karantina-Hebrew-700.woff2",
-      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
-      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
       "source/build-dan133-publish-candidates.mjs",
       "source/build-dan135-meta-exports.mjs"
     ],
     "excludedSources": [
+      "04-product-screenshots/**/*.png (including all Google Maps captures)",
       "05-ad-creatives/01-platform-launch/*.png",
       "05-ad-creatives/02-stories/*.png",
-      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+      "No third-party map tiles, illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
     ]
   }
 ]
