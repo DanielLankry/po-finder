@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import { isProductionAppHost } from './destructive-target';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local'), quiet: true });
 
@@ -37,7 +38,7 @@ function assertSafeDestructiveTarget(): void {
     throw new Error('Destructive tests require an absolute URL in PLAYWRIGHT_BASE_URL.');
   }
 
-  if (URL!.includes(PRODUCTION_PROJECT_REF) || /(^|\.)pokarov\.co\.il(?=[:/]|$)/i.test(baseHost)) {
+  if (URL!.includes(PRODUCTION_PROJECT_REF) || isProductionAppHost(baseHost)) {
     throw new Error(
       'Destructive tests are blocked against the production Supabase project and pokarov.co.il. Configure a dedicated test project first.'
     );
