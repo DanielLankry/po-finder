@@ -28,7 +28,7 @@ function assertSafeDestructiveTarget(): void {
 
   const baseHost = (() => {
     try {
-      return new URL(baseUrl).hostname;
+      return new globalThis.URL(baseUrl).hostname;
     } catch {
       return '';
     }
