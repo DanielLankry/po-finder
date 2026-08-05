@@ -25,6 +25,8 @@ This matrix defines the safe destructive E2E fixture set for Pokarov listing pay
 - Duration catalog E2E: [`tests/destructive/pricing-duration-products.spec.ts`](../../tests/destructive/pricing-duration-products.spec.ts)
 - Paid owner E2E: [`tests/destructive/paid-business-owner.spec.ts`](../../tests/destructive/paid-business-owner.spec.ts)
 - Unpaid owner E2E: [`tests/destructive/unpaid-business-owner.spec.ts`](../../tests/destructive/unpaid-business-owner.spec.ts)
+- Seeded cross-role preview: [`tests/destructive/seeded-lifecycle-preview.spec.ts`](../../tests/destructive/seeded-lifecycle-preview.spec.ts)
+- Seeded preview runbook: [`docs/quality/seeded-lifecycle-preview.md`](./seeded-lifecycle-preview.md)
 - Launch RLS migration assertions: [`tests/launch-privacy-migration.test.mjs`](../../tests/launch-privacy-migration.test.mjs)
 
 ## Fixture Roles
@@ -94,12 +96,18 @@ Retired `boost_30` rows may remain for historical audit, but new purchase attemp
 | `payment-succeeded` | Successful `settle_payment_attempt`. | Attempt becomes `succeeded`; business grant is applied once and snapshots remain consistent. |
 | `payment-renewal-refund-lifo` | Grant `listing_6m`, then `listing_2m`, then request older preflight refund. | Older refund preflight is rejected until newest grant is refunded. |
 
+The DAN-113 seeded preview exercises the customer/owner vertical slice with an
+additional `PREVIEW_FIXTURES_CONFIRMED=1` gate. It covers payment processing,
+successful RPC settlement, expiry, and failed-payment recovery without opening
+HYP checkout or a payment-return URL.
+
 ## Minimum Safe Execution
 
 Use the smallest command that proves the intended surface.
 
 ```bash
 node --test tests/payment-plan-rls-fixture-matrix.test.mjs
+node --test tests/seeded-lifecycle-preview-contract.test.mjs
 ```
 
 Only after Forge confirms a disposable target:
