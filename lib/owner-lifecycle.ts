@@ -72,8 +72,9 @@ export function getOwnerLifecycleDetails(
   const nowMs = Date.parse(nowIso);
   const expiryMs = business.expires_at ? Date.parse(business.expires_at) : NaN;
   const hasValidExpiry = Number.isFinite(expiryMs);
-  const daysLeft = hasValidExpiry ? Math.ceil((expiryMs - nowMs) / DAY_MS) : null;
-  const formattedExpiry = hasValidExpiry ? formatHebrewDate(business.expires_at!) : null;
+  const usesExpiry = hasValidExpiry && business.is_legacy_public !== true;
+  const daysLeft = usesExpiry ? Math.ceil((expiryMs - nowMs) / DAY_MS) : null;
+  const formattedExpiry = usesExpiry ? formatHebrewDate(business.expires_at!) : null;
   const publicVisible =
     isVerified &&
     business.is_active &&
@@ -96,7 +97,7 @@ export function getOwnerLifecycleDetails(
   }
 
   if (!publicVisible) {
-    if (hasValidExpiry && expiryMs <= nowMs) {
+    if (usesExpiry && expiryMs <= nowMs) {
       return {
         state: "expired",
         tone: "error",
@@ -266,5 +267,6 @@ function formatHebrewDate(value: string): string {
     day: "numeric",
     month: "long",
     year: "numeric",
+    timeZone: "Asia/Jerusalem",
   });
 }
