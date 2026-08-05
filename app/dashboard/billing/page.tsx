@@ -1,6 +1,8 @@
 import { getPlans } from "@/lib/plans-server";
 import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/supabase/admin";
+import { getOwnerPaymentTransientState } from "@/lib/owner-lifecycle";
+import type { OwnerPaymentTransientState } from "@/lib/owner-lifecycle";
 import BillingClient from "./BillingClient";
 import type { PurchaseEvent } from "./BillingClient";
 
@@ -8,10 +10,15 @@ type BillingSearchParams = Promise<{
   attempt?: string | string[];
 }>;
 
-/** Loads a succeeded payment owned by the signed-in user for safe Purchase tracking. */
-async function getPurchaseEvent(
+type BillingPaymentContext = {
+  state: OwnerPaymentTransientState | null;
+  purchaseEvent: PurchaseEvent | null;
+};
+
+/** Resolves display and analytics state from a payment owned by the signed-in user. */
+async function getBillingPaymentContext(
   searchParams: BillingSearchParams
-): Promise<PurchaseEvent | null> {
+): Promise<BillingPaymentContext | null> {
   const attemptedId = (await searchParams).attempt;
   const attemptId = Array.isArray(attemptedId) ? attemptedId[0] : attemptedId;
   if (!attemptId) return null;
@@ -24,18 +31,23 @@ async function getPurchaseEvent(
 
   const { data } = await adminClient()
     .from("payment_attempts")
-    .select("id, product_code, amount_agorot")
+    .select("id, product_code, amount_agorot, status, hyp_response_code")
     .eq("id", attemptId)
     .eq("user_id", user.id)
-    .eq("status", "succeeded")
     .maybeSingle();
   if (!data) return null;
 
   return {
-    id: data.id,
-    planCode: data.product_code,
-    value: data.amount_agorot / 100,
-    currency: "ILS",
+    state: getOwnerPaymentTransientState(data),
+    purchaseEvent:
+      data.status === "succeeded"
+        ? {
+            id: data.id,
+            planCode: data.product_code,
+            value: data.amount_agorot / 100,
+            currency: "ILS",
+          }
+        : null,
   };
 }
 
@@ -45,12 +57,13 @@ export default async function BillingPage({
   searchParams: BillingSearchParams;
 }) {
   const plans = await getPlans();
-  const purchaseEvent = await getPurchaseEvent(searchParams);
+  const paymentContext = await getBillingPaymentContext(searchParams);
   return (
     <BillingClient
       plans={plans}
       nowIso={new Date().toISOString()}
-      purchaseEvent={purchaseEvent}
+      paymentState={paymentContext?.state ?? null}
+      purchaseEvent={paymentContext?.purchaseEvent ?? null}
     />
   );
 }
