@@ -1,71 +1,135 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { PLAN_CODES, PLANS } from "../lib/plans.ts";
 
-const repositoryRoot = resolve(import.meta.dirname, "..");
-const matrixPath = resolve(
-  repositoryRoot,
-  "docs/quality/payment-plan-rls-fixture-matrix.md",
-);
+const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const matrixPath = resolve(repositoryRoot, "docs/quality/payment-plan-rls-fixture-matrix.md");
 const matrix = readFileSync(matrixPath, "utf8");
 
-const expectedPlanRows = [
-  ["listing_1d", 1, "null", 300],
-  ["listing_2d", 2, "null", 500],
-  ["listing_3d", 3, "null", 600],
-  ["listing_7d", 7, "null", 800],
-  ["listing_1m", 30, "1", 1100],
-  ["listing_2m", 60, "2", 1900],
-  ["listing_3m", 90, "3", 2600],
-  ["listing_4m", 120, "4", 3100],
-  ["listing_5m", 150, "5", 3600],
-  ["listing_6m", 180, "6", 4100],
-  ["listing_7m", 210, "7", 4500],
-  ["listing_8m", 240, "8", 4900],
-  ["listing_9m", 270, "9", 5200],
-  ["listing_10m", 300, "10", 5500],
-  ["listing_11m", 330, "11", 5800],
-  ["listing_12m", 360, "12", 6100],
-];
-
-test("payment-plan fixture matrix lists every supported listing plan in order", () => {
-  let lastIndex = -1;
-
-  for (const [code, days, months, price] of expectedPlanRows) {
-    const rowPattern = new RegExp(
-      String.raw`\| \d+ \| \`${code}\` \| ${days} \| ${months} \| ${price} \|`,
-    );
-    const match = matrix.match(rowPattern);
-    assert.ok(match, `missing matrix row for ${code}`);
-    const nextIndex = match.index ?? -1;
-    assert.ok(nextIndex > lastIndex, `${code} is out of order`);
-    lastIndex = nextIndex;
+function takeSection(name) {
+  const heading = `## ${name}`;
+  const start = matrix.indexOf(heading);
+  if (start === -1) {
+    return null;
   }
+  const next = matrix.indexOf("\n## ", start + heading.length);
+  return matrix.slice(start, next === -1 ? undefined : next);
+}
+
+function extractPlanRows(sectionText) {
+  const rows = [];
+  const rowPattern = /^\|\s*(\d+)\s*\|\s*`([^`]+)`\s*\|\s*(\d+)\s*\|\s*(null|\d+)\s*\|\s*(\d+)\s*\|/gm;
+
+  for (const match of sectionText.matchAll(rowPattern)) {
+    rows.push({
+      order: Number(match[1]),
+      code: match[2],
+      planDays: Number(match[3]),
+      durationMonths: match[4] === "null" ? null : Number(match[4]),
+      priceAgorot: Number(match[5]),
+    });
+  }
+  return rows;
+}
+
+test("payment-plan matrix lists every supported listing plan exactly once and in exact PLAN_CODES order", () => {
+  const section = takeSection("Payment-Plan Matrix");
+  assert.ok(section, "missing Payment-Plan Matrix section");
+  const rows = extractPlanRows(section);
+
+  const expected = PLANS.map((plan, index) => ({
+    order: index + 1,
+    code: plan.code,
+    planDays: plan.days,
+    durationMonths: plan.months,
+    priceAgorot: plan.price,
+  }));
+
+  assert.deepEqual(
+    rows,
+    expected,
+    "plan rows differ from canonical PLAN/PLANS contract or are out of order",
+  );
+  assert.deepEqual(
+    rows.map((row) => row.code),
+    PLAN_CODES,
+    "plan code list does not match PLAN_CODES",
+  );
 });
 
-test("fixture matrix preserves destructive-test safety boundaries", () => {
+test("fixture matrix names required scenario IDs and safety boundaries", () => {
+  assert.ok(!matrix.includes("npm run docs:links"), "remove stale docs:links command");
+  assert.ok(matrix.includes("PLAYWRIGHT_BASE_URL"), "missing PLAYWRIGHT_BASE_URL guard text");
+  assert.ok(matrix.includes("ymqlqdhelsocibhnanjy"), "missing production Supabase safeguard");
+  assert.ok(matrix.includes("pokarov.co.il"), "missing production site safeguard");
+
   for (const requiredText of [
     "RUN_DESTRUCTIVE=1",
-    "ymqlqdhelsocibhnanjy",
-    "pokarov.co.il",
     "qa+*@pokarov.test",
-    "settle_payment_attempt",
-    "do not execute `supabase db push`, `supabase db reset`, or production migrations",
+    "APPROVED_DISPOSABLE_BASE_URL",
+    "supabase db push",
+    "supabase db reset",
+    "production migrations",
   ]) {
-    assert.ok(matrix.includes(requiredText), `missing safety boundary: ${requiredText}`);
+    assert.ok(matrix.includes(requiredText), `missing safety boundary text: ${requiredText}`);
   }
-});
 
-test("fixture matrix names the required RLS fixture scenarios", () => {
-  for (const fixtureName of [
+  for (const fixture of [
     "free-draft-owner",
     "paid-active-owner",
     "paid-lifecycle-owner",
+    "verified-inactive-owner",
     "expired-paid-owner",
     "renewal-owner",
+    "legacy-public-owner",
+    "payment-state-owner",
     "catalog-admin",
   ]) {
-    assert.ok(matrix.includes(`\`${fixtureName}\``), `missing fixture ${fixtureName}`);
+    assert.ok(matrix.includes(`\`${fixture}\``), `missing fixture role: ${fixture}`);
+  }
+
+  for (const id of [
+    "rls-private-draft",
+    "rls-unauth-mine-401",
+    "rls-verified-inactive-private",
+    "rls-paid-public",
+    "rls-expired-non-legacy-hidden",
+    "rls-legacy-public",
+    "rls-owner-continuity",
+    "rls-owner-cannot-tamper-lifecycle",
+    "rls-stale-profile-status",
+    "rls-renewal-refund-lifo",
+    "rls-owner-public-surface",
+    "payment-pending",
+    "payment-cancelled",
+    "payment-verification-failed",
+    "payment-transport-failure",
+    "payment-lost-return",
+    "payment-succeeded",
+    "payment-renewal-refund-lifo",
+  ]) {
+    assert.ok(matrix.includes(`\`${id}\``), `missing matrix scenario id: ${id}`);
+  }
+});
+
+test("fixture matrix references canonical files and local links resolve", () => {
+  const linkPattern = /\[[^\]]+\]\(([^)]+)\)/g;
+  const links = [...matrix.matchAll(linkPattern)]
+    .map((match) => match[1])
+    .filter((href) => !href.startsWith("http://") && !href.startsWith("https://"))
+    .filter((href) => !href.startsWith("mailto:"))
+    .filter((href) => !href.startsWith("/"))
+    .map((href) => href.split("#")[0]);
+
+  assert.ok(links.length > 0, "expected at least one canonical local markdown link");
+  for (const href of links) {
+    const target = resolve(resolve(dirname(matrixPath), href));
+    assert.ok(
+      existsSync(target),
+      `missing linked file from matrix: ${href} (${target})`,
+    );
   }
 });
