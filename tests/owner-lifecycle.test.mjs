@@ -65,6 +65,38 @@ test("active businesses without expiry only appear public when grandfathered", (
   assert.equal(grandfathered.publicVisible, true);
 });
 
+test("grandfathered businesses ignore stale expiry snapshots restored by refunds", () => {
+  const details = getOwnerLifecycleDetails(
+    {
+      is_active: true,
+      is_verified: true,
+      is_legacy_public: true,
+      expires_at: "2026-08-01T12:00:00.000Z",
+    },
+    NOW,
+  );
+
+  assert.equal(details.state, "active");
+  assert.equal(details.publicVisible, true);
+  assert.equal(details.daysLeft, null);
+  assert.equal(details.formattedExpiry, null);
+  assert.equal(details.pill, "מופיע לציבור");
+});
+
+test("expiry dates are formatted in Israel time", () => {
+  const details = getOwnerLifecycleDetails(
+    {
+      is_active: true,
+      is_verified: true,
+      expires_at: "2026-08-20T21:30:00.000Z",
+    },
+    NOW,
+  );
+
+  assert.match(details.formattedExpiry ?? "", /21/);
+  assert.doesNotMatch(details.formattedExpiry ?? "", /20 באוגוסט/);
+});
+
 test("expired listings are not public-visible and point owners to renewal", () => {
   const details = getOwnerLifecycleDetails(
     { is_active: true, is_verified: true, expires_at: "2026-08-03T11:59:59.000Z" },
