@@ -19,8 +19,25 @@ if (!URL || !KEY) {
 function assertSafeDestructiveTarget(): void {
   if (process.env.RUN_DESTRUCTIVE !== '1') return;
 
-  const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? '';
-  if (URL!.includes(PRODUCTION_PROJECT_REF) || /pokarov\.co\.il/i.test(baseUrl)) {
+  const baseUrl = process.env.PLAYWRIGHT_BASE_URL;
+  if (!baseUrl) {
+    throw new Error(
+      'Destructive tests are blocked without explicit PLAYWRIGHT_BASE_URL. Configure a disposable QA base URL first.'
+    );
+  }
+
+  const baseHost = (() => {
+    try {
+      return new URL(baseUrl).hostname;
+    } catch {
+      return '';
+    }
+  })();
+  if (!baseHost) {
+    throw new Error('Destructive tests require an absolute URL in PLAYWRIGHT_BASE_URL.');
+  }
+
+  if (URL!.includes(PRODUCTION_PROJECT_REF) || /(^|\.)pokarov\.co\.il(?=[:/]|$)/i.test(baseHost)) {
     throw new Error(
       'Destructive tests are blocked against the production Supabase project and pokarov.co.il. Configure a dedicated test project first.'
     );
