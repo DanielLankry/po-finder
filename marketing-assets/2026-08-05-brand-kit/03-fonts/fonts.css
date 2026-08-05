@@ -1,0 +1,31 @@
+@font-face {
+  font-family: "Assistant";
+  src: url("./Assistant-Hebrew-Variable-200-800.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Karantina";
+  src: url("./Karantina-Hebrew-300.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Karantina";
+  src: url("./Karantina-Hebrew-400.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Karantina";
+  src: url("./Karantina-Hebrew-700.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}

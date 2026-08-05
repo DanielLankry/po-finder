@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "brand_name": "פה קרוב",
+  "website_url": "https://pokarov.co.il",
+  "extracted_at": "2026-08-05T11:55:23+03:00",
+  "voice": {
+    "formal_casual": 8,
+    "rational_emotional": 6,
+    "playful_serious": 6,
+    "bold_subtle": 7,
+    "traditional_innovative": 7,
+    "expert_accessible": 9,
+    "descriptors": ["מקומי", "ישיר", "קהילתי"]
+  },
+  "colors": {
+    "primary": "#2D6A4F",
+    "secondary": ["#4A8B66", "#C4552D", "#F7F3EA", "#17402D"],
+    "forbidden": ["neon green", "corporate blue as primary"],
+    "background": "#F7F3EA",
+    "text": "#17402D"
+  },
+  "typography": {
+    "heading_font": "Karantina",
+    "body_font": "Assistant",
+    "pairing_descriptor": "כותרות פוסטר עבריות עם גוף קריא ונגיש"
+  },
+  "imagery": {
+    "style": "mixed",
+    "subjects": ["עסקים קטנים", "דוכנים", "עגלות קפה", "מפות שכונתיות"],
+    "composition": "צילום מקומי אותנטי עם שכבות נייר, קווי מפה, מסגרות דיו ו-CTA טרקוטה",
+    "forbidden": ["cheesy corporate stock photos", "fabricated businesses or results", "AI imagery presented as original photography"]
+  },
+  "aesthetic": {
+    "mood_keywords": ["שכונתי", "חם", "טקטילי"],
+    "texture": "textured",
+    "negative_space": "moderate"
+  },
+  "brand_values": ["תמיכה בעסקים קטנים", "גילוי מקומי", "פשטות ושקיפות"],
+  "target_audience": {
+    "age_range": "18-55",
+    "profession": "בעלי עסקים קטנים לצד צרכנים שמחפשים עסקים מקומיים",
+    "pain_points": ["קושי להיראות ולהתגלות מקומית", "קושי למצוא עסקים קטנים פתוחים וקרובים"],
+    "aspirations": ["נוכחות מקומית ברורה", "קהילה שמגלה ותומכת בעסקים קרובים"]
+  },
+  "screenshots": {
+    "homepage": "../04-product-screenshots/01-live-public/07-map-desktop-live-empty-1440x900.png",
+    "secondary": [
+      "../04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
+      "../04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png"
+    ]
+  }
+}

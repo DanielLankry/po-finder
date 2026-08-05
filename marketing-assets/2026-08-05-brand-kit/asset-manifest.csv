@@ -1,0 +1,28 @@
+asset,status,path,spec,source,notes
+Main logo SVG,ready,01-logos/pokarov-logo-main.svg,2400x700 SVG,Official icon plus approved Hebrew name,Embedded PNG icon and embedded Karantina font
+Main transparent PNG,ready,01-logos/pokarov-logo-main-transparent-2400x700.png,2400x700 transparent,Generated from main SVG,At least 2000px wide
+Logo for light background,ready,01-logos/pokarov-logo-for-light-background.svg,2400x700 SVG,Brand palette,Ink-green wordmark
+Logo for dark background,ready,01-logos/pokarov-logo-for-dark-background.svg,2400x700 SVG,Brand palette,Warm-white wordmark
+Official icon SVG package,ready,01-logos/pokarov-icon-official.svg,512x512 SVG,public/logo.png,Icon has no text
+Official icon PNG,ready,01-logos/pokarov-icon-official-512.png,512x512 transparent,public/logo.png,Exact site asset
+High resolution icon PNG,ready,01-logos/pokarov-icon-official-transparent-2048.png,2048x2048 transparent,Prior prepared asset,Upscaled from 512px official source
+Favicon,ready,01-logos/favicon.ico,ICO,public/favicon.ico,Exact site asset
+Color palette,ready,02-brand-guide/colors.csv,HEX and RGB,app/globals.css,Exact production tokens
+Naming decision,ready,02-brand-guide/naming.md,פה קרוב,Site metadata and launch notes,Pokarov reserved for technical use
+Assistant font,ready,03-fonts/Assistant-Hebrew-Variable-200-800.woff2,WOFF2,Next.js production build,SIL OFL 1.1
+Karantina font 300,ready,03-fonts/Karantina-Hebrew-300.woff2,WOFF2,Next.js production build,SIL OFL 1.1
+Karantina font 400,ready,03-fonts/Karantina-Hebrew-400.woff2,WOFF2,Next.js production build,SIL OFL 1.1
+Karantina font 700,ready,03-fonts/Karantina-Hebrew-700.woff2,WOFF2,Next.js production build,SIL OFL 1.1
+Live mobile empty results,ready,04-product-screenshots/01-live-public/01-results-mobile-live-empty-1440x2560.png,1440x2560,https://pokarov.co.il,Current zero-business production state
+Live mobile empty map,ready,04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png,1440x2560,https://pokarov.co.il,Current zero-business production state
+Mobile category filters,ready,04-product-screenshots/01-live-public/03-filters-category-mobile-1440x2560.png,1440x2560,https://pokarov.co.il,Real UI
+Mobile location filters,ready,04-product-screenshots/01-live-public/04-filters-location-mobile-1440x2560.png,1440x2560,https://pokarov.co.il,Real UI with live Google location suggestions
+Mobile hours filters,ready,04-product-screenshots/01-live-public/05-filters-hours-mobile-1440x2560.png,1440x2560,https://pokarov.co.il,Real UI
+Current mobile pricing selector,ready,04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png,1440x2560,https://pokarov.co.il/pricing,Real UI
+Current mobile pricing details,ready,04-product-screenshots/01-live-public/06b-pricing-mobile-details-1440x2560.png,1440x2560,https://pokarov.co.il/pricing,Real UI
+Live desktop map,ready,04-product-screenshots/01-live-public/07-map-desktop-live-empty-1440x900.png,1440x900,https://pokarov.co.il,Current zero-business production state
+Current desktop pricing,ready,04-product-screenshots/01-live-public/08-pricing-desktop-current-1440x900.png,1440x900,https://pokarov.co.il/pricing,Real UI
+Mobile map with 4-8 real businesses,blocked,04-product-screenshots/02-requires-real-business-data/,1440x2560,Production data missing,Do not fabricate pins or businesses
+Mobile business card,blocked,04-product-screenshots/02-requires-real-business-data/,1440x2560,Production data missing,Needs an approved real business
+Mobile full business profile,blocked,04-product-screenshots/02-requires-real-business-data/,1440x2560,Production data missing,Needs an approved real business
+Owner profile hours photos events screens,blocked,04-product-screenshots/02-requires-real-business-data/,1440x2560,Authenticated owner data missing,Needs approved capture account
