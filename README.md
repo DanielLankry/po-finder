@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# פה קרוב (Pokarov)
 
-## Getting Started
+`פה קרוב` is a Hebrew-first local business discovery platform built with
+Next.js, Supabase, Google Maps, and HYP payments. Visitors can discover nearby
+businesses; owners can purchase a time-limited listing and manage its public
+profile from the dashboard.
 
-First, run the development server:
+## Local development
+
+Requirements:
+
+- Node.js 20 or newer
+- npm
+- A Supabase project and the external service credentials listed in
+  [`.env.local.example`](.env.local.example)
+
+Install dependencies and start the development server:
 
 ```bash
+npm ci
+cp .env.local.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application is served at [http://localhost:3000](http://localhost:3000).
+Keep real credentials in `.env.local`; never commit them.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Verification
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run docs:links
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
 
-## Learn More
+Playwright suites are run separately with `npx playwright test`. Tests under
+`tests/destructive/` change Supabase state and must only target a disposable or
+explicitly approved environment.
 
-To learn more about Next.js, take a look at the following resources:
+## Repository map
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Path | Purpose |
+| --- | --- |
+| `app/` | Next.js App Router pages and API route handlers |
+| `components/` | Reusable UI grouped by product domain |
+| `lib/` | Shared domain logic and external integrations |
+| `public/` | Static browser assets |
+| `supabase/migrations/` | Ordered database migrations |
+| `tests/` | Node and Playwright test suites |
+| `docs/` | Active documentation and preserved historical material |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Start with the [documentation index](docs/README.md) for compliance, quality
+evidence, project history, and archived plans. Contributor
+and agent conventions live in [AGENTS.md](AGENTS.md).
 
-## Deploy on Vercel
+## Database and deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Useful Supabase commands are exposed as `npm run db:*` scripts. Database
+migrations, production deployments, secrets, and paid-service changes require
+explicit approval. Next.js request guarding and Supabase session refresh live in
+`proxy.ts`; do not add `middleware.ts`.
