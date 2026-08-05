@@ -1,0 +1,338 @@
+[
+  {
+    "conceptToken": "owner_map_l3_v1",
+    "headline": "העסק שלכם על המפה",
+    "body": "צרו טיוטת עסק בחינם, הוסיפו מיקום ושעות פעילות, ובחרו תקופת הופעה רק כשתהיו מוכנים.",
+    "cta": "מידע נוסף",
+    "destination": "https://pokarov.co.il/vendors",
+    "utm": "https://pokarov.co.il/vendors?utm_source=meta&utm_medium=paid_social&utm_campaign=il_owner_supply_launch_2026q3&utm_content=owner_map_l3_v1",
+    "format": "feed_4x5",
+    "width": 1080,
+    "height": 1350,
+    "file": "exports/owner_map_l3_v1_feed_4x5_1080x1350.png",
+    "sha256": "ecf621c45fd180fd3e020545b599b7f68c02cf2587f2f61bb1c7de711e13e306",
+    "safeZoneCheck": "96px side margins; no critical text in bottom 140px",
+    "rightsSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
+      "03-fonts/Karantina-Hebrew-700.woff2",
+      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
+      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
+      "source/build-dan133-publish-candidates.mjs",
+      "source/build-dan135-meta-exports.mjs"
+    ],
+    "excludedSources": [
+      "05-ad-creatives/01-platform-launch/*.png",
+      "05-ad-creatives/02-stories/*.png",
+      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+    ]
+  },
+  {
+    "conceptToken": "owner_map_l3_v1",
+    "headline": "העסק שלכם על המפה",
+    "body": "צרו טיוטת עסק בחינם, הוסיפו מיקום ושעות פעילות, ובחרו תקופת הופעה רק כשתהיו מוכנים.",
+    "cta": "מידע נוסף",
+    "destination": "https://pokarov.co.il/vendors",
+    "utm": "https://pokarov.co.il/vendors?utm_source=meta&utm_medium=paid_social&utm_campaign=il_owner_supply_launch_2026q3&utm_content=owner_map_l3_v1",
+    "format": "square_1x1",
+    "width": 1080,
+    "height": 1080,
+    "file": "exports/owner_map_l3_v1_square_1x1_1080x1080.png",
+    "sha256": "7d4422c761d5e807938ebef15f9505e729eb6b9d796946d63bf110418dfcffa7",
+    "safeZoneCheck": "96px perimeter for critical text",
+    "rightsSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
+      "03-fonts/Karantina-Hebrew-700.woff2",
+      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
+      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
+      "source/build-dan133-publish-candidates.mjs",
+      "source/build-dan135-meta-exports.mjs"
+    ],
+    "excludedSources": [
+      "05-ad-creatives/01-platform-launch/*.png",
+      "05-ad-creatives/02-stories/*.png",
+      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+    ]
+  },
+  {
+    "conceptToken": "owner_map_l3_v1",
+    "headline": "העסק שלכם על המפה",
+    "body": "צרו טיוטת עסק בחינם, הוסיפו מיקום ושעות פעילות, ובחרו תקופת הופעה רק כשתהיו מוכנים.",
+    "cta": "מידע נוסף",
+    "destination": "https://pokarov.co.il/vendors",
+    "utm": "https://pokarov.co.il/vendors?utm_source=meta&utm_medium=paid_social&utm_campaign=il_owner_supply_launch_2026q3&utm_content=owner_map_l3_v1",
+    "format": "story_9x16",
+    "width": 1080,
+    "height": 1920,
+    "file": "exports/owner_map_l3_v1_story_9x16_1080x1920.png",
+    "sha256": "08017a0fceb3a10c161e5523e50c59a29c27eb7e4173e564087c0f4d684dcbdf",
+    "safeZoneCheck": "no critical text in top 250px or bottom 340px; right-side UI rail avoided",
+    "rightsSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
+      "03-fonts/Karantina-Hebrew-700.woff2",
+      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
+      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
+      "source/build-dan133-publish-candidates.mjs",
+      "source/build-dan135-meta-exports.mjs"
+    ],
+    "excludedSources": [
+      "05-ad-creatives/01-platform-launch/*.png",
+      "05-ad-creatives/02-stories/*.png",
+      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+    ]
+  },
+  {
+    "conceptToken": "free_draft_process_v1",
+    "headline": "צרו טיוטת עסק בחינם",
+    "body": "פותחים חשבון, ממלאים את פרטי העסק ורואים תצוגה מקדימה פרטית לפני בחירת תקופת הופעה.",
+    "cta": "הרשמה",
+    "destination": "https://pokarov.co.il/pricing",
+    "utm": "https://pokarov.co.il/pricing?utm_source=meta&utm_medium=paid_social&utm_campaign=il_owner_supply_launch_2026q3&utm_content=free_draft_process_v1",
+    "format": "feed_4x5",
+    "width": 1080,
+    "height": 1350,
+    "file": "exports/free_draft_process_v1_feed_4x5_1080x1350.png",
+    "sha256": "4b305bee854bc1d1075ac857ecbc25d14d0429fd8f0b9358557dc020b4158ce3",
+    "safeZoneCheck": "96px side margins; no critical text in bottom 140px",
+    "rightsSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
+      "03-fonts/Karantina-Hebrew-700.woff2",
+      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
+      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
+      "source/build-dan133-publish-candidates.mjs",
+      "source/build-dan135-meta-exports.mjs"
+    ],
+    "excludedSources": [
+      "05-ad-creatives/01-platform-launch/*.png",
+      "05-ad-creatives/02-stories/*.png",
+      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+    ]
+  },
+  {
+    "conceptToken": "free_draft_process_v1",
+    "headline": "צרו טיוטת עסק בחינם",
+    "body": "פותחים חשבון, ממלאים את פרטי העסק ורואים תצוגה מקדימה פרטית לפני בחירת תקופת הופעה.",
+    "cta": "הרשמה",
+    "destination": "https://pokarov.co.il/pricing",
+    "utm": "https://pokarov.co.il/pricing?utm_source=meta&utm_medium=paid_social&utm_campaign=il_owner_supply_launch_2026q3&utm_content=free_draft_process_v1",
+    "format": "square_1x1",
+    "width": 1080,
+    "height": 1080,
+    "file": "exports/free_draft_process_v1_square_1x1_1080x1080.png",
+    "sha256": "7eb8f34a1e00a72e55fab25f360e136b18244cd56fdaf0db64ab58f32bf2ecc9",
+    "safeZoneCheck": "96px perimeter for critical text",
+    "rightsSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
+      "03-fonts/Karantina-Hebrew-700.woff2",
+      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
+      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
+      "source/build-dan133-publish-candidates.mjs",
+      "source/build-dan135-meta-exports.mjs"
+    ],
+    "excludedSources": [
+      "05-ad-creatives/01-platform-launch/*.png",
+      "05-ad-creatives/02-stories/*.png",
+      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+    ]
+  },
+  {
+    "conceptToken": "free_draft_process_v1",
+    "headline": "צרו טיוטת עסק בחינם",
+    "body": "פותחים חשבון, ממלאים את פרטי העסק ורואים תצוגה מקדימה פרטית לפני בחירת תקופת הופעה.",
+    "cta": "הרשמה",
+    "destination": "https://pokarov.co.il/pricing",
+    "utm": "https://pokarov.co.il/pricing?utm_source=meta&utm_medium=paid_social&utm_campaign=il_owner_supply_launch_2026q3&utm_content=free_draft_process_v1",
+    "format": "story_9x16",
+    "width": 1080,
+    "height": 1920,
+    "file": "exports/free_draft_process_v1_story_9x16_1080x1920.png",
+    "sha256": "79411f243b041e8ee48a0f8a2bcd49298f0f2908d280eb0ef0addb951df067a4",
+    "safeZoneCheck": "no critical text in top 250px or bottom 340px; right-side UI rail avoided",
+    "rightsSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
+      "03-fonts/Karantina-Hebrew-700.woff2",
+      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
+      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
+      "source/build-dan133-publish-candidates.mjs",
+      "source/build-dan135-meta-exports.mjs"
+    ],
+    "excludedSources": [
+      "05-ad-creatives/01-platform-launch/*.png",
+      "05-ad-creatives/02-stories/*.png",
+      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+    ]
+  },
+  {
+    "conceptToken": "mobile_hours_s5_v1",
+    "headline": "מיקום ושעות במקום אחד",
+    "body": "עדכנו מיקום ושעות פעילות כדי שלקוחות יוכלו לראות מתי ואיפה אתם פתוחים.",
+    "cta": "מידע נוסף",
+    "destination": "https://pokarov.co.il/vendors",
+    "utm": "https://pokarov.co.il/vendors?utm_source=meta&utm_medium=paid_social&utm_campaign=il_owner_supply_launch_2026q3&utm_content=mobile_hours_s5_v1",
+    "format": "feed_4x5",
+    "width": 1080,
+    "height": 1350,
+    "file": "exports/mobile_hours_s5_v1_feed_4x5_1080x1350.png",
+    "sha256": "354fe8d367dc8573798bac41dc5c6404cc7fb67951d42bcfcc56d83a4f309210",
+    "safeZoneCheck": "96px side margins; no critical text in bottom 140px",
+    "rightsSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
+      "03-fonts/Karantina-Hebrew-700.woff2",
+      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
+      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
+      "source/build-dan133-publish-candidates.mjs",
+      "source/build-dan135-meta-exports.mjs"
+    ],
+    "excludedSources": [
+      "05-ad-creatives/01-platform-launch/*.png",
+      "05-ad-creatives/02-stories/*.png",
+      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+    ]
+  },
+  {
+    "conceptToken": "mobile_hours_s5_v1",
+    "headline": "מיקום ושעות במקום אחד",
+    "body": "עדכנו מיקום ושעות פעילות כדי שלקוחות יוכלו לראות מתי ואיפה אתם פתוחים.",
+    "cta": "מידע נוסף",
+    "destination": "https://pokarov.co.il/vendors",
+    "utm": "https://pokarov.co.il/vendors?utm_source=meta&utm_medium=paid_social&utm_campaign=il_owner_supply_launch_2026q3&utm_content=mobile_hours_s5_v1",
+    "format": "square_1x1",
+    "width": 1080,
+    "height": 1080,
+    "file": "exports/mobile_hours_s5_v1_square_1x1_1080x1080.png",
+    "sha256": "9c0dd7d68dda55073b47a2590668e7fefc11b362001acfb0112df061aa9dd84b",
+    "safeZoneCheck": "96px perimeter for critical text",
+    "rightsSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
+      "03-fonts/Karantina-Hebrew-700.woff2",
+      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
+      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
+      "source/build-dan133-publish-candidates.mjs",
+      "source/build-dan135-meta-exports.mjs"
+    ],
+    "excludedSources": [
+      "05-ad-creatives/01-platform-launch/*.png",
+      "05-ad-creatives/02-stories/*.png",
+      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+    ]
+  },
+  {
+    "conceptToken": "mobile_hours_s5_v1",
+    "headline": "מיקום ושעות במקום אחד",
+    "body": "עדכנו מיקום ושעות פעילות כדי שלקוחות יוכלו לראות מתי ואיפה אתם פתוחים.",
+    "cta": "מידע נוסף",
+    "destination": "https://pokarov.co.il/vendors",
+    "utm": "https://pokarov.co.il/vendors?utm_source=meta&utm_medium=paid_social&utm_campaign=il_owner_supply_launch_2026q3&utm_content=mobile_hours_s5_v1",
+    "format": "story_9x16",
+    "width": 1080,
+    "height": 1920,
+    "file": "exports/mobile_hours_s5_v1_story_9x16_1080x1920.png",
+    "sha256": "fe61c48772ea0e24945bdfea6ebba86394d5f050af8adb9fedb7ab7a479134ba",
+    "safeZoneCheck": "no critical text in top 250px or bottom 340px; right-side UI rail avoided",
+    "rightsSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
+      "03-fonts/Karantina-Hebrew-700.woff2",
+      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
+      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
+      "source/build-dan133-publish-candidates.mjs",
+      "source/build-dan135-meta-exports.mjs"
+    ],
+    "excludedSources": [
+      "05-ad-creatives/01-platform-launch/*.png",
+      "05-ad-creatives/02-stories/*.png",
+      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+    ]
+  },
+  {
+    "conceptToken": "local_makers_s7_v1",
+    "headline": "מקום ליוצרים מקומיים",
+    "body": "צרו פרופיל עסק עם תמונות, קטגוריה, שעות ומיקום, ובחרו הופעה מיום אחד ועד 12 חודשים.",
+    "cta": "מידע נוסף",
+    "destination": "https://pokarov.co.il/vendors",
+    "utm": "https://pokarov.co.il/vendors?utm_source=meta&utm_medium=paid_social&utm_campaign=il_owner_supply_launch_2026q3&utm_content=local_makers_s7_v1",
+    "format": "feed_4x5",
+    "width": 1080,
+    "height": 1350,
+    "file": "exports/local_makers_s7_v1_feed_4x5_1080x1350.png",
+    "sha256": "49be93224f4747cb8d36e8bb8e12b764e3c5b1660357eb44e771da1fea56c303",
+    "safeZoneCheck": "96px side margins; no critical text in bottom 140px",
+    "rightsSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
+      "03-fonts/Karantina-Hebrew-700.woff2",
+      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
+      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
+      "source/build-dan133-publish-candidates.mjs",
+      "source/build-dan135-meta-exports.mjs"
+    ],
+    "excludedSources": [
+      "05-ad-creatives/01-platform-launch/*.png",
+      "05-ad-creatives/02-stories/*.png",
+      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+    ]
+  },
+  {
+    "conceptToken": "local_makers_s7_v1",
+    "headline": "מקום ליוצרים מקומיים",
+    "body": "צרו פרופיל עסק עם תמונות, קטגוריה, שעות ומיקום, ובחרו הופעה מיום אחד ועד 12 חודשים.",
+    "cta": "מידע נוסף",
+    "destination": "https://pokarov.co.il/vendors",
+    "utm": "https://pokarov.co.il/vendors?utm_source=meta&utm_medium=paid_social&utm_campaign=il_owner_supply_launch_2026q3&utm_content=local_makers_s7_v1",
+    "format": "square_1x1",
+    "width": 1080,
+    "height": 1080,
+    "file": "exports/local_makers_s7_v1_square_1x1_1080x1080.png",
+    "sha256": "a645a81545ad6dd869e09d40ff505b4e8d41d7b82ff8fc22e41866b465297134",
+    "safeZoneCheck": "96px perimeter for critical text",
+    "rightsSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
+      "03-fonts/Karantina-Hebrew-700.woff2",
+      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
+      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
+      "source/build-dan133-publish-candidates.mjs",
+      "source/build-dan135-meta-exports.mjs"
+    ],
+    "excludedSources": [
+      "05-ad-creatives/01-platform-launch/*.png",
+      "05-ad-creatives/02-stories/*.png",
+      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+    ]
+  },
+  {
+    "conceptToken": "local_makers_s7_v1",
+    "headline": "מקום ליוצרים מקומיים",
+    "body": "צרו פרופיל עסק עם תמונות, קטגוריה, שעות ומיקום, ובחרו הופעה מיום אחד ועד 12 חודשים.",
+    "cta": "מידע נוסף",
+    "destination": "https://pokarov.co.il/vendors",
+    "utm": "https://pokarov.co.il/vendors?utm_source=meta&utm_medium=paid_social&utm_campaign=il_owner_supply_launch_2026q3&utm_content=local_makers_s7_v1",
+    "format": "story_9x16",
+    "width": 1080,
+    "height": 1920,
+    "file": "exports/local_makers_s7_v1_story_9x16_1080x1920.png",
+    "sha256": "a5702d916085940b02f292cc319455b2ad7bc05760d4471de9ea282a80e5b473",
+    "safeZoneCheck": "no critical text in top 250px or bottom 340px; right-side UI rail avoided",
+    "rightsSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
+      "03-fonts/Karantina-Hebrew-700.woff2",
+      "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
+      "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
+      "source/build-dan133-publish-candidates.mjs",
+      "source/build-dan135-meta-exports.mjs"
+    ],
+    "excludedSources": [
+      "05-ad-creatives/01-platform-launch/*.png",
+      "05-ad-creatives/02-stories/*.png",
+      "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark."
+    ]
+  }
+]
