@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Calendar, Plus, Receipt } from "lucide-react";
+import { Calendar, Receipt } from "lucide-react";
 import DurationSelectorCard from "@/components/business/DurationSelectorCard";
 import {
   OwnerLifecycleBanner,
   OwnerLifecycleLoading,
-  OwnerLifecycleNotice,
   OwnerLifecyclePills,
+  OwnerLifecycleTransientNotice,
 } from "@/components/dashboard/OwnerLifecycleStatus";
 import { PLAN_CODES } from "@/lib/plans";
 import type { Plan, PlanCode } from "@/lib/plans";
@@ -60,11 +60,17 @@ export default function BillingClient({
     fetch("/api/businesses?mine=1")
       .then((response) => response.json())
       .then((data) => {
-        if (data.error) setError(data.error);
+        if (data.error) setError(data.error === "Unauthorized" ? "permission" : data.error);
         else setBusinesses(data.businesses ?? []);
       })
       .catch((caught) =>
-        setError(caught instanceof Error ? caught.message : String(caught))
+        setError(
+          typeof navigator !== "undefined" && !navigator.onLine
+            ? "offline"
+            : caught instanceof Error
+              ? caught.message
+              : String(caught)
+        )
       )
       .finally(() => setLoading(false));
   }, []);
@@ -167,14 +173,21 @@ export default function BillingClient({
       </div>
 
       {paymentState === "success" ? (
-        <OwnerLifecycleNotice tone="success" text="התשלום נקלט והזמן נוסף לעסק." />
+        <OwnerLifecycleTransientNotice state="payment_success" />
       ) : paymentState === "processing" ? (
-        <OwnerLifecycleNotice
-          tone="warning"
-          text="התשלום התקבל ונמצא בבדיקה. לא צריך לשלם שוב — התמיכה קיבלה התראה."
-        />
+        <OwnerLifecycleTransientNotice state="payment_processing" />
+      ) : paymentState === "cancelled" ? (
+        <OwnerLifecycleTransientNotice state="payment_cancelled" />
+      ) : paymentState === "failed" ? (
+        <OwnerLifecycleTransientNotice state="payment_failed" />
       ) : null}
-      {error ? <OwnerLifecycleNotice tone="error" text={error} /> : null}
+      {error === "offline" ? (
+        <OwnerLifecycleTransientNotice state="offline" />
+      ) : error === "permission" ? (
+        <OwnerLifecycleTransientNotice state="permission" />
+      ) : error ? (
+        <OwnerLifecycleTransientNotice state="error" message={error} />
+      ) : null}
 
       <section className="brand-panel overflow-hidden">
         <div className="flex items-center gap-2 border-b-2 border-[#17402D] bg-[#FFF3B0] px-6 py-4">
@@ -182,16 +195,10 @@ export default function BillingClient({
           <h2 className="font-display text-2xl font-bold text-[#17402D]">העסק שלי</h2>
         </div>
         {loading ? (
-          <OwnerLifecycleLoading />
+          <OwnerLifecycleLoading text="טוענים את מצב העסק והתשלום..." />
         ) : businesses.length === 0 ? (
-          <div className="p-10 text-center">
-            <p className="text-sm text-stone-600">לפני תשלום יוצרים טיוטת עסק בחינם.</p>
-            <Link
-              href="/dashboard/profile"
-              className="brand-button mt-4 inline-flex h-11 items-center gap-2 rounded-xl px-5 text-sm font-bold"
-            >
-              <Plus className="h-4 w-4" /> יצירת טיוטה
-            </Link>
+          <div className="p-5 md:p-7">
+            <OwnerLifecycleTransientNotice state="empty" />
           </div>
         ) : (
           <div className="divide-y-2 divide-stone-200">

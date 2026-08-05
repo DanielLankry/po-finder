@@ -66,7 +66,7 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
   const origin = process.env.NEXT_PUBLIC_SITE_URL ?? req.nextUrl.origin;
 
   if (!order) {
-    return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
+    return NextResponse.redirect(`${origin}/dashboard/billing?payment=cancelled`);
   }
 
   const admin = adminClient();
@@ -77,7 +77,7 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     .single();
 
   if (!attempt) {
-    return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
+    return NextResponse.redirect(`${origin}/dashboard/billing?payment=failed`);
   }
 
   // Idempotence — if we already settled this attempt, just route the user.
@@ -88,7 +88,7 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     return NextResponse.redirect(successUrl);
   }
   if (attempt.status === "refunded" || attempt.status === "failed") {
-    return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
+    return NextResponse.redirect(`${origin}/dashboard/billing?payment=failed`);
   }
 
   // Fold the redirect query into a JSON snapshot for support / debugging.
@@ -134,7 +134,7 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     if (error) {
       console.error("[/api/payments/return] failed to record verify failure:", error);
     }
-    return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
+    return NextResponse.redirect(`${origin}/dashboard/billing?payment=failed`);
   }
 
   if (!isSuccessfulHypReturn(params)) {
@@ -150,7 +150,7 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     if (error) {
       console.error("[/api/payments/return] failed to record declined payment:", error);
     }
-    return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
+    return NextResponse.redirect(`${origin}/dashboard/billing?payment=failed`);
   }
 
   const { error: settleError } = await admin.rpc("settle_payment_attempt", {

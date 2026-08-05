@@ -24,5 +24,5 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
+  return NextResponse.redirect(`${origin}/dashboard/billing?payment=cancelled`);
 }

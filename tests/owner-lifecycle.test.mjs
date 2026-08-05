@@ -1,7 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { getOwnerLifecycleDetails } from "../lib/owner-lifecycle.ts";
+import {
+  getOwnerLifecycleDetails,
+  getOwnerTransientDetails,
+} from "../lib/owner-lifecycle.ts";
 
 const NOW = "2026-08-03T12:00:00.000Z";
 
@@ -70,4 +73,29 @@ test("expired listings are not public-visible and point owners to renewal", () =
   assert.equal(details.state, "expired");
   assert.equal(details.publicVisible, false);
   assert.equal(details.actionLabel, "חידוש הופעה");
+});
+
+test("payment recovery transient states keep owners on billing actions", () => {
+  const cancelled = getOwnerTransientDetails("payment_cancelled");
+  const failed = getOwnerTransientDetails("payment_failed");
+  const processing = getOwnerTransientDetails("payment_processing");
+
+  assert.equal(cancelled.tone, "warning");
+  assert.match(cancelled.description, /לנסות שוב/);
+  assert.equal(failed.tone, "error");
+  assert.equal(failed.live, "assertive");
+  assert.equal(processing.tone, "warning");
+  assert.match(processing.description, /לא צריך לשלם שוב/);
+});
+
+test("transient empty, permission, and offline states expose owner-safe actions", () => {
+  const empty = getOwnerTransientDetails("empty");
+  const permission = getOwnerTransientDetails("permission");
+  const offline = getOwnerTransientDetails("offline");
+
+  assert.equal(empty.actionHref, "/dashboard/profile");
+  assert.match(empty.description, /טיוטה פרטית/);
+  assert.equal(permission.actionHref, "/dashboard");
+  assert.equal(permission.live, "assertive");
+  assert.equal(offline.tone, "warning");
 });

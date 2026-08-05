@@ -8,9 +8,11 @@ import {
 } from "lucide-react";
 import {
   getOwnerLifecycleDetails,
+  getOwnerTransientDetails,
   type OwnerLifecycleDetails,
   type OwnerLifecycleInput,
   type OwnerLifecycleTone,
+  type OwnerTransientState,
 } from "@/lib/owner-lifecycle";
 
 const TONE_CLASSES: Record<OwnerLifecycleTone, {
@@ -139,6 +141,53 @@ export function OwnerLifecycleNotice({
       <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
       <p className="text-sm">{text}</p>
     </div>
+  );
+}
+
+export function OwnerLifecycleTransientNotice({
+  state,
+  message,
+}: {
+  state: OwnerTransientState;
+  message?: string | null;
+}) {
+  const details = getOwnerTransientDetails(state, message);
+  const classes = TONE_CLASSES[details.tone];
+  const Icon =
+    details.tone === "success"
+      ? CheckCircle2
+      : details.tone === "warning"
+        ? AlertCircle
+        : details.tone === "error"
+          ? AlertCircle
+          : Clock3;
+
+  return (
+    <section
+      className={`flex flex-col gap-4 rounded-[18px] border-2 p-5 sm:flex-row sm:items-start sm:justify-between ${classes.panel}`}
+      role={details.live === "assertive" ? "alert" : "status"}
+      aria-live={details.live}
+    >
+      <div className="flex min-w-0 items-start gap-3">
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${classes.iconWrap}`}>
+          <Icon className={`h-5 w-5 ${classes.icon}`} aria-hidden="true" />
+        </div>
+        <div className="min-w-0">
+          <h2 className="text-sm font-black text-stone-950">{details.title}</h2>
+          <p className="mt-1 text-xs leading-relaxed text-stone-700">
+            {details.description}
+          </p>
+        </div>
+      </div>
+      {details.actionHref && details.actionLabel ? (
+        <Link
+          href={details.actionHref}
+          className={`inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl px-4 py-2 text-xs font-black transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4552D] focus-visible:ring-offset-2 ${classes.button}`}
+        >
+          {details.actionLabel}
+        </Link>
+      ) : null}
+    </section>
   );
 }
 
