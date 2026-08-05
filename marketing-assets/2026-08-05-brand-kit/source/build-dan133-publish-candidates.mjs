@@ -137,7 +137,7 @@ function artPanel(concept, box) {
     const cardW = (innerW - gap * 2) / 3;
     const labels = ["פרטים", "תצוגה", "תקופה"];
     return `${common}${labels.map((label, index) => {
-      const cardX = innerX + index * (cardW + gap);
+      const cardX = innerX + (labels.length - 1 - index) * (cardW + gap);
       return `<rect x="${cardX}" y="${innerY}" width="${cardW}" height="${innerH}" rx="20" fill="${index === 1 ? "#f4ead7" : "#fffaf0"}" stroke="#18392d" stroke-width="4"/><circle cx="${cardX + cardW / 2}" cy="${innerY + innerH * 0.34}" r="31" fill="${concept.accent}" stroke="#18392d" stroke-width="4"/><text x="${cardX + cardW / 2}" y="${innerY + innerH * 0.34 + 12}" text-anchor="middle" font-family="Assistant" font-size="34" font-weight="900" fill="#fffaf0">${index + 1}</text><text x="${cardX + cardW / 2}" y="${innerY + innerH * 0.76}" text-anchor="middle" font-family="Assistant" font-size="${labelSize}" font-weight="850" fill="#18392d">${label}</text>`;
     }).join("")}`;
   }
@@ -217,6 +217,9 @@ function layoutFor(format) {
 async function svgFor(concept, format, draft, assets) {
   const layout = layoutFor(format);
   const logoHeight = Math.round(layout.logo.w * 0.292);
+  const kickerLines = layout.story && concept.id === "local-makers"
+    ? wrapWords(concept.kicker, 23)
+    : [concept.kicker];
   const headlineLines = wrapWords(concept.headline, layout.headlineChars);
   const bodyLines = wrapWords(concept.body, layout.bodyChars);
   const ctaTextX = layout.cta.x + layout.cta.w / 2;
@@ -227,7 +230,7 @@ async function svgFor(concept, format, draft, assets) {
 <rect width="100%" height="100%" fill="#f4ead7"/>
 <g opacity=".18" fill="none" stroke-linecap="round"><path d="M-40 ${format.h * 0.77} C230 ${format.h * 0.54}, 490 ${format.h * 0.94}, 1130 ${format.h * 0.3}" stroke="#2f7d5b" stroke-width="6"/><path d="M100 -50 C310 250, 730 430, 1180 325" stroke="#d46d45" stroke-width="6"/><circle cx="920" cy="${format.h * 0.19}" r="12" fill="#d46d45"/></g>
 <image href="${assets.logo}" x="${layout.logo.x}" y="${layout.logo.y}" width="${layout.logo.w}" height="${logoHeight}" preserveAspectRatio="xMidYMid meet"/>
-${textBlock([concept.kicker], layout.textRight, layout.kickerY, layout.kickerSize, 800, concept.accent, "Assistant", 46)}
+${textBlock(kickerLines, layout.textRight, layout.kickerY, layout.kickerSize, 800, concept.accent, "Assistant", 46)}
 ${textBlock(headlineLines, layout.textRight, layout.headlineY, layout.headlineSize, 700, "#18392d", "Karantina", layout.headlineSize * 0.86)}
 ${textBlock(bodyLines, layout.textRight, layout.bodyY, layout.bodySize, 760, "#18392d", "Assistant", layout.bodySize * 1.24)}
 ${artPanel(concept, layout.panel)}

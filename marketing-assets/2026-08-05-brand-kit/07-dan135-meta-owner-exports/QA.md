@@ -39,15 +39,15 @@ illustrated ad PNGs under `05-ad-creatives/01-platform-launch` and
 | `exports/owner_map_l3_v1_feed_4x5_1080x1350.png` | 1080x1350 | `owner_map_l3_v1` | `7054dc9a74076b7bad32a063ab45f4117f4e935d3e7b0947e984a2ca78a320c6` |
 | `exports/owner_map_l3_v1_square_1x1_1080x1080.png` | 1080x1080 | `owner_map_l3_v1` | `b55c7e5ab1e2b1509f33f808edd5bf919589205fe7eacccd4fedcf0a2eb60255` |
 | `exports/owner_map_l3_v1_story_9x16_1080x1920.png` | 1080x1920 | `owner_map_l3_v1` | `ce729365b4656838779bb00a80cec2f4aa41d950cd49d69db89a224b6edd0c3e` |
-| `exports/free_draft_process_v1_feed_4x5_1080x1350.png` | 1080x1350 | `free_draft_process_v1` | `c2ac70fbebb42e52d324f64d21c7cbd291e93bdc77929bac095e4af45a226850` |
-| `exports/free_draft_process_v1_square_1x1_1080x1080.png` | 1080x1080 | `free_draft_process_v1` | `dee93dfee124ebd24d8429b3558d78d36036551d4e8431801b89bd78bfc346ab` |
-| `exports/free_draft_process_v1_story_9x16_1080x1920.png` | 1080x1920 | `free_draft_process_v1` | `193624300d6ebcd57fe4eb02f01f739c5bc98367c84b7099e3438ed7200d9bc5` |
+| `exports/free_draft_process_v1_feed_4x5_1080x1350.png` | 1080x1350 | `free_draft_process_v1` | `137edfcf62232b847751dea7f6c333ba3a859d17afa902fde299466905575599` |
+| `exports/free_draft_process_v1_square_1x1_1080x1080.png` | 1080x1080 | `free_draft_process_v1` | `a8a78c43779999e4ad89ef0eb71871dc1d0f8492a114530a55282f33fe8248c4` |
+| `exports/free_draft_process_v1_story_9x16_1080x1920.png` | 1080x1920 | `free_draft_process_v1` | `296fce4e2159ba70263ae4409127c1e519396545cd982e3a7376a1e553c223d0` |
 | `exports/mobile_hours_s5_v1_feed_4x5_1080x1350.png` | 1080x1350 | `mobile_hours_s5_v1` | `4d95c96142181e2bdcd1dbe3f20aee14cca790de14b83a0579b3b436e6c2ed4c` |
 | `exports/mobile_hours_s5_v1_square_1x1_1080x1080.png` | 1080x1080 | `mobile_hours_s5_v1` | `aa131b9aeaf3af201a07949aa5c6fef213f2c123d3e88aa07ea2c078e21d6df6` |
 | `exports/mobile_hours_s5_v1_story_9x16_1080x1920.png` | 1080x1920 | `mobile_hours_s5_v1` | `24e80924dd2276309e5d908919a38db34b9ef7fb76aeaa6ba91e41027580b5f1` |
 | `exports/local_makers_s7_v1_feed_4x5_1080x1350.png` | 1080x1350 | `local_makers_s7_v1` | `2ffb83cd3e5605b0548ba8969d67692b5ab8e75ed3e5d689c024f218748bb26f` |
 | `exports/local_makers_s7_v1_square_1x1_1080x1080.png` | 1080x1080 | `local_makers_s7_v1` | `a6af5048c7149e1d7bcabbb5be6c3b980332fd098d3ec4ead5989c4876ee4ee4` |
-| `exports/local_makers_s7_v1_story_9x16_1080x1920.png` | 1080x1920 | `local_makers_s7_v1` | `3fc8a519b05b40604fa570ffe53c8fd9e81534dc6d66c0ba0760e378affba323` |
+| `exports/local_makers_s7_v1_story_9x16_1080x1920.png` | 1080x1920 | `local_makers_s7_v1` | `8d91966e5df8663de32936fe56178da335e0d06336f0fd14dbd4ca413ab79fc8` |
 
 ## Verification Command
 
