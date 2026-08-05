@@ -13,10 +13,14 @@ Current states:
 
 Usage:
 - Dashboard overview renders `OwnerLifecycleBanner` below the greeting.
+- Dashboard analytics includes an owner privacy cue: visitor counts are aggregate only and do not expose names, identity, or contact details.
 - Profile renders `OwnerLifecycleLoading` while fetching, `OwnerLifecycleBanner` above the edit form, and `OwnerLifecyclePills` in the preview header.
 - Billing renders `OwnerLifecycleNotice` for payment callbacks, `OwnerLifecycleLoading` while fetching, `OwnerLifecyclePills` in each business header, and a compact `OwnerLifecycleBanner` above the duration selector.
 
 Verification:
-- `node --test tests/owner-lifecycle.test.mjs`
+- `node --test tests/owner-lifecycle.test.mjs` (2026-08-05: 5 tests passed)
 - `npx tsc --noEmit --pretty false`
-- Targeted ESLint command attempted but blocked by incomplete local dependency tree. After repairing two generated packages in `node_modules`, the command still stopped before source analysis on `Cannot find module .../node_modules/json-schema-traverse/index.js`.
+- `npx eslint components/dashboard/OwnerLifecycleStatus.tsx lib/owner-lifecycle.ts app/dashboard/page.tsx app/dashboard/profile/page.tsx app/dashboard/billing/BillingClient.tsx tests/owner-lifecycle.test.mjs` blocked before source analysis because the local dependency tree is missing `node_modules/json-schema-traverse/index.js`.
+
+Review handoff:
+- Sentinel review remains mandatory before development completion because the shared lifecycle appears on billing/payment recovery and owner analytics surfaces.

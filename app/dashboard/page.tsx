@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Clock, Star, Camera, MapPin, MessageCircle, Eye, Phone, Hand } from "lucide-react";
+import { Plus, Clock, Star, Camera, MapPin, MessageCircle, Eye, Phone, Hand, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessesByOwner } from "@/lib/db/businesses";
 import { getTodaySchedule } from "@/lib/db/schedules";
@@ -192,6 +192,10 @@ async function DashboardContent({
         <p className="text-stone-400 text-xs mb-4">
           נתוני ביקורים ופעולות על הדף הציבורי
         </p>
+        <div className="mb-4 flex items-start gap-2 rounded-xl border border-[#17402D]/20 bg-[#EFF5F0] px-3 py-2 text-xs leading-relaxed text-stone-600">
+          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#2D6A4F]" aria-hidden="true" />
+          <span>המספרים מוצגים כסיכום בלבד. אנחנו לא מציגים זהות, שמות או פרטי קשר של מבקרים.</span>
+        </div>
         <div className="brand-rule mb-5" aria-hidden="true" />
         <div className="grid grid-cols-3 gap-2 sm:gap-4">
           <div className="rounded-xl bg-[#EFF5F0] p-3 text-center">
