@@ -102,11 +102,7 @@ export async function createConfirmedUser(opts: {
   return { id: data.user.id, email: opts.email, password };
 }
 
-/**
- * Simulates the successful server-side settlement of a listing payment.
- * This never calls HYP: the succeeded ledger row is the durable entitlement
- * consumed by the business INSERT trigger.
- */
+/** Payment fixture helpers never call HYP; they operate on the disposable ledger only. */
 export type DurationPlanCode =
   | 'listing_1d'
   | 'listing_2d'
@@ -125,7 +121,7 @@ export type DurationPlanCode =
   | 'listing_11m'
   | 'listing_12m';
 
-export async function grantDurationPlan(opts: {
+export async function createPendingDurationAttempt(opts: {
   ownerId: string;
   businessId: string;
   productCode?: DurationPlanCode;
@@ -147,23 +143,66 @@ export async function grantDurationPlan(opts: {
     })
     .select('id')
     .single();
-  if (error) throw new Error(`grantDurationPlan failed: ${error.message}`);
+  if (error) throw new Error(`createPendingDurationAttempt failed: ${error.message}`);
+
+  return { id: data.id };
+}
+
+export async function settlePaymentAttempt(opts: {
+  attemptId: string;
+  purpose?: string;
+}): Promise<void> {
+  const sb = admin();
 
   const { error: settleError } = await sb.rpc('settle_payment_attempt', {
-    p_attempt_id: data.id,
-    p_hyp_transaction_id: `QA-${data.id}`,
+    p_attempt_id: opts.attemptId,
+    p_hyp_transaction_id: `QA-${opts.attemptId}`,
     p_hyp_auth_code: 'QA_AUTH',
     p_hyp_card_mask: '0000',
     p_hyp_response_code: '0',
     p_raw_return: {
       qa: true,
       provider_called: false,
-      purpose: 'paid-lifecycle-regression',
+      purpose: opts.purpose ?? 'paid-lifecycle-regression',
     },
   });
   if (settleError) throw new Error(`settle_payment_attempt failed: ${settleError.message}`);
+}
 
-  return { id: data.id };
+export async function failPaymentAttempt(opts: {
+  attemptId: string;
+  responseCode?: string;
+}): Promise<void> {
+  const { data, error } = await admin()
+    .from('payment_attempts')
+    .update({
+      status: 'failed',
+      hyp_response_code: opts.responseCode ?? 'verify_failed',
+      completed_at: new Date().toISOString(),
+      raw_return: {
+        qa: true,
+        provider_called: false,
+        purpose: 'payment-recovery-preview',
+      },
+    })
+    .eq('id', opts.attemptId)
+    .eq('status', 'pending')
+    .select('id')
+    .single();
+  if (error || !data) {
+    throw new Error(`failPaymentAttempt failed: ${error?.message ?? 'attempt was not pending'}`);
+  }
+}
+
+export async function grantDurationPlan(opts: {
+  ownerId: string;
+  businessId: string;
+  productCode?: DurationPlanCode;
+}): Promise<{ id: string }> {
+  const attempt = await createPendingDurationAttempt(opts);
+  await settlePaymentAttempt({ attemptId: attempt.id });
+
+  return attempt;
 }
 
 /** Signs a disposable QA user into a non-persistent client for real RLS checks. */
