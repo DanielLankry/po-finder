@@ -14,6 +14,28 @@ export type OwnerLifecycleState =
 
 export type OwnerLifecycleTone = "success" | "warning" | "error" | "neutral";
 
+export type OwnerTransientState =
+  | "loading"
+  | "empty"
+  | "offline"
+  | "error"
+  | "permission"
+  | "destructive"
+  | "payment_success"
+  | "payment_processing"
+  | "payment_cancelled"
+  | "payment_failed";
+
+export type OwnerTransientDetails = {
+  state: OwnerTransientState;
+  tone: OwnerLifecycleTone;
+  title: string;
+  description: string;
+  actionHref?: string;
+  actionLabel?: string;
+  live: "polite" | "assertive";
+};
+
 export type OwnerLifecycleDetails = {
   state: OwnerLifecycleState;
   tone: OwnerLifecycleTone;
@@ -121,6 +143,98 @@ export function getOwnerLifecycleDetails(
     formattedExpiry,
     publicVisible: true,
   };
+}
+
+export function getOwnerTransientDetails(
+  state: OwnerTransientState,
+  message?: string | null,
+): OwnerTransientDetails {
+  switch (state) {
+    case "loading":
+      return {
+        state,
+        tone: "neutral",
+        title: "טוענים את פרטי העסק",
+        description: message ?? "בודקים את מצב הטיוטה, האימות והתשלום.",
+        live: "polite",
+      };
+    case "empty":
+      return {
+        state,
+        tone: "neutral",
+        title: "עדיין אין טיוטת עסק",
+        description: message ?? "לפני תשלום יוצרים טיוטה פרטית בחינם. היא לא תופיע לציבור עד אימות ותשלום.",
+        actionHref: "/dashboard/profile",
+        actionLabel: "יצירת טיוטה",
+        live: "polite",
+      };
+    case "offline":
+      return {
+        state,
+        tone: "warning",
+        title: "אין חיבור זמין",
+        description: message ?? "לא הצלחנו לרענן את מצב העסק. בדקו את החיבור ונסו שוב.",
+        live: "assertive",
+      };
+    case "error":
+      return {
+        state,
+        tone: "error",
+        title: "משהו השתבש",
+        description: message ?? "לא הצלחנו להשלים את הפעולה. נסו שוב או פנו לתמיכה.",
+        live: "assertive",
+      };
+    case "permission":
+      return {
+        state,
+        tone: "error",
+        title: "אין הרשאה לעסק הזה",
+        description: message ?? "אפשר לערוך ולשלם רק על עסקים שמחוברים לחשבון שלכם.",
+        actionHref: "/dashboard",
+        actionLabel: "חזרה ללוח הבקרה",
+        live: "assertive",
+      };
+    case "destructive":
+      return {
+        state,
+        tone: "warning",
+        title: "פעולה רגישה",
+        description: message ?? "לפני מחיקה או ביטול נציג בדיוק מה יקרה ונבקש אישור מפורש.",
+        live: "assertive",
+      };
+    case "payment_success":
+      return {
+        state,
+        tone: "success",
+        title: "התשלום נקלט",
+        description: message ?? "הזמן נוסף לעסק. אם העסק מאומת, הוא מופיע לציבור לפי התוקף החדש.",
+        live: "polite",
+      };
+    case "payment_processing":
+      return {
+        state,
+        tone: "warning",
+        title: "התשלום בבדיקה",
+        description: message ?? "לא צריך לשלם שוב. נשמור את הניסיון פתוח עד שהחיוב והזכאות יתאימו.",
+        live: "polite",
+      };
+    case "payment_cancelled":
+      return {
+        state,
+        tone: "warning",
+        title: "התשלום בוטל",
+        description: message ?? "לא בוצע חיוב פעיל. אפשר לבחור משך אחר או לנסות שוב מאותו מסך.",
+        live: "polite",
+      };
+    case "payment_failed":
+      return {
+        state,
+        tone: "error",
+        title: "התשלום לא הושלם",
+        description: message ?? "העסק לא פורסם בעקבות ניסיון התשלום הזה. אפשר לנסות שוב או לפנות לתמיכה.",
+        live: "assertive",
+      };
+  }
 }
 
 function formatHebrewDate(value: string): string {
