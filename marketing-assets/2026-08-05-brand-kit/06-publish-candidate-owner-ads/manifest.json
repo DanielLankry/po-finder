@@ -7,8 +7,22 @@
     "height": 1350,
     "draftPreview": false,
     "file": "publish-candidates/owner-map-feed-4x5-1080x1350-publish-candidate.png",
+    "sha256": "7054dc9a74076b7bad32a063ab45f4117f4e935d3e7b0947e984a2ca78a320c6",
     "utmContent": "owner_map_l3_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px side margins; no critical content in bottom 140px",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 92,
+      "yMax": 1200
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "owner-map",
@@ -18,8 +32,22 @@
     "height": 1350,
     "draftPreview": true,
     "file": "draft-previews/owner-map-feed-4x5-1080x1350-draft-preview.png",
+    "sha256": "f61020601ae0448a847dd41a4ea9c3fdc88057d0a13dab8ed5adce6136ca7be2",
     "utmContent": "owner_map_l3_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px side margins; no critical content in bottom 140px",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 92,
+      "yMax": 1200
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "owner-map",
@@ -29,8 +57,22 @@
     "height": 1080,
     "draftPreview": false,
     "file": "publish-candidates/owner-map-square-1x1-1080x1080-publish-candidate.png",
+    "sha256": "b55c7e5ab1e2b1509f33f808edd5bf919589205fe7eacccd4fedcf0a2eb60255",
     "utmContent": "owner_map_l3_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px perimeter for critical content",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 110,
+      "yMax": 965
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "owner-map",
@@ -40,8 +82,22 @@
     "height": 1080,
     "draftPreview": true,
     "file": "draft-previews/owner-map-square-1x1-1080x1080-draft-preview.png",
+    "sha256": "ca776cfe0e7545e91bd16a17055ea3ca8119a6b63016a7ddff1de879f802bb74",
     "utmContent": "owner_map_l3_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px perimeter for critical content",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 110,
+      "yMax": 965
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "owner-map",
@@ -51,8 +107,22 @@
     "height": 1920,
     "draftPreview": false,
     "file": "publish-candidates/owner-map-story-9x16-1080x1920-publish-candidate.png",
+    "sha256": "ce729365b4656838779bb00a80cec2f4aa41d950cd49d69db89a224b6edd0c3e",
     "utmContent": "owner_map_l3_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 820,
+      "yMin": 270,
+      "yMax": 1540
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "owner-map",
@@ -62,8 +132,22 @@
     "height": 1920,
     "draftPreview": true,
     "file": "draft-previews/owner-map-story-9x16-1080x1920-draft-preview.png",
+    "sha256": "a95d0f52804b017706f3d0ab854574726b412650e9239657c4ed497f8a1d2975",
     "utmContent": "owner_map_l3_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 820,
+      "yMin": 270,
+      "yMax": 1540
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "free-draft",
@@ -73,8 +157,22 @@
     "height": 1350,
     "draftPreview": false,
     "file": "publish-candidates/free-draft-feed-4x5-1080x1350-publish-candidate.png",
+    "sha256": "c2ac70fbebb42e52d324f64d21c7cbd291e93bdc77929bac095e4af45a226850",
     "utmContent": "free_draft_process_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px side margins; no critical content in bottom 140px",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 92,
+      "yMax": 1200
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "free-draft",
@@ -84,8 +182,22 @@
     "height": 1350,
     "draftPreview": true,
     "file": "draft-previews/free-draft-feed-4x5-1080x1350-draft-preview.png",
+    "sha256": "7c7abb9e56d57735d4dd9053fdd9c4864aee851dd14fe6fca2681f3a4e004293",
     "utmContent": "free_draft_process_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px side margins; no critical content in bottom 140px",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 92,
+      "yMax": 1200
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "free-draft",
@@ -95,8 +207,22 @@
     "height": 1080,
     "draftPreview": false,
     "file": "publish-candidates/free-draft-square-1x1-1080x1080-publish-candidate.png",
+    "sha256": "dee93dfee124ebd24d8429b3558d78d36036551d4e8431801b89bd78bfc346ab",
     "utmContent": "free_draft_process_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px perimeter for critical content",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 110,
+      "yMax": 965
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "free-draft",
@@ -106,8 +232,22 @@
     "height": 1080,
     "draftPreview": true,
     "file": "draft-previews/free-draft-square-1x1-1080x1080-draft-preview.png",
+    "sha256": "024d641f61cdc0c782aec54237040764daeca19c31e08988e2d8a9c99599d580",
     "utmContent": "free_draft_process_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px perimeter for critical content",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 110,
+      "yMax": 965
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "free-draft",
@@ -117,8 +257,22 @@
     "height": 1920,
     "draftPreview": false,
     "file": "publish-candidates/free-draft-story-9x16-1080x1920-publish-candidate.png",
+    "sha256": "193624300d6ebcd57fe4eb02f01f739c5bc98367c84b7099e3438ed7200d9bc5",
     "utmContent": "free_draft_process_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 820,
+      "yMin": 270,
+      "yMax": 1540
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "free-draft",
@@ -128,8 +282,22 @@
     "height": 1920,
     "draftPreview": true,
     "file": "draft-previews/free-draft-story-9x16-1080x1920-draft-preview.png",
+    "sha256": "de131cbd66a2cd822e77e85b635e0ddf7a157f80ad920e425e77c0a257bf2abb",
     "utmContent": "free_draft_process_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 820,
+      "yMin": 270,
+      "yMax": 1540
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "location-hours",
@@ -139,8 +307,22 @@
     "height": 1350,
     "draftPreview": false,
     "file": "publish-candidates/location-hours-feed-4x5-1080x1350-publish-candidate.png",
+    "sha256": "4d95c96142181e2bdcd1dbe3f20aee14cca790de14b83a0579b3b436e6c2ed4c",
     "utmContent": "mobile_hours_s5_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px side margins; no critical content in bottom 140px",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 92,
+      "yMax": 1200
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "location-hours",
@@ -150,8 +332,22 @@
     "height": 1350,
     "draftPreview": true,
     "file": "draft-previews/location-hours-feed-4x5-1080x1350-draft-preview.png",
+    "sha256": "0ebdff38ef6c25b2b3b73fb270f310e8196bc8d07b72bdedbc0722653f711b13",
     "utmContent": "mobile_hours_s5_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px side margins; no critical content in bottom 140px",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 92,
+      "yMax": 1200
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "location-hours",
@@ -161,8 +357,22 @@
     "height": 1080,
     "draftPreview": false,
     "file": "publish-candidates/location-hours-square-1x1-1080x1080-publish-candidate.png",
+    "sha256": "aa131b9aeaf3af201a07949aa5c6fef213f2c123d3e88aa07ea2c078e21d6df6",
     "utmContent": "mobile_hours_s5_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px perimeter for critical content",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 110,
+      "yMax": 965
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "location-hours",
@@ -172,8 +382,22 @@
     "height": 1080,
     "draftPreview": true,
     "file": "draft-previews/location-hours-square-1x1-1080x1080-draft-preview.png",
+    "sha256": "7f561045c0052de6f5fcf396998b869d441d673074d9b746e08eb6f78928a059",
     "utmContent": "mobile_hours_s5_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px perimeter for critical content",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 110,
+      "yMax": 965
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "location-hours",
@@ -183,8 +407,22 @@
     "height": 1920,
     "draftPreview": false,
     "file": "publish-candidates/location-hours-story-9x16-1080x1920-publish-candidate.png",
+    "sha256": "24e80924dd2276309e5d908919a38db34b9ef7fb76aeaa6ba91e41027580b5f1",
     "utmContent": "mobile_hours_s5_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 820,
+      "yMin": 270,
+      "yMax": 1540
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "location-hours",
@@ -194,8 +432,22 @@
     "height": 1920,
     "draftPreview": true,
     "file": "draft-previews/location-hours-story-9x16-1080x1920-draft-preview.png",
+    "sha256": "a99c96be4a9dc18ee95d47be1528f0203ff66c6a10a063205e98c4bd20afd415",
     "utmContent": "mobile_hours_s5_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 820,
+      "yMin": 270,
+      "yMax": 1540
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "local-makers",
@@ -205,8 +457,22 @@
     "height": 1350,
     "draftPreview": false,
     "file": "publish-candidates/local-makers-feed-4x5-1080x1350-publish-candidate.png",
+    "sha256": "2ffb83cd3e5605b0548ba8969d67692b5ab8e75ed3e5d689c024f218748bb26f",
     "utmContent": "local_makers_s7_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px side margins; no critical content in bottom 140px",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 92,
+      "yMax": 1200
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "local-makers",
@@ -216,8 +482,22 @@
     "height": 1350,
     "draftPreview": true,
     "file": "draft-previews/local-makers-feed-4x5-1080x1350-draft-preview.png",
+    "sha256": "7f83749a947060e45e4e19c2aca3d4c4ee044ac55c6fb3dd3078bb9fde701deb",
     "utmContent": "local_makers_s7_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px side margins; no critical content in bottom 140px",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 92,
+      "yMax": 1200
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "local-makers",
@@ -227,8 +507,22 @@
     "height": 1080,
     "draftPreview": false,
     "file": "publish-candidates/local-makers-square-1x1-1080x1080-publish-candidate.png",
+    "sha256": "a6af5048c7149e1d7bcabbb5be6c3b980332fd098d3ec4ead5989c4876ee4ee4",
     "utmContent": "local_makers_s7_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px perimeter for critical content",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 110,
+      "yMax": 965
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "local-makers",
@@ -238,8 +532,22 @@
     "height": 1080,
     "draftPreview": true,
     "file": "draft-previews/local-makers-square-1x1-1080x1080-draft-preview.png",
+    "sha256": "813fea2b6e053a99d9b7fa5d531b8d20e04b15569a4598905d12eb1d198e6f93",
     "utmContent": "local_makers_s7_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "96px perimeter for critical content",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 960,
+      "yMin": 110,
+      "yMax": 965
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "local-makers",
@@ -249,8 +557,22 @@
     "height": 1920,
     "draftPreview": false,
     "file": "publish-candidates/local-makers-story-9x16-1080x1920-publish-candidate.png",
+    "sha256": "3fc8a519b05b40604fa570ffe53c8fd9e81534dc6d66c0ba0760e378affba323",
     "utmContent": "local_makers_s7_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 820,
+      "yMin": 270,
+      "yMax": 1540
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   },
   {
     "concept": "local-makers",
@@ -260,7 +582,21 @@
     "height": 1920,
     "draftPreview": true,
     "file": "draft-previews/local-makers-story-9x16-1080x1920-draft-preview.png",
+    "sha256": "d9442882a0885a7580a202839c9bb42a321f4f414c643e751e5346bf997a390b",
     "utmContent": "local_makers_s7_v1",
-    "rightsSafeSources": "Owned Pokarov logo/font assets and truthful product UI screenshots only; no supplied people/business scene PNGs used."
+    "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
+    "criticalBounds": {
+      "xMin": 120,
+      "xMax": 820,
+      "yMin": 270,
+      "yMax": 1540
+    },
+    "rightsSafeSources": [
+      "01-logos/pokarov-logo-main-transparent-2400x700.png",
+      "03-fonts/Assistant-Hebrew-Variable-200-800.woff2 (OFL-1.1)",
+      "03-fonts/Karantina-Hebrew-700.woff2 (OFL-1.1)",
+      "source/build-dan133-publish-candidates.mjs (repository-authored vector UI/map-like geometry)"
+    ],
+    "excludedSources": "No product screenshots, Google Maps content, illustrated people/business scenes, or undocumented third-party imagery."
   }
 ]

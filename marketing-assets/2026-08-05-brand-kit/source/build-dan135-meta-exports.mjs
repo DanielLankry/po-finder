@@ -12,8 +12,6 @@ const sourceAssets = [
   "01-logos/pokarov-logo-main-transparent-2400x700.png",
   "03-fonts/Assistant-Hebrew-Variable-200-800.woff2",
   "03-fonts/Karantina-Hebrew-700.woff2",
-  "04-product-screenshots/01-live-public/02-map-mobile-live-empty-1440x2560.png",
-  "04-product-screenshots/01-live-public/06-pricing-mobile-selector-1440x2560.png",
   "source/build-dan133-publish-candidates.mjs",
   "source/build-dan135-meta-exports.mjs",
 ];
@@ -54,9 +52,9 @@ const concepts = [
 ];
 
 const formats = [
-  { key: "feed_4x5", sourceKey: "feed-4x5", width: 1080, height: 1350, safeZone: "96px side margins; no critical text in bottom 140px" },
-  { key: "square_1x1", sourceKey: "square-1x1", width: 1080, height: 1080, safeZone: "96px perimeter for critical text" },
-  { key: "story_9x16", sourceKey: "story-9x16", width: 1080, height: 1920, safeZone: "no critical text in top 250px or bottom 340px; right-side UI rail avoided" },
+  { key: "feed_4x5", sourceKey: "feed-4x5", width: 1080, height: 1350, safeZone: "96px side margins; no critical content in bottom 140px", criticalBounds: { xMin: 120, xMax: 960, yMin: 92, yMax: 1200 } },
+  { key: "square_1x1", sourceKey: "square-1x1", width: 1080, height: 1080, safeZone: "96px perimeter for critical content", criticalBounds: { xMin: 120, xMax: 960, yMin: 110, yMax: 965 } },
+  { key: "story_9x16", sourceKey: "story-9x16", width: 1080, height: 1920, safeZone: "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance", criticalBounds: { xMin: 120, xMax: 820, yMin: 270, yMax: 1540 } },
 ];
 
 async function sha256(file) {
@@ -81,38 +79,13 @@ for (const concept of concepts) {
   for (const format of formats) {
     const sourceName = `${concept.sourcePrefix}-${format.sourceKey}-${format.width}x${format.height}-publish-candidate.png`;
     const outputName = `${concept.token}_${format.key}_${format.width}x${format.height}.png`;
-    const storySafeSourceName = `${concept.sourcePrefix}-feed-4x5-1080x1350-publish-candidate.png`;
-    const sourcePath = path.join(sourceRoot, format.key === "story_9x16" ? storySafeSourceName : sourceName);
+    const sourcePath = path.join(sourceRoot, sourceName);
     const outputPath = path.join(exportDir, outputName);
     if (!(await exists(sourcePath))) {
       missing.push(path.relative(root, sourcePath));
       continue;
     }
-    if (format.key === "story_9x16") {
-      const resizedSquare = await sharp(sourcePath)
-        .resize({ width: 850, height: 1063, fit: "contain", background: "#f4ead7" })
-        .png()
-        .toBuffer();
-      await sharp({
-        create: {
-          width: format.width,
-          height: format.height,
-          channels: 4,
-          background: "#f4ead7",
-        },
-      })
-        .composite([
-          {
-            input: resizedSquare,
-            left: 115,
-            top: 330,
-          },
-        ])
-        .png()
-        .toFile(outputPath);
-    } else {
-      await fs.copyFile(sourcePath, outputPath);
-    }
+    await fs.copyFile(sourcePath, outputPath);
     const meta = await sharp(outputPath).metadata();
     const hash = await sha256(outputPath);
     manifest.push({
@@ -127,12 +100,16 @@ for (const concept of concepts) {
       height: meta.height,
       file: path.relative(outRoot, outputPath),
       sha256: hash,
+      sourceCandidate: path.relative(root, sourcePath),
+      sourceSha256: await sha256(sourcePath),
       safeZoneCheck: format.safeZone,
+      criticalBounds: format.criticalBounds,
       rightsSources: sourceAssets,
       excludedSources: [
+        "04-product-screenshots/**/*.png (including all Google Maps captures)",
         "05-ad-creatives/01-platform-launch/*.png",
         "05-ad-creatives/02-stories/*.png",
-        "No illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark.",
+        "No third-party map tiles, illustrated people, fictional businesses, undocumented photos, invented signs, outcome claims, consumer inventory claims, or draft watermark.",
       ],
     });
   }
@@ -162,17 +139,21 @@ Validated: 2026-08-05
 
 ## Rights Sources
 
-Every export is built from repository-owned assets only:
+Every export uses the repository-owned Pokarov logo, repository-bundled OFL
+fonts, and deterministic vector UI/map-like geometry authored in the generator:
 
 ${sourceAssets.map((asset) => `- \`${asset}\``).join("\n")}
 
-The original DAN-131 illustrated ad PNGs under \`05-ad-creatives/01-platform-launch\` and \`05-ad-creatives/02-stories\` are not used as export inputs.
+No product screenshot or third-party map tile is used. The original DAN-131
+illustrated ad PNGs under \`05-ad-creatives/01-platform-launch\` and
+\`05-ad-creatives/02-stories\` are not used as export inputs.
 
 ## Safe-Zone Checks
 
-- Feed portrait: 96px side margins; no critical text in the bottom 140px.
-- Feed square: 96px perimeter for critical text.
-- Story/Reel: no critical text in the top 250px or bottom 340px; key RTL text is kept away from the right-side UI rail.
+- Feed portrait critical bounds: x=120–960, y=92–1200; the bottom 150px is clear.
+- Feed square critical bounds: x=120–960, y=110–965; the full 96px perimeter is clear.
+- Story/Reel critical bounds: x=120–820, y=270–1540; the top 250px, bottom 340px, and right 260px UI rail are clear.
+- Every placement is native. Body/supporting-label/CTA/domain text remains at least 12.7px at a 360px viewport; Story body text is 44px (14.7px at 360px).
 
 ## Export Hashes
 
