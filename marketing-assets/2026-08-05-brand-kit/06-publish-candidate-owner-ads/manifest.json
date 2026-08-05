@@ -157,7 +157,7 @@
     "height": 1350,
     "draftPreview": false,
     "file": "publish-candidates/free-draft-feed-4x5-1080x1350-publish-candidate.png",
-    "sha256": "c2ac70fbebb42e52d324f64d21c7cbd291e93bdc77929bac095e4af45a226850",
+    "sha256": "137edfcf62232b847751dea7f6c333ba3a859d17afa902fde299466905575599",
     "utmContent": "free_draft_process_v1",
     "safeZoneCheck": "96px side margins; no critical content in bottom 140px",
     "criticalBounds": {
@@ -182,7 +182,7 @@
     "height": 1350,
     "draftPreview": true,
     "file": "draft-previews/free-draft-feed-4x5-1080x1350-draft-preview.png",
-    "sha256": "7c7abb9e56d57735d4dd9053fdd9c4864aee851dd14fe6fca2681f3a4e004293",
+    "sha256": "583b2f07b76a967fa0d61b8b7fc0a6db410ac93e87bd2a7c29699a96f72f1509",
     "utmContent": "free_draft_process_v1",
     "safeZoneCheck": "96px side margins; no critical content in bottom 140px",
     "criticalBounds": {
@@ -207,7 +207,7 @@
     "height": 1080,
     "draftPreview": false,
     "file": "publish-candidates/free-draft-square-1x1-1080x1080-publish-candidate.png",
-    "sha256": "dee93dfee124ebd24d8429b3558d78d36036551d4e8431801b89bd78bfc346ab",
+    "sha256": "a8a78c43779999e4ad89ef0eb71871dc1d0f8492a114530a55282f33fe8248c4",
     "utmContent": "free_draft_process_v1",
     "safeZoneCheck": "96px perimeter for critical content",
     "criticalBounds": {
@@ -232,7 +232,7 @@
     "height": 1080,
     "draftPreview": true,
     "file": "draft-previews/free-draft-square-1x1-1080x1080-draft-preview.png",
-    "sha256": "024d641f61cdc0c782aec54237040764daeca19c31e08988e2d8a9c99599d580",
+    "sha256": "7cbdea819f7ac188b3bd9ce98c16ccc16ca5db1169f296f0562b1a6cd98eb77b",
     "utmContent": "free_draft_process_v1",
     "safeZoneCheck": "96px perimeter for critical content",
     "criticalBounds": {
@@ -257,7 +257,7 @@
     "height": 1920,
     "draftPreview": false,
     "file": "publish-candidates/free-draft-story-9x16-1080x1920-publish-candidate.png",
-    "sha256": "193624300d6ebcd57fe4eb02f01f739c5bc98367c84b7099e3438ed7200d9bc5",
+    "sha256": "296fce4e2159ba70263ae4409127c1e519396545cd982e3a7376a1e553c223d0",
     "utmContent": "free_draft_process_v1",
     "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
     "criticalBounds": {
@@ -282,7 +282,7 @@
     "height": 1920,
     "draftPreview": true,
     "file": "draft-previews/free-draft-story-9x16-1080x1920-draft-preview.png",
-    "sha256": "de131cbd66a2cd822e77e85b635e0ddf7a157f80ad920e425e77c0a257bf2abb",
+    "sha256": "adf93fd15aebaa0703feaa4bf7af2c82d657eb6c2217c427804aa81fe5ecce76",
     "utmContent": "free_draft_process_v1",
     "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
     "criticalBounds": {
@@ -557,7 +557,7 @@
     "height": 1920,
     "draftPreview": false,
     "file": "publish-candidates/local-makers-story-9x16-1080x1920-publish-candidate.png",
-    "sha256": "3fc8a519b05b40604fa570ffe53c8fd9e81534dc6d66c0ba0760e378affba323",
+    "sha256": "8d91966e5df8663de32936fe56178da335e0d06336f0fd14dbd4ca413ab79fc8",
     "utmContent": "local_makers_s7_v1",
     "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
     "criticalBounds": {
@@ -582,7 +582,7 @@
     "height": 1920,
     "draftPreview": true,
     "file": "draft-previews/local-makers-story-9x16-1080x1920-draft-preview.png",
-    "sha256": "d9442882a0885a7580a202839c9bb42a321f4f414c643e751e5346bf997a390b",
+    "sha256": "c69d3bc9cab429f8966d82ae4e31812710ac4081c3cfa208ff42c5376dbbdd09",
     "utmContent": "local_makers_s7_v1",
     "safeZoneCheck": "250px top, 340px bottom, 120px left, and 260px right UI-rail clearance",
     "criticalBounds": {
