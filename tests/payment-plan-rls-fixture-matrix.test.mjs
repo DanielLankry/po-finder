@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { PLAN_CODES, PLANS } from "../lib/plans.ts";
+import { isProductionAppHost } from "./utils/destructive-target.ts";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const matrixPath = resolve(repositoryRoot, "docs/quality/payment-plan-rls-fixture-matrix.md");
@@ -61,6 +62,8 @@ test("payment-plan matrix lists every supported listing plan exactly once and in
 });
 
 test("fixture matrix names required scenario IDs and safety boundaries", () => {
+  const safetyContract = takeSection("Safety Contract");
+  assert.ok(safetyContract, "missing Safety Contract section");
   assert.ok(!matrix.includes("npm run docs:links"), "remove stale docs:links command");
   assert.ok(matrix.includes("PLAYWRIGHT_BASE_URL"), "missing PLAYWRIGHT_BASE_URL guard text");
   assert.ok(matrix.includes("ymqlqdhelsocibhnanjy"), "missing production Supabase safeguard");
@@ -74,7 +77,20 @@ test("fixture matrix names required scenario IDs and safety boundaries", () => {
     "supabase db reset",
     "production migrations",
   ]) {
-    assert.ok(matrix.includes(requiredText), `missing safety boundary text: ${requiredText}`);
+    assert.ok(
+      matrix.includes(requiredText),
+      `missing safety boundary text: ${requiredText}`,
+    );
+  }
+
+  for (const requiredPaymentBoundary of [
+    "settle_payment_attempt",
+    "do not call HYP or charge cards",
+  ]) {
+    assert.ok(
+      safetyContract.includes(requiredPaymentBoundary),
+      `missing payment safety boundary: ${requiredPaymentBoundary}`,
+    );
   }
 
   for (const fixture of [
@@ -112,6 +128,22 @@ test("fixture matrix names required scenario IDs and safety boundaries", () => {
     "payment-renewal-refund-lifo",
   ]) {
     assert.ok(matrix.includes(`\`${id}\``), `missing matrix scenario id: ${id}`);
+  }
+});
+
+test("production app guard rejects canonical and trailing-dot hostnames", () => {
+  for (const appUrl of [
+    "https://pokarov.co.il",
+    "https://www.pokarov.co.il",
+    "https://pokarov.co.il.",
+    "https://www.pokarov.co.il.",
+  ]) {
+    const hostname = new URL(appUrl).hostname;
+    assert.equal(isProductionAppHost(hostname), true, `guard allowed ${hostname}`);
+  }
+
+  for (const hostname of ["pokarov.co.il.example.test", "notpokarov.co.il"]) {
+    assert.equal(isProductionAppHost(hostname), false, `guard blocked ${hostname}`);
   }
 });
 
