@@ -24,5 +24,8 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
+  const billingUrl = new URL("/dashboard/billing", origin);
+  billingUrl.searchParams.set("payment", "cancelled");
+  if (attemptId) billingUrl.searchParams.set("attempt", attemptId);
+  return NextResponse.redirect(billingUrl);
 }
