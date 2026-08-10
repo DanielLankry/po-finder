@@ -1,7 +1,11 @@
 function requireEnv(name: string): string {
-  const value = process.env[name];
+  const value = process.env[name]?.trim();
   if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
+    throw new Error(
+      `Missing required environment variable: ${name}. ` +
+        "For local development, configure .env.local (npm run vercel:env for a linked Vercel project). " +
+        "For hosted builds, configure the variable in the matching Vercel Development, Preview, or Production environment."
+    );
   }
   return value;
 }
