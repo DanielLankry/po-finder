@@ -8,6 +8,9 @@
 ## DONE
 
 ### Nightly Quality
+- [x] Keep the mobile navbar audience rotating when motion is reduced — 2026-08-11
+  - Files modified: `components/layout/Navbar.tsx`, `components/ui/typewriter.tsx`, `tests/public/mobile-layout.spec.ts`, `TASKS.md`, `AGENTS.md`
+  - Summary: Preserved the normal typewriter animation while replacing the reduced-motion static fallback with accessible whole-phrase swaps, so the mobile audience text always changes without forcing motion-sensitive visitors through typing animation.
 - [x] Render the launch example as a standard business card and hide live campaign demand — 2026-08-11
   - Files modified: `app/api/promotions/first-20/route.ts`, `components/business/BusinessCard.tsx`, `components/business/BusinessListPanel.tsx`, `components/marketing/ExampleBusinessCard.tsx`, `components/marketing/FirstBusinessesOfferModal.tsx`, `lib/launch-promotion.ts`, `tests/first-twenty-promotion.test.mjs`, `tests/public/launch-promotion.spec.ts`, `tests/public/map-availability.spec.ts`, `tests/public/mobile-layout.spec.ts`, `TASKS.md`, `AGENTS.md`
   - Summary: Replaced the bespoke empty-state promotion card with the same standard card used by real businesses, kept the demo clearly labelled and inert, and removed live claimed/remaining counts from the public API, popup, banner, and analytics while retaining the fixed 20-business limit.

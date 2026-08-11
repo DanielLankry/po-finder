@@ -170,8 +170,8 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
             >
               <Image src="/logo.png" alt="פה קרוב" width={52} height={52} priority className="rounded-xl w-10 h-10 sm:w-[52px] sm:h-[52px]" />
             </Link>
-            {/* The changing audience stays visible on phones, with a static
-                equivalent when the visitor has requested reduced motion. */}
+            {/* The changing audience stays visible on phones. Typewriter swaps
+                whole phrases without animation when reduced motion is requested. */}
           <div
             className="flex h-11 w-[86px] items-center overflow-hidden border-r-2 border-[#17402D]/15 pr-2 min-[360px]:w-[100px] min-[560px]:w-[130px] sm:w-[160px] md:w-[190px] lg:w-[260px] xl:w-[295px]"
             data-testid="navbar-changing-text"
@@ -182,10 +182,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
               data-testid="navbar-changing-text-visual"
               aria-hidden="true"
             >
-              <span className="hidden whitespace-nowrap font-display text-[clamp(0.875rem,4.4vw,1.875rem)] font-bold leading-none text-[#2D6A4F] motion-reduce:inline">
-                לעסקים קטנים
-              </span>
-              <div className="min-w-0 overflow-hidden motion-reduce:hidden">
+              <div className="min-w-0 overflow-hidden">
                 <Typewriter
                   text={[
                     "לעסקים קטנים",
