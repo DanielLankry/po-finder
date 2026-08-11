@@ -3,8 +3,6 @@ import { expect, test } from "@playwright/test";
 const promotion = {
   code: "first-20-3m",
   capacity: 20,
-  claimedCount: 7,
-  remaining: 13,
   durationMonths: 3,
   startsAt: "2026-08-11T00:00:00.000Z",
   enrollmentEndsAt: "2026-12-31T21:59:59.000Z",
@@ -34,13 +32,15 @@ test("the launch offer opens only once per browser session", async ({ page }) =>
   await page.goto("/");
   const modal = page.getByTestId("first-businesses-offer-modal");
   await expect(modal).toBeVisible();
-  await expect(modal.getByTestId("promotion-remaining")).toHaveText("13 מתוך 20");
+  await expect(modal.getByTestId("promotion-capacity")).toHaveText("עד 20 עסקים בלבד");
+  await expect(modal).not.toContainText("נותרו");
   await modal.getByRole("button", { name: "סגירה" }).click();
 
   await page.reload();
   await page.waitForTimeout(1_000);
   await expect(modal).toHaveCount(0);
-  await expect(page.getByTestId("promotion-list-banner")).toContainText("נותרו 13");
+  await expect(page.getByTestId("promotion-list-banner")).toContainText("20 העסקים הראשונים");
+  await expect(page.getByTestId("promotion-list-banner")).not.toContainText("נותרו");
 });
 
 test("a zero-result search never substitutes the example for a real platform", async ({ page }) => {

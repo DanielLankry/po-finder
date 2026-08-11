@@ -17,7 +17,7 @@ import { trackPostHogEvent } from "@/lib/posthog";
 
 const SESSION_KEY = "po-first-businesses-offer-seen";
 
-/** Shows the bounded launch offer once per browser session while places remain. */
+/** Shows the bounded launch offer once per session without exposing live demand. */
 export default function FirstBusinessesOfferModal({
   promotion,
 }: {
@@ -27,7 +27,7 @@ export default function FirstBusinessesOfferModal({
   const tracked = useRef(false);
 
   useEffect(() => {
-    if (!promotion?.isOpen || promotion.remaining <= 0) return;
+    if (!promotion?.isOpen) return;
     if (sessionStorage.getItem(SESSION_KEY)) return;
 
     const timer = window.setTimeout(() => {
@@ -47,7 +47,6 @@ export default function FirstBusinessesOfferModal({
     });
     trackPostHogEvent("launch_promotion_viewed", {
       campaign_code: promotion.code,
-      remaining: promotion.remaining,
     });
   }, [open, promotion]);
 
@@ -86,9 +85,9 @@ export default function FirstBusinessesOfferModal({
             <div className="brand-panel-soft flex items-center gap-3 bg-[#EFF5F0] p-4">
               <BadgeCheck className="h-6 w-6 shrink-0 text-[#2D6A4F]" aria-hidden="true" />
               <div>
-                <p className="text-xs font-bold text-[#17402D]/60">מקומות שנותרו</p>
-                <p className="font-display text-3xl text-[#17402D]" data-testid="promotion-remaining">
-                  {promotion.remaining} מתוך {promotion.capacity}
+                <p className="text-xs font-bold text-[#17402D]/60">מבצע מוגבל</p>
+                <p className="font-display text-2xl text-[#17402D]" data-testid="promotion-capacity">
+                  עד {promotion.capacity} עסקים בלבד
                 </p>
               </div>
             </div>
@@ -112,7 +111,6 @@ export default function FirstBusinessesOfferModal({
               trackPostHogEvent("launch_promotion_cta_clicked", {
                 campaign_code: promotion.code,
                 placement: "modal",
-                remaining: promotion.remaining,
               });
             }}
             className="brand-button flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-5 text-base font-black"

@@ -9,6 +9,10 @@ const migration = readFileSync(
   ),
   "utf8",
 );
+const publicContract = readFileSync(
+  new URL("../lib/launch-promotion.ts", import.meta.url),
+  "utf8",
+);
 
 test("campaign has the agreed bounded capacity, duration, and end date", () => {
   assert.match(migration, /'first-20-3m',[\s\S]*?20,[\s\S]*?0,[\s\S]*?3,/);
@@ -51,4 +55,14 @@ test("browser roles can read only aggregate status and cannot manage campaign ro
     ),
     false,
   );
+});
+
+test("public campaign contract exposes the fixed cap but not live claim counts", () => {
+  const interfaceBody = publicContract.match(
+    /export interface LaunchPromotionStatus \{([\s\S]*?)\n\}/,
+  )?.[1];
+  assert.ok(interfaceBody);
+  assert.match(interfaceBody, /capacity: number/);
+  assert.match(interfaceBody, /isOpen: boolean/);
+  assert.doesNotMatch(interfaceBody, /claimedCount|remaining/);
 });

@@ -153,8 +153,6 @@ test.describe("mobile layout regression coverage", () => {
           promotion: {
             code: "first-20-3m",
             capacity: 20,
-            claimedCount: 3,
-            remaining: 17,
             durationMonths: 3,
             startsAt: "2026-08-11T00:00:00.000Z",
             enrollmentEndsAt: "2026-12-31T21:59:59.000Z",
@@ -167,16 +165,17 @@ test.describe("mobile layout regression coverage", () => {
     await page.goto("/");
     const modal = page.getByTestId("first-businesses-offer-modal");
     await expect(modal).toBeVisible();
-    await expect(modal.getByText("17 מתוך 20")).toBeVisible();
+    await expect(modal.getByText("עד 20 עסקים בלבד")).toBeVisible();
+    await expect(modal).not.toContainText("נותרו");
     await modal.getByRole("button", { name: "סגירה" }).click();
 
     const example = page.getByTestId("example-business-card");
     await expect(example).toBeVisible();
     await expect(example.getByText("עסק לדוגמה", { exact: true })).toBeVisible();
-    await expect(example.getByText("קפה השכונה", { exact: true })).toBeVisible();
-    await expect(example.getByRole("link", { name: /שמירת מקום חינם/ })).toHaveAttribute(
-      "href",
-      "/auth/register?redirectTo=%2Fdashboard%2Fprofile%3Fcampaign%3Dfirst-20-3m",
-    );
+    await expect(example.getByText("נונה קפה", { exact: true })).toBeVisible();
+    await expect(example.getByText("לבונטין, תל אביב-יפו", { exact: true })).toBeVisible();
+    await expect(example.getByText("4.8", { exact: true })).toBeVisible();
+    await expect(example.getByRole("button", { name: "נונה קפה — קפה ושתייה" })).toBeDisabled();
+    await expect(example.getByRole("button", { name: "שמור למועדפים" })).toHaveCount(0);
   });
 });

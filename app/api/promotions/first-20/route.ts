@@ -7,7 +7,7 @@ import {
 
 export const dynamic = "force-dynamic";
 
-/** Returns only aggregate campaign availability; no owner or business data is exposed. */
+/** Returns campaign eligibility and its fixed cap without exposing live claims. */
 export async function GET() {
   const supabase = await createClient();
   const { data, error } = await supabase
