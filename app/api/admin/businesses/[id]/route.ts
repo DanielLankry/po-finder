@@ -15,7 +15,6 @@ const patchSchema = z.object({
   category: z.enum(["coffee", "food", "sweets", "meat", "vegan", "celiac", "flowers", "jewelry", "vintage"]).optional(),
   kashrut: z.enum(["kosher", "kosher_mehadrin", "none"]).optional(),
   phone: z.string().max(40).nullable().optional(),
-  whatsapp: z.string().max(40).nullable().optional(),
   website: z.string().max(500).nullable().optional(),
   instagram: z.string().max(160).nullable().optional(),
   business_number: z.string().max(80).nullable().optional(),

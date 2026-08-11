@@ -32,7 +32,11 @@ function RegisterForm() {
     redirectTo?.startsWith("/pricing") ||
     redirectTo?.startsWith("/dashboard/billing") ||
     false;
-  const [role, setRole] = useState<UserRole>(() => (isPricingSignup ? "business_owner" : "customer"));
+  const isPromotionSignup =
+    redirectTo?.startsWith("/dashboard/profile") &&
+    redirectTo.includes("campaign=first-20-3m");
+  const isBusinessSignup = isPricingSignup || isPromotionSignup;
+  const [role, setRole] = useState<UserRole>(() => (isBusinessSignup ? "business_owner" : "customer"));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -172,11 +176,19 @@ function RegisterForm() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2D6A4F] opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[#2D6A4F]" />
                 </span>
-                {isPricingSignup ? "המשך לבחירת משך ההופעה" : "פתיחת חשבון לעסקים ולקוחות"}
+                {isPromotionSignup
+                  ? "המשך ליצירת פרופיל ושמירת מקום"
+                  : isPricingSignup
+                    ? "המשך לבחירת משך ההופעה"
+                    : "פתיחת חשבון לעסקים ולקוחות"}
               </div>
 
               <h1 className="font-display text-5xl text-[#17402D] mb-2 leading-none">
-                {isPricingSignup ? "כמעט סיימנו: פתחו חשבון להצטרפות" : "יצירת חשבון חדש"}
+                {isPromotionSignup
+                  ? "פותחים חשבון וממשיכים לשמירת מקום"
+                  : isPricingSignup
+                    ? "כמעט סיימנו: פתחו חשבון להצטרפות"
+                    : "יצירת חשבון חדש"}
               </h1>
               <p className="text-[#78716C] text-sm mb-6">
                 כבר יש לכם חשבון?{" "}
@@ -191,7 +203,7 @@ function RegisterForm() {
                 <p className="text-[#17402D] font-semibold text-sm mb-3">אני מצטרף/ת בתור:</p>
                 <div className="grid grid-cols-2 gap-3">
                   <RoleCard active={role === "business_owner"} onClick={() => setRole("business_owner")}
-                    icon={<Store className="h-5 w-5" />} title="בעל עסק" description="פרסום בתשלום חד־פעמי" />
+                    icon={<Store className="h-5 w-5" />} title="בעל עסק" description={isPromotionSignup ? "3 חודשים חינם בכפוף למקום" : "פרסום בתשלום חד־פעמי"} />
                   <RoleCard active={role === "customer"} onClick={() => setRole("customer")}
                     icon={<ShoppingCart className="h-5 w-5" />} title="לקוח" description="גלשו והשאירו ביקורת" />
                 </div>
@@ -240,7 +252,13 @@ function RegisterForm() {
 
                 <button type="submit" disabled={loading}
                   className="brand-button w-full h-12 rounded-xl font-bold text-[15px] transition-all disabled:opacity-60">
-                  {loading ? "...נרשמים" : isPricingSignup ? "יצירת חשבון והמשך לתשלום" : "יצירת חשבון"}
+                  {loading
+                    ? "...נרשמים"
+                    : isPromotionSignup
+                      ? "יצירת חשבון והמשך לפרופיל העסק"
+                      : isPricingSignup
+                        ? "יצירת חשבון והמשך לתשלום"
+                        : "יצירת חשבון"}
                 </button>
               </form>
 

@@ -10,15 +10,15 @@ const MOBILE_ROUTES = [
   "/auth/register",
 ];
 
-const RESPONSIVE_VIEWPORTS = [
-  { width: 320, height: 700 },
-  { width: 375, height: 760 },
-  { width: 768, height: 900 },
+const CUSTOMER_FLOW_VIEWPORTS = [
+  { width: 320, height: 860 },
+  { width: 390, height: 860 },
+  { width: 430, height: 860 },
 ] as const;
 
-const NAVBAR_VIEWPORTS = [
-  ...RESPONSIVE_VIEWPORTS,
-  { width: 430, height: 860 },
+const RESPONSIVE_VIEWPORTS = [
+  ...CUSTOMER_FLOW_VIEWPORTS,
+  { width: 768, height: 900 },
 ] as const;
 
 test.describe("mobile layout regression coverage", () => {
@@ -27,7 +27,7 @@ test.describe("mobile layout regression coverage", () => {
     await page.addInitScript(() => localStorage.setItem("po-cookie-consent", "accepted"));
   });
 
-  for (const viewport of NAVBAR_VIEWPORTS) {
+  for (const viewport of RESPONSIVE_VIEWPORTS) {
     test(`navbar changing text is visible and contained at ${viewport.width}px`, async ({ page }) => {
       await page.setViewportSize(viewport);
       await page.goto("/");
@@ -38,6 +38,7 @@ test.describe("mobile layout regression coverage", () => {
       const actions = page.getByTestId("navbar-actions");
       const changingText = page.getByTestId("navbar-changing-text");
       const changingTextVisual = page.getByTestId("navbar-changing-text-visual");
+      const menuButton = page.getByRole("button", { name: "פתיחת תפריט", exact: true });
 
       await expect(header).toBeVisible();
       await expect(nav).toBeVisible();
@@ -46,11 +47,22 @@ test.describe("mobile layout regression coverage", () => {
       await expect(changingText).toBeVisible();
       await expect(changingTextVisual).toContainText("ל");
       await expect(page.getByRole("button", { name: "מועדפים" })).toBeVisible();
-      const menuButton = page.getByRole("button", { name: "פתיחת תפריט", exact: true });
       await expect(menuButton).toBeVisible();
 
       if (viewport.width < 768) {
-        await expect(page.getByRole("button", { name: "פתיחת חיפוש" })).toBeVisible();
+        const searchButton = page.getByRole("button", { name: "פתיחת חיפוש" });
+        const favoritesButton = page.getByRole("button", { name: "מועדפים" });
+        await expect(searchButton).toBeVisible();
+
+        const controlBoxes = await Promise.all([
+          searchButton.boundingBox(),
+          favoritesButton.boundingBox(),
+          menuButton.boundingBox(),
+        ]);
+        for (const box of controlBoxes) {
+          expect(box?.width).toBeGreaterThanOrEqual(44);
+          expect(box?.height).toBeGreaterThanOrEqual(44);
+        }
       } else {
         await expect(page.getByRole("button", { name: "פתיחת חיפוש" })).toBeHidden();
       }
@@ -129,13 +141,42 @@ test.describe("mobile layout regression coverage", () => {
     expect(primaryBox!.width).toBeGreaterThanOrEqual(gridBox!.width - 1);
   });
 
-  test("an empty launch invites the first business in Hebrew", async ({ page }) => {
+  test("an empty launch shows the bounded offer and a labelled example business", async ({ page }) => {
     await page.route("**/api/businesses?includeSchedule=1", async (route) => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ businesses: [] }) });
     });
+    await page.route("**/api/promotions/first-20", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          promotion: {
+            code: "first-20-3m",
+            capacity: 20,
+            claimedCount: 3,
+            remaining: 17,
+            durationMonths: 3,
+            startsAt: "2026-08-11T00:00:00.000Z",
+            enrollmentEndsAt: "2026-12-31T21:59:59.000Z",
+            isOpen: true,
+          },
+        }),
+      });
+    });
 
     await page.goto("/");
-    await expect(page.getByText("היו העסק הראשון בפלטפורמה החדשה שלנו").first()).toBeVisible();
-    await expect(page.getByRole("link", { name: "פרסמו את העסק הראשון" })).toHaveAttribute("href", "/pricing");
+    const modal = page.getByTestId("first-businesses-offer-modal");
+    await expect(modal).toBeVisible();
+    await expect(modal.getByText("17 מתוך 20")).toBeVisible();
+    await modal.getByRole("button", { name: "סגירה" }).click();
+
+    const example = page.getByTestId("example-business-card");
+    await expect(example).toBeVisible();
+    await expect(example.getByText("עסק לדוגמה", { exact: true })).toBeVisible();
+    await expect(example.getByText("קפה השכונה", { exact: true })).toBeVisible();
+    await expect(example.getByRole("link", { name: /שמירת מקום חינם/ })).toHaveAttribute(
+      "href",
+      "/auth/register?redirectTo=%2Fdashboard%2Fprofile%3Fcampaign%3Dfirst-20-3m",
+    );
   });
 });

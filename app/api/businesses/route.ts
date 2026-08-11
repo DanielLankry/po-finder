@@ -52,7 +52,6 @@ export async function GET(req: NextRequest) {
         lng,
         weekly_hours,
         phone,
-        whatsapp,
         website,
         instagram,
         kashrut,

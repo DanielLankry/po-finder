@@ -32,4 +32,14 @@ test('contact page renders form', async ({ page }) => {
   await expect(form).toBeVisible();
   const inputs = form.locator('input, textarea');
   expect(await inputs.count()).toBeGreaterThan(0);
+  await expect(page.getByText('נשיב תוך 2 ימי עסקים', { exact: false })).toBeVisible();
+  await expect(page.locator('body')).not.toContainText(/3 ימי עסקים/);
 });
+
+for (const route of ['/about', '/contact', '/pricing', '/vendors']) {
+  test(`public contact options exclude WhatsApp: ${route}`, async ({ page }) => {
+    await page.goto(route);
+    await expect(page.locator('a[href*="wa.me"], a[href*="whatsapp"]')).toHaveCount(0);
+    await expect(page.locator('body')).not.toContainText(/וואטסאפ|WhatsApp/i);
+  });
+}

@@ -106,7 +106,6 @@ async function DashboardContent({
 
   const viewCount = analyticsData?.filter((e: { event_type: string }) => e.event_type === "view").length ?? 0;
   const callCount = analyticsData?.filter((e: { event_type: string }) => e.event_type === "call_click").length ?? 0;
-  const whatsappCount = analyticsData?.filter((e: { event_type: string }) => e.event_type === "whatsapp_click").length ?? 0;
 
   return (
     <>
@@ -135,9 +134,13 @@ async function DashboardContent({
             <Clock3 className="h-5 w-5 text-amber-600" aria-hidden="true" />
           </div>
           <div>
-            <p className="font-semibold text-amber-900 text-sm">הטיוטה ממתינה לאימות</p>
+            <p className="font-semibold text-amber-900 text-sm">
+              {business.promotion_code === "first-20-3m" ? "המקום נשמר והטיוטה ממתינה לאימות" : "הטיוטה ממתינה לאימות"}
+            </p>
             <p className="text-amber-700 text-xs mt-1 leading-relaxed">
-              פרטי העסק נשמרו באופן פרטי. הצוות יאמת את העסק, ואז יהיה אפשר לבחור את משך ההופעה ולהעלות אותו לאוויר.
+              {business.promotion_code === "first-20-3m"
+                ? "פרטי העסק נשמרו באופן פרטי. לאחר אישור מנהל העסק יעלה לאוויר, ורק אז יתחילו 3 החודשים החינם."
+                : "פרטי העסק נשמרו באופן פרטי. הצוות יאמת את העסק, ואז יהיה אפשר לבחור את משך ההופעה ולהעלות אותו לאוויר."}
             </p>
           </div>
         </div>
@@ -247,7 +250,7 @@ async function DashboardContent({
           נתוני ביקורים ופעולות על הדף הציבורי
         </p>
         <div className="brand-rule mb-5" aria-hidden="true" />
-        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-4">
           <div className="rounded-xl bg-[#EFF5F0] p-3 text-center">
             <div className="flex items-center justify-center mb-1">
               <Eye className="h-4 w-4 text-[#4A8B66]" aria-hidden="true" />
@@ -261,13 +264,6 @@ async function DashboardContent({
             </div>
             <p className="font-display font-bold text-2xl text-stone-900">{callCount}</p>
             <p className="text-stone-500 text-xs mt-0.5">לחיצות שיחה</p>
-          </div>
-          <div className="rounded-xl bg-[#F6E3D9] p-3 text-center">
-            <div className="flex items-center justify-center mb-1">
-              <MessageCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
-            </div>
-            <p className="font-display font-bold text-2xl text-stone-900">{whatsappCount}</p>
-            <p className="text-stone-500 text-xs mt-0.5">וואטסאפ</p>
           </div>
         </div>
       </div>

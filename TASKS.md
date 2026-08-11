@@ -1,11 +1,19 @@
 # Po-Finder (פה קרוב) - Tasks
 
 > Small business discovery app (Next.js 16 + Supabase + Google Maps)
-> Last updated: 2026-07-16
+> Last updated: 2026-08-11
 
 ---
 
 ## DONE
+
+### Nightly Quality
+- [x] Add the first-20 businesses launch promotion and honest empty-state demo — 2026-08-11
+  - Files modified: `.vercelignore`, `app/MapPage.tsx`, `app/admin/businesses/page.tsx`, `app/api/admin/businesses/approve/route.ts`, `app/api/promotions/first-20/route.ts`, `app/auth/register/page.tsx`, `app/dashboard/billing/BillingClient.tsx`, `app/dashboard/page.tsx`, `app/dashboard/profile/page.tsx`, `components/business/BusinessListPanel.tsx`, `components/marketing/ExampleBusinessCard.tsx`, `components/marketing/FirstBusinessesOfferModal.tsx`, `components/ui/dialog.tsx`, `lib/email-templates.ts`, `lib/launch-promotion.ts`, `lib/types.ts`, `package.json`, `package-lock.json`, `supabase/migrations/20260811085142_first_twenty_business_promotion.sql`, `tests/auth/auth-pages.spec.ts`, `tests/first-twenty-promotion.test.mjs`, `tests/public/launch-promotion.spec.ts`, `tests/public/mobile-layout.spec.ts`, `TASKS.md`, `AGENTS.md`
+  - Summary: Added an atomic 20-place campaign that reserves on draft creation and starts three free calendar months only after manager approval, paired it with a live counter, session-scoped popup, owner/admin lifecycle messaging, and a clearly labelled example listing that appears only when the real platform is empty; also refreshed vulnerable production overrides until `npm audit --omit=dev` returned zero advisories.
+- [x] Patch production dependencies and isolate safe Playwright teardown — 2026-07-27
+  - Files modified: `package.json`, `package-lock.json`, `tests/destructive/global-teardown.ts`, `tests/public/pricing-v2.spec.ts`, `TASKS.md`, `AGENTS.md`
+  - Summary: Upgraded Next.js and vulnerable transitive packages, aligned pricing assertions with the enforced launch ladder, and prevented public/auth runs from loading destructive Supabase helpers.
 
 ### Authentication & Users
 - [x] Supabase Auth integration (email/password + Google OAuth)
@@ -70,6 +78,9 @@
 - [x] Remove the visible navbar wordmark — 2026-07-16
   - Files modified: `components/layout/Navbar.tsx`, `tests/public/mobile-layout.spec.ts`, `TASKS.md`, `AGENTS.md`
   - Summary: Kept only the linked logo and rotating audience text in the top navbar, with focused mobile coverage at the 430px breakpoint where the fixed wordmark previously appeared.
+- [x] Restore mobile navbar touch targets in production — 2026-07-27
+  - Files modified: `components/layout/Navbar.tsx`, `tests/public/mobile-layout.spec.ts`, `TASKS.md`, `AGENTS.md`
+  - Summary: Kept search, favorites, and menu controls at 44×44 px on the smallest screens and added regression coverage so compact mobile layouts remain accessible without overflowing.
 
 ### Static Pages
 - [x] Privacy policy page
@@ -77,6 +88,9 @@
 - [x] Accessibility statement page
 - [x] About, contact, pricing, and vendor launch pages
 - [x] Dynamic SEO metadata for business pages
+- [x] Remove customer-facing WhatsApp and shorten the support response time — 2026-08-11
+  - Files modified: `app/about/page.tsx`, `app/contact/page.tsx`, `app/vendors/page.tsx`, `app/businesses/[id]/page.tsx`, `app/dashboard/profile/page.tsx`, `app/dashboard/page.tsx`, `app/admin/businesses/page.tsx`, `app/api/admin/businesses/route.ts`, `app/api/admin/businesses/[id]/route.ts`, `app/api/businesses/route.ts`, `app/privacy/page.tsx`, `app/globals.css`, `components/business/ShareButtons.tsx`, `components/business/StatusCard.tsx`, `components/legal/LegalIdentity.tsx`, `lib/db/businesses.ts`, `lib/email-templates.ts`, `lib/site-config.ts`, `tests/public/pages.spec.ts`, `TASKS.md`, `AGENTS.md`
+  - Summary: Removed WhatsApp contact, sharing, entry, admin, public-data, and analytics surfaces while keeping email, phone, and QR alternatives, and changed the promised support response time from three to two business days.
 
 ### Launch Readiness
 - [x] Complete the ordered production hardening rollout — 2026-07-16
@@ -94,6 +108,9 @@
 - [x] Add autonomous engineering and Meta marketing operators — 2026-07-16
   - Files modified: `.agents/README.md`, `.agents/site-engineer/AGENT.md`, `.agents/meta-marketing/AGENT.md`, `.agents/meta-marketing/TARGETS.md`, `TASKS.md`, `AGENTS.md`
   - Summary: Added approval-gated production engineering and Facebook/Instagram marketing runbooks and registered ten recurring Israel-time health, QA, maintenance, performance, creative, attribution, and growth automations for the project.
+- [x] Restore the email-only pricing contact panel — 2026-07-28
+  - Files modified: `app/pricing/PricingClient.tsx`, `tests/public/pricing-v2.spec.ts`, `TASKS.md`
+  - Summary: Removed the unintended WhatsApp action from pricing and added regression coverage so pre-payment contact stays email-only.
 - [x] Convert the live site from QA data to a customer-ready launch funnel — 2026-07-16
   - Files modified: `app/MapPage.tsx`, `app/api/contact/route.ts`, `app/api/payments/checkout/route.ts`, `app/api/payments/return/route.ts`, `app/auth/callback/route.ts`, `app/auth/register/page.tsx`, `app/dashboard/billing/BillingClient.tsx`, `app/dashboard/billing/page.tsx`, `app/dashboard/profile/page.tsx`, `app/privacy/page.tsx`, `app/refund/page.tsx`, `app/terms/page.tsx`, `components/business/BusinessListPanel.tsx`, `components/providers/MetaPixelProvider.tsx`, `lib/meta-pixel.ts`, `tests/auth/auth-pages.spec.ts`, `tests/public/meta-pixel-consent.spec.ts`, `tests/public/mobile-layout.spec.ts`, `tests/utils/supabase-admin.ts`, `TASKS.md`, `AGENTS.md`
   - Summary: Removed every test business from production while preserving payment history, added a Hebrew first-business launch state, repaired pricing and Google signup roles, added consent-aware Meta registration/lead/checkout/purchase events, stopped customer-facing payment detail leaks, made contact delivery truthful, updated legal dates, and hard-blocked destructive tests from the live project.

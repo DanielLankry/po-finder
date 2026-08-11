@@ -73,7 +73,7 @@ function DialogContent({
             className="business-type-button absolute top-4 right-4 flex h-11 w-11 min-h-11 items-center justify-center p-0 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <XIcon />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">סגירה</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>

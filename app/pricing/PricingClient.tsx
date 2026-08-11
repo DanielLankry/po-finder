@@ -104,7 +104,6 @@ export default function PricingClient({
               </p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
-
               <a
                 href={`mailto:${BUSINESS_INFO.contactEmail}`}
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-stone-300 bg-white px-5 font-semibold text-stone-700 hover:bg-stone-50"

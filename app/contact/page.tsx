@@ -5,7 +5,7 @@ import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Mail, Send, MessageCircle, Store, Bug, ShieldCheck, CreditCard, HelpCircle } from "lucide-react";
-import { BUSINESS_INFO, getWhatsAppHref } from "@/lib/site-config";
+import { BUSINESS_INFO } from "@/lib/site-config";
 
 const SUBJECTS = [
   { value: "general", label: "שאלה כללית", icon: HelpCircle },
@@ -15,8 +15,6 @@ const SUBJECTS = [
   { value: "billing", label: "חיוב ותשלומים", icon: CreditCard },
   { value: "other", label: "אחר", icon: MessageCircle },
 ];
-
-const whatsappHref = getWhatsAppHref();
 
 export default function ContactPage() {
   const [formState, setFormState] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -60,22 +58,9 @@ export default function ContactPage() {
           <div className="brand-panel mb-6 overflow-hidden bg-[#FFFDF7]">
             <div className="flex flex-col gap-3 border-b-2 border-[#17402D] bg-[#DDEBE0] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
               <p className="text-sm text-[#17402D]">
-                {whatsappHref
-                  ? "לפרטים, הצטרפות או שאלות לגבי השירות ניתן לפנות אלינו בוואטסאפ או במייל."
-                  : "לפרטים, הצטרפות או שאלות לגבי השירות ניתן לפנות אלינו במייל."}
+                לפרטים, הצטרפות או שאלות לגבי השירות ניתן לפנות אלינו במייל.
               </p>
               <div className="flex flex-wrap gap-2">
-                {whatsappHref ? (
-                  <a
-                    href={whatsappHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border-2 border-[#168A42] bg-[#25D366] px-4 text-sm font-semibold text-white shadow-[2px_2px_0_0_#168A42] transition-colors hover:bg-[#1EB856]"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    דברו איתנו בוואטסאפ
-                  </a>
-                ) : null}
                 <a
                   href={`mailto:${BUSINESS_INFO.contactEmail}`}
                   className="brand-control inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold text-[#17402D]"
@@ -92,7 +77,7 @@ export default function ContactPage() {
                   <Send className="h-8 w-8 text-[#2D6A4F]" aria-hidden="true" />
                 </div>
                 <h2 className="font-display font-bold text-3xl text-[#17402D] mb-2">ההודעה נשלחה</h2>
-                <p className="text-[#888]">נחזור אליכם תוך 3 ימי עסקים.</p>
+                <p className="text-[#888]">נחזור אליכם תוך 2 ימי עסקים.</p>
                 <button
                   onClick={() => {
                     setFormState("idle");
@@ -212,7 +197,7 @@ export default function ContactPage() {
                 </button>
 
                 <p className="text-center text-[#AAA] text-xs">
-                  נשיב תוך 3 ימי עסקים • א׳–ה׳ 9:00–17:00
+                  נשיב תוך 2 ימי עסקים • א׳–ה׳ 9:00–17:00
                 </p>
                 {formState === "error" && (
                   <p role="alert" className="text-center text-red-600 text-sm">

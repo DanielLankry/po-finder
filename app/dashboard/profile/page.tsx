@@ -18,9 +18,10 @@ import type { Business, BusinessCategory, KashrutStatus } from "@/lib/types";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import PlacesSearchBar from "@/components/map/PlacesSearchBar";
 import type { LocationResult } from "@/components/map/PlacesSearchBar";
-import { BadgeCheck, Beef, CakeSlice, Coffee, Eye, Flower2, Gem, Leaf, MapPin, MessageCircle, Phone, Shirt, UtensilsCrossed, Wheat } from "lucide-react";
+import { BadgeCheck, Beef, CakeSlice, Coffee, Eye, Flower2, Gem, Leaf, MapPin, Phone, Shirt, UtensilsCrossed, Wheat } from "lucide-react";
 import { getLatestOwnedBusiness } from "@/lib/db/owned-businesses";
 import { trackMetaEvent } from "@/lib/meta-pixel";
+import { trackPostHogEvent } from "@/lib/posthog";
 
 const CATEGORY_ICONS: Record<BusinessCategory, React.ComponentType<{ className?: string }>> = {
   coffee: Coffee,
@@ -35,6 +36,7 @@ const CATEGORY_ICONS: Record<BusinessCategory, React.ComponentType<{ className?:
 };
 
 export default function ProfilePage() {
+  const [isPromotionJourney, setIsPromotionJourney] = useState(false);
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -43,13 +45,18 @@ export default function ProfilePage() {
 
   const supabase = createClient();
 
+  useEffect(() => {
+    setIsPromotionJourney(
+      new URLSearchParams(window.location.search).get("campaign") === "first-20-3m",
+    );
+  }, []);
+
   const [form, setForm] = useState({
     name: "",
     description: "",
     category: "food" as BusinessCategory,
     kashrut: "none" as KashrutStatus,
     phone: "",
-    whatsapp: "",
     website: "",
     instagram: "",
     business_number: "",
@@ -73,7 +80,6 @@ export default function ProfilePage() {
           category: data.category ?? "coffee",
           kashrut: data.kashrut ?? "none",
           phone: data.phone ?? "",
-          whatsapp: data.whatsapp ?? "",
           website: data.website ?? "",
           instagram: data.instagram ?? "",
           business_number: data.business_number ?? "",
@@ -119,7 +125,6 @@ export default function ProfilePage() {
         category: form.category,
         kashrut: form.kashrut,
         phone: form.phone.trim() || null,
-        whatsapp: form.whatsapp.trim() || null,
         website: form.website.trim() || null,
         instagram: form.instagram.replace(/^@/, "").trim() || null,
         business_number: form.business_number.trim() || null,
@@ -141,10 +146,21 @@ export default function ProfilePage() {
         if (insertError) throw insertError;
         // Update local state so next save does UPDATE not INSERT
         const inserted = await getLatestOwnedBusiness(supabase);
-        if (inserted) setBusiness(inserted);
+        if (inserted) {
+          setBusiness(inserted);
+          if (inserted.promotion_code === "first-20-3m") {
+            trackPostHogEvent("launch_promotion_reserved", {
+              campaign_code: inserted.promotion_code,
+              category: form.category,
+            });
+          }
+        }
         trackMetaEvent("Lead", {
           content_name: "business_draft",
           content_category: form.category,
+        });
+        trackPostHogEvent("business_draft_created", {
+          category: form.category,
         });
       }
       setSuccess(true);
@@ -171,7 +187,9 @@ export default function ProfilePage() {
         {business ? "עריכת פרטי העסק" : "יצירת פרופיל עסק"}
       </h1>
       <p className="mb-5 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-        זו טיוטה פרטית בחינם. היא תופיע לציבור רק אחרי אימות העסק ותשלום על רישום פעיל.
+        {isPromotionJourney || business?.promotion_code === "first-20-3m"
+          ? "ביצירת הפרופיל נשמר מקום במבצע, כל עוד נותרו מקומות. העסק יתפרסם רק אחרי אישור מנהל, ואז יתחילו 3 החודשים החינם."
+          : "זו טיוטה פרטית בחינם. היא תופיע לציבור רק אחרי אימות העסק ותשלום על רישום פעיל."}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -281,17 +299,6 @@ export default function ProfilePage() {
             />
           </FormField>
 
-          <FormField label="WhatsApp" htmlFor="business-whatsapp">
-            <Input
-              id="business-whatsapp"
-              value={form.whatsapp}
-              onChange={(e) => update("whatsapp", e.target.value)}
-              placeholder="972XXXXXXXXX"
-              type="tel"
-              className="h-11 rounded-xl border-stone-200 focus-visible:ring-[#2D6A4F]"
-              dir="ltr"
-            />
-          </FormField>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -336,8 +343,18 @@ export default function ProfilePage() {
         {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
         {success && (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            <span className="flex items-center gap-2 font-medium"><BadgeCheck className="h-4 w-4" aria-hidden="true" /> הטיוטה נשמרה בהצלחה</span>
-            <Link href="/dashboard/billing" className="font-bold underline">לבחירת תקופה ותשלום</Link>
+            <span className="flex items-center gap-2 font-medium">
+              <BadgeCheck className="h-4 w-4" aria-hidden="true" />
+              {business?.promotion_code === "first-20-3m"
+                ? "המקום נשמר — 3 החודשים יתחילו לאחר אישור מנהל"
+                : "הטיוטה נשמרה בהצלחה"}
+            </span>
+            <Link
+              href={business?.promotion_code === "first-20-3m" ? "/dashboard" : "/dashboard/billing"}
+              className="font-bold underline"
+            >
+              {business?.promotion_code === "first-20-3m" ? "לסטטוס האישור" : "לבחירת תקופה ותשלום"}
+            </Link>
           </div>
         )}
 
@@ -375,7 +392,6 @@ export default function ProfilePage() {
             <p className="min-h-10 text-sm leading-relaxed text-stone-600">{form.description.trim() || "התיאור שתכתבו יופיע כאן."}</p>
             {form.address ? <p className="flex items-center gap-2 text-xs text-stone-600"><MapPin className="h-3.5 w-3.5 text-[#C4552D]" />{form.address}</p> : null}
             {form.phone ? <p className="flex items-center gap-2 text-xs text-stone-600" dir="ltr"><Phone className="h-3.5 w-3.5 text-[#2D6A4F]" />{form.phone}</p> : null}
-            {form.whatsapp ? <p className="flex items-center gap-2 text-xs text-stone-600" dir="ltr"><MessageCircle className="h-3.5 w-3.5 text-[#2D6A4F]" />WhatsApp {form.whatsapp}</p> : null}
           </div>
         </div>
         <p className="mt-4 text-xs leading-relaxed text-stone-600">אפשר לערוך ולצפות בטיוטה בלי לשלם. אחרי אימות, בוחרים משך הופעה ורק אז הכרטיס נכנס למפה ולרשימה.</p>

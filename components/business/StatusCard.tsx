@@ -6,7 +6,6 @@ import {
   ExternalLink,
   Globe2,
   MapPin,
-  MessageCircle,
   Navigation,
   Phone,
 } from "lucide-react";
@@ -18,7 +17,7 @@ import ShareButtons from "./ShareButtons";
 interface StatusCardProps {
   business: Pick<
     Business,
-    "id" | "name" | "address" | "phone" | "whatsapp" | "website" | "instagram" | "is_verified"
+    "id" | "name" | "address" | "phone" | "website" | "instagram" | "is_verified"
   >;
   schedule: BusinessSchedule | null;
   hoursStatus?: BusinessHoursStatus;
@@ -30,7 +29,6 @@ export default function StatusCard({ business, schedule, hoursStatus }: StatusCa
     hours_status: hoursStatus,
   });
   const address = schedule?.address ?? business.address;
-  const waNumber = business.whatsapp?.replace(/\D/g, "") ?? "";
   const mapsQuery = encodeURIComponent(address ?? business.name);
   const websiteUrl = business.website
     ? business.website.startsWith("http")
@@ -94,19 +92,6 @@ export default function StatusCard({ business, schedule, hoursStatus }: StatusCa
         </div>
 
         <div className="grid gap-3">
-          {waNumber && (
-            <a
-              href={`https://wa.me/${waNumber}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackEvent(business.id, "whatsapp_click")}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-[#17402D] bg-[#2D6A4F] px-5 text-sm font-black text-white shadow-[3px_3px_0_0_#17402D] transition-all hover:-translate-y-0.5 hover:bg-[#1F5038] hover:shadow-[5px_5px_0_0_#17402D] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0_0_#17402D]"
-            >
-              <MessageCircle className="h-4 w-4" aria-hidden="true" />
-              שלחו הודעה בוואטסאפ
-            </a>
-          )}
-
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {business.phone && (
               <a

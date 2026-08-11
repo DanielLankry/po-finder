@@ -8,6 +8,7 @@ test-results
 .claude
 .codex
 .agents
+marketing-assets
 .env*
 *.log
 *.tsbuildinfo
