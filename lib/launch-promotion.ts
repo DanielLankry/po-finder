@@ -6,8 +6,6 @@ export const FIRST_BUSINESSES_SIGNUP_PATH =
 export interface LaunchPromotionStatus {
   code: string;
   capacity: number;
-  claimedCount: number;
-  remaining: number;
   durationMonths: number;
   startsAt: string;
   enrollmentEndsAt: string;
@@ -23,7 +21,7 @@ interface PromotionStatusRow {
   is_active: boolean;
 }
 
-/** Converts the read-only aggregate database row into the public campaign contract. */
+/** Converts the database row into a public contract that hides live demand. */
 export function toLaunchPromotionStatus(
   row: PromotionStatusRow,
   now = new Date(),
@@ -36,8 +34,6 @@ export function toLaunchPromotionStatus(
   return {
     code: row.code,
     capacity: row.capacity,
-    claimedCount: row.claimed_count,
-    remaining,
     durationMonths: row.duration_months,
     startsAt: row.starts_at,
     enrollmentEndsAt: row.enrollment_ends_at,

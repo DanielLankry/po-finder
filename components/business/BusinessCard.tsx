@@ -19,6 +19,9 @@ interface BusinessCardProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   onFavoriteToggle?: () => void;
+  badgeLabel?: string;
+  hideFavorite?: boolean;
+  disabled?: boolean;
 }
 export default function BusinessCard({
   business,
@@ -30,6 +33,9 @@ export default function BusinessCard({
   onMouseEnter,
   onMouseLeave,
   onFavoriteToggle,
+  badgeLabel,
+  hideFavorite = false,
+  disabled = false,
 }: BusinessCardProps) {
   const schedule = business.today_schedule ?? null;
   const availability = getBusinessAvailability(business);
@@ -47,7 +53,8 @@ export default function BusinessCard({
     >
       <button
         onClick={onClick}
-        className={`w-full text-right cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] rounded-[24px] group relative bg-white block p-3.5 ${
+        disabled={disabled}
+        className={`w-full text-right transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] rounded-[24px] group relative bg-white block p-3.5 ${disabled ? "cursor-default" : "cursor-pointer"} ${
           isSelected 
             ? "shadow-[0_8px_24px_rgba(45,106,79,0.25)] scale-[1.02]" 
             : isHovered 
@@ -55,6 +62,7 @@ export default function BusinessCard({
               : "shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)] transform hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98]"
         }`}
         aria-pressed={isSelected}
+        aria-disabled={disabled}
         aria-label={`${business.name} — ${CATEGORY_LABELS[business.category]}`}
       >
         <div className="flex flex-col gap-3.5" dir="rtl">
@@ -68,6 +76,12 @@ export default function BusinessCard({
             />
             {primaryPhoto && (
               <div className={`absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 to-transparent transition-opacity duration-300 pointer-events-none ${isHovered ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} />
+            )}
+
+            {badgeLabel && (
+              <div className="absolute left-3 top-3 z-10 rounded-full border-2 border-[#17402D] bg-[#FFF3B0] px-3 py-1.5 text-xs font-black text-[#17402D] shadow-[2px_2px_0_0_#17402D]">
+                {badgeLabel}
+              </div>
             )}
             
             {/* Optional "Open Now" badge over image */}
@@ -126,20 +140,22 @@ export default function BusinessCard({
           </div>
         </div>
       </button>
-      <button
-        type="button"
-        onClick={onFavoriteToggle}
-        className="absolute left-7 top-7 z-10 flex h-11 w-11 items-center justify-center rounded-full border-2 border-white/80 bg-white/95 text-stone-600 shadow-md backdrop-blur-md transition-all hover:scale-105 hover:text-rose-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
-        aria-label={isFavorited ? "הסר ממועדפים" : "שמור למועדפים"}
-        aria-pressed={isFavorited}
-      >
-        <Heart
-          className={`h-5 w-5 transition-all duration-200 ${
-            isFavorited ? "scale-110 fill-rose-500 text-rose-500" : "text-stone-600"
-          }`}
-          aria-hidden="true"
-        />
-      </button>
+      {!hideFavorite && (
+        <button
+          type="button"
+          onClick={onFavoriteToggle}
+          className="absolute left-7 top-7 z-10 flex h-11 w-11 items-center justify-center rounded-full border-2 border-white/80 bg-white/95 text-stone-600 shadow-md backdrop-blur-md transition-all hover:scale-105 hover:text-rose-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+          aria-label={isFavorited ? "הסר ממועדפים" : "שמור למועדפים"}
+          aria-pressed={isFavorited}
+        >
+          <Heart
+            className={`h-5 w-5 transition-all duration-200 ${
+              isFavorited ? "scale-110 fill-rose-500 text-rose-500" : "text-stone-600"
+            }`}
+            aria-hidden="true"
+          />
+        </button>
+      )}
     </div>
   );
 }

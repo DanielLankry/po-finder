@@ -321,7 +321,6 @@ export default function BusinessListPanel({
               trackPostHogEvent("launch_promotion_cta_clicked", {
                 campaign_code: promotion.code,
                 placement: "business_list_banner",
-                remaining: promotion.remaining,
               });
             }}
             className="mb-3 flex min-h-11 items-center justify-between gap-3 rounded-xl border-2 border-[#17402D] bg-[#FFF3B0] px-3 py-2 text-[#17402D] shadow-[3px_3px_0_0_#17402D] transition-transform hover:-translate-y-0.5"
@@ -332,7 +331,7 @@ export default function BusinessListPanel({
               3 חודשים חינם ל־20 העסקים הראשונים
             </span>
             <span className="shrink-0 rounded-full bg-[#17402D] px-2.5 py-1 text-[11px] font-black text-[#FFFDF7]">
-              נותרו {promotion.remaining}
+              להצטרפות
             </span>
           </Link>
         )}
@@ -412,7 +411,7 @@ export default function BusinessListPanel({
           </div>
         ) : filtered.length === 0 && isPlatformEmpty ? (
           <div className="min-h-full px-4 py-8 sm:px-6 sm:py-10">
-            <ExampleBusinessCard promotion={promotion} />
+            <ExampleBusinessCard />
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-4 px-8 py-16 text-center">
