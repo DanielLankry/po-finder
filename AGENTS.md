@@ -66,7 +66,7 @@ Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do
 - Recurring autonomous operations are defined under `.agents/`: the site engineer may open tested low-risk PRs but cannot deploy or mutate production, while the Meta marketing agent remains recommendation-only until explicit campaign authority and real targets are provided.
 
 ## Known Issues
-- Production must receive `20260811085142_first_twenty_business_promotion.sql` before the campaign-enabled app is promoted; the API intentionally degrades to no offer when the aggregate table is absent.
+- Production must receive `20260811100008_first_twenty_business_promotion.sql` before the campaign-enabled app is promoted; the API intentionally degrades to no offer when the aggregate table is absent.
 - Production has `20260715144513_launch_privacy_hardening.sql` applied; preserve that migration version so future CLI pushes do not try to replay the policy cutover.
 - If HYP charges a card but no browser return reaches `/api/payments/return`, existing pending attempts must be reconciled manually or via a future transaction inquiry integration.
 - `CRON_SECRET` is configured in production; an unauthenticated expiry-reminder request returns `401`, and Vercel Cron supplies the bearer token for authorized runs.
