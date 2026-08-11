@@ -12,7 +12,6 @@ interface Business {
   description: string | null;
   category: string;
   phone: string | null;
-  whatsapp: string | null;
   website: string | null;
   instagram: string | null;
   kashrut: string;
@@ -25,6 +24,9 @@ interface Business {
   lat: number | null;
   lng: number | null;
   address: string | null;
+  promotion_code?: string | null;
+  promotion_reserved_at?: string | null;
+  promotion_activated_at?: string | null;
 }
 
 /** Mirrors the public listing predicate for the admin's live-listing count. */
@@ -38,7 +40,7 @@ function isCurrentlyPublic(business: Business): boolean {
 const EMPTY_FORM = {
   owner_id: "",
   name: "", description: "", category: "food" as BusinessCategory,
-  phone: "", whatsapp: "", website: "", instagram: "",
+  phone: "", website: "", instagram: "",
   kashrut: "none" as KashrutStatus, business_number: "",
   address: "", lat: "32.0853", lng: "34.7818",
   duration_months: "1",
@@ -66,12 +68,19 @@ export default function AdminBusinessesPage() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  async function approve(businessId: string) {
-    setActionLoading(businessId);
+  async function approve(business: Business) {
+    if (
+      business.promotion_code === "first-20-3m" &&
+      !confirm(`לאשר את ${business.name}? האישור יפרסם את העסק ויתחיל עכשיו 3 חודשים חינם.`)
+    ) {
+      return;
+    }
+
+    setActionLoading(business.id);
     const res = await fetch("/api/admin/businesses/approve", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ businessId }),
+      body: JSON.stringify({ businessId: business.id }),
     });
     if (res.ok) fetchAll();
     else alert("שגיאה באישור העסק");
@@ -152,7 +161,6 @@ export default function AdminBusinessesPage() {
           description: editBiz.description,
           category: editBiz.category,
           phone: editBiz.phone,
-          whatsapp: editBiz.whatsapp,
           website: editBiz.website,
           instagram: editBiz.instagram,
           kashrut: editBiz.kashrut,
@@ -335,11 +343,6 @@ export default function AdminBusinessesPage() {
                   <input value={editBiz.phone ?? ""} onChange={(e) => setEditBiz({...editBiz, phone: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" />
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">WhatsApp</label>
-                  <input value={editBiz.whatsapp ?? ""} onChange={(e) => setEditBiz({...editBiz, whatsapp: e.target.value})}
-                    className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" />
-                </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-semibold text-[#111] mb-1">כתובת</label>
                   <input value={editBiz.address ?? ""} onChange={(e) => setEditBiz({...editBiz, address: e.target.value})}
@@ -433,7 +436,7 @@ export default function AdminBusinessesPage() {
 }
 
 function BusinessCard({ biz, onApprove, onDelete, onEdit, onToggleVisibility, actionLoading }: {
-  biz: Business; onApprove: (id: string) => void;
+  biz: Business; onApprove: (business: Business) => void;
   onDelete: (id: string) => void; onEdit: (b: Business) => void;
   onToggleVisibility: (b: Business) => void; actionLoading: string | null;
 }) {
@@ -450,6 +453,11 @@ function BusinessCard({ biz, onApprove, onDelete, onEdit, onToggleVisibility, ac
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${biz.is_verified ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
               {biz.is_verified ? (currentlyPublic ? "מאומת ומוצג" : "מאומת, לא מוצג") : "ממתין לאימות"}
             </span>
+            {biz.promotion_code === "first-20-3m" && (
+              <span className="rounded-full bg-[#FFF3B0] px-2 py-0.5 text-xs font-bold text-[#8A3618]">
+                {biz.promotion_activated_at ? "3 חודשים חינם הופעלו" : "מקום שמור — יופעל באישור"}
+              </span>
+            )}
           </div>
           <h2 className="font-bold text-[#111] text-base md:text-lg truncate">{biz.name}</h2>
           {biz.description && <p className="text-[#666] text-sm mt-0.5 line-clamp-1">{biz.description}</p>}
@@ -463,7 +471,7 @@ function BusinessCard({ biz, onApprove, onDelete, onEdit, onToggleVisibility, ac
       </div>
       <div className="flex gap-2 mt-3 pt-3 border-t border-[#F5F5F5] flex-wrap">
         {!biz.is_verified && (
-          <button onClick={() => onApprove(biz.id)} disabled={isLoading}
+          <button onClick={() => onApprove(biz)} disabled={isLoading}
             className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#2D6A4F] text-white font-semibold text-sm hover:bg-[#1F5038] transition-colors disabled:opacity-50">
             <CheckCircle className="h-3.5 w-3.5" />{isLoading ? "..." : "אשר"}
           </button>

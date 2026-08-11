@@ -31,7 +31,6 @@ const createBusinessSchema = z.object({
   category: z.enum(["coffee", "food", "sweets", "meat", "vegan", "celiac", "flowers", "jewelry", "vintage"]),
   kashrut: z.enum(["kosher", "kosher_mehadrin", "none"]),
   phone: nullableText(40),
-  whatsapp: nullableText(40),
   website: nullableText(500),
   instagram: nullableText(160),
   business_number: nullableText(80),
@@ -70,7 +69,7 @@ export async function POST(req: NextRequest) {
   }
 
   const {
-    owner_id, name, description, category, kashrut, phone, whatsapp,
+    owner_id, name, description, category, kashrut, phone,
     website, instagram, business_number, address, lat, lng, duration_months,
   } = parsed.data;
   const expires = addCalendarMonths(new Date(), duration_months);
@@ -85,7 +84,6 @@ export async function POST(req: NextRequest) {
       category,
       kashrut,
       phone,
-      whatsapp,
       website,
       instagram,
       business_number,

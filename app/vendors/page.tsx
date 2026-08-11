@@ -1,18 +1,16 @@
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { Mail, MessageCircle, PenLine, MapPin, Handshake, Search, Clock3, Percent, Heart } from "lucide-react";
+import { Mail, PenLine, MapPin, Handshake, Search, Clock3, Percent, Heart } from "lucide-react";
 import Reveal from "@/components/ui/reveal";
 import { Marquee } from "@/components/ui/marquee";
-import { BRAND_NAME, BUSINESS_INFO, LAUNCH_OFFER, VENDOR_FAQS, getWhatsAppHref } from "@/lib/site-config";
+import { BRAND_NAME, BUSINESS_INFO, LAUNCH_OFFER, VENDOR_FAQS } from "@/lib/site-config";
 
 export const metadata = {
   title: "הצטרפות עסקים",
   description:
     "הצטרפו לפה קרוב והופיעו על מפה בזמן אמת עם פרופיל עסק, תמונות, שעות פעילות, מיקום וכפתור התקשרות.",
 };
-
-const whatsappHref = getWhatsAppHref();
 
 const MARQUEE_ITEMS = [
   "קפה נייד", "דוכני אוכל", "פרחים", "וינטג׳", "תכשיטים", "מאפים",
@@ -105,25 +103,13 @@ export default function VendorsPage() {
                 {LAUNCH_OFFER.primaryButtonText}
                 <span className="text-xl">←</span>
               </Link>
-              {whatsappHref ? (
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="poster-hover w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-[#17402D] font-bold text-lg px-8 py-4 rounded-2xl border-2 border-[#17402D] shadow-[4px_4px_0_0_#17402D]"
-                >
-                  <MessageCircle className="h-5 w-5 text-[#25D366]" />
-                  דברו איתנו בוואטסאפ
-                </a>
-              ) : (
-                <a
-                  href={`mailto:${BUSINESS_INFO.contactEmail}`}
-                  className="poster-hover w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-[#17402D] font-bold text-lg px-8 py-4 rounded-2xl border-2 border-[#17402D] shadow-[4px_4px_0_0_#17402D]"
-                >
-                  <Mail className="h-5 w-5" />
-                  {BUSINESS_INFO.contactEmail}
-                </a>
-              )}
+              <a
+                href={`mailto:${BUSINESS_INFO.contactEmail}`}
+                className="poster-hover w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-[#17402D] font-bold text-lg px-8 py-4 rounded-2xl border-2 border-[#17402D] shadow-[4px_4px_0_0_#17402D]"
+              >
+                <Mail className="h-5 w-5" />
+                {BUSINESS_INFO.contactEmail}
+              </a>
             </div>
           </Reveal>
         </div>
@@ -236,17 +222,13 @@ export default function VendorsPage() {
                 {LAUNCH_OFFER.primaryButtonText}
                 <span className="text-xl">←</span>
               </Link>
-              {whatsappHref ? (
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="poster-hover inline-flex items-center justify-center gap-2 bg-[#F7F3EA] text-[#17402D] font-bold text-lg px-10 py-4 rounded-2xl border-2 border-[#F7F3EA]"
-                >
-                  <MessageCircle className="h-5 w-5 text-[#25D366]" />
-                  דברו איתנו בוואטסאפ
-                </a>
-              ) : null}
+              <a
+                href={`mailto:${BUSINESS_INFO.contactEmail}`}
+                className="poster-hover inline-flex items-center justify-center gap-2 bg-[#F7F3EA] text-[#17402D] font-bold text-lg px-10 py-4 rounded-2xl border-2 border-[#F7F3EA]"
+              >
+                <Mail className="h-5 w-5" />
+                {BUSINESS_INFO.contactEmail}
+              </a>
             </div>
           </Reveal>
         </div>

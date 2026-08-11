@@ -2,6 +2,7 @@ import posthog from "posthog-js";
 
 let initialized = false;
 let enabled = false;
+const CONSENT_KEY = "po-cookie-consent";
 
 export function initPostHog() {
   if (typeof window === "undefined") return;
@@ -31,6 +32,20 @@ export function disablePostHog() {
 
 export function isPostHogEnabled() {
   return enabled;
+}
+
+export function trackPostHogEvent(
+  event: string,
+  properties?: Record<string, unknown>,
+): boolean {
+  if (typeof window === "undefined") return false;
+  if (localStorage.getItem(CONSENT_KEY) !== "accepted") return false;
+
+  initPostHog();
+  if (!enabled) return false;
+
+  posthog.capture(event, properties);
+  return true;
 }
 
 export { posthog };

@@ -99,7 +99,7 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
                 </table>
               </div>
               <h1 style="font-family: 'Rubik', Arial, sans-serif; font-size: 26px; font-weight: 800; color: white; margin: 0 0 8px;">העסק שלך אושר! 🎉</h1>
-              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: rgba(255,255,255,0.85); margin: 0;">${safeBusinessName} עבר אימות ומוכן לרישום</p>
+              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: rgba(255,255,255,0.85); margin: 0;">${expiryStr ? `${safeBusinessName} עבר אימות ועלה לאוויר` : `${safeBusinessName} עבר אימות ומוכן לרישום`}</p>
             </td>
           </tr>
         </table>
@@ -113,7 +113,9 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
           שלום! 👋<br><br>
           אנחנו שמחים לבשר שהעסק <strong style="color: #111827;">${safeBusinessName}</strong> עבר את תהליך האימות בפה קרוב.
           <br><br>
-          כדי לפרסם אותו ללקוחות במפה וברשימה, אפשר לבחור עכשיו את משך ההופעה מלוח החיובים.
+          ${expiryStr
+            ? `הפרסום התחיל עכשיו ויישאר פעיל עד <strong>${expiryStr}</strong>. זמן ההמתנה לאישור לא ירד מתקופת ההטבה.`
+            : "כדי לפרסם אותו ללקוחות במפה וברשימה, אפשר לבחור עכשיו את משך ההופעה מלוח החיובים."}
         </p>
 
         <!-- Info box -->
@@ -124,7 +126,7 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
                 <tr>
                   <td style="padding-bottom: 12px;">
                     <span style="font-size: 18px;">📍</span>
-                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #17402D; margin-right: 8px;">מוכן להפעלה לאחר תשלום</span>
+                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #17402D; margin-right: 8px;">${expiryStr ? "מופיע עכשיו במפה וברשימה" : "מוכן להפעלה לאחר תשלום"}</span>
                   </td>
                 </tr>
                 <tr>
@@ -149,8 +151,8 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
             <td align="center" style="padding-bottom: 8px;">
-              <a href="https://pokarov.co.il/dashboard/billing" style="display: inline-block; background: linear-gradient(135deg, #2D6A4F, #1F5038); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 40px; border-radius: 50px; box-shadow: 0 4px 16px rgba(45,106,79,0.35);">
-                בחירת משך הופעה ←
+              <a href="https://pokarov.co.il/${expiryStr ? "dashboard" : "dashboard/billing"}" style="display: inline-block; background: linear-gradient(135deg, #2D6A4F, #1F5038); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 40px; border-radius: 50px; box-shadow: 0 4px 16px rgba(45,106,79,0.35);">
+                ${expiryStr ? "צפייה בעסק שלי ←" : "בחירת משך הופעה ←"}
               </a>
             </td>
           </tr>
@@ -308,7 +310,7 @@ export function contactAutoReplyTemplate(name: string, subjectLabel: string): st
                 <tr>
                   <td>
                     <span style="font-size: 16px; margin-left: 6px;">💬</span>
-                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; color: #374151;">נחזור אליך תוך <strong>3 ימי עסקים</strong></span>
+                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; color: #374151;">נחזור אליך תוך <strong>2 ימי עסקים</strong></span>
                   </td>
                 </tr>
               </table>

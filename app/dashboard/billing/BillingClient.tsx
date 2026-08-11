@@ -7,6 +7,7 @@ import DurationSelectorCard from "@/components/business/DurationSelectorCard";
 import { PLAN_CODES } from "@/lib/plans";
 import type { Plan, PlanCode } from "@/lib/plans";
 import { trackMetaEvent } from "@/lib/meta-pixel";
+import { trackPostHogEvent } from "@/lib/posthog";
 
 interface BusinessLite {
   id: string;
@@ -14,6 +15,9 @@ interface BusinessLite {
   expires_at: string | null;
   is_active: boolean;
   is_verified: boolean;
+  promotion_code?: string | null;
+  promotion_reserved_at?: string | null;
+  promotion_activated_at?: string | null;
 }
 
 export interface PurchaseEvent {
@@ -64,10 +68,11 @@ export default function BillingClient({
   useEffect(() => {
     if (!purchaseEvent) return;
 
-    const storageKey = `po-meta-purchase:${purchaseEvent.id}`;
+    const metaStorageKey = `po-meta-purchase:${purchaseEvent.id}`;
+    const postHogStorageKey = `po-posthog-purchase:${purchaseEvent.id}`;
     function sendPurchase() {
-      if (localStorage.getItem(storageKey)) return;
       if (
+        !localStorage.getItem(metaStorageKey) &&
         trackMetaEvent(
           "Purchase",
           {
@@ -80,7 +85,18 @@ export default function BillingClient({
           { eventID: purchaseEvent!.id }
         )
       ) {
-        localStorage.setItem(storageKey, "1");
+        localStorage.setItem(metaStorageKey, "1");
+      }
+      if (
+        !localStorage.getItem(postHogStorageKey) &&
+        trackPostHogEvent("listing_purchased", {
+          event_id: purchaseEvent!.id,
+          plan_code: purchaseEvent!.planCode,
+          value: purchaseEvent!.value,
+          currency: purchaseEvent!.currency,
+        })
+      ) {
+        localStorage.setItem(postHogStorageKey, "1");
       }
     }
 
@@ -121,6 +137,11 @@ export default function BillingClient({
         content_ids: [plan.code],
         content_type: "product",
         num_items: 1,
+      });
+      trackPostHogEvent("checkout_started", {
+        plan_code: plan.code,
+        value: plan.price / 100,
+        currency: "ILS",
       });
       window.location.assign(data.url);
     } catch (caught) {
@@ -195,7 +216,9 @@ export default function BillingClient({
                     </div>
                     {!business.is_verified ? (
                       <p className="max-w-sm rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-900">
-                        הטיוטה נשמרה. אחרי שהצוות יאמת את העסק אפשר יהיה לבחור זמן ולשלם.
+                        {business.promotion_code === "first-20-3m"
+                          ? "המקום במבצע נשמר. אחרי אישור מנהל העסק יעלה לאוויר ו־3 החודשים החינם יתחילו."
+                          : "הטיוטה נשמרה. אחרי שהצוות יאמת את העסק אפשר יהיה לבחור זמן ולשלם."}
                       </p>
                     ) : null}
                   </div>
