@@ -29,6 +29,9 @@ test.describe("mobile layout regression coverage", () => {
 
   for (const viewport of RESPONSIVE_VIEWPORTS) {
     test(`navbar changing text is visible and contained at ${viewport.width}px`, async ({ page }) => {
+      await page.addInitScript(() => {
+        sessionStorage.setItem("po-first-businesses-offer-seen", "1");
+      });
       await page.setViewportSize(viewport);
       await page.goto("/");
 
@@ -98,6 +101,31 @@ test.describe("mobile layout regression coverage", () => {
       await expect(page.getByRole("link", { name: "נגישות", exact: true })).toBeVisible();
     });
   }
+
+  test("navbar audience advances with the typewriter animation", async ({ page }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem("po-first-businesses-offer-seen", "1");
+    });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+
+    const changingTextVisual = page.getByTestId("navbar-changing-text-visual");
+    await expect(changingTextVisual).toHaveText("לעסקים קטנים|");
+    await expect(changingTextVisual).toHaveText("לדוכנים|", { timeout: 5_000 });
+  });
+
+  test("navbar audience swaps complete phrases when motion is reduced", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.addInitScript(() => {
+      sessionStorage.setItem("po-first-businesses-offer-seen", "1");
+    });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+
+    const changingTextVisual = page.getByTestId("navbar-changing-text-visual");
+    await expect(changingTextVisual).toHaveText("לעסקים קטנים");
+    await expect(changingTextVisual).toHaveText("לדוכנים", { timeout: 4_000 });
+  });
 
   for (const viewport of RESPONSIVE_VIEWPORTS) {
     for (const route of MOBILE_ROUTES) {

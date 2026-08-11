@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { motion, Variants } from "framer-motion"
+import { motion, useReducedMotion, Variants } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
@@ -61,8 +61,12 @@ const Typewriter = ({
   const [currentIndex, setCurrentIndex] = useState(initialText.length)
   const [isDeleting, setIsDeleting] = useState(false)
   const [currentTextIndex, setCurrentTextIndex] = useState(0)
+  const [reducedTextIndex, setReducedTextIndex] = useState(0)
+  const shouldReduceMotion = useReducedMotion()
 
   useEffect(() => {
+    if (shouldReduceMotion) return
+
     let timeout: NodeJS.Timeout
 
     const currentText = texts[currentTextIndex]
@@ -115,16 +119,37 @@ const Typewriter = ({
     texts,
     currentTextIndex,
     loop,
+    shouldReduceMotion,
   ])
 
-  const currentWord = texts[currentTextIndex]
+  useEffect(() => {
+    if (!shouldReduceMotion || texts.length <= 1) return
+    if (!loop && reducedTextIndex >= texts.length - 1) return
+
+    const timeout = setTimeout(() => {
+      setReducedTextIndex((previous) => {
+        const next = previous + 1
+        return next >= texts.length ? 0 : next
+      })
+    }, waitTime)
+
+    return () => clearTimeout(timeout)
+  }, [loop, reducedTextIndex, shouldReduceMotion, texts.length, waitTime])
+
+  const safeReducedTextIndex = reducedTextIndex % texts.length
+  const renderedText = shouldReduceMotion
+    ? (texts[safeReducedTextIndex] ?? "")
+    : displayText
+  const currentWord = shouldReduceMotion
+    ? texts[safeReducedTextIndex]
+    : texts[currentTextIndex]
   const wordColorClass = wordColors[currentWord] ?? ""
   const glowStyle = glowColor ? { textShadow: `0 0 12px ${glowColor}, 0 0 24px ${glowColor}` } : undefined
 
   return (
     <div className={`inline whitespace-pre-wrap ${className} ${wordColorClass}`} style={glowStyle}>
-      <span>{displayText}</span>
-      {showCursor && (
+      <span>{renderedText}</span>
+      {showCursor && !shouldReduceMotion && (
         <motion.span
           variants={cursorAnimationVariants}
           className={cn(
