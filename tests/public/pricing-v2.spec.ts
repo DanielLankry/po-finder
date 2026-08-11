@@ -42,6 +42,20 @@ test.describe("duration pricing", () => {
     await expect(page.getByRole("button", { name: "פרסום העסק ל־12 חודשים" })).toBeVisible();
   });
 
+  test("expiry preview uses the browser date instead of the cached page timestamp", async ({ page }) => {
+    const browserNow = Date.parse("2030-08-10T12:00:00.000Z");
+    await page.addInitScript((fixedNow) => {
+      Date.now = () => fixedNow;
+    }, browserNow);
+
+    await page.goto("/pricing");
+    const slider = page.getByRole("slider", { name: "משך הפרסום" });
+    await expect(slider).toBeEnabled();
+    await slider.fill("0");
+
+    await expect(page.getByText("העסק יוצג עד 11 באוגוסט 2030")).toBeVisible();
+  });
+
   test("pricing page has no horizontal overflow", async ({ page }) => {
     await page.goto("/pricing");
     await page.waitForLoadState("domcontentloaded");
