@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 import { adminClient } from "@/lib/supabase/admin";
 import { inquirePaymentAttempt } from "@/lib/hyp";
-import { reconcileHypPaymentAttempt } from "@/lib/payment-reconciliation";
+import {
+  claimHypPaymentAttempts,
+  DEFAULT_RECONCILIATION_LEASE_SECONDS,
+  DEFAULT_RECONCILIATION_MAX_ATTEMPTS,
+  reconcileHypPaymentAttempt,
+} from "@/lib/payment-reconciliation";
 
 export const runtime = "nodejs";
 
@@ -10,6 +15,7 @@ type PendingPaymentAttempt = {
   id: string;
   status: string;
   amount_agorot: number;
+  reconciliation_attempt_count: number;
 };
 
 const DEFAULT_MIN_AGE_MINUTES = 15;
@@ -18,7 +24,7 @@ const MAX_LIMIT = 50;
 
 function numericEnv(name: string, fallback: number): number {
   const parsed = Number(process.env[name]);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
 }
 
 export async function GET(request: NextRequest) {
@@ -44,29 +50,41 @@ export async function GET(request: NextRequest) {
   const createdBefore = new Date(
     Date.now() - minAgeMinutes * 60_000
   ).toISOString();
+  const maxAttempts = numericEnv(
+    "HYP_RECONCILIATION_MAX_ATTEMPTS",
+    DEFAULT_RECONCILIATION_MAX_ATTEMPTS,
+  );
+  const leaseSeconds = numericEnv(
+    "HYP_RECONCILIATION_LEASE_SECONDS",
+    DEFAULT_RECONCILIATION_LEASE_SECONDS,
+  );
 
   const admin = adminClient();
-  const { data, error } = await admin
-    .from("payment_attempts")
-    .select("id, status, amount_agorot")
-    .eq("status", "pending")
-    .lt("created_at", createdBefore)
-    .order("created_at", { ascending: true })
-    .limit(limit);
-
-  if (error) {
+  let attempts: PendingPaymentAttempt[];
+  try {
+    attempts = (await claimHypPaymentAttempts(admin, {
+      createdBefore,
+      limit,
+      maxAttempts,
+      leaseSeconds,
+    })) as PendingPaymentAttempt[];
+  } catch (caught) {
     return NextResponse.json(
-      { error: "payment_query_failed", detail: error.message },
+      {
+        error: "payment_claim_failed",
+        detail: caught instanceof Error ? caught.message : String(caught),
+      },
       { status: 500 },
     );
   }
 
   const results = [];
-  for (const attempt of (data ?? []) as PendingPaymentAttempt[]) {
+  for (const attempt of attempts) {
     const result = await reconcileHypPaymentAttempt(
       admin,
       attempt,
       inquirePaymentAttempt,
+      maxAttempts,
     );
     results.push(result);
 
