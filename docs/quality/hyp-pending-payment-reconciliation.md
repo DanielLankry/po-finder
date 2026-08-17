@@ -22,8 +22,19 @@ approval and Sentinel review.
 
 The parser grants entitlement only for a successful `AutoComm` debit whose
 `financialStatus` is `Captured` or `Transmitted`, whose amount matches the local
-attempt when present, and which has no successful later cancel, refund, or
-reversal row. `Cancelled` financial state is never treated as charged.
+attempt when present, and whose response rows all echo the expected payment
+attempt correlation. Response order is not treated as chronological: any
+applicable successful `Cancel` (`52`), `AuthCredit` (`53`), or `Reversal` (`58`)
+vetoes automatic settlement wherever it appears. `Cancelled`, `Canceled`,
+`Refunded`, and `Reversed` financial states are never treated as charged.
+
+New checkouts place a deterministic 19-character payment-attempt correlation in
+HYP's documented payment-page `user` field. Reconciliation queries by that
+`user` value and requires every returned transaction row to echo it. A missing
+or mismatched echo retains the local attempt as `pending`, records
+`correlation_unverified`, and follows the normal retry/escalation policy. The
+settlement helper repeats the correlation check so a parser or fixture cannot
+bypass it.
 
 Settlement stores the debit `tranId`, because the existing `CancelTrans` refund
 flow requires that technical transaction identifier. `mpiTransactionId` and
@@ -33,15 +44,19 @@ Outcomes are applied as follows:
 
 - `charged`: call the existing idempotent `settle_payment_attempt` RPC.
 - `not_charged`, including cancelled/refunded: fail only a still-pending row.
-- `not_found`, `unknown`, transport failure, or settlement failure: retain
-  `pending`, record the result, and retry with backoff until escalation.
+- `not_found`, `unknown`, unverified correlation, transport failure, or
+  settlement failure: retain `pending`, record the result, and retry with
+  backoff until escalation.
 - amount mismatch: retain `pending`, stop automatic retries, and escalate.
 
-HYP's public inquiry documentation describes `cgUid`, `tranId`, and `user`
-lookups but does not currently document the merchant attempt `uniqueid` lookup
-used by this integration. Before enabling the schedule, obtain confirmation for
-this terminal or run a separately approved sandbox fixture proving that
-`<uniqueid>{payment_attempt.id}</uniqueid>` returns the related transaction set.
+HYP's public inquiry documentation explicitly supports `user` as a payment-page
+field and as an `inquireTransactions` lookup key, including echoed `user` values
+in the response rows. This replaces the previous undocumented `uniqueid`
+inquiry. Attempts created before this checkout correlation is deployed cannot
+be settled automatically by this worker; they fail closed and require the
+manual evidence path below. Before enabling the schedule, use a separately
+approved non-production fixture to verify that the legacy `/p/` APISign bridge
+preserves `user` for this merchant terminal.
 
 References:
 
@@ -57,7 +72,9 @@ In this order, with the required approvals:
 2. Configure `CRON_SECRET`, `HYP_ENTERPRISE_RELAY_URL`,
    `HYP_ENTERPRISE_USER`, `HYP_ENTERPRISE_PASSWORD`, and
    `HYP_TERMINAL_NUMBER` in the deployment environment.
-3. Confirm the terminal-specific `uniqueid` inquiry behavior described above.
+3. Confirm the terminal-specific legacy APISign `user` propagation described
+   above, and limit the first observation to attempts created after the
+   correlated checkout change is deployed.
 4. Deploy the reviewed commit. The Vercel schedule then invokes the route hourly.
 5. Observe the first run and audit rows before leaving the schedule enabled.
 

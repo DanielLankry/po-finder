@@ -1,7 +1,9 @@
 import { toHypVerificationParams } from "@/lib/payment-state";
 import { verifyCreditGuardResponseMac } from "@/lib/hyp-verification";
 import {
+  buildHypInquiryXml,
   parseHypPaymentInquiry,
+  toHypInquiryUser,
   type HypPaymentInquiry,
 } from "@/lib/hyp-inquiry";
 
@@ -94,15 +96,6 @@ function describeNoSignatureBody(body: string): string {
   return `HYP APISign returned no signature. Body: ${body.slice(0, 300)}`;
 }
 
-function escapeXml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
-
 export interface CheckoutParams {
   /** Amount in shekels (integer, e.g. 270 for ₪270). HYP expects whole shekels. */
   amount: number;
@@ -137,6 +130,7 @@ function buildPayParams(p: CheckoutParams, masof: string, passp: string): Record
     Info: p.info,
     Order: p.order,
     uniqueid: p.order,
+    user: toHypInquiryUser(p.order),
     Coin: "1",
     UTF8: "True",
     UTF8out: "True",
@@ -210,7 +204,7 @@ export async function createSignedCheckoutUrl(p: CheckoutParams): Promise<string
  */
 export async function inquirePaymentAttempt(uniqueId: string): Promise<HypPaymentInquiry> {
   const { relayUrl, user, password, terminalNumber } = getEnterpriseCreds();
-  const intIn = `<ashrait><request><version>2000</version><language>ENG</language><command>inquireTransactions</command><inquireTransactions><terminalNumber>${escapeXml(terminalNumber)}</terminalNumber><uniqueid>${escapeXml(uniqueId)}</uniqueid></inquireTransactions></request></ashrait>`;
+  const intIn = buildHypInquiryXml(terminalNumber, uniqueId);
   const body = new URLSearchParams({
     user,
     password,
@@ -231,7 +225,7 @@ export async function inquirePaymentAttempt(uniqueId: string): Promise<HypPaymen
     throw new Error(`HYP inquiry HTTP ${res.status}: ${rawXml.slice(0, 300)}`);
   }
 
-  return parseHypPaymentInquiry(rawXml);
+  return parseHypPaymentInquiry(rawXml, uniqueId);
 }
 
 /**
