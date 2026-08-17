@@ -2,9 +2,7 @@
 -- Replaces the 30/60/90 duration ladder. Boost = extra visibility only,
 -- never grants listing rights.
 
--- 0. plans table was never created by a migration (admin pricing editor
---    relied on it existing manually / falling back to static PLANS).
---    Create it here so the migration is self-sufficient.
+-- 0. plans table safety net (already exists in this DB, harmless if so).
 CREATE TABLE IF NOT EXISTS public.plans (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   sort_order integer NOT NULL DEFAULT 0,
@@ -14,7 +12,6 @@ CREATE TABLE IF NOT EXISTS public.plans (
 );
 
 ALTER TABLE public.plans ENABLE ROW LEVEL SECURITY;
--- Reads/writes go through the service-role server only; no policies needed.
 
 -- 1. plans: add kind, reseed to exactly two rows.
 ALTER TABLE public.plans
