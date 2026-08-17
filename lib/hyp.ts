@@ -1,5 +1,12 @@
 import { toHypVerificationParams } from "@/lib/payment-state";
 import { verifyCreditGuardResponseMac } from "@/lib/hyp-verification";
+import { getHypEnterpriseConfig } from "@/lib/hyp-enterprise-config";
+import {
+  buildHypInquiryXml,
+  parseHypPaymentInquiry,
+  toHypInquiryUser,
+  type HypPaymentInquiry,
+} from "@/lib/hyp-inquiry";
 
 /**
  * HYP Pay Protocol client.
@@ -108,6 +115,7 @@ function buildPayParams(p: CheckoutParams, masof: string, passp: string): Record
     Info: p.info,
     Order: p.order,
     uniqueid: p.order,
+    user: toHypInquiryUser(p.order),
     Coin: "1",
     UTF8: "True",
     UTF8out: "True",
@@ -173,6 +181,36 @@ export async function createSignedCheckoutUrl(p: CheckoutParams): Promise<string
   }
 
   return `${HYP_ENDPOINT}?${body}`;
+}
+
+/**
+ * Queries HYP Enterprise for our merchant attempt ID. Per HYP docs, transaction
+ * inquiries are for sparse reconciliation, not continuous polling.
+ */
+export async function inquirePaymentAttempt(uniqueId: string): Promise<HypPaymentInquiry> {
+  const { relayUrl, user, password, terminalNumber } = getHypEnterpriseConfig();
+  const intIn = buildHypInquiryXml(terminalNumber, uniqueId);
+  const body = new URLSearchParams({
+    user,
+    password,
+    int_in: intIn,
+  });
+
+  const res = await fetch(relayUrl, {
+    method: "POST",
+    headers: {
+      ...hypHeaders(),
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body,
+    signal: AbortSignal.timeout(HYP_REQUEST_TIMEOUT_MS),
+  });
+  const rawXml = (await res.text()).trim();
+  if (!res.ok) {
+    throw new Error(`HYP inquiry HTTP ${res.status}: ${rawXml.slice(0, 300)}`);
+  }
+
+  return parseHypPaymentInquiry(rawXml, uniqueId);
 }
 
 /**
