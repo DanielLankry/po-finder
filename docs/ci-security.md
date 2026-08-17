@@ -9,7 +9,7 @@ npm ci
 npm run docs:links
 npm run lint
 npm run typecheck
-npm audit --omit=dev --audit-level=moderate
+npm audit --omit=dev
 npm test
 npm run build
 ```

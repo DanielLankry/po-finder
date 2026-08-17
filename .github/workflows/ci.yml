@@ -42,7 +42,7 @@ jobs:
         run: npm run typecheck
 
       - name: Audit production dependencies
-        run: npm audit --omit=dev --audit-level=moderate
+        run: npm audit --omit=dev
 
       - name: Unit tests
         run: npm test
