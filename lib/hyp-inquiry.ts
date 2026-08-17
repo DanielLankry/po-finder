@@ -28,6 +28,51 @@ function normalizeAmount(value: string): number | null {
   return Number.isFinite(parsed) ? Math.round(parsed) : null;
 }
 
+function normalizeValue(value: string): string {
+  return value.trim().toLowerCase().replace(/[\s_-]+/g, "");
+}
+
+function isSuccessfulRow(row: string): boolean {
+  const status = extractTag(row, "status") || extractTag(row, "statusCode");
+  const errorCode = extractTag(row, "errorCode");
+  return status === "000" || status === "0" || errorCode === "00";
+}
+
+function isCapturedDebit(row: string): boolean {
+  const validation = normalizeValue(extractTag(row, "validation"));
+  const financialStatus = normalizeValue(extractTag(row, "financialStatus"));
+  const transactionType = normalizeValue(extractTag(row, "transactionType"));
+  const debitType =
+    transactionType === "regulardebit" ||
+    transactionType === "forceddebit" ||
+    transactionType === "debit" ||
+    transactionType === "01" ||
+    transactionType === "03";
+
+  return (
+    isSuccessfulRow(row) &&
+    validation === "autocomm" &&
+    debitType &&
+    (financialStatus === "captured" || financialStatus === "transmitted")
+  );
+}
+
+function reversesCharge(row: string): boolean {
+  const financialStatus = normalizeValue(extractTag(row, "financialStatus"));
+  const transactionType = normalizeValue(extractTag(row, "transactionType"));
+  return (
+    financialStatus === "cancelled" ||
+    (isSuccessfulRow(row) &&
+      (transactionType === "cancel" ||
+        transactionType === "refund" ||
+        transactionType === "regularcredit" ||
+        transactionType === "reversal" ||
+        transactionType === "51" ||
+        transactionType === "52" ||
+        transactionType === "58"))
+  );
+}
+
 export function parseHypPaymentInquiry(rawXml: string): HypPaymentInquiry {
   const topResult = extractTag(rawXml, "result");
   const rows = [
@@ -35,24 +80,22 @@ export function parseHypPaymentInquiry(rawXml: string): HypPaymentInquiry {
     ...extractBlocks(rawXml, "transaction"),
   ];
 
-  const chargedRow = rows.find((row) => {
-    const validation = extractTag(row, "validation");
-    const status = extractTag(row, "status") || extractTag(row, "statusCode");
-    const statusText = extractTag(row, "statusText");
-    const errorCode = extractTag(row, "errorCode");
-    return (
-      (status === "000" || status === "0") &&
-      (validation === "AutoComm" || statusText === "SUCCEEDED" || errorCode === "00")
-    );
-  });
+  const chargedRowIndex = rows.reduce(
+    (found, row, index) => (isCapturedDebit(row) ? index : found),
+    -1,
+  );
+  const chargedRow = chargedRowIndex >= 0 ? rows[chargedRowIndex] : undefined;
+  const reversalRowIndex = rows.findIndex(reversesCharge);
+  const chargeWasReversed =
+    reversalRowIndex >= 0 &&
+    (chargedRowIndex < 0 || reversalRowIndex >= chargedRowIndex);
 
-  if (chargedRow) {
+  if (chargedRow && !chargeWasReversed && extractTag(chargedRow, "tranId")) {
     return {
       outcome: "charged",
-      hypTransactionId:
-        extractTag(chargedRow, "mpiTransactionId") ||
-        extractTag(chargedRow, "cgUid") ||
-        extractTag(chargedRow, "tranId"),
+      // CancelTrans and the existing refund flow require the technical debit
+      // tranId, not the MPI/cgUid identifier shared by related transactions.
+      hypTransactionId: extractTag(chargedRow, "tranId"),
       hypAuthCode: extractTag(chargedRow, "authNumber"),
       hypCardMask: extractTag(chargedRow, "cardMask") || extractTag(chargedRow, "cardNo"),
       hypResponseCode:
@@ -68,36 +111,50 @@ export function parseHypPaymentInquiry(rawXml: string): HypPaymentInquiry {
   }
 
   const failedRow = rows.find((row) => {
-    const validation = extractTag(row, "validation");
+    const validation = normalizeValue(extractTag(row, "validation"));
+    const financialStatus = normalizeValue(extractTag(row, "financialStatus"));
     const status = extractTag(row, "status") || extractTag(row, "statusCode");
     const errorCode = extractTag(row, "errorCode");
-    return validation !== "TxnSetup" && (status || errorCode);
+    return (
+      validation !== "txnsetup" &&
+      (financialStatus === "rejected" ||
+        financialStatus === "error" ||
+        (status !== "000" && status !== "0" && Boolean(status)) ||
+        (errorCode !== "00" && Boolean(errorCode)))
+    );
   });
 
-  if (failedRow) {
+  if (chargeWasReversed || failedRow) {
+    const terminalRow = chargeWasReversed
+      ? rows[reversalRowIndex]
+      : failedRow;
     return {
       outcome: "not_charged",
       hypTransactionId:
-        extractTag(failedRow, "mpiTransactionId") ||
-        extractTag(failedRow, "cgUid") ||
-        extractTag(failedRow, "tranId"),
-      hypAuthCode: extractTag(failedRow, "authNumber"),
-      hypCardMask: extractTag(failedRow, "cardMask") || extractTag(failedRow, "cardNo"),
+        extractTag(terminalRow ?? "", "tranId") ||
+        extractTag(terminalRow ?? "", "cgUid") ||
+        extractTag(terminalRow ?? "", "mpiTransactionId"),
+      hypAuthCode: extractTag(terminalRow ?? "", "authNumber"),
+      hypCardMask:
+        extractTag(terminalRow ?? "", "cardMask") ||
+        extractTag(terminalRow ?? "", "cardNo"),
       hypResponseCode:
-        extractTag(failedRow, "cgGatewayResponseCode") ||
-        extractTag(failedRow, "status") ||
-        extractTag(failedRow, "statusCode") ||
-        extractTag(failedRow, "errorCode") ||
+        (chargeWasReversed ? "reversed" : "") ||
+        extractTag(terminalRow ?? "", "cgGatewayResponseCode") ||
+        extractTag(terminalRow ?? "", "status") ||
+        extractTag(terminalRow ?? "", "statusCode") ||
+        extractTag(terminalRow ?? "", "errorCode") ||
         "not_charged",
       amountAgorot: normalizeAmount(
-        extractTag(failedRow, "total") || extractTag(failedRow, "amount")
+        extractTag(terminalRow ?? "", "total") ||
+          extractTag(terminalRow ?? "", "amount")
       ),
       rawXml,
     };
   }
 
   return {
-    outcome: topResult === "000" ? "not_found" : "unknown",
+    outcome: topResult === "000" && rows.length === 0 ? "not_found" : "unknown",
     hypTransactionId: "",
     hypAuthCode: "",
     hypCardMask: "",
