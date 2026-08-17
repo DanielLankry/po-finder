@@ -1,5 +1,9 @@
 import { toHypVerificationParams } from "@/lib/payment-state";
 import { verifyCreditGuardResponseMac } from "@/lib/hyp-verification";
+import {
+  parseHypPaymentInquiry,
+  type HypPaymentInquiry,
+} from "@/lib/hyp-inquiry";
 
 /**
  * HYP Pay Protocol client.
@@ -33,6 +37,22 @@ function getCreds() {
     masof: requireEnv("HYP_MASOF"),
     passp: requireEnv("HYP_PASSP"),
     apiKey: requireEnv("HYP_API_KEY"),
+  };
+}
+
+function getEnterpriseCreds() {
+  const relayUrl =
+    process.env.HYP_ENTERPRISE_RELAY_URL?.trim() ||
+    process.env.HYP_ENTERPRISE_URL?.trim();
+  if (!relayUrl) {
+    throw new Error("Missing env: HYP_ENTERPRISE_RELAY_URL");
+  }
+
+  return {
+    relayUrl,
+    user: requireEnv("HYP_ENTERPRISE_USER"),
+    password: requireEnv("HYP_ENTERPRISE_PASSWORD"),
+    terminalNumber: requireEnv("HYP_TERMINAL_NUMBER"),
   };
 }
 
@@ -72,6 +92,15 @@ function describeNoSignatureBody(body: string): string {
     return `HYP rejected sign request (CCode=${ccode}). 902=KEY/PassP mismatch; 901=Masof not API-permitted.`;
   }
   return `HYP APISign returned no signature. Body: ${body.slice(0, 300)}`;
+}
+
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
 export interface CheckoutParams {
@@ -173,6 +202,36 @@ export async function createSignedCheckoutUrl(p: CheckoutParams): Promise<string
   }
 
   return `${HYP_ENDPOINT}?${body}`;
+}
+
+/**
+ * Queries HYP Enterprise for our merchant attempt ID. Per HYP docs, transaction
+ * inquiries are for sparse reconciliation, not continuous polling.
+ */
+export async function inquirePaymentAttempt(uniqueId: string): Promise<HypPaymentInquiry> {
+  const { relayUrl, user, password, terminalNumber } = getEnterpriseCreds();
+  const intIn = `<ashrait><request><version>2000</version><language>ENG</language><command>inquireTransactions</command><inquireTransactions><terminalNumber>${escapeXml(terminalNumber)}</terminalNumber><uniqueid>${escapeXml(uniqueId)}</uniqueid></inquireTransactions></request></ashrait>`;
+  const body = new URLSearchParams({
+    user,
+    password,
+    int_in: intIn,
+  });
+
+  const res = await fetch(relayUrl, {
+    method: "POST",
+    headers: {
+      ...hypHeaders(),
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body,
+    signal: AbortSignal.timeout(HYP_REQUEST_TIMEOUT_MS),
+  });
+  const rawXml = (await res.text()).trim();
+  if (!res.ok) {
+    throw new Error(`HYP inquiry HTTP ${res.status}: ${rawXml.slice(0, 300)}`);
+  }
+
+  return parseHypPaymentInquiry(rawXml);
 }
 
 /**
