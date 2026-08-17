@@ -71,56 +71,78 @@ function isSuccessfulRow(row: string): boolean {
   return status ? status === "000" || status === "0" : errorCode === "00";
 }
 
-function isCapturedDebit(row: string): boolean {
-  const validation = normalizeValue(extractTag(row, "validation"));
-  const financialStatus = normalizeValue(extractTag(row, "financialStatus"));
+function isDebitRow(row: string): boolean {
   const transactionType = normalizeValue(extractTag(row, "transactionType"));
   const transactionTypeCode = normalizeValue(
     extractTagAttribute(row, "transactionType", "code"),
   );
-  const debitType =
+  return (
     transactionType === "regulardebit" ||
     transactionType === "forceddebit" ||
     transactionType === "debit" ||
     transactionType === "01" ||
     transactionType === "03" ||
     transactionTypeCode === "01" ||
-    transactionTypeCode === "03";
+    transactionTypeCode === "03"
+  );
+}
+
+function isCapturedDebit(row: string): boolean {
+  const validation = normalizeValue(extractTag(row, "validation"));
+  const financialStatus = normalizeValue(extractTag(row, "financialStatus"));
 
   return (
     isSuccessfulRow(row) &&
     validation === "autocomm" &&
-    debitType &&
+    isDebitRow(row) &&
     (financialStatus === "captured" || financialStatus === "transmitted")
   );
 }
 
-function reversesCharge(row: string): boolean {
+function isTerminallyReversedDebit(row: string): boolean {
   const financialStatus = normalizeValue(extractTag(row, "financialStatus"));
+  return (
+    isDebitRow(row) &&
+    (financialStatus === "cancelled" ||
+      financialStatus === "canceled" ||
+      financialStatus === "refunded" ||
+      financialStatus === "reversed")
+  );
+}
+
+function isSuccessfulReversal(row: string): boolean {
   const transactionType = normalizeValue(extractTag(row, "transactionType"));
   const transactionTypeCode = normalizeValue(
     extractTagAttribute(row, "transactionType", "code"),
   );
   return (
-    financialStatus === "cancelled" ||
-    financialStatus === "canceled" ||
-    financialStatus === "refunded" ||
-    financialStatus === "reversed" ||
-    (isSuccessfulRow(row) &&
-      (transactionType === "cancel" ||
-        transactionType === "authcredit" ||
-        transactionType === "refund" ||
-        transactionType === "regularcredit" ||
-        transactionType === "reversal" ||
-        transactionType === "51" ||
-        transactionType === "52" ||
-        transactionType === "53" ||
-        transactionType === "58" ||
-        transactionTypeCode === "51" ||
-        transactionTypeCode === "52" ||
-        transactionTypeCode === "53" ||
-        transactionTypeCode === "58"))
+    isSuccessfulRow(row) &&
+    (transactionType === "cancel" ||
+      transactionType === "authcredit" ||
+      transactionType === "refund" ||
+      transactionType === "regularcredit" ||
+      transactionType === "reversal" ||
+      transactionType === "51" ||
+      transactionType === "52" ||
+      transactionType === "53" ||
+      transactionType === "58" ||
+      transactionTypeCode === "51" ||
+      transactionTypeCode === "52" ||
+      transactionTypeCode === "53" ||
+      transactionTypeCode === "58")
   );
+}
+
+function sumTransactionAmounts(rows: string[]): number | null {
+  let total = 0;
+  for (const row of rows) {
+    const amount = normalizeAmount(
+      extractTag(row, "total") || extractTag(row, "amount"),
+    );
+    if (amount === null || amount <= 0) return null;
+    total += amount;
+  }
+  return total;
 }
 
 function inquiryDetails(
@@ -181,17 +203,39 @@ export function parseHypPaymentInquiry(
     };
   }
 
-  const chargedRowIndex = rows.reduce(
-    (found, row, index) => (isCapturedDebit(row) ? index : found),
-    -1,
-  );
-  const chargedRow = chargedRowIndex >= 0 ? rows[chargedRowIndex] : undefined;
-  // HYP does not guarantee response row order. Any applicable successful
-  // cancel, credit, or reversal vetoes automatic settlement.
-  const reversalRowIndex = rows.findIndex(reversesCharge);
-  const chargeWasReversed = reversalRowIndex >= 0;
+  const terminallyReversedDebit = rows.find(isTerminallyReversedDebit);
+  if (terminallyReversedDebit) {
+    return inquiryDetails(
+      rawXml,
+      terminallyReversedDebit,
+      "not_charged",
+      "reversed",
+    );
+  }
 
-  if (chargedRow && !chargeWasReversed && extractTag(chargedRow, "tranId")) {
+  const chargedRows = rows.filter(isCapturedDebit);
+  const reversalRows = rows.filter(isSuccessfulReversal);
+
+  if (reversalRows.length > 0) {
+    // HYP supports partial refunds and does not guarantee response row order.
+    // Only a complete, amount-proven offset is terminally not charged. Any
+    // partial, excess, or amount-less mix retains the attempt for review.
+    const chargedAmount = sumTransactionAmounts(chargedRows);
+    const reversedAmount = sumTransactionAmounts(reversalRows);
+    const reversalRow = reversalRows[reversalRows.length - 1];
+    if (
+      chargedRows.length > 0 &&
+      chargedAmount !== null &&
+      reversedAmount !== null &&
+      chargedAmount === reversedAmount
+    ) {
+      return inquiryDetails(rawXml, reversalRow, "not_charged", "reversed");
+    }
+    return inquiryDetails(rawXml, reversalRow, "unknown", "partial_reversal");
+  }
+
+  const chargedRow = chargedRows.length === 1 ? chargedRows[0] : undefined;
+  if (chargedRow && extractTag(chargedRow, "tranId")) {
     // CancelTrans and the existing refund flow require the technical debit
     // tranId, not the MPI/cgUid identifier shared by related transactions.
     return inquiryDetails(rawXml, chargedRow, "charged", "");
@@ -211,16 +255,8 @@ export function parseHypPaymentInquiry(
     );
   });
 
-  if (chargeWasReversed || failedRow) {
-    const terminalRow = chargeWasReversed
-      ? rows[reversalRowIndex]
-      : failedRow;
-    return inquiryDetails(
-      rawXml,
-      terminalRow ?? "",
-      "not_charged",
-      chargeWasReversed ? "reversed" : "",
-    );
+  if (failedRow) {
+    return inquiryDetails(rawXml, failedRow, "not_charged", "");
   }
 
   return {
