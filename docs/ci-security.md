@@ -1,6 +1,8 @@
 # CI and Security Gates
 
 The default CI workflow runs on pull requests and pushes to `master`.
+It uses Node.js 24 LTS and Node.js 24-based action releases so the gates do not
+depend on GitHub's retired Node.js 20 action runtime.
 
 Local parity commands:
 
@@ -27,3 +29,5 @@ Additional repository automation:
 - CodeQL scans JavaScript and TypeScript on pull requests, `master` pushes, and
   a weekly schedule.
 - Gitleaks scans pull requests and `master` pushes for committed secrets.
+  Historical HYP public-test fixtures are allowlisted by exact fingerprint in
+  `.gitleaksignore`; new matches remain blocking.
