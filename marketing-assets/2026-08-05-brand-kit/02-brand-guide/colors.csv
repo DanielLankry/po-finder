@@ -1,0 +1,11 @@
+name,usage,hex,rgb
+Primary green,Primary controls and brand,#2D6A4F,"45, 106, 79"
+Secondary green,Supporting accents,#4A8B66,"74, 139, 102"
+Ink green,Text borders and hard shadows,#17402D,"23, 64, 45"
+Pressed green,Hover and pressed states,#1F5038,"31, 80, 56"
+Terracotta,Primary CTA,#C4552D,"196, 85, 45"
+Terracotta dark,CTA borders and shadows,#8A3618,"138, 54, 24"
+Warm paper,Main background,#F7F3EA,"247, 243, 234"
+Soft green,Secondary background,#EFF5F0,"239, 245, 240"
+Warm white,Panels and dark-background wordmark,#FFFDF7,"255, 253, 247"
+Rating yellow,Stars and highlights,#F4B942,"244, 185, 66"
