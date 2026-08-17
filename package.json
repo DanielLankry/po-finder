@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "docs:links": "node scripts/check-doc-links.mjs",
+    "test": "node --test tests/*.test.mjs",
     "db:link": "supabase link",
     "db:diff": "supabase db diff -f",
     "db:push": "supabase db push",
@@ -40,12 +43,13 @@
   },
   "overrides": {
     "@babel/core": "7.29.7",
-    "dompurify": "3.4.12",
-    "fast-uri": "3.1.4",
+    "dompurify": "3.4.13",
+    "fast-uri": "3.1.5",
     "glob": {
-      "brace-expansion": "5.0.8"
+      "brace-expansion": "5.0.9"
     },
-    "postcss": "8.5.19",
+    "nanoid": "3.3.18",
+    "postcss": "8.5.26",
     "sharp": "0.35.0"
   },
   "devDependencies": {
