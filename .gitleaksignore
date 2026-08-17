@@ -1,0 +1,4 @@
+# HYP's documented public test merchant values, retained in historical fixtures.
+a8f98ed1c4721153e3895dca07e889a4e67dcf21:.env.local.example:generic-api-key:19
+a8f98ed1c4721153e3895dca07e889a4e67dcf21:tests/smoke-hyp.mjs:generic-api-key:56
+a8f98ed1c4721153e3895dca07e889a4e67dcf21:tests/smoke-hyp.mjs:generic-api-key:63
