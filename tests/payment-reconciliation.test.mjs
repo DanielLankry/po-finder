@@ -1,7 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { parseHypPaymentInquiry } from "../lib/hyp-inquiry.ts";
+import {
+  buildHypInquiryXml,
+  parseHypPaymentInquiry,
+  toHypInquiryUser,
+} from "../lib/hyp-inquiry.ts";
 import {
   claimHypPaymentAttempts,
   getReconciliationRetryDisposition,
@@ -10,10 +14,18 @@ import {
 
 const ATTEMPT_ID = "34a33035-4275-42f8-9963-ea59adcf9445";
 
+test("HYP inquiry uses the documented user lookup", () => {
+  const xml = buildHypInquiryXml("terminal&1", ATTEMPT_ID);
+
+  assert.match(xml, /<terminalNumber>terminal&amp;1<\/terminalNumber>/);
+  assert.match(xml, new RegExp(`<user>${toHypInquiryUser(ATTEMPT_ID)}</user>`));
+  assert.doesNotMatch(xml, /<uniqueid>/i);
+});
+
 test("charged payment without browser return is settled from HYP inquiry", async () => {
   const admin = createAdminClient();
   const attempt = pendingAttempt();
-  const inquiry = parseHypPaymentInquiry(successInquiryXml());
+  const inquiry = parseHypPaymentInquiry(successInquiryXml(), ATTEMPT_ID);
 
   const result = await reconcileHypPaymentAttempt(admin, attempt, async () => inquiry);
 
@@ -38,6 +50,7 @@ test("negative HYP inquiry fails only the matching pending attempt", async () =>
 
   const result = await reconcileHypPaymentAttempt(admin, row, async () => ({
     outcome: "not_charged",
+    inquiryUser: toHypInquiryUser(ATTEMPT_ID),
     hypTransactionId: "tx-123",
     hypAuthCode: "",
     hypCardMask: "",
@@ -107,6 +120,7 @@ test("negative inquiry cannot overwrite a concurrent successful return", async (
     pendingAttempt(),
     async () => ({
       outcome: "not_charged",
+      inquiryUser: toHypInquiryUser(ATTEMPT_ID),
       hypTransactionId: "119187092",
       hypAuthCode: "",
       hypCardMask: "",
@@ -123,8 +137,8 @@ test("negative inquiry cannot overwrite a concurrent successful return", async (
 });
 
 test("cancelled or refunded inquiry rows never grant entitlement", () => {
-  const cancelled = parseHypPaymentInquiry(cancelledInquiryXml());
-  const refunded = parseHypPaymentInquiry(refundedInquiryXml());
+  const cancelled = parseHypPaymentInquiry(cancelledInquiryXml(), ATTEMPT_ID);
+  const refunded = parseHypPaymentInquiry(refundedInquiryXml(), ATTEMPT_ID);
 
   assert.equal(cancelled.outcome, "not_charged");
   assert.equal(cancelled.hypResponseCode, "reversed");
@@ -133,11 +147,108 @@ test("cancelled or refunded inquiry rows never grant entitlement", () => {
 });
 
 test("captured inquiry preserves debit tranId for the refund flow", () => {
-  const inquiry = parseHypPaymentInquiry(successInquiryXml());
+  const inquiry = parseHypPaymentInquiry(successInquiryXml(), ATTEMPT_ID);
 
   assert.equal(inquiry.outcome, "charged");
   assert.equal(inquiry.hypTransactionId, "119187092");
   assert.notEqual(inquiry.hypTransactionId, "tx-123");
+});
+
+test("reversal before its debit vetoes automatic settlement", async () => {
+  const row = pendingAttempt();
+  const admin = createAdminClient(row);
+  const inquiry = parseHypPaymentInquiry(
+    transactionInquiryXml([reversalRow("reversal-1"), debitRow()]),
+    ATTEMPT_ID,
+  );
+
+  const result = await reconcileHypPaymentAttempt(admin, row, async () => inquiry);
+
+  assert.equal(inquiry.outcome, "not_charged");
+  assert.equal(result.status, "failed");
+  assert.equal(
+    admin.rpcCalls.some(({ name }) => name === "settle_payment_attempt"),
+    false,
+  );
+});
+
+test("any successful reversal vetoes debit regardless of row order", () => {
+  const inquiry = parseHypPaymentInquiry(
+    transactionInquiryXml([
+      debitRow(),
+      reversalRow("failed-reversal", "101"),
+      reversalRow("successful-credit", "000", "53", "AuthCredit"),
+      debitRow("second-debit"),
+    ]),
+    ATTEMPT_ID,
+  );
+
+  assert.equal(inquiry.outcome, "not_charged");
+  assert.equal(inquiry.hypTransactionId, "successful-credit");
+});
+
+test("mismatched inquiry user cannot settle the local attempt", async () => {
+  const admin = createAdminClient();
+  const inquiry = parseHypPaymentInquiry(
+    transactionInquiryXml([debitRow("wrong-attempt-debit", "different-attempt")]),
+    ATTEMPT_ID,
+  );
+
+  const result = await reconcileHypPaymentAttempt(
+    admin,
+    pendingAttempt(),
+    async () => inquiry,
+  );
+
+  assert.equal(inquiry.outcome, "unknown");
+  assert.deepEqual(result, {
+    attemptId: ATTEMPT_ID,
+    status: "pending",
+    reason: "inquiry_correlation_unverified",
+  });
+  assert.equal(admin.rpcCalls[0].name, "record_payment_reconciliation_outcome");
+  assert.equal(admin.rpcCalls[0].args.p_outcome, "correlation_unverified");
+  assert.equal(
+    admin.rpcCalls.some(({ name }) => name === "settle_payment_attempt"),
+    false,
+  );
+});
+
+test("missing inquiry user cannot produce a terminal outcome", () => {
+  const inquiry = parseHypPaymentInquiry(
+    transactionInquiryXml([debitRow("uncorrelated-debit", "")]),
+    ATTEMPT_ID,
+  );
+
+  assert.equal(inquiry.outcome, "unknown");
+  assert.equal(inquiry.hypResponseCode, "correlation_unverified");
+});
+
+test("settlement rechecks correlation even for an injected charged result", async () => {
+  const admin = createAdminClient();
+
+  const result = await reconcileHypPaymentAttempt(
+    admin,
+    pendingAttempt(),
+    async () => ({
+      outcome: "charged",
+      inquiryUser: "different-attempt",
+      hypTransactionId: "wrong-attempt-debit",
+      hypAuthCode: "4760370",
+      hypCardMask: "411111******1111",
+      hypResponseCode: "000",
+      amountAgorot: 1500,
+      rawXml: "<ashrait />",
+    }),
+  );
+
+  assert.equal(result.status, "pending");
+  assert.equal(result.reason, "inquiry_correlation_unverified");
+  assert.equal(admin.rpcCalls[0].args.p_outcome, "correlation_unverified");
+  assert.equal(
+    admin.rpcCalls.some(({ name }) => name === "settle_payment_attempt"),
+    false,
+  );
 });
 
 test("retry schedule escalates at the configured cap", async () => {
@@ -204,6 +315,7 @@ function successInquiryXml() {
         <transaction>
           <status>000</status>
           <validation>TxnSetup</validation>
+          <user>${toHypInquiryUser(ATTEMPT_ID)}</user>
           <total>1500</total>
           <cgUid>setup-123</cgUid>
         </transaction>
@@ -211,6 +323,7 @@ function successInquiryXml() {
           <status>000</status>
           <statusText>Permitted transaction</statusText>
           <validation>AutoComm</validation>
+          <user>${toHypInquiryUser(ATTEMPT_ID)}</user>
           <transactionType code="01">RegularDebit</transactionType>
           <financialStatus>Captured</financialStatus>
           <total>1500</total>
@@ -230,6 +343,7 @@ function cancelledInquiryXml() {
 <ashrait><response><result>000</result><inquireTransactions><transactions>
   <transaction>
     <status>000</status><validation>AutoComm</validation>
+    <user>${toHypInquiryUser(ATTEMPT_ID)}</user>
     <transactionType code="01">RegularDebit</transactionType>
     <financialStatus>Cancelled</financialStatus><tranId>119187092</tranId>
   </transaction>
@@ -241,15 +355,38 @@ function refundedInquiryXml() {
 <ashrait><response><result>000</result><inquireTransactions><transactions>
   <transaction>
     <status>000</status><validation>AutoComm</validation>
+    <user>${toHypInquiryUser(ATTEMPT_ID)}</user>
     <transactionType code="01">RegularDebit</transactionType>
     <financialStatus>Transmitted</financialStatus><tranId>119187092</tranId>
   </transaction>
   <transaction>
     <status>000</status><validation>AutoComm</validation>
+    <user>${toHypInquiryUser(ATTEMPT_ID)}</user>
     <transactionType code="52">Cancel</transactionType>
     <financialStatus>Transmitted</financialStatus><tranId>119187120</tranId>
   </transaction>
 </transactions></inquireTransactions></response></ashrait>`;
+}
+
+function transactionInquiryXml(rows) {
+  return `<ashrait><response><result>000</result><inquireTransactions><transactions>${rows.join("")}</transactions></inquireTransactions></response></ashrait>`;
+}
+
+function debitRow(
+  transactionId = "debit-1",
+  user = toHypInquiryUser(ATTEMPT_ID),
+) {
+  return `<transaction><status>000</status><validation>AutoComm</validation><transactionType code="01">RegularDebit</transactionType><financialStatus>Captured</financialStatus><total>1500</total><user>${user}</user><tranId>${transactionId}</tranId></transaction>`;
+}
+
+function reversalRow(
+  transactionId,
+  status = "000",
+  typeCode = "58",
+  typeName = "Reversal",
+  user = toHypInquiryUser(ATTEMPT_ID),
+) {
+  return `<transaction><status>${status}</status><validation>AutoComm</validation><transactionType code="${typeCode}">${typeName}</transactionType><financialStatus>Transmitted</financialStatus><total>1500</total><user>${user}</user><tranId>${transactionId}</tranId></transaction>`;
 }
 
 function createAdminClient(row = null) {

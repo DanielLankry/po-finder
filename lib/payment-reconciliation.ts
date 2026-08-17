@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 type HypPaymentInquiry = {
   outcome: "charged" | "not_charged" | "not_found" | "unknown";
+  inquiryUser: string;
   hypTransactionId: string;
   hypAuthCode: string;
   hypCardMask: string;
@@ -39,6 +40,10 @@ type ReconciliationRetryDisposition = {
   nextRetryAt: string | null;
   escalated: boolean;
 };
+
+function expectedInquiryUser(attemptId: string): string {
+  return attemptId.trim().slice(0, 19);
+}
 
 export async function claimHypPaymentAttempts(
   admin: SupabaseClient,
@@ -99,6 +104,7 @@ function rawInquiryJson(inquiry: HypPaymentInquiry): Record<string, string> {
   return {
     reconciliation: "hyp_inquiry",
     outcome: inquiry.outcome,
+    inquiryUser: inquiry.inquiryUser,
     hypTransactionId: inquiry.hypTransactionId,
     hypResponseCode: inquiry.hypResponseCode,
     amountAgorot: inquiry.amountAgorot === null ? "" : String(inquiry.amountAgorot),
@@ -180,6 +186,32 @@ export async function reconcileHypPaymentAttempt(
       attempt,
       "transport_error",
       caught instanceof Error ? caught.message : "inquiry_unavailable",
+      maxAttempts,
+    );
+  }
+
+  if (
+    (inquiry.outcome === "charged" || inquiry.outcome === "not_charged") &&
+    inquiry.inquiryUser !== expectedInquiryUser(attempt.id)
+  ) {
+    return leavePendingForRetry(
+      admin,
+      attempt,
+      "correlation_unverified",
+      "inquiry_correlation_unverified",
+      maxAttempts,
+    );
+  }
+
+  if (
+    inquiry.outcome === "unknown" &&
+    inquiry.hypResponseCode === "correlation_unverified"
+  ) {
+    return leavePendingForRetry(
+      admin,
+      attempt,
+      "correlation_unverified",
+      "inquiry_correlation_unverified",
       maxAttempts,
     );
   }
