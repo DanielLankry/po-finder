@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { BadgeCheck, CalendarDays, Check } from "lucide-react";
 import {
   PLAN_CODES,
@@ -20,6 +20,15 @@ interface DurationSelectorCardProps {
   loading?: boolean;
   onAction: (plan: Plan) => void;
 }
+
+let browserNowSnapshot = Date.now();
+const subscribeToBrowserNow = (onStoreChange: () => void) => {
+  browserNowSnapshot = Date.now();
+  onStoreChange();
+  return () => {};
+};
+const getBrowserNowSnapshot = (): number | null => browserNowSnapshot;
+const getServerNowSnapshot = (): number | null => null;
 
 /** Renders every listing duration as one continuous, synchronized slider.
  * The database owns final entitlement dates; this UTC preview mirrors its day
@@ -47,6 +56,12 @@ export default function DurationSelectorCard({
     getPlanByCode(catalog, "listing_6m") ??
     catalog[0];
   const [selectedCode, setSelectedCode] = useState<PlanCode>(initialPlan.code);
+  const browserNow = useSyncExternalStore(
+    subscribeToBrowserNow,
+    getBrowserNowSnapshot,
+    getServerNowSnapshot
+  );
+  const isHydrated = browserNow !== null;
   const selected = getPlanByCode(catalog, selectedCode) ?? initialPlan;
   const selectedIndex = Math.max(
     0,
@@ -58,7 +73,9 @@ export default function DurationSelectorCard({
     (plan) => plan.months === null && plan.days < 7
   ).length;
 
-  const now = new Date(nowIso);
+  // Keep the server snapshot for hydration, then use the browser clock so a
+  // cached pricing page cannot keep showing dates relative to its build time.
+  const now = new Date(browserNow ?? nowIso);
   const existingExpiry = baseExpiry ? new Date(baseExpiry) : null;
   const base =
     existingExpiry && existingExpiry.getTime() > now.getTime()
@@ -139,6 +156,7 @@ export default function DurationSelectorCard({
             max={catalog.length - 1}
             step={1}
             value={selectedIndex}
+            disabled={!isHydrated}
             onChange={(event) => {
               const plan = catalog[Number(event.target.value)];
               if (plan) setSelectedCode(plan.code);
