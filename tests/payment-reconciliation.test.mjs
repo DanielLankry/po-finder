@@ -7,6 +7,7 @@ import {
   toHypInquiryUser,
 } from "../lib/hyp-inquiry.ts";
 import { getHypEnterpriseConfig } from "../lib/hyp-enterprise-config.ts";
+import { handlePaymentReconciliationCron } from "../lib/payment-reconciliation-cron.ts";
 import {
   claimHypPaymentAttempts,
   getReconciliationRetryDisposition,
@@ -147,6 +148,46 @@ test("cancelled or refunded inquiry rows never grant entitlement", () => {
   assert.equal(refunded.hypResponseCode, "reversed");
 });
 
+test("cancelled and captured debits remain pending for review", async () => {
+  const row = pendingAttempt();
+  const admin = createAdminClient(row);
+  const inquiry = parseHypPaymentInquiry(
+    transactionInquiryXml([cancelledDebitRow(), debitRow("captured-debit")]),
+    ATTEMPT_ID,
+  );
+
+  const result = await reconcileHypPaymentAttempt(admin, row, async () => inquiry);
+
+  assert.equal(inquiry.outcome, "unknown");
+  assert.equal(inquiry.hypResponseCode, "mixed_financial_state");
+  assert.equal(result.status, "pending");
+  assert.equal(row.status, "pending");
+  assert.equal(
+    admin.rpcCalls.some(({ name }) => name === "settle_payment_attempt"),
+    false,
+  );
+});
+
+test("captured debits plus a rejected reversal cannot fail the attempt", async () => {
+  const row = pendingAttempt();
+  const admin = createAdminClient(row);
+  const inquiry = parseHypPaymentInquiry(
+    transactionInquiryXml([
+      debitRow("first-captured-debit"),
+      debitRow("second-captured-debit"),
+      reversalRow("rejected-reversal", "101"),
+    ]),
+    ATTEMPT_ID,
+  );
+
+  const result = await reconcileHypPaymentAttempt(admin, row, async () => inquiry);
+
+  assert.equal(inquiry.outcome, "unknown");
+  assert.equal(inquiry.hypResponseCode, "multiple_captured_debits");
+  assert.equal(result.status, "pending");
+  assert.equal(row.status, "pending");
+});
+
 test("captured inquiry preserves debit tranId for the refund flow", () => {
   const inquiry = parseHypPaymentInquiry(successInquiryXml(), ATTEMPT_ID);
 
@@ -260,6 +301,50 @@ test("Enterprise inquiry config fails before use when incomplete or unsafe", () 
       terminalNumber: "1234",
     },
   );
+});
+
+test("invalid Enterprise config returns 503 before any claim RPC", async () => {
+  let adminClientCalls = 0;
+  let claimCalls = 0;
+
+  const response = await handlePaymentReconciliationCron(
+    {
+      authorization: "Bearer cron-secret",
+      cronSecret: "cron-secret",
+      requestedLimit: null,
+      configuredLimit: undefined,
+      configuredMinAgeMinutes: undefined,
+      configuredMaxAttempts: undefined,
+      configuredLeaseSeconds: undefined,
+    },
+    {
+      assertHypEnterpriseConfigured: () => getHypEnterpriseConfig({}),
+      getAdminClient() {
+        adminClientCalls += 1;
+        return createAdminClient();
+      },
+      async claimAttempts() {
+        claimCalls += 1;
+        return [];
+      },
+      async reconcileAttempt() {
+        throw new Error("must not reconcile");
+      },
+      captureError() {},
+      defaultMaxAttempts: 5,
+      defaultLeaseSeconds: 600,
+    },
+  );
+
+  assert.deepEqual(response, {
+    status: 503,
+    body: {
+      error: "hyp_inquiry_not_configured",
+      detail: "Missing env: HYP_ENTERPRISE_RELAY_URL",
+    },
+  });
+  assert.equal(adminClientCalls, 0);
+  assert.equal(claimCalls, 0);
 });
 
 test("mismatched inquiry user cannot settle the local attempt", async () => {
@@ -423,6 +508,10 @@ function cancelledInquiryXml() {
     <financialStatus>Cancelled</financialStatus><tranId>119187092</tranId>
   </transaction>
 </transactions></inquireTransactions></response></ashrait>`;
+}
+
+function cancelledDebitRow() {
+  return `<transaction><status>000</status><validation>AutoComm</validation><user>${toHypInquiryUser(ATTEMPT_ID)}</user><transactionType code="01">RegularDebit</transactionType><financialStatus>Cancelled</financialStatus><total>1500</total><tranId>cancelled-debit</tranId></transaction>`;
 }
 
 function refundedInquiryXml() {

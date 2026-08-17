@@ -203,8 +203,17 @@ export function parseHypPaymentInquiry(
     };
   }
 
+  const chargedRows = rows.filter(isCapturedDebit);
   const terminallyReversedDebit = rows.find(isTerminallyReversedDebit);
   if (terminallyReversedDebit) {
+    if (chargedRows.length > 0) {
+      return inquiryDetails(
+        rawXml,
+        terminallyReversedDebit,
+        "unknown",
+        "mixed_financial_state",
+      );
+    }
     return inquiryDetails(
       rawXml,
       terminallyReversedDebit,
@@ -213,7 +222,6 @@ export function parseHypPaymentInquiry(
     );
   }
 
-  const chargedRows = rows.filter(isCapturedDebit);
   const reversalRows = rows.filter(isSuccessfulReversal);
 
   if (reversalRows.length > 0) {
@@ -239,6 +247,15 @@ export function parseHypPaymentInquiry(
     // CancelTrans and the existing refund flow require the technical debit
     // tranId, not the MPI/cgUid identifier shared by related transactions.
     return inquiryDetails(rawXml, chargedRow, "charged", "");
+  }
+
+  if (chargedRows.length > 0) {
+    return inquiryDetails(
+      rawXml,
+      chargedRows[0],
+      "unknown",
+      "multiple_captured_debits",
+    );
   }
 
   const failedRow = rows.find((row) => {

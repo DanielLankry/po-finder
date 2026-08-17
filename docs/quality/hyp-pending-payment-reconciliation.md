@@ -29,7 +29,10 @@ as fully reversed only when the summed reversal amount exactly offsets the
 summed captured debit amount. Partial, excess, missing-amount, and otherwise
 mixed reversals remain `pending` for review; they are never failed or settled
 automatically. A debit row in a terminal `Cancelled`, `Canceled`, `Refunded`, or
-`Reversed` financial state is never treated as charged.
+`Reversed` financial state is never treated as charged. If the same response
+also contains a captured debit, or contains multiple captured debits plus a
+rejected reversal, the mixed set remains `pending`; a negative row cannot make
+an attempt with captured debit evidence terminally failed.
 
 New checkouts place a deterministic 19-character payment-attempt correlation in
 HYP's documented payment-page `user` field. Reconciliation queries by that
@@ -182,7 +185,7 @@ npx eslint \
   app/api/payments/return/route.ts \
   app/api/cron/payment-reconciliation/route.ts \
   lib/hyp.ts lib/hyp-enterprise-config.ts lib/hyp-inquiry.ts \
-  lib/payment-reconciliation.ts \
+  lib/payment-reconciliation.ts lib/payment-reconciliation-cron.ts \
   lib/payment-return.ts lib/payment-state.ts \
   tests/payment-return.test.mjs tests/payment-reconciliation.test.mjs
 ```
