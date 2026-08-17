@@ -23,10 +23,13 @@ approval and Sentinel review.
 The parser grants entitlement only for a successful `AutoComm` debit whose
 `financialStatus` is `Captured` or `Transmitted`, whose amount matches the local
 attempt when present, and whose response rows all echo the expected payment
-attempt correlation. Response order is not treated as chronological: any
-applicable successful `Cancel` (`52`), `AuthCredit` (`53`), or `Reversal` (`58`)
-vetoes automatic settlement wherever it appears. `Cancelled`, `Canceled`,
-`Refunded`, and `Reversed` financial states are never treated as charged.
+attempt correlation. Response order is not treated as chronological. A
+successful `Cancel` (`52`), `AuthCredit` (`53`), or `Reversal` (`58`) is treated
+as fully reversed only when the summed reversal amount exactly offsets the
+summed captured debit amount. Partial, excess, missing-amount, and otherwise
+mixed reversals remain `pending` for review; they are never failed or settled
+automatically. A debit row in a terminal `Cancelled`, `Canceled`, `Refunded`, or
+`Reversed` financial state is never treated as charged.
 
 New checkouts place a deterministic 19-character payment-attempt correlation in
 HYP's documented payment-page `user` field. Reconciliation queries by that
@@ -43,7 +46,8 @@ flow requires that technical transaction identifier. `mpiTransactionId` and
 Outcomes are applied as follows:
 
 - `charged`: call the existing idempotent `settle_payment_attempt` RPC.
-- `not_charged`, including cancelled/refunded: fail only a still-pending row.
+- `not_charged`, including fully cancelled/refunded: fail only a still-pending
+  row.
 - `not_found`, `unknown`, unverified correlation, transport failure, or
   settlement failure: retain `pending`, record the result, and retry with
   backoff until escalation.
@@ -69,7 +73,7 @@ References:
 In this order, with the required approvals:
 
 1. Apply `20260817090000_payment_reconciliation_audit.sql`.
-2. Configure `CRON_SECRET`, `HYP_ENTERPRISE_RELAY_URL`,
+2. Configure `CRON_SECRET`, the HTTPS `HYP_ENTERPRISE_RELAY_URL`,
    `HYP_ENTERPRISE_USER`, `HYP_ENTERPRISE_PASSWORD`, and
    `HYP_TERMINAL_NUMBER` in the deployment environment.
 3. Confirm the terminal-specific legacy APISign `user` propagation described
@@ -102,6 +106,8 @@ Responses:
   `checked: 0` is healthy when nothing is due.
 - `401 unauthorized`: bearer token absent or incorrect.
 - `503 cron_not_configured`: `CRON_SECRET` is missing.
+- `503 hyp_inquiry_not_configured`: Enterprise inquiry configuration is missing
+  or invalid; no payment attempt was claimed and no retry was consumed.
 - `500 payment_claim_failed`: migration missing or database claim failed.
 - A `200` with `errors > 0`: inspect each result and the audit trail; retry
   exhaustion, amount mismatch, settlement failure, and audit failure require
@@ -175,7 +181,8 @@ npx tsc --noEmit
 npx eslint \
   app/api/payments/return/route.ts \
   app/api/cron/payment-reconciliation/route.ts \
-  lib/hyp.ts lib/hyp-inquiry.ts lib/payment-reconciliation.ts \
+  lib/hyp.ts lib/hyp-enterprise-config.ts lib/hyp-inquiry.ts \
+  lib/payment-reconciliation.ts \
   lib/payment-return.ts lib/payment-state.ts \
   tests/payment-return.test.mjs tests/payment-reconciliation.test.mjs
 ```

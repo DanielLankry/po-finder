@@ -6,6 +6,7 @@ import {
   parseHypPaymentInquiry,
   toHypInquiryUser,
 } from "../lib/hyp-inquiry.ts";
+import { getHypEnterpriseConfig } from "../lib/hyp-enterprise-config.ts";
 import {
   claimHypPaymentAttempts,
   getReconciliationRetryDisposition,
@@ -172,19 +173,93 @@ test("reversal before its debit vetoes automatic settlement", async () => {
   );
 });
 
-test("any successful reversal vetoes debit regardless of row order", () => {
+test("a full reversal vetoes debit regardless of row order", () => {
   const inquiry = parseHypPaymentInquiry(
     transactionInquiryXml([
-      debitRow(),
       reversalRow("failed-reversal", "101"),
       reversalRow("successful-credit", "000", "53", "AuthCredit"),
-      debitRow("second-debit"),
+      debitRow(),
     ]),
     ATTEMPT_ID,
   );
 
   assert.equal(inquiry.outcome, "not_charged");
   assert.equal(inquiry.hypTransactionId, "successful-credit");
+});
+
+test("partial reversal remains pending while money is still charged", async () => {
+  const row = pendingAttempt();
+  const admin = createAdminClient(row);
+  const inquiry = parseHypPaymentInquiry(
+    transactionInquiryXml([
+      debitRow(),
+      reversalRow(
+        "partial-credit",
+        "000",
+        "53",
+        "AuthCredit",
+        undefined,
+        500,
+      ),
+    ]),
+    ATTEMPT_ID,
+  );
+
+  const result = await reconcileHypPaymentAttempt(admin, row, async () => inquiry);
+
+  assert.equal(inquiry.outcome, "unknown");
+  assert.equal(inquiry.hypResponseCode, "partial_reversal");
+  assert.equal(result.status, "pending");
+  assert.equal(row.status, "pending");
+  assert.equal(
+    admin.rpcCalls.some(({ name }) => name === "settle_payment_attempt"),
+    false,
+  );
+});
+
+test("mixed debits and reversals require review unless totals fully offset", () => {
+  const inquiry = parseHypPaymentInquiry(
+    transactionInquiryXml([
+      debitRow(),
+      reversalRow("credit-1"),
+      debitRow("second-debit"),
+    ]),
+    ATTEMPT_ID,
+  );
+
+  assert.equal(inquiry.outcome, "unknown");
+  assert.equal(inquiry.hypResponseCode, "partial_reversal");
+});
+
+test("Enterprise inquiry config fails before use when incomplete or unsafe", () => {
+  assert.throws(
+    () => getHypEnterpriseConfig({}),
+    /Missing env: HYP_ENTERPRISE_RELAY_URL/,
+  );
+  assert.throws(
+    () =>
+      getHypEnterpriseConfig({
+        HYP_ENTERPRISE_RELAY_URL: "http://relay.example.test",
+        HYP_ENTERPRISE_USER: "merchant",
+        HYP_ENTERPRISE_PASSWORD: "secret",
+        HYP_TERMINAL_NUMBER: "1234",
+      }),
+    /must use HTTPS/,
+  );
+  assert.deepEqual(
+    getHypEnterpriseConfig({
+      HYP_ENTERPRISE_RELAY_URL: "https://relay.example.test/inquiry",
+      HYP_ENTERPRISE_USER: " merchant ",
+      HYP_ENTERPRISE_PASSWORD: " secret ",
+      HYP_TERMINAL_NUMBER: " 1234 ",
+    }),
+    {
+      relayUrl: "https://relay.example.test/inquiry",
+      user: "merchant",
+      password: "secret",
+      terminalNumber: "1234",
+    },
+  );
 });
 
 test("mismatched inquiry user cannot settle the local attempt", async () => {
@@ -357,13 +432,13 @@ function refundedInquiryXml() {
     <status>000</status><validation>AutoComm</validation>
     <user>${toHypInquiryUser(ATTEMPT_ID)}</user>
     <transactionType code="01">RegularDebit</transactionType>
-    <financialStatus>Transmitted</financialStatus><tranId>119187092</tranId>
+    <financialStatus>Transmitted</financialStatus><total>1500</total><tranId>119187092</tranId>
   </transaction>
   <transaction>
     <status>000</status><validation>AutoComm</validation>
     <user>${toHypInquiryUser(ATTEMPT_ID)}</user>
     <transactionType code="52">Cancel</transactionType>
-    <financialStatus>Transmitted</financialStatus><tranId>119187120</tranId>
+    <financialStatus>Transmitted</financialStatus><total>1500</total><tranId>119187120</tranId>
   </transaction>
 </transactions></inquireTransactions></response></ashrait>`;
 }
@@ -385,8 +460,9 @@ function reversalRow(
   typeCode = "58",
   typeName = "Reversal",
   user = toHypInquiryUser(ATTEMPT_ID),
+  amount = 1500,
 ) {
-  return `<transaction><status>${status}</status><validation>AutoComm</validation><transactionType code="${typeCode}">${typeName}</transactionType><financialStatus>Transmitted</financialStatus><total>1500</total><user>${user}</user><tranId>${transactionId}</tranId></transaction>`;
+  return `<transaction><status>${status}</status><validation>AutoComm</validation><transactionType code="${typeCode}">${typeName}</transactionType><financialStatus>Transmitted</financialStatus><total>${amount}</total><user>${user}</user><tranId>${transactionId}</tranId></transaction>`;
 }
 
 function createAdminClient(row = null) {

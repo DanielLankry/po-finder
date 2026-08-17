@@ -1,5 +1,6 @@
 import { toHypVerificationParams } from "@/lib/payment-state";
 import { verifyCreditGuardResponseMac } from "@/lib/hyp-verification";
+import { getHypEnterpriseConfig } from "@/lib/hyp-enterprise-config";
 import {
   buildHypInquiryXml,
   parseHypPaymentInquiry,
@@ -39,22 +40,6 @@ function getCreds() {
     masof: requireEnv("HYP_MASOF"),
     passp: requireEnv("HYP_PASSP"),
     apiKey: requireEnv("HYP_API_KEY"),
-  };
-}
-
-function getEnterpriseCreds() {
-  const relayUrl =
-    process.env.HYP_ENTERPRISE_RELAY_URL?.trim() ||
-    process.env.HYP_ENTERPRISE_URL?.trim();
-  if (!relayUrl) {
-    throw new Error("Missing env: HYP_ENTERPRISE_RELAY_URL");
-  }
-
-  return {
-    relayUrl,
-    user: requireEnv("HYP_ENTERPRISE_USER"),
-    password: requireEnv("HYP_ENTERPRISE_PASSWORD"),
-    terminalNumber: requireEnv("HYP_TERMINAL_NUMBER"),
   };
 }
 
@@ -203,7 +188,7 @@ export async function createSignedCheckoutUrl(p: CheckoutParams): Promise<string
  * inquiries are for sparse reconciliation, not continuous polling.
  */
 export async function inquirePaymentAttempt(uniqueId: string): Promise<HypPaymentInquiry> {
-  const { relayUrl, user, password, terminalNumber } = getEnterpriseCreds();
+  const { relayUrl, user, password, terminalNumber } = getHypEnterpriseConfig();
   const intIn = buildHypInquiryXml(terminalNumber, uniqueId);
   const body = new URLSearchParams({
     user,

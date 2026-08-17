@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 import { adminClient } from "@/lib/supabase/admin";
 import { inquirePaymentAttempt } from "@/lib/hyp";
+import { getHypEnterpriseConfig } from "@/lib/hyp-enterprise-config";
 import {
   claimHypPaymentAttempts,
   DEFAULT_RECONCILIATION_LEASE_SECONDS,
@@ -34,6 +35,18 @@ export async function GET(request: NextRequest) {
   }
   if (request.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  try {
+    getHypEnterpriseConfig();
+  } catch (caught) {
+    return NextResponse.json(
+      {
+        error: "hyp_inquiry_not_configured",
+        detail: caught instanceof Error ? caught.message : String(caught),
+      },
+      { status: 503 },
+    );
   }
 
   const minAgeMinutes = numericEnv(
