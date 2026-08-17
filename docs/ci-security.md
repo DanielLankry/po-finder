@@ -1,6 +1,6 @@
 # CI and Security Gates
 
-The default CI workflow runs on pull requests and pushes to `main`.
+The default CI workflow runs on pull requests and pushes to `master`.
 
 Local parity commands:
 
@@ -20,3 +20,10 @@ and does not deploy, migrate, or contact Production.
 
 Production dependency remediation is pinned in `package.json` `overrides`.
 Keep `npm audit --omit=dev` at zero before removing or relaxing those pins.
+
+Additional repository automation:
+
+- Dependabot opens weekly npm and GitHub Actions update pull requests.
+- CodeQL scans JavaScript and TypeScript on pull requests, `master` pushes, and
+  a weekly schedule.
+- Gitleaks scans pull requests and `master` pushes for committed secrets.
