@@ -89,4 +89,3 @@ function createPaymentAttemptClient(row) {
     },
   };
 }
-
