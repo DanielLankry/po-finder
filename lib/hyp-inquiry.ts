@@ -110,27 +110,39 @@ function isTerminallyReversedDebit(row: string): boolean {
   );
 }
 
-function isSuccessfulReversal(row: string): boolean {
+function isReversalRow(row: string): boolean {
   const transactionType = normalizeValue(extractTag(row, "transactionType"));
   const transactionTypeCode = normalizeValue(
     extractTagAttribute(row, "transactionType", "code"),
   );
   return (
-    isSuccessfulRow(row) &&
-    (transactionType === "cancel" ||
-      transactionType === "authcredit" ||
-      transactionType === "refund" ||
-      transactionType === "regularcredit" ||
-      transactionType === "reversal" ||
-      transactionType === "51" ||
-      transactionType === "52" ||
-      transactionType === "53" ||
-      transactionType === "58" ||
-      transactionTypeCode === "51" ||
-      transactionTypeCode === "52" ||
-      transactionTypeCode === "53" ||
-      transactionTypeCode === "58")
+    transactionType === "cancel" ||
+    transactionType === "authcredit" ||
+    transactionType === "refund" ||
+    transactionType === "regularcredit" ||
+    transactionType === "reversal" ||
+    transactionType === "51" ||
+    transactionType === "52" ||
+    transactionType === "53" ||
+    transactionType === "58" ||
+    transactionTypeCode === "51" ||
+    transactionTypeCode === "52" ||
+    transactionTypeCode === "53" ||
+    transactionTypeCode === "58"
   );
+}
+
+function isSuccessfulReversal(row: string): boolean {
+  const financialStatus = normalizeValue(extractTag(row, "financialStatus"));
+  return (
+    isSuccessfulRow(row) &&
+    isReversalRow(row) &&
+    (financialStatus === "captured" || financialStatus === "transmitted")
+  );
+}
+
+function isNonTerminalSuccessfulReversal(row: string): boolean {
+  return isSuccessfulRow(row) && isReversalRow(row) && !isSuccessfulReversal(row);
 }
 
 function sumTransactionAmounts(rows: string[]): number | null {
@@ -240,6 +252,19 @@ export function parseHypPaymentInquiry(
       return inquiryDetails(rawXml, reversalRow, "not_charged", "reversed");
     }
     return inquiryDetails(rawXml, reversalRow, "unknown", "partial_reversal");
+  }
+
+  const nonTerminalReversal = rows.find(isNonTerminalSuccessfulReversal);
+  if (nonTerminalReversal) {
+    // A successful HYP response does not make a credit final. Its independent
+    // financial pipeline status can still be Pending or Authorized, so it must
+    // veto settlement without being treated as proof that the debit was offset.
+    return inquiryDetails(
+      rawXml,
+      nonTerminalReversal,
+      "unknown",
+      "non_terminal_reversal",
+    );
   }
 
   const chargedRow = chargedRows.length === 1 ? chargedRows[0] : undefined;
