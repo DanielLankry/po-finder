@@ -1,15 +1,23 @@
 const PAID_SUBSCRIPTION_STATUSES = new Set(["active", "past_due"]);
 
-const PAYMENT_ATTEMPT_PARAM_NAMES = [
+const LOCAL_PAYMENT_ATTEMPT_PARAM_NAMES = [
   "attempt",
   "paymentAttempt",
   "payment_attempt",
+];
+
+const PROVIDER_PAYMENT_ATTEMPT_PARAM_NAMES = [
   "Order",
   "order",
   "uniqueid",
   "uniqueID",
   "uniqueId",
   "UniqueId",
+];
+
+const PAYMENT_ATTEMPT_PARAM_NAMES = [
+  ...LOCAL_PAYMENT_ATTEMPT_PARAM_NAMES,
+  ...PROVIDER_PAYMENT_ATTEMPT_PARAM_NAMES,
 ];
 
 const LOCAL_ONLY_RETURN_PARAMS = new Set([
@@ -52,6 +60,29 @@ export function getPaymentAttemptId(params: URLSearchParams): string | null {
     if (value) return value;
   }
   return null;
+}
+
+/** Returns the order identifier carried by HYP rather than our return URL. */
+export function getProviderPaymentAttemptId(params: URLSearchParams): string | null {
+  for (const name of PROVIDER_PAYMENT_ATTEMPT_PARAM_NAMES) {
+    const value = params.get(name)?.trim();
+    if (value) return value;
+  }
+  return null;
+}
+
+/**
+ * Binds the local return URL to HYP's signed order identifier. Every supplied
+ * alias, including duplicate query keys, must agree.
+ */
+export function getBoundPaymentAttemptId(params: URLSearchParams): string | null {
+  const providerId = getProviderPaymentAttemptId(params);
+  if (!providerId) return null;
+
+  const suppliedIds = PAYMENT_ATTEMPT_PARAM_NAMES.flatMap((name) =>
+    params.getAll(name).map((value) => value.trim()).filter(Boolean)
+  );
+  return suppliedIds.every((value) => value === providerId) ? providerId : null;
 }
 
 /**

@@ -3,11 +3,15 @@ import * as Sentry from "@sentry/nextjs";
 import { adminClient } from "@/lib/supabase/admin";
 import { verifyReturnSignature } from "@/lib/hyp";
 import {
+  failPendingPaymentAttempt,
+  getValidPaymentAttemptId,
+} from "@/lib/payment-return";
+import {
+  getBoundPaymentAttemptId,
   getHypAuthCode,
   getHypCardMask,
   getHypResponseCode,
   getHypTransactionId,
-  getPaymentAttemptId,
   isSuccessfulHypReturn,
 } from "@/lib/payment-state";
 
@@ -61,7 +65,7 @@ async function readPostReturnParams(req: NextRequest): Promise<URLSearchParams> 
 }
 
 async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
-  const order = getPaymentAttemptId(params);
+  const order = getValidPaymentAttemptId(getBoundPaymentAttemptId(params));
   const responseCode = getHypResponseCode(params);
   const origin = process.env.NEXT_PUBLIC_SITE_URL ?? req.nextUrl.origin;
 
@@ -125,15 +129,16 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
   }
 
   if (!verified) {
-    const { error } = await admin
-      .from("payment_attempts")
-      .update({
+    const { error } = await failPendingPaymentAttempt(
+      admin,
+      attempt.id,
+      {
         status: "failed",
         hyp_response_code: responseCode ?? "verify_failed",
         raw_return: rawReturn,
         completed_at: new Date().toISOString(),
-      })
-      .eq("id", attempt.id);
+      },
+    );
     if (error) {
       console.error("[/api/payments/return] failed to record verify failure:", error);
     }
@@ -143,15 +148,16 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
   }
 
   if (!isSuccessfulHypReturn(params)) {
-    const { error } = await admin
-      .from("payment_attempts")
-      .update({
+    const { error } = await failPendingPaymentAttempt(
+      admin,
+      attempt.id,
+      {
         status: "failed",
         hyp_response_code: responseCode ?? "unknown",
         raw_return: rawReturn,
         completed_at: new Date().toISOString(),
-      })
-      .eq("id", attempt.id);
+      },
+    );
     if (error) {
       console.error("[/api/payments/return] failed to record declined payment:", error);
     }
