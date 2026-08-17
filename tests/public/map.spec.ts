@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { collectErrors } from '../utils/console';
+import { completeFirstVisit } from '../utils/first-visit';
 
 test('home renders map and search', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('/');
+  await completeFirstVisit(page);
   await expect(page.locator('body')).toBeVisible();
 
   if ((page.viewportSize()?.width ?? 1440) < 1440) {
@@ -26,7 +28,8 @@ test('home renders map and search', async ({ page }) => {
 
 test('home has interactive controls', async ({ page }) => {
   await page.goto('/');
-  const buttons = page.getByRole('button');
-  const count = await buttons.count();
-  expect(count, 'expected interactive buttons on home').toBeGreaterThan(0);
+  await completeFirstVisit(page);
+
+  await expect(page.getByRole('button', { name: 'פתיחת סינון מתקדם' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'מועדפים' })).toBeVisible();
 });

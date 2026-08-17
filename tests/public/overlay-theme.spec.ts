@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { completeFirstVisit } from "../utils/first-visit";
 
 test("filter drawer uses the shared neighborhood-paper window theme", async ({ page }) => {
   await page.goto("/");
+  await completeFirstVisit(page);
   await page.getByRole("button", { name: "פתיחת סינון מתקדם" }).click();
 
   await expect(page.getByRole("heading", { name: "סינון המפה" })).toBeVisible();

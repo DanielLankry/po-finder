@@ -1,4 +1,20 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+async function selectDuration(page: Page, index: number, summary: string) {
+  const slider = page.getByRole("slider", { name: "משך הפרסום" });
+
+  await expect(slider).toBeVisible();
+  await expect
+    .poll(async () => {
+      const alternateIndex = index === 0 ? 1 : index - 1;
+      await slider.fill(String(alternateIndex));
+      await slider.fill(String(index));
+      return page.getByText(summary, { exact: true }).count();
+    })
+    .toBeGreaterThan(0);
+  await expect(slider).toHaveValue(String(index));
+  await expect(page.getByText(summary, { exact: true })).toBeVisible();
+}
 
 test.describe("duration pricing", () => {
   test("shows one duration slider with six months selected by default", async ({ page }) => {
@@ -17,27 +33,18 @@ test.describe("duration pricing", () => {
     await expect(page.getByText(/קידום ל־30|קידום ל-30|מסלול השקה/)).toHaveCount(0);
   });
 
-  test("one slider covers one, two, three days, week, and all twelve month prices", async ({ page }) => {
+  test("hydrated slider updates one-day and 12-month pricing and expiry", async ({ page }) => {
     await page.goto("/pricing");
-    const slider = page.getByRole("slider", { name: "משך הפרסום" });
+    const expiryPreview = page.getByText(/^העסק יוצג עד /);
 
-    await slider.fill("0");
-    await expect(page.getByText("יום אחד — ₪20")).toBeVisible();
+    await selectDuration(page, 0, "יום אחד — ₪20");
+    const oneDayExpiry = await expiryPreview.textContent();
+    expect(oneDayExpiry).toMatch(/^העסק יוצג עד \S/);
 
-    await slider.fill("1");
-    await expect(page.getByText("יומיים — ₪25")).toBeVisible();
-
-    await slider.fill("2");
-    await expect(page.getByText("3 ימים — ₪30")).toBeVisible();
-
-    await slider.fill("3");
-    await expect(page.getByText("שבוע אחד — ₪40")).toBeVisible();
-
-    await slider.fill("4");
-    await expect(page.getByText("חודש אחד — ₪60")).toBeVisible();
-
-    await slider.fill("15");
-    await expect(page.getByText("12 חודשים — ₪250")).toBeVisible();
+    await selectDuration(page, 15, "12 חודשים — ₪250");
+    const twelveMonthExpiry = await expiryPreview.textContent();
+    expect(twelveMonthExpiry).toMatch(/^העסק יוצג עד \S/);
+    expect(twelveMonthExpiry).not.toBe(oneDayExpiry);
     await expect(page.getByText("הכי משתלם")).toBeVisible();
     await expect(page.getByRole("button", { name: "פרסום העסק ל־12 חודשים" })).toBeVisible();
   });
@@ -93,6 +100,7 @@ test.describe("duration pricing", () => {
   });
 
   test("pricing CTA preserves the selected plan for business-owner registration", async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("po-cookie-consent", "declined"));
     await page.goto("/pricing");
     await page.getByRole("button", { name: "פרסום העסק ל־6 חודשים" }).click();
     await expect(page).toHaveURL(

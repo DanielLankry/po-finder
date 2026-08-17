@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { completeFirstVisit, FIRST_20_OFFER } from "../utils/first-visit";
 
 const MOBILE_ROUTES = [
   "/",
@@ -13,15 +14,15 @@ const MOBILE_ROUTES = [
 const CUSTOMER_FLOW_VIEWPORTS = [320, 390, 430] as const;
 
 test.describe("mobile layout regression coverage", () => {
-  test.beforeEach(async ({ page }, testInfo) => {
+  test.beforeEach(async ({}, testInfo) => {
     test.skip((testInfo.project.use.viewport?.width ?? 1440) >= 1440, "mobile-only layout check");
-    await page.addInitScript(() => localStorage.setItem("po-cookie-consent", "accepted"));
   });
 
   for (const width of CUSTOMER_FLOW_VIEWPORTS) {
     test(`navbar keeps logo-only branding and rotating text at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 860 });
       await page.goto("/");
+      await completeFirstVisit(page);
 
       const header = page.locator("header").first();
       const nav = page.getByRole("navigation", { name: "ניווט ראשי" });
@@ -36,7 +37,8 @@ test.describe("mobile layout regression coverage", () => {
       await expect(changingText).toBeVisible();
       await expect(page.getByTestId("navbar-changing-text-visual")).toContainText("ל");
       await expect(page.getByRole("button", { name: "פתיחת חיפוש" })).toBeVisible();
-      await expect(page.getByRole("button", { name: "מועדפים" })).toBeVisible();
+      const favoritesButton = page.getByRole("button", { name: "מועדפים" });
+      await expect(favoritesButton).toBeVisible();
       const menuButton = page.getByRole("button", { name: "פתיחת תפריט", exact: true });
       await expect(menuButton).toBeVisible();
       await expect(page.getByRole("button", { name: "פתיחת תפריט נגישות" })).toBeHidden();
@@ -60,6 +62,14 @@ test.describe("mobile layout regression coverage", () => {
         viewportWidth: window.innerWidth,
       }));
       expect(dimensions.documentWidth).toBeLessThanOrEqual(dimensions.viewportWidth);
+
+      await page.getByRole("button", { name: "פתיחת חיפוש" }).click();
+      await expect(page.getByRole("dialog", { name: "חיפוש מיקום" })).toBeVisible();
+      await page.getByRole("button", { name: "ביטול" }).click();
+
+      await favoritesButton.click();
+      await expect(page.getByRole("dialog", { name: "מועדפים" })).toBeVisible();
+      await page.getByRole("button", { name: "סגור" }).click();
 
       await menuButton.click();
       await expect(page.getByRole("link", { name: "נגישות", exact: true })).toBeVisible();
@@ -108,13 +118,17 @@ test.describe("mobile layout regression coverage", () => {
     expect(primaryBox!.width).toBeGreaterThanOrEqual(gridBox!.width - 1);
   });
 
-  test("an empty launch invites the first business in Hebrew", async ({ page }) => {
+  test("an empty launch presents the first-20 campaign in Hebrew", async ({ page }) => {
     await page.route("**/api/businesses?includeSchedule=1", async (route) => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ businesses: [] }) });
     });
 
     await page.goto("/");
-    await expect(page.getByText("היו העסק הראשון בפלטפורמה החדשה שלנו").first()).toBeVisible();
-    await expect(page.getByRole("link", { name: "פרסמו את העסק הראשון" })).toHaveAttribute("href", "/pricing");
+    await completeFirstVisit(page);
+    await expect(page.getByText("העסקים הראשונים מתחילים כאן").first()).toBeVisible();
+    await expect(page.getByRole("link", { name: new RegExp(FIRST_20_OFFER) })).toHaveAttribute(
+      "href",
+      /campaign%3Dfirst-20-3m/
+    );
   });
 });
