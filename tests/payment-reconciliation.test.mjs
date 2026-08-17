@@ -228,6 +228,41 @@ test("a full reversal vetoes debit regardless of row order", () => {
   assert.equal(inquiry.hypTransactionId, "successful-credit");
 });
 
+test("pending and authorized reversals leave the attempt pending", async (t) => {
+  for (const financialStatus of ["Pending", "Authorized"]) {
+    await t.test(financialStatus, async () => {
+      const row = pendingAttempt();
+      const admin = createAdminClient(row);
+      const inquiry = parseHypPaymentInquiry(
+        transactionInquiryXml([
+          debitRow(),
+          reversalRow(
+            `${financialStatus.toLowerCase()}-credit`,
+            "000",
+            "53",
+            "AuthCredit",
+            undefined,
+            1500,
+            financialStatus,
+          ),
+        ]),
+        ATTEMPT_ID,
+      );
+
+      const result = await reconcileHypPaymentAttempt(admin, row, async () => inquiry);
+
+      assert.equal(inquiry.outcome, "unknown");
+      assert.equal(inquiry.hypResponseCode, "non_terminal_reversal");
+      assert.equal(result.status, "pending");
+      assert.equal(row.status, "pending");
+      assert.equal(
+        admin.rpcCalls.some(({ name }) => name === "settle_payment_attempt"),
+        false,
+      );
+    });
+  }
+});
+
 test("partial reversal remains pending while money is still charged", async () => {
   const row = pendingAttempt();
   const admin = createAdminClient(row);
@@ -550,8 +585,9 @@ function reversalRow(
   typeName = "Reversal",
   user = toHypInquiryUser(ATTEMPT_ID),
   amount = 1500,
+  financialStatus = "Transmitted",
 ) {
-  return `<transaction><status>${status}</status><validation>AutoComm</validation><transactionType code="${typeCode}">${typeName}</transactionType><financialStatus>Transmitted</financialStatus><total>${amount}</total><user>${user}</user><tranId>${transactionId}</tranId></transaction>`;
+  return `<transaction><status>${status}</status><validation>AutoComm</validation><transactionType code="${typeCode}">${typeName}</transactionType><financialStatus>${financialStatus}</financialStatus><total>${amount}</total><user>${user}</user><tranId>${transactionId}</tranId></transaction>`;
 }
 
 function createAdminClient(row = null) {
