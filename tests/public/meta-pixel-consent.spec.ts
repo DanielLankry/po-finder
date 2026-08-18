@@ -1,9 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { dismissLaunchOffer } from "../utils/first-visit";
 
 test("Meta Pixel stays offline until optional cookies are accepted", async ({ page }) => {
   await page.goto("/");
-  await dismissLaunchOffer(page);
   await expect(page.getByRole("dialog", { name: "הסכמה לעוגיות" })).toBeVisible();
   expect(await page.evaluate(() => Boolean(window.fbq))).toBe(false);
   await expect(page.locator("#meta-pixel-script")).toHaveCount(0);
@@ -18,7 +16,6 @@ test("Meta Pixel stays offline until optional cookies are accepted", async ({ pa
 
 test("declining optional cookies does not initialize Meta Pixel", async ({ page }) => {
   await page.goto("/");
-  await dismissLaunchOffer(page);
   await page.getByRole("button", { name: "דחייה" }).click();
 
   expect(await page.evaluate(() => Boolean(window.fbq))).toBe(false);
