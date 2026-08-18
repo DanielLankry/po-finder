@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { completeFirstVisit, FIRST_20_OFFER } from "../utils/first-visit";
+import { completeFirstVisit } from "../utils/first-visit";
 
 const MOBILE_ROUTES = [
   "/",
@@ -118,17 +118,17 @@ test.describe("mobile layout regression coverage", () => {
     expect(primaryBox!.width).toBeGreaterThanOrEqual(gridBox!.width - 1);
   });
 
-  test("an empty launch presents the first-20 campaign in Hebrew", async ({ page }) => {
+  test("an empty launch invites the first business in Hebrew", async ({ page }) => {
     await page.route("**/api/businesses?includeSchedule=1", async (route) => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ businesses: [] }) });
     });
 
     await page.goto("/");
     await completeFirstVisit(page);
-    await expect(page.getByText("העסקים הראשונים מתחילים כאן").first()).toBeVisible();
-    await expect(page.getByRole("link", { name: new RegExp(FIRST_20_OFFER) })).toHaveAttribute(
+    await expect(page.getByText("היו העסק הראשון בפלטפורמה החדשה שלנו").first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "פרסמו את העסק הראשון" })).toHaveAttribute(
       "href",
-      /campaign%3Dfirst-20-3m/
+      "/pricing"
     );
   });
 });

@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { dismissLaunchOffer } from "../utils/first-visit";
 
 const unknownBusiness = {
   id: "11111111-1111-4111-8111-111111111111",
@@ -57,7 +56,6 @@ test("confirmed-closed businesses stay off both the list and map", async ({
   });
 
   await page.goto("/");
-  await dismissLaunchOffer(page);
 
   await expect(
     page.getByRole("button", { name: "עסק ללא שעות — קפה ושתייה", exact: true })
