@@ -1,0 +1,55 @@
+{
+  "issue": "DAN-263",
+  "captured_at": "2026-08-26T05:40:13Z",
+  "target": "https://pokarov.co.il",
+  "profile": "Lighthouse default mobile throttling",
+  "tools": {
+    "lighthouse": "12.6.1",
+    "chrome": "147.0.7727.15"
+  },
+  "runs_per_route": 3,
+  "budgets": {
+    "lcp_ms": 2500,
+    "cls": 0.1,
+    "inp_ms_field": 200,
+    "tbt_ms_synthetic_proxy": 200
+  },
+  "field_inp": null,
+  "field_inp_note": "Unavailable until the consent-gated integration is deployed, enabled in Vercel if required, and has sufficient opted-in traffic.",
+  "routes": [
+    {
+      "route": "/",
+      "lcp_ms": [8639.038, 7558.339, 7668.405],
+      "lcp_median_ms": 7668.405,
+      "cls": [0.003075, 0.002874, 0.002874],
+      "cls_median": 0.002874,
+      "tbt_ms": [2844.5, 610.5, 548],
+      "tbt_median_ms": 610.5,
+      "performance_scores": [41, 60, 61],
+      "performance_median": 60
+    },
+    {
+      "route": "/pricing",
+      "lcp_ms": [4091.984, 4084.7395, 4084.7775],
+      "lcp_median_ms": 4084.7775,
+      "cls": [0.000059, 0.000059, 0.000059],
+      "cls_median": 0.000059,
+      "tbt_ms": [370, 446, 562],
+      "tbt_median_ms": 446,
+      "performance_scores": [78, 75, 72],
+      "performance_median": 75
+    },
+    {
+      "route": "/auth/login",
+      "lcp_ms": [4167.19, 3968.109, 4286.146],
+      "lcp_median_ms": 4167.19,
+      "cls": [0, 0, 0],
+      "cls_median": 0,
+      "tbt_ms": [335.5, 273.5, 314],
+      "tbt_median_ms": 314,
+      "performance_scores": [79, 81, 78],
+      "performance_median": 79
+    }
+  ],
+  "result": "Budget assertion failed for LCP and TBT on all three routes; CLS passed on all three routes."
+}

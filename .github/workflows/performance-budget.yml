@@ -1,0 +1,46 @@
+name: Performance budget
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  cwv-baseline:
+    name: CWV baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Lighthouse budget
+        run: npm run perf:baseline
+        env:
+          CI: true
+          LHCI_BASE_URL: https://pokarov.co.il
+          LHCI_BUILD_CONTEXT__CURRENT_BRANCH: ${{ github.ref_name }}
+          LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
+          LHCI_BUILD_CONTEXT__CURRENT_BUILD_NUMBER: ${{ github.run_id }}
+          LHCI_BUILD_CONTEXT__CURRENT_COMMIT_TIME: ${{ github.run_started_at }}
+
+      - name: Upload LHCI artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-budget
+          path: .lighthouseci
+          retention-days: 30
