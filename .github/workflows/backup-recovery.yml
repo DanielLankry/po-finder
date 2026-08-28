@@ -1,0 +1,134 @@
+name: Backup recovery controls
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: export or restore-drill
+        required: true
+        type: choice
+        options:
+          - export
+          - restore-drill
+      approved_target_ref:
+        description: Approved disposable target ref for restore-drill mode
+        required: false
+        type: string
+      confirm_disposable_restore:
+        description: Type RESTORE:<approved target ref> for restore-drill mode
+        required: false
+        type: string
+  schedule:
+    # Fixed UTC scheduling keeps the export interval at 24 hours through
+    # Asia/Jerusalem daylight-saving transitions (02:15 winter, 03:15 summer).
+    - cron: "15 0 * * *"
+    # Stale-marker monitor. A failed run is the alert path for the protected
+    # backup environment owners.
+    - cron: "45 5,11,17 * * *"
+
+concurrency:
+  group: po-finder-backup-recovery
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  recovery:
+    name: Po Finder backup recovery
+    runs-on: ubuntu-latest
+    environment: backup-recovery
+    timeout-minutes: 120
+    env:
+      SUPABASE_SOURCE_REGION: ap-northeast-1
+      BACKUP_RETENTION_DAYS: "35"
+      BACKUP_MAX_SUCCESS_AGE_HOURS: "36"
+    steps:
+      - name: Check out repository
+        # actions/checkout v4 resolved on 2026-08-28.
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Configure runtime work directories
+        run: |
+          echo "BACKUP_WORK_DIR=${RUNNER_TEMP}/po-finder-backup" >> "$GITHUB_ENV"
+          echo "RESTORE_WORK_DIR=${RUNNER_TEMP}/po-finder-restore" >> "$GITHUB_ENV"
+
+      - name: Install required tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y age jq postgresql-client unzip
+          rclone_version="1.75.0"
+          rclone_archive="rclone-v${rclone_version}-linux-amd64.zip"
+          curl --fail --silent --show-error --location \
+            --output "${RUNNER_TEMP}/${rclone_archive}" \
+            "https://github.com/rclone/rclone/releases/download/v${rclone_version}/${rclone_archive}"
+          printf '%s  %s\n' \
+            'aa2804e08f48250e71009c727124b6341cd0288465804a9a09d14663cabafbaa' \
+            "${RUNNER_TEMP}/${rclone_archive}" | sha256sum --check --strict
+          unzip -q "${RUNNER_TEMP}/${rclone_archive}" -d "${RUNNER_TEMP}/rclone"
+          sudo install -m 0755 \
+            "${RUNNER_TEMP}/rclone/rclone-v${rclone_version}-linux-amd64/rclone" \
+            /usr/local/bin/rclone
+          npm ci
+          echo "$GITHUB_WORKSPACE/node_modules/.bin" >> "$GITHUB_PATH"
+
+      - name: Write protected rclone configuration
+        env:
+          PO_FINDER_BACKUP_RCLONE_CONFIG: ${{ secrets.PO_FINDER_BACKUP_RCLONE_CONFIG }}
+        run: |
+          if [ -z "$PO_FINDER_BACKUP_RCLONE_CONFIG" ]; then
+            echo "Protected rclone configuration is missing." >&2
+            exit 1
+          fi
+          umask 077
+          rclone_config_file="${RUNNER_TEMP}/po-finder-rclone.conf"
+          printf '%s\n' "$PO_FINDER_BACKUP_RCLONE_CONFIG" > "$rclone_config_file"
+          chmod 600 "$rclone_config_file"
+          echo "RCLONE_CONFIG=$rclone_config_file" >> "$GITHUB_ENV"
+
+      - name: Validate backup scripts
+        run: npm run backup:validate
+
+      - name: Write restore identity
+        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'restore-drill'
+        env:
+          PO_FINDER_RESTORE_AGE_IDENTITY: ${{ secrets.PO_FINDER_RESTORE_AGE_IDENTITY }}
+        run: |
+          umask 077
+          identity_file="${RUNNER_TEMP}/po-finder-restore-age-identity.txt"
+          printf '%s\n' "$PO_FINDER_RESTORE_AGE_IDENTITY" > "$identity_file"
+          chmod 600 "$identity_file"
+          echo "PO_FINDER_RESTORE_AGE_IDENTITY_FILE=$identity_file" >> "$GITHUB_ENV"
+
+      - name: Export encrypted recovery set
+        if: (github.event_name == 'schedule' && github.event.schedule == '15 0 * * *') || inputs.mode == 'export'
+        env:
+          SOURCE_DB_URL: ${{ secrets.PO_FINDER_BACKUP_SOURCE_DB_URL }}
+          AGE_RECIPIENTS: ${{ secrets.PO_FINDER_BACKUP_AGE_RECIPIENTS }}
+          BACKUP_DESTINATION_RCLONE: ${{ secrets.PO_FINDER_BACKUP_DESTINATION_RCLONE }}
+          SUPABASE_STORAGE_RCLONE_SOURCE: ${{ secrets.PO_FINDER_STORAGE_RCLONE_SOURCE }}
+        run: scripts/backup/export-recovery-set.sh
+
+      - name: Check latest success marker freshness
+        if: github.event_name == 'schedule' && github.event.schedule == '45 5,11,17 * * *'
+        env:
+          BACKUP_DESTINATION_RCLONE: ${{ secrets.PO_FINDER_BACKUP_DESTINATION_RCLONE }}
+        run: scripts/backup/check-latest-success.sh
+
+      - name: Run disposable restore drill
+        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'restore-drill'
+        env:
+          TARGET_DB_URL: ${{ secrets.PO_FINDER_RESTORE_TARGET_DB_URL }}
+          AGE_IDENTITY_FILE: ${{ env.PO_FINDER_RESTORE_AGE_IDENTITY_FILE }}
+          RESTORE_SOURCE_RCLONE: ${{ secrets.PO_FINDER_BACKUP_DESTINATION_RCLONE }}
+          TARGET_STORAGE_RCLONE_DESTINATION: ${{ secrets.PO_FINDER_RESTORE_STORAGE_RCLONE_DESTINATION }}
+          APPROVED_DISPOSABLE_TARGET_REF: ${{ inputs.approved_target_ref }}
+          CONFIGURED_DISPOSABLE_TARGET_REF: ${{ secrets.PO_FINDER_RESTORE_TARGET_REF }}
+          CONFIRM_DISPOSABLE_RESTORE: ${{ inputs.confirm_disposable_restore }}
+        run: scripts/backup/restore-drill.sh
+
+      - name: Remove temporary secret files
+        if: always()
+        run: |
+          rm -f "${RUNNER_TEMP}/po-finder-rclone.conf"
+          rm -f "${RUNNER_TEMP}/po-finder-restore-age-identity.txt"
