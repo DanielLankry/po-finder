@@ -53,7 +53,8 @@ Required protected secrets:
 
 - `PO_FINDER_BACKUP_SOURCE_DB_URL`: read-capable Supabase Postgres URL.
 - `PO_FINDER_BACKUP_AGE_RECIPIENTS`: comma-separated age public recipients;
-  at least two recipients are required.
+  at least two distinct recipients are required so one lost key cannot make every
+  recovery set unreadable.
 - `PO_FINDER_BACKUP_DESTINATION_RCLONE`: rclone destination prefix for encrypted
   recovery sets and `latest-success.json`.
 - `PO_FINDER_STORAGE_RCLONE_SOURCE`: rclone source for Supabase Storage objects.
@@ -73,8 +74,12 @@ any source read or off-site write. The encrypted backup destination is inspected
 separately and must use an object-storage backend (`s3`, `b2`, `azureblob`, or
 `google cloud storage`). A Supabase Storage endpoint, the production project
 reference, reuse of the production Storage source remote, or a destination
-type/endpoint environment override fails before any remote access. This is the
-enforced off-site boundary; a protected remote name alone is not sufficient.
+type/endpoint environment override fails before any remote access. The gate
+rejects backend-global endpoint overrides for every allowed backend
+(`RCLONE_S3_ENDPOINT`, `RCLONE_B2_ENDPOINT`, `RCLONE_AZUREBLOB_ENDPOINT`, and
+`RCLONE_GCS_ENDPOINT`) as well as remote-specific endpoint/type overrides. This
+is the enforced off-site boundary; a protected remote name alone is not
+sufficient.
 
 Each successful export:
 
@@ -89,19 +94,25 @@ Each successful export:
    default schema dump excludes `auth` and `storage`, it also generates a
    separate `managed-schema.sql` from the source catalogs for their policies,
    RLS flags, and relation ACLs.
-4. Captures a canonical security-state manifest covering relation ownership,
-   RLS flags, policies, relation ACLs, and public routine definitions.
-5. Copies Storage objects separately through rclone.
-6. Packages the recovery set, verifies the archive, encrypts it with age, and
+4. Captures a canonical schema digest covering relations, columns and defaults,
+   constraints, indexes, triggers, views, sequences, enum/domain types, and
+   public routines.
+5. Captures a canonical security-state manifest covering relation ownership,
+   RLS flags, policies, relation ACLs, public routine definitions, and effective
+   routine `EXECUTE` ACLs (including PostgreSQL default grants).
+6. Copies Storage objects separately through rclone. Export skip mode is
+   publishable only when the independently queried `storage.objects` count is
+   zero.
+7. Packages the recovery set, verifies the archive, encrypts it with age, and
    uploads only ciphertext plus a non-sensitive success marker.
-7. Streams the uploaded ciphertext back through `rclone cat` and requires its
+8. Streams the uploaded ciphertext back through `rclone cat` and requires its
    SHA-256 to exactly match the local ciphertext before publishing either
    success marker.
-8. Writes the immutable run marker with run id, completion time, source project
+9. Writes the immutable run marker with run id, completion time, source project
    ref, manifest hash, ciphertext hash, size, source region, commit, RPO, and
    retention.
-9. Completes the 35-day retention operation.
-10. Publishes the global `latest-success.json` last. A failed verification or
+10. Completes the 35-day retention operation.
+11. Publishes the global `latest-success.json` last. A failed verification or
    retention operation therefore cannot advertise the run as healthy.
 
 The disjoint scheduled monitor checks `latest-success.json` at 05:45, 11:45,
@@ -169,10 +180,11 @@ The drill:
    objects through its Supabase S3 endpoint so the target generates valid local
    `storage.objects` rows, and downloads them through `rclone check` to verify
    every source object against the disposable target.
-6. Recomputes durable table counts/checksums and the canonical security-state
-   manifest on the target.
-7. Fails the drill on any database, Storage, policy, RLS, ACL, ownership, or
-   critical public-routine mismatch.
+6. Requires a valid source schema digest, recomputes the same canonical schema
+   digest plus durable table counts/checksums and security-state manifest on the
+   target, and compares all three.
+7. Fails the drill on any database, schema, Storage, policy, RLS, relation or
+   routine ACL, ownership, or critical public-routine mismatch.
 8. Emits a redacted JSON report for Sentinel review.
 
 Sentinel review is mandatory before calling the implementation complete. The
