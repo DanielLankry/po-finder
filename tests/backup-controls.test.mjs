@@ -124,6 +124,8 @@ test("export controls enforce encrypted off-site recovery markers", () => {
   assert.match(restoreScript, /json_build_object\('bucket_id', bucket_id, 'name', name\)/);
   assert.match(exportScript, /validate_database_source_binding/);
   assert.match(exportScript, /validate_storage_source_binding/);
+  assert.match(exportScript, /validate_backup_destination_binding/);
+  assert.match(exportScript, /Backup destination must not use a Supabase Storage endpoint/);
   assert.match(exportScript, /Uploaded ciphertext hash mismatch/);
   assert.match(exportScript, /rclone cat/);
   assert.match(exportScript, /security-state-after\.jsonl/);
@@ -219,6 +221,141 @@ esac`,
     assert.doesNotMatch(calls, /(^|\n)(copy|copyto|cat|delete) /, "mismatched sources must not upload");
   } finally {
     rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("export rejects the Production Storage backend as its backup destination before remote access", () => {
+  const root = mkdtempSync(join(tmpdir(), "po-finder-export-destination-binding-"));
+  try {
+    const binDir = join(root, "bin");
+    const log = join(root, "rclone.log");
+    mkdirForTest(binDir);
+    for (const command of ["age", "jq", "psql", "supabase"]) {
+      writeMock(binDir, command, "exit 0");
+    }
+    writeMock(
+      binDir,
+      "rclone",
+      `printf '%s\n' "$*" >> "$MOCK_RCLONE_LOG"
+case "\${1:-}" in
+  config) printf '[production]\ntype = s3\nendpoint = https://ymqlqdhelsocibhnanjy.storage.supabase.co/storage/v1/s3\nsecret_access_key = XXX\n' ;;
+  *) exit 97 ;;
+esac`,
+    );
+
+    const result = spawnSync("bash", ["scripts/backup/export-recovery-set.sh"], {
+      env: {
+        ...process.env,
+        PATH: `${binDir}:${process.env.PATH}`,
+        SOURCE_DB_URL:
+          "postgresql://postgres@db.ymqlqdhelsocibhnanjy.supabase.co:5432/postgres",
+        AGE_RECIPIENTS: "age1recipient-one,age1recipient-two",
+        BACKUP_DESTINATION_RCLONE: "production:photos/recovery",
+        BACKUP_SKIP_STORAGE: "1",
+        MOCK_RCLONE_LOG: log,
+      },
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 3, result.stderr);
+    assert.match(result.stderr, /must not use a Supabase Storage endpoint/);
+    const calls = readFileSync(log, "utf8");
+    assert.match(calls, /^config redacted production$/m);
+    assert.doesNotMatch(
+      calls,
+      /(^|\n)(lsf|copy|copyto|cat|delete) /,
+      "Production-bound destination must fail before remote access or write",
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("export rejects reuse of the production Storage source remote as its destination", () => {
+  const root = mkdtempSync(join(tmpdir(), "po-finder-export-shared-remote-"));
+  try {
+    const binDir = join(root, "bin");
+    const log = join(root, "rclone.log");
+    mkdirForTest(binDir);
+    for (const command of ["age", "jq", "psql", "supabase"]) {
+      writeMock(binDir, command, "exit 0");
+    }
+    writeMock(
+      binDir,
+      "rclone",
+      `printf '%s\n' "$*" >> "$MOCK_RCLONE_LOG"
+case "\${1:-}" in
+  config) printf '[production]\ntype = s3\nendpoint = https://ymqlqdhelsocibhnanjy.storage.supabase.co/storage/v1/s3\n' ;;
+  *) exit 97 ;;
+esac`,
+    );
+
+    const result = spawnSync("bash", ["scripts/backup/export-recovery-set.sh"], {
+      env: {
+        ...process.env,
+        PATH: `${binDir}:${process.env.PATH}`,
+        SOURCE_DB_URL:
+          "postgresql://postgres@db.ymqlqdhelsocibhnanjy.supabase.co:5432/postgres",
+        AGE_RECIPIENTS: "age1recipient-one,age1recipient-two",
+        BACKUP_DESTINATION_RCLONE: "production:recovery",
+        SUPABASE_STORAGE_RCLONE_SOURCE: "production:photos",
+        MOCK_RCLONE_LOG: log,
+      },
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 3, result.stderr);
+    assert.match(result.stderr, /must not reuse the production Storage source remote/);
+    const calls = readFileSync(log, "utf8");
+    assert.equal(
+      [...calls.matchAll(/^config redacted production$/gm)].length,
+      1,
+      "source binding may be inspected, but destination validation must reject before remote access",
+    );
+    assert.doesNotMatch(calls, /(^|\n)(lsf|copy|copyto|cat|delete) /);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("export rejects proxy and local destination backends before remote access", () => {
+  for (const backendType of ["alias", "crypt", "local"]) {
+    const root = mkdtempSync(join(tmpdir(), `po-finder-export-${backendType}-destination-`));
+    try {
+      const binDir = join(root, "bin");
+      const log = join(root, "rclone.log");
+      mkdirForTest(binDir);
+      for (const command of ["age", "jq", "psql", "supabase"]) {
+        writeMock(binDir, command, "exit 0");
+      }
+      writeMock(
+        binDir,
+        "rclone",
+        `printf '%s\n' "$*" >> "$MOCK_RCLONE_LOG"
+case "\${1:-}" in
+  config) printf '[destination]\ntype = %s\nremote = production:photos\n' "$MOCK_DESTINATION_TYPE" ;;
+  *) exit 97 ;;
+esac`,
+      );
+
+      const result = spawnSync("bash", ["scripts/backup/export-recovery-set.sh"], {
+        env: {
+          ...process.env,
+          PATH: `${binDir}:${process.env.PATH}`,
+          SOURCE_DB_URL:
+            "postgresql://postgres@db.ymqlqdhelsocibhnanjy.supabase.co:5432/postgres",
+          AGE_RECIPIENTS: "age1recipient-one,age1recipient-two",
+          BACKUP_DESTINATION_RCLONE: "destination:recovery",
+          BACKUP_SKIP_STORAGE: "1",
+          MOCK_DESTINATION_TYPE: backendType,
+          MOCK_RCLONE_LOG: log,
+        },
+        encoding: "utf8",
+      });
+      assert.equal(result.status, 3, `${backendType}: ${result.stderr}`);
+      assert.match(result.stderr, /must use an approved off-site object-storage backend/);
+      assert.doesNotMatch(readFileSync(log, "utf8"), /(^|\n)(lsf|copy|copyto|cat|delete) /);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   }
 });
 
@@ -775,6 +912,7 @@ cp "$input" "$output"`,
       "rclone",
       `printf '%s\\n' "$*" >> "$MOCK_RCLONE_LOG"
 case "\${1:-}" in
+  config) printf '[destination]\\ntype = b2\\naccount = XXX\\nkey = XXX\\n' ;;
   listremotes) printf 'destination:\\n' ;;
   lsf|copyto) exit 0 ;;
   cat)

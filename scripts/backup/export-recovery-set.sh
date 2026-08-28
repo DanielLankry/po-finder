@@ -250,6 +250,63 @@ validate_storage_source_binding() {
   exit 3
 }
 
+reject_rclone_destination_overrides() {
+  local spec="$1"
+  local remote normalized name
+  remote="$(rclone_remote_name "$spec")"
+  normalized="${remote^^}"
+  normalized="${normalized//[^A-Z0-9]/_}"
+
+  if [[ -n "${RCLONE_S3_ENDPOINT:-}" ]]; then
+    echo "Refusing inherited rclone backup destination override: RCLONE_S3_ENDPOINT." >&2
+    exit 3
+  fi
+
+  for name in "RCLONE_CONFIG_${normalized}_ENDPOINT" "RCLONE_CONFIG_${normalized}_TYPE"; do
+    if [[ -n "${!name:-}" ]]; then
+      echo "Refusing inherited rclone backup destination override: $name." >&2
+      exit 3
+    fi
+  done
+}
+
+validate_backup_destination_binding() {
+  local spec="$1"
+  local production_ref="$2"
+  local source_spec="${3:-}"
+  local remote source_remote redacted backend_type normalized_config
+  remote="$(rclone_remote_name "$spec")"
+
+  if [[ -n "$source_spec" ]]; then
+    source_remote="$(rclone_remote_name "$source_spec")"
+    if [[ "$remote" == "$source_remote" ]]; then
+      echo "Backup destination must not reuse the production Storage source remote." >&2
+      exit 3
+    fi
+  fi
+
+  if ! redacted="$(rclone config redacted "$remote" 2>/dev/null)"; then
+    echo "Unable to inspect the redacted backup destination configuration." >&2
+    exit 3
+  fi
+  backend_type="$(printf '%s\n' "$redacted" | sed -n 's/^[[:space:]]*type[[:space:]]*=[[:space:]]*//p' | head -n 1)"
+  case "$backend_type" in
+    s3|b2|azureblob|"google cloud storage")
+      ;;
+    *)
+      echo "Backup destination must use an approved off-site object-storage backend." >&2
+      exit 3
+      ;;
+  esac
+
+  normalized_config="${redacted,,}"
+  if [[ "$normalized_config" == *"$production_ref"* ||
+    "$normalized_config" == *"supabase.co/storage/v1/s3"* ]]; then
+    echo "Backup destination must not use a Supabase Storage endpoint." >&2
+    exit 3
+  fi
+}
+
 quote_ident() {
   printf '"%s"' "${1//\"/\"\"}"
 }
@@ -583,6 +640,7 @@ main() {
   if [[ "${BACKUP_SKIP_UPLOAD:-0}" != "1" ]]; then
     require_cmd rclone
     require_env BACKUP_DESTINATION_RCLONE
+    reject_rclone_destination_overrides "$BACKUP_DESTINATION_RCLONE"
   fi
 
   if [[ "${BACKUP_SKIP_STORAGE:-0}" != "1" ]]; then
@@ -593,6 +651,8 @@ main() {
   fi
 
   if [[ "${BACKUP_SKIP_UPLOAD:-0}" != "1" ]]; then
+    validate_backup_destination_binding "$BACKUP_DESTINATION_RCLONE" \
+      "$PO_FINDER_PRODUCTION_PROJECT_REF" "${SUPABASE_STORAGE_RCLONE_SOURCE:-}"
     validate_rclone_remote_access "$BACKUP_DESTINATION_RCLONE"
   fi
   if [[ "${BACKUP_SKIP_STORAGE:-0}" != "1" ]]; then
