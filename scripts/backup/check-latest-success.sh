@@ -6,6 +6,8 @@ if [[ $- == *x* ]]; then
   exit 1
 fi
 
+umask 077
+
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || {
     echo "Missing required command: $1" >&2
@@ -62,6 +64,11 @@ main() {
   now_epoch="$(date -u +%s)"
   age_seconds=$((now_epoch - completed_epoch))
   max_age_seconds=$((max_age_hours * 60 * 60))
+
+  if (( age_seconds < 0 )); then
+    echo "Latest recovery-set success marker is dated in the future." >&2
+    exit 22
+  fi
 
   if (( age_seconds > max_age_seconds )); then
     echo "Latest recovery-set success marker is older than ${max_age_hours} hours." >&2

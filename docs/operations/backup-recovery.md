@@ -88,9 +88,14 @@ Each successful export:
 
 The disjoint scheduled monitor checks `latest-success.json` at 05:45, 11:45,
 and 17:45 UTC, between the daily export windows. It fails when the latest
-completed marker is older than 36 hours; GitHub Actions failure notifications
+completed marker is older than 36 hours or dated in the future; GitHub Actions failure notifications
 for the protected environment are the alert path for Atlas/Rivet until a
 separately approved incident channel is configured.
+
+Database, Auth, and Storage staging files are created under a private `0700`
+directory with a `077` umask. Cleartext staging is removed by an exit trap on
+both success and failure; only encrypted output and the non-sensitive marker
+can remain in the export work directory.
 
 ## Restore drill workflow
 
@@ -120,6 +125,11 @@ redacted target configuration and requires the Storage S3 endpoint to be the
 same approved project ref. Both source and target remotes must pass a read-only
 root listing. Aliased/proxied database targets and Storage remotes without an
 exact Supabase project endpoint are deliberately rejected.
+`RCLONE_S3_ENDPOINT` and remote-specific rclone endpoint/type environment
+overrides are rejected before any rclone access so they cannot supersede the
+validated protected configuration. Decrypted recovery material is staged with
+private permissions and removed by an exit trap on every outcome; only the
+redacted successful drill report remains.
 
 The drill:
 
