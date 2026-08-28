@@ -182,6 +182,45 @@ write_target_manifest() {
   done < <(table_list)
 }
 
+write_storage_manifest() {
+  local storage_dir="$1"
+  local out="$2"
+
+  (
+    cd "$storage_dir"
+    while IFS= read -r -d '' object; do
+      sha256sum "$object"
+    done < <(find . -type f -print0 | LC_ALL=C sort -z)
+  ) > "$out"
+  {
+    printf 'object_count=%s\n' "$(find "$storage_dir" -type f -printf . | wc -c | tr -d ' ')"
+    printf 'total_bytes=%s\n' "$(find "$storage_dir" -type f -printf '%s\n' | awk '{s+=$1} END {print s+0}')"
+  } >> "$out"
+}
+
+verify_storage_manifest() {
+  local recovery_dir="$1"
+  local expected="$recovery_dir/storage-manifest.txt"
+  local actual="$2"
+
+  if [[ ! -f "$expected" ]]; then
+    echo "Recovery set is missing storage-manifest.txt; refusing restore drill." >&2
+    exit 16
+  fi
+  if grep -Fx 'storage_export=skipped' "$expected" >/dev/null; then
+    printf 'storage_export=skipped\n' > "$actual"
+    write_storage_manifest "$recovery_dir/storage" "$actual.content"
+    cat "$actual.content" >> "$actual"
+    rm -f "$actual.content"
+  else
+    write_storage_manifest "$recovery_dir/storage" "$actual"
+  fi
+  if ! diff -u "$expected" "$actual" >/dev/null; then
+    echo "Recovery-set Storage objects do not match storage-manifest.txt." >&2
+    exit 16
+  fi
+}
+
 main() {
   if [[ "${1:-}" == "--help" ]]; then
     usage
@@ -222,6 +261,7 @@ main() {
   fi
 
   local run_id work_root marker encrypted archive recovery_dir source_manifest target_manifest
+  local storage_manifest storage_object_count storage_check_log
   run_id="${RESTORE_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)}"
   work_root="${RESTORE_WORK_DIR:-$(mktemp -d)}"
   mkdir -p "$work_root"
@@ -255,6 +295,18 @@ main() {
     exit 14
   fi
 
+  storage_manifest="$work_root/verified-storage-manifest.txt"
+  verify_storage_manifest "$recovery_dir" "$storage_manifest"
+  storage_object_count="$(sed -n 's/^object_count=//p' "$storage_manifest")"
+  if [[ ! "$storage_object_count" =~ ^[0-9]+$ ]]; then
+    echo "Storage manifest has an invalid object count; refusing restore drill." >&2
+    exit 16
+  fi
+  if [[ "${RESTORE_SKIP_STORAGE:-0}" == "1" && "$storage_object_count" != "0" ]]; then
+    echo "RESTORE_SKIP_STORAGE is allowed only for a zero-object recovery set." >&2
+    exit 16
+  fi
+
   psql_target \
     --single-transaction \
     --variable ON_ERROR_STOP=1 \
@@ -265,6 +317,14 @@ main() {
 
   if [[ "${RESTORE_SKIP_STORAGE:-0}" != "1" ]]; then
     rclone copy "$recovery_dir/storage" "$TARGET_STORAGE_RCLONE_DESTINATION" --immutable --metadata
+    storage_check_log="$work_root/storage-check.log"
+    if ! rclone check "$recovery_dir/storage" "$TARGET_STORAGE_RCLONE_DESTINATION" \
+      --download > "$storage_check_log" 2>&1; then
+      rm -f "$storage_check_log"
+      echo "Disposable target Storage objects do not match the recovery set." >&2
+      exit 16
+    fi
+    rm -f "$storage_check_log"
   fi
 
   target_manifest="$work_root/target-manifest.txt"
@@ -288,6 +348,8 @@ main() {
   "ciphertextSha256": "$ciphertext_hash",
   "manifestSha256": "$marker_manifest_hash",
   "tableChecksumsMatch": true,
+  "storageObjectCount": $storage_object_count,
+  "storageObjectsMatch": true,
   "storageRestoreMode": "${RESTORE_SKIP_STORAGE:-0}"
 }
 JSON

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import {
   chmodSync,
   existsSync,
@@ -102,6 +103,10 @@ test("restore drill refuses production and requires disposable confirmation", ()
   assert.match(restoreScript, /Ciphertext hash mismatch/);
   assert.match(restoreScript, /Manifest hash mismatch/);
   assert.match(restoreScript, /Restored table counts\/checksums do not match/);
+  assert.match(restoreScript, /verify_storage_manifest/);
+  assert.match(restoreScript, /rclone check/);
+  assert.match(restoreScript, /--download/);
+  assert.match(restoreScript, /allowed only for a zero-object recovery set/);
   assert.doesNotMatch(restoreScript, /Shift_Database/);
 });
 
@@ -176,6 +181,125 @@ test("restore accepts matching database and Storage identities before downloadin
     });
     assert.equal(result.status, 97, result.stderr);
     assert.match(readFileSync(log, "utf8"), /copyto source:backups\/latest-success\.json/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("restore fails when declared Storage objects are absent from the disposable target", () => {
+  const root = mkdtempSync(join(tmpdir(), "po-finder-restore-storage-completeness-"));
+  try {
+    const binDir = join(root, "bin");
+    const fixtureRoot = join(root, "fixture");
+    const sourceRun = "20260828T031500Z";
+    const recoveryDir = join(fixtureRoot, `po-finder-recovery-${sourceRun}`);
+    const storageDir = join(recoveryDir, "storage");
+    const archive = join(root, "po-finder-recovery.tar.gz.age");
+    const marker = join(root, "latest-success.json");
+    const workDir = join(root, "work");
+    const log = join(root, "rclone.log");
+    mkdirForTest(binDir);
+    mkdirForTest(join(recoveryDir, "database"));
+    mkdirForTest(storageDir);
+    for (const name of ["one", "two", "three", "four", "five", "six", "seven"]) {
+      writeFileSync(join(storageDir, `${name}.txt`), name);
+    }
+    for (const name of ["roles.sql", "schema.sql", "data.sql"]) {
+      writeFileSync(join(recoveryDir, "database", name), "");
+    }
+    writeFileSync(join(recoveryDir, "manifest-after.txt"), "label=after\n[tables]\n");
+    const storageEntries = ["five", "four", "one", "seven", "six", "three", "two"]
+      .map((name) => {
+        const contents = readFileSync(join(storageDir, `${name}.txt`));
+        return `${createHash("sha256").update(contents).digest("hex")}  ./${name}.txt`;
+      });
+    writeFileSync(
+      join(recoveryDir, "storage-manifest.txt"),
+      `${storageEntries.join("\n")}\nobject_count=7\ntotal_bytes=27\n`,
+    );
+    const tarResult = spawnSync(
+      "tar",
+      ["-C", fixtureRoot, "-czf", archive, `po-finder-recovery-${sourceRun}`],
+      { encoding: "utf8" },
+    );
+    assert.equal(tarResult.status, 0, tarResult.stderr);
+    const sourceManifest = readFileSync(join(recoveryDir, "manifest-after.txt"));
+    const encrypted = readFileSync(archive);
+    writeFileSync(
+      marker,
+      JSON.stringify({
+        runId: sourceRun,
+        ciphertextSha256: createHash("sha256").update(encrypted).digest("hex"),
+        manifestSha256: createHash("sha256").update(sourceManifest).digest("hex"),
+      }),
+    );
+
+    writeMock(
+      binDir,
+      "age",
+      `output=''
+input=''
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -o) shift; output="$1" ;;
+    -i) shift ;;
+    -d) ;;
+    *) input="$1" ;;
+  esac
+  shift || true
+done
+cp "$input" "$output"`,
+    );
+    writeMock(
+      binDir,
+      "jq",
+      `case "\${2:-}" in
+  .runId) printf '%s\n' "$MOCK_SOURCE_RUN" ;;
+  .ciphertextSha256) sha256sum "$MOCK_ARCHIVE" | awk '{print $1}' ;;
+  .manifestSha256) sha256sum "$MOCK_SOURCE_MANIFEST" | awk '{print $1}' ;;
+  *) exit 98 ;;
+esac`,
+    );
+    writeMock(binDir, "psql", "exit 0");
+    writeMock(
+      binDir,
+      "rclone",
+      `printf '%s\n' "$*" >> "$MOCK_RCLONE_LOG"
+case "\${1:-}" in
+  listremotes) printf 'source:\ntarget:\n' ;;
+  lsf) exit 0 ;;
+  config) printf '[target]\ntype = s3\nendpoint = %s\n' "$MOCK_STORAGE_ENDPOINT" ;;
+  copyto)
+    case "$2" in
+      *latest-success.json) cp "$MOCK_MARKER" "$3" ;;
+      *po-finder-recovery.tar.gz.age) cp "$MOCK_ARCHIVE" "$3" ;;
+      *) exit 97 ;;
+    esac
+    ;;
+  copy) exit 0 ;;
+  check) exit 44 ;;
+  *) exit 96 ;;
+esac`,
+    );
+
+    const endpoint = "https://aaaaaaaaaaaaaaaaaaaa.storage.supabase.co/storage/v1/s3";
+    const result = spawnSync("bash", ["scripts/backup/restore-drill.sh"], {
+      env: restoreEnvironment(binDir, {
+        RESTORE_WORK_DIR: workDir,
+        MOCK_ARCHIVE: archive,
+        MOCK_MARKER: marker,
+        MOCK_RCLONE_LOG: log,
+        MOCK_SOURCE_MANIFEST: join(recoveryDir, "manifest-after.txt"),
+        MOCK_SOURCE_RUN: sourceRun,
+        MOCK_STORAGE_ENDPOINT: endpoint,
+      }),
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 16, result.stderr);
+    assert.match(result.stderr, /Disposable target Storage objects do not match/);
+    const calls = readFileSync(log, "utf8");
+    assert.match(calls, /copy .*target:storage --immutable --metadata/);
+    assert.match(calls, /check .*target:storage --download/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -285,6 +409,8 @@ test("runbook records gates, source links, and Sentinel review requirement", () 
   assert.match(runbook, /ymqlqdhelsocibhnanjy/);
   assert.match(runbook, /Shift_Database/);
   assert.match(runbook, /Sentinel review is mandatory/);
+  assert.match(runbook, /Daniel approval is not recorded/);
+  assert.doesNotMatch(runbook, /recorded by Atlas from Daniel approval/);
   assert.match(runbook, /https:\/\/supabase.com\/docs\/guides\/platform\/backups/);
   assert.match(runbook, /https:\/\/supabase.com\/docs\/guides\/platform\/migrating-within-supabase\/backup-restore/);
 });
