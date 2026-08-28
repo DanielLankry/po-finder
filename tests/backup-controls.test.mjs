@@ -105,6 +105,17 @@ test("export controls enforce encrypted off-site recovery markers", () => {
   assert.match(exportScript, /-x "storage\.objects"/);
   assert.match(exportScript, /json_build_object\('bucket_id', bucket_id, 'name', name\)/);
   assert.match(restoreScript, /json_build_object\('bucket_id', bucket_id, 'name', name\)/);
+  assert.match(exportScript, /validate_database_source_binding/);
+  assert.match(exportScript, /validate_storage_source_binding/);
+  assert.match(exportScript, /Uploaded ciphertext hash mismatch/);
+  assert.match(exportScript, /rclone cat/);
+  assert.match(exportScript, /security-state-after\.jsonl/);
+  assert.match(exportScript, /managed-schema\.sql/);
+  const remoteHashVerification = exportScript.indexOf("remote_ciphertext_hash=");
+  const immutableRunMarker = exportScript.indexOf(
+    "$BACKUP_DESTINATION_RCLONE/$run_id/latest-success.json",
+  );
+  assert.ok(remoteHashVerification >= 0 && immutableRunMarker > remoteHashVerification);
   const globalMarkerPublish = exportScript.lastIndexOf("$BACKUP_DESTINATION_RCLONE/latest-success.json");
   assert.ok(globalMarkerPublish > exportScript.lastIndexOf("rclone delete"));
   assert.ok(globalMarkerPublish > exportScript.lastIndexOf('rm -rf "$set_dir" "$archive"'));
@@ -124,7 +135,74 @@ test("restore drill refuses production and requires disposable confirmation", ()
   assert.match(restoreScript, /rclone check/);
   assert.match(restoreScript, /--download/);
   assert.match(restoreScript, /allowed only for a zero-object recovery set/);
+  assert.match(
+    restoreScript,
+    /ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated/,
+  );
+  assert.match(restoreScript, /managed-schema\.sql/);
+  assert.match(restoreScript, /Security-state hash mismatch/);
+  assert.match(restoreScript, /Restored policies, RLS, ACLs, or critical routine state/);
   assert.doesNotMatch(restoreScript, /Shift_Database/);
+});
+
+test("export rejects database and Storage sources not bound to production before upload", () => {
+  const root = mkdtempSync(join(tmpdir(), "po-finder-export-source-binding-"));
+  try {
+    const binDir = join(root, "bin");
+    const log = join(root, "rclone.log");
+    mkdirForTest(binDir);
+    for (const command of ["age", "jq", "psql", "supabase"]) {
+      writeMock(binDir, command, "exit 0");
+    }
+    writeMock(
+      binDir,
+      "rclone",
+      `printf '%s\n' "$*" >> "$MOCK_RCLONE_LOG"
+case "\${1:-}" in
+  config) printf '[storage]\ntype = s3\nendpoint = %s\n' "$MOCK_STORAGE_ENDPOINT" ;;
+  *) exit 97 ;;
+esac`,
+    );
+    const baseEnvironment = {
+      ...process.env,
+      PATH: `${binDir}:${process.env.PATH}`,
+      AGE_RECIPIENTS: "age1recipient-one,age1recipient-two",
+      BACKUP_DESTINATION_RCLONE: "destination:po-finder",
+      SUPABASE_STORAGE_RCLONE_SOURCE: "storage:photos",
+      MOCK_RCLONE_LOG: log,
+      MOCK_STORAGE_ENDPOINT:
+        "https://ymqlqdhelsocibhnanjy.storage.supabase.co/storage/v1/s3",
+    };
+
+    const wrongDatabase = spawnSync("bash", ["scripts/backup/export-recovery-set.sh"], {
+      env: {
+        ...baseEnvironment,
+        SOURCE_DB_URL: "postgresql://postgres@db.aaaaaaaaaaaaaaaaaaaa.supabase.co:5432/postgres",
+      },
+      encoding: "utf8",
+    });
+    assert.equal(wrongDatabase.status, 3, wrongDatabase.stderr);
+    assert.match(wrongDatabase.stderr, /does not identify the known production project/);
+    assert.equal(existsSync(log), false, "rclone must not run for a mismatched database source");
+
+    const wrongStorage = spawnSync("bash", ["scripts/backup/export-recovery-set.sh"], {
+      env: {
+        ...baseEnvironment,
+        SOURCE_DB_URL:
+          "postgresql://postgres@db.ymqlqdhelsocibhnanjy.supabase.co:5432/postgres",
+        MOCK_STORAGE_ENDPOINT:
+          "https://aaaaaaaaaaaaaaaaaaaa.storage.supabase.co/storage/v1/s3",
+      },
+      encoding: "utf8",
+    });
+    assert.equal(wrongStorage.status, 3, wrongStorage.stderr);
+    assert.match(wrongStorage.stderr, /Source Storage remote does not identify/);
+    const calls = readFileSync(log, "utf8");
+    assert.match(calls, /^config redacted storage$/m);
+    assert.doesNotMatch(calls, /(^|\n)(copy|copyto|cat|delete) /, "mismatched sources must not upload");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test("workflow uses protected environment, pinned actions, and no production restore trigger", () => {
@@ -344,9 +422,12 @@ test("non-empty Storage restore succeeds only when the disposable target matches
     for (const name of objectNames) {
       writeFileSync(join(storageDir, `${name}.txt`), name);
     }
-    for (const name of ["roles.sql", "schema.sql", "data.sql"]) {
+    for (const name of ["roles.sql", "schema.sql", "data.sql", "managed-schema.sql"]) {
       writeFileSync(join(recoveryDir, "database", name), "");
     }
+    const securityState = "public.fixture\nstorage.objects\n";
+    writeFileSync(join(recoveryDir, "security-state-after.jsonl"), securityState);
+    const securityStateHash = createHash("sha256").update(securityState).digest("hex");
     const emptyTableChecksum = createHash("sha256").update("").digest("hex");
     const logicalStorageRows = objectNames
       .map((name) => JSON.stringify({ bucket_id: "photos", name: `${name}.txt` }))
@@ -357,7 +438,8 @@ test("non-empty Storage restore succeeds only when the disposable target matches
       .digest("hex");
     writeFileSync(
       join(recoveryDir, "manifest-after.txt"),
-      `label=after\n[tables]\npublic.fixture count=0 sha256=${emptyTableChecksum}\n` +
+      `label=after\nsecurity_state_sha256=${securityStateHash}\n[tables]\n` +
+        `public.fixture count=0 sha256=${emptyTableChecksum}\n` +
         `storage.objects count=7 sha256=${logicalStorageChecksum}\n`,
     );
     const storageEntries = objectNames.map((name) => {
@@ -380,6 +462,7 @@ test("non-empty Storage restore succeeds only when the disposable target matches
       marker,
       JSON.stringify({
         runId: sourceRun,
+        sourceProjectRef: "ymqlqdhelsocibhnanjy",
         ciphertextSha256: createHash("sha256").update(encrypted).digest("hex"),
         manifestSha256: createHash("sha256").update(sourceManifest).digest("hex"),
       }),
@@ -406,6 +489,7 @@ cp "$input" "$output"`,
       "jq",
       `case "\${2:-}" in
   .runId) printf '%s\n' "$MOCK_SOURCE_RUN" ;;
+  .sourceProjectRef) printf 'ymqlqdhelsocibhnanjy\n' ;;
   .ciphertextSha256) sha256sum "$MOCK_ARCHIVE" | awk '{print $1}' ;;
   .manifestSha256) sha256sum "$MOCK_SOURCE_MANIFEST" | awk '{print $1}' ;;
   .count) printf '0\n' ;;
@@ -484,7 +568,7 @@ esac`,
     assert.match(calls, /check .*target:storage --download/);
     assert.deepEqual(
       readFileSync(join(root, "restore-modes.log"), "utf8").trim().split("\n"),
-      ["600 700", "600 700", "600 700"],
+      ["600 700", "600 700", "600 700", "600 700"],
     );
     assert.equal(
       readdirSync(workDir).some((entry) => entry.startsWith(".po-finder-restore.")),
@@ -515,6 +599,7 @@ esac`,
     const report = JSON.parse(readFileSync(reportPath, "utf8"));
     assert.equal(report.storageObjectCount, 7);
     assert.equal(report.storageObjectsMatch, true);
+    assert.equal(report.securityStateMatches, true);
     const successCalls = readFileSync(successLog, "utf8");
     assert.match(successCalls, /copy .*target:storage --metadata/);
     assert.match(successCalls, /check .*target:storage --download/);
@@ -579,7 +664,13 @@ cp "$input" "$output"`,
 case "\${1:-}" in
   listremotes) printf 'destination:\\n' ;;
   lsf|copyto) exit 0 ;;
-  lsl) printf '%s recovery.age\\n' "$(wc -c < "$MOCK_ENCRYPTED_FILE" | tr -d ' ')" ;;
+  cat)
+    if [ "\${MOCK_CORRUPT_REMOTE:-0}" = "1" ]; then
+      printf 'corrupted remote ciphertext'
+    else
+      cat "$MOCK_ENCRYPTED_FILE"
+    fi
+    ;;
   delete) exit 42 ;;
   *) exit 98 ;;
 esac`,
@@ -590,7 +681,8 @@ esac`,
       env: {
         ...process.env,
         PATH: `${binDir}:${process.env.PATH}`,
-        SOURCE_DB_URL: "postgresql://read-only@source.invalid:5432/postgres",
+        SOURCE_DB_URL:
+          "postgresql://postgres@db.ymqlqdhelsocibhnanjy.supabase.co:5432/postgres",
         AGE_RECIPIENTS: "age1recipient-one,age1recipient-two",
         BACKUP_DESTINATION_RCLONE: "destination:po-finder",
         BACKUP_SKIP_STORAGE: "1",
@@ -620,6 +712,37 @@ esac`,
       false,
       "failed export must remove its private cleartext staging directory",
     );
+
+    const corruptWorkDir = join(root, "work-corrupt");
+    const corruptLog = join(root, "rclone-corrupt.log");
+    const corruptRunId = "20260828T030100Z";
+    const corrupted = spawnSync("bash", ["scripts/backup/export-recovery-set.sh"], {
+      env: {
+        ...process.env,
+        PATH: `${binDir}:${process.env.PATH}`,
+        SOURCE_DB_URL:
+          "postgresql://postgres@db.ymqlqdhelsocibhnanjy.supabase.co:5432/postgres",
+        AGE_RECIPIENTS: "age1recipient-one,age1recipient-two",
+        BACKUP_DESTINATION_RCLONE: "destination:po-finder",
+        BACKUP_SKIP_STORAGE: "1",
+        BACKUP_WORK_DIR: corruptWorkDir,
+        BACKUP_RUN_ID: corruptRunId,
+        MOCK_RCLONE_LOG: corruptLog,
+        MOCK_EXPORT_MODE_LOG: modeLog,
+        MOCK_ENCRYPTED_FILE: join(
+          corruptWorkDir,
+          `po-finder-recovery-${corruptRunId}.tar.gz.age`,
+        ),
+        MOCK_CORRUPT_REMOTE: "1",
+      },
+      encoding: "utf8",
+    });
+    assert.equal(corrupted.status, 4, corrupted.stderr);
+    assert.match(corrupted.stderr, /Uploaded ciphertext hash mismatch/);
+    const corruptCalls = readFileSync(corruptLog, "utf8");
+    assert.match(corruptCalls, /cat destination:po-finder/);
+    assert.doesNotMatch(corruptCalls, /latest-success\.json/);
+    assert.doesNotMatch(corruptCalls, /(^|\n)delete /);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

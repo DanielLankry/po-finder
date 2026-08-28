@@ -66,6 +66,10 @@ Required protected secrets:
 The runner installs checksum-pinned rclone `1.75.0`. Before an export or marker
 check, the scripts require each named remote to exist in that protected config
 and perform a read-only root listing to validate configuration and credentials.
+The export also binds the database host/user and the redacted Storage S3
+endpoint to production project `ymqlqdhelsocibhnanjy`; aliases, a second
+project ref, a non-S3 backend, and libpq/rclone endpoint overrides fail before
+any source read or off-site write.
 
 Each successful export:
 
@@ -76,14 +80,23 @@ Each successful export:
    object paths, bytes, and content checksums are also captured by the separate
    Storage manifest.
 2. Refuses to publish if the before/after manifests differ.
-3. Runs Supabase's documented role, schema, and data dump sequence.
-4. Copies Storage objects separately through rclone.
-5. Packages the recovery set, verifies the archive, encrypts it with age, and
+3. Runs Supabase's documented role, schema, and data dump sequence. Because the
+   default schema dump excludes `auth` and `storage`, it also generates a
+   separate `managed-schema.sql` from the source catalogs for their policies,
+   RLS flags, and relation ACLs.
+4. Captures a canonical security-state manifest covering relation ownership,
+   RLS flags, policies, relation ACLs, and public routine definitions.
+5. Copies Storage objects separately through rclone.
+6. Packages the recovery set, verifies the archive, encrypts it with age, and
    uploads only ciphertext plus a non-sensitive success marker.
-6. Writes the immutable run marker with run id, completion time, manifest hash,
-   ciphertext hash, size, source region, commit, RPO, and retention.
-7. Verifies the remote ciphertext and completes the 35-day retention operation.
-8. Publishes the global `latest-success.json` last. A failed verification or
+7. Streams the uploaded ciphertext back through `rclone cat` and requires its
+   SHA-256 to exactly match the local ciphertext before publishing either
+   success marker.
+8. Writes the immutable run marker with run id, completion time, source project
+   ref, manifest hash, ciphertext hash, size, source region, commit, RPO, and
+   retention.
+9. Completes the 35-day retention operation.
+10. Publishes the global `latest-success.json` last. A failed verification or
    retention operation therefore cannot advertise the run as healthy.
 
 The disjoint scheduled monitor checks `latest-success.json` at 05:45, 11:45,
@@ -135,8 +148,10 @@ The drill:
 
 1. Downloads `latest-success.json` and the named encrypted recovery set.
 2. Verifies ciphertext and manifest hashes before decrypting/restoring.
-3. Restores roles, schema, and data except `storage.objects` to the disposable
-   target in one transaction.
+3. Revokes automatic `anon`/`authenticated` default table privileges before
+   schema creation, then restores roles, public schema, data except
+   `storage.objects`, and the generated Auth/Storage policies, RLS flags, and
+   relation ACLs to the disposable target in one transaction.
 4. Verifies the decrypted Storage files against `storage-manifest.txt` before any
    target write; skip mode is accepted only when the manifest declares zero
    objects.
@@ -144,8 +159,10 @@ The drill:
    objects through its Supabase S3 endpoint so the target generates valid local
    `storage.objects` rows, and downloads them through `rclone check` to verify
    every source object against the disposable target.
-6. Recomputes durable table counts and checksums on the target.
-7. Fails the drill on any database or Storage mismatch.
+6. Recomputes durable table counts/checksums and the canonical security-state
+   manifest on the target.
+7. Fails the drill on any database, Storage, policy, RLS, ACL, ownership, or
+   critical public-routine mismatch.
 8. Emits a redacted JSON report for Sentinel review.
 
 Sentinel review is mandatory before calling the implementation complete. The

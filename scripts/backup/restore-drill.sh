@@ -8,6 +8,8 @@ fi
 
 umask 077
 
+readonly PO_FINDER_PRODUCTION_PROJECT_REF="ymqlqdhelsocibhnanjy"
+
 restore_work_root=""
 restore_staging_dir=""
 
@@ -274,6 +276,99 @@ psql_target() {
   psql "$TARGET_DB_URL" -X -v ON_ERROR_STOP=1 "$@"
 }
 
+write_security_state() {
+  local psql_function="$1"
+  local out="$2"
+
+  "$psql_function" -A -t <<'SQL' | LC_ALL=C sort > "$out"
+with security_state as (
+  select 10 as kind_order,
+         n.nspname || '.' || c.relname as object_key,
+         jsonb_build_object(
+           'kind', 'relation_security',
+           'schema', n.nspname,
+           'relation', c.relname,
+           'relkind', c.relkind,
+           'owner', pg_get_userbyid(c.relowner),
+           'rls_enabled', c.relrowsecurity,
+           'rls_forced', c.relforcerowsecurity
+         ) as state
+  from pg_class c
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+    and c.relkind in ('r', 'p', 'v', 'm', 'f')
+
+  union all
+
+  select 20,
+         n.nspname || '.' || c.relname || '.' || p.polname,
+         jsonb_build_object(
+           'kind', 'policy',
+           'schema', n.nspname,
+           'relation', c.relname,
+           'name', p.polname,
+           'permissive', p.polpermissive,
+           'command', p.polcmd,
+           'roles', (
+             select jsonb_agg(
+               case when role_oid = 0 then 'PUBLIC' else pg_get_userbyid(role_oid) end
+               order by case when role_oid = 0 then 'PUBLIC' else pg_get_userbyid(role_oid) end
+             )
+             from unnest(p.polroles) as role_oid
+           ),
+           'using', pg_get_expr(p.polqual, p.polrelid),
+           'with_check', pg_get_expr(p.polwithcheck, p.polrelid)
+         )
+  from pg_policy p
+  join pg_class c on c.oid = p.polrelid
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+
+  union all
+
+  select 30,
+         n.nspname || '.' || c.relname || '.' ||
+           case when acl.grantee = 0 then 'PUBLIC' else pg_get_userbyid(acl.grantee) end || '.' ||
+           acl.privilege_type,
+         jsonb_build_object(
+           'kind', 'relation_acl',
+           'schema', n.nspname,
+           'relation', c.relname,
+           'grantee', case when acl.grantee = 0 then 'PUBLIC' else pg_get_userbyid(acl.grantee) end,
+           'privilege', acl.privilege_type,
+           'grantable', acl.is_grantable
+         )
+  from pg_class c
+  join pg_namespace n on n.oid = c.relnamespace
+  cross join lateral aclexplode(coalesce(c.relacl, '{}'::aclitem[])) as acl
+  where n.nspname in ('public', 'auth', 'storage')
+    and c.relkind in ('r', 'p', 'v', 'm', 'f')
+
+  union all
+
+  select 40,
+         n.nspname || '.' || p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')',
+         jsonb_build_object(
+           'kind', 'routine_security',
+           'schema', n.nspname,
+           'identity', p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')',
+           'owner', pg_get_userbyid(p.proowner),
+           'security_definer', p.prosecdef,
+           'volatility', p.provolatile,
+           'configuration', p.proconfig,
+           'definition', pg_get_functiondef(p.oid)
+         )
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname = 'public'
+    and p.prokind in ('f', 'p')
+)
+select state::text
+from security_state
+order by kind_order, object_key, state::text;
+SQL
+}
+
 table_list() {
   psql_target -A -t <<'SQL'
 select table_schema || '.' || table_name
@@ -407,7 +502,9 @@ main() {
   fi
 
   local run_id work_root staging_dir report marker encrypted archive recovery_dir source_manifest target_manifest
+  local source_security_state target_security_state expected_security_hash
   local storage_manifest storage_object_count storage_check_log
+  local required_restore_file
   run_id="${RESTORE_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)}"
   validate_run_id "$run_id"
   work_root="${RESTORE_WORK_DIR:-$(mktemp -d)}"
@@ -427,12 +524,17 @@ main() {
   archive="$staging_dir/po-finder-recovery.tar.gz"
 
   rclone copyto "$RESTORE_SOURCE_RCLONE/latest-success.json" "$marker"
-  local source_run ciphertext_hash marker_manifest_hash
+  local source_run source_project_ref ciphertext_hash marker_manifest_hash
   source_run="$(jq -r '.runId' "$marker")"
+  source_project_ref="$(jq -r '.sourceProjectRef' "$marker")"
   ciphertext_hash="$(jq -r '.ciphertextSha256' "$marker")"
   marker_manifest_hash="$(jq -r '.manifestSha256' "$marker")"
   if [[ -z "$source_run" || "$source_run" == "null" ]]; then
     echo "Latest success marker is missing runId." >&2
+    exit 12
+  fi
+  if [[ "$source_project_ref" != "$PO_FINDER_PRODUCTION_PROJECT_REF" ]]; then
+    echo "Latest success marker is not bound to the known production source project." >&2
     exit 12
   fi
   validate_run_id "$source_run"
@@ -458,6 +560,20 @@ main() {
     exit 14
   fi
 
+  source_security_state="$recovery_dir/security-state-after.jsonl"
+  expected_security_hash="$(sed -n 's/^security_state_sha256=//p' "$source_manifest")"
+  if [[ ! "$expected_security_hash" =~ ^[0-9a-f]{64}$ || ! -f "$source_security_state" ||
+    "$(sha256sum "$source_security_state" | awk '{print $1}')" != "$expected_security_hash" ]]; then
+    echo "Security-state hash mismatch; refusing restore drill." >&2
+    exit 14
+  fi
+  for required_restore_file in roles.sql schema.sql data.sql managed-schema.sql; do
+    if [[ ! -f "$recovery_dir/database/$required_restore_file" ]]; then
+      echo "Recovery set is missing required database restore files." >&2
+      exit 14
+    fi
+  done
+
   storage_manifest="$staging_dir/verified-storage-manifest.txt"
   verify_storage_manifest "$recovery_dir" "$storage_manifest"
   storage_object_count="$(sed -n 's/^object_count=//p' "$storage_manifest")"
@@ -473,10 +589,12 @@ main() {
   psql_target \
     --single-transaction \
     --variable ON_ERROR_STOP=1 \
+    --command 'ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated' \
     --file "$recovery_dir/database/roles.sql" \
     --file "$recovery_dir/database/schema.sql" \
     --command 'SET session_replication_role = replica' \
-    --file "$recovery_dir/database/data.sql"
+    --file "$recovery_dir/database/data.sql" \
+    --file "$recovery_dir/database/managed-schema.sql"
 
   if [[ "${RESTORE_SKIP_STORAGE:-0}" != "1" ]]; then
     # storage.objects is intentionally absent from data.sql. Uploading the blobs
@@ -503,6 +621,13 @@ main() {
     exit 15
   fi
 
+  target_security_state="$staging_dir/target-security-state.jsonl"
+  write_security_state psql_target "$target_security_state"
+  if ! diff -u "$source_security_state" "$target_security_state" > "$staging_dir/security-state-diff.txt"; then
+    echo "Restored policies, RLS, ACLs, or critical routine state do not match the source." >&2
+    exit 17
+  fi
+
   cat > "$report" <<JSON
 {
   "service": "po-finder",
@@ -514,6 +639,7 @@ main() {
   "ciphertextSha256": "$ciphertext_hash",
   "manifestSha256": "$marker_manifest_hash",
   "tableChecksumsMatch": true,
+  "securityStateMatches": true,
   "storageObjectCount": $storage_object_count,
   "storageObjectsMatch": true,
   "storageRestoreMode": "${RESTORE_SKIP_STORAGE:-0}"
