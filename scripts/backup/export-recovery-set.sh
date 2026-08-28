@@ -6,6 +6,18 @@ if [[ $- == *x* ]]; then
   exit 1
 fi
 
+umask 077
+
+export_work_root=""
+export_staging_dir=""
+
+cleanup_export_artifacts() {
+  if [[ -n "$export_staging_dir" && -n "$export_work_root" &&
+    "$export_staging_dir" == "$export_work_root"/.po-finder-export.* ]]; then
+    rm -rf -- "$export_staging_dir"
+  fi
+}
+
 usage() {
   cat <<'USAGE'
 Create an encrypted Po Finder recovery set.
@@ -36,6 +48,14 @@ require_env() {
   local name="$1"
   if [[ -z "${!name:-}" ]]; then
     echo "Missing required environment variable: $name" >&2
+    exit 1
+  fi
+}
+
+validate_run_id() {
+  local run_id="$1"
+  if [[ ! "$run_id" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$ ]]; then
+    echo "Backup run id contains unsupported characters." >&2
     exit 1
   fi
 }
@@ -198,10 +218,19 @@ main() {
     validate_rclone_remote_access "$SUPABASE_STORAGE_RCLONE_SOURCE"
   fi
 
-  local run_id work_root set_dir archive encrypted marker recipients_args retention_days
+  local run_id work_root staging_dir set_dir archive encrypted marker recipients_args retention_days
   run_id="${BACKUP_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)}"
+  validate_run_id "$run_id"
   work_root="${BACKUP_WORK_DIR:-$(mktemp -d)}"
-  set_dir="$work_root/po-finder-recovery-$run_id"
+  mkdir -p "$work_root"
+  work_root="$(cd "$work_root" && pwd -P)"
+  staging_dir="$(mktemp -d "$work_root/.po-finder-export.XXXXXX")"
+  export_work_root="$work_root"
+  export_staging_dir="$staging_dir"
+  trap cleanup_export_artifacts EXIT
+  set_dir="$staging_dir/po-finder-recovery-$run_id"
+  archive="$staging_dir/po-finder-recovery-$run_id.tar.gz"
+  encrypted="$work_root/po-finder-recovery-$run_id.tar.gz.age"
   retention_days="${BACKUP_RETENTION_DAYS:-35}"
   mkdir -p "$set_dir/database" "$set_dir/storage"
 
@@ -211,11 +240,13 @@ main() {
   supabase db dump --db-url "$SOURCE_DB_URL" -f "$set_dir/database/schema.sql"
   supabase db dump --db-url "$SOURCE_DB_URL" -f "$set_dir/database/data.sql" --use-copy --data-only \
     -x "storage.objects" -x "storage.buckets_vectors" -x "storage.vector_indexes"
+  chmod 600 "$set_dir/database/roles.sql" "$set_dir/database/schema.sql" "$set_dir/database/data.sql"
 
   if [[ "${BACKUP_SKIP_STORAGE:-0}" == "1" ]]; then
     printf 'storage_export=skipped\nobject_count=0\ntotal_bytes=0\n' > "$set_dir/storage-manifest.txt"
   else
     rclone copy "$SUPABASE_STORAGE_RCLONE_SOURCE" "$set_dir/storage" --immutable --metadata
+    chmod -R go-rwx "$set_dir/storage"
     write_storage_manifest "$set_dir/storage" "$set_dir/storage-manifest.txt"
   fi
 
@@ -227,9 +258,7 @@ main() {
     exit 2
   fi
 
-  archive="$work_root/po-finder-recovery-$run_id.tar.gz"
-  encrypted="$archive.age"
-  tar -C "$work_root" -czf "$archive" "po-finder-recovery-$run_id"
+  tar -C "$staging_dir" -czf "$archive" "po-finder-recovery-$run_id"
   tar -tzf "$archive" >/dev/null
 
   IFS=',' read -r -a recipients <<< "$AGE_RECIPIENTS"

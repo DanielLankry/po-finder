@@ -6,6 +6,18 @@ if [[ $- == *x* ]]; then
   exit 1
 fi
 
+umask 077
+
+restore_work_root=""
+restore_staging_dir=""
+
+cleanup_restore_artifacts() {
+  if [[ -n "$restore_staging_dir" && -n "$restore_work_root" &&
+    "$restore_staging_dir" == "$restore_work_root"/.po-finder-restore.* ]]; then
+    rm -rf -- "$restore_staging_dir"
+  fi
+}
+
 usage() {
   cat <<'USAGE'
 Run a disposable Po Finder restore drill from an encrypted recovery set.
@@ -38,6 +50,14 @@ require_env() {
   if [[ -z "${!name:-}" ]]; then
     echo "Missing required environment variable: $name" >&2
     exit 1
+  fi
+}
+
+validate_run_id() {
+  local run_id="$1"
+  if [[ ! "$run_id" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$ ]]; then
+    echo "Restore run id contains unsupported characters." >&2
+    exit 11
   fi
 }
 
@@ -157,6 +177,26 @@ reject_libpq_target_overrides() {
   for name in "${target_overrides[@]}"; do
     if [[ -n "${!name:-}" ]]; then
       echo "Refusing inherited libpq target override: $name." >&2
+      exit 11
+    fi
+  done
+}
+
+reject_rclone_storage_target_overrides() {
+  local spec="$1"
+  local remote normalized name
+  remote="$(rclone_remote_name "$spec")"
+  normalized="${remote^^}"
+  normalized="${normalized//[^A-Z0-9]/_}"
+
+  if [[ -n "${RCLONE_S3_ENDPOINT:-}" ]]; then
+    echo "Refusing inherited rclone Storage target override: RCLONE_S3_ENDPOINT." >&2
+    exit 11
+  fi
+
+  for name in "RCLONE_CONFIG_${normalized}_ENDPOINT" "RCLONE_CONFIG_${normalized}_TYPE"; do
+    if [[ -n "${!name:-}" ]]; then
+      echo "Refusing inherited rclone Storage target override: $name." >&2
       exit 11
     fi
   done
@@ -352,23 +392,39 @@ main() {
   fi
   validate_database_target_binding "$TARGET_DB_URL" "$APPROVED_DISPOSABLE_TARGET_REF"
   reject_libpq_target_overrides
-  validate_rclone_remote_access "$RESTORE_SOURCE_RCLONE"
 
   if [[ "${RESTORE_SKIP_STORAGE:-0}" != "1" ]]; then
     require_env TARGET_STORAGE_RCLONE_DESTINATION
+    reject_rclone_storage_target_overrides "$TARGET_STORAGE_RCLONE_DESTINATION"
+  fi
+
+  validate_rclone_remote_access "$RESTORE_SOURCE_RCLONE"
+
+  if [[ "${RESTORE_SKIP_STORAGE:-0}" != "1" ]]; then
     validate_rclone_remote_access "$TARGET_STORAGE_RCLONE_DESTINATION"
     validate_storage_target_binding "$TARGET_STORAGE_RCLONE_DESTINATION" "$APPROVED_DISPOSABLE_TARGET_REF"
     validate_empty_storage_target "$TARGET_STORAGE_RCLONE_DESTINATION"
   fi
 
-  local run_id work_root marker encrypted archive recovery_dir source_manifest target_manifest
+  local run_id work_root staging_dir report marker encrypted archive recovery_dir source_manifest target_manifest
   local storage_manifest storage_object_count storage_check_log
   run_id="${RESTORE_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)}"
+  validate_run_id "$run_id"
   work_root="${RESTORE_WORK_DIR:-$(mktemp -d)}"
   mkdir -p "$work_root"
-  marker="$work_root/latest-success.json"
-  encrypted="$work_root/po-finder-recovery.tar.gz.age"
-  archive="$work_root/po-finder-recovery.tar.gz"
+  work_root="$(cd "$work_root" && pwd -P)"
+  staging_dir="$(mktemp -d "$work_root/.po-finder-restore.XXXXXX")"
+  restore_work_root="$work_root"
+  restore_staging_dir="$staging_dir"
+  trap cleanup_restore_artifacts EXIT
+  report="$work_root/drill-report-redacted-$run_id.json"
+  if [[ -e "$report" ]]; then
+    echo "Restore drill report already exists for this run id." >&2
+    exit 11
+  fi
+  marker="$staging_dir/latest-success.json"
+  encrypted="$staging_dir/po-finder-recovery.tar.gz.age"
+  archive="$staging_dir/po-finder-recovery.tar.gz"
 
   rclone copyto "$RESTORE_SOURCE_RCLONE/latest-success.json" "$marker"
   local source_run ciphertext_hash marker_manifest_hash
@@ -379,6 +435,7 @@ main() {
     echo "Latest success marker is missing runId." >&2
     exit 12
   fi
+  validate_run_id "$source_run"
 
   rclone copyto "$RESTORE_SOURCE_RCLONE/$source_run/po-finder-recovery.tar.gz.age" "$encrypted"
   if [[ "$(sha256sum "$encrypted" | awk '{print $1}')" != "$ciphertext_hash" ]]; then
@@ -388,15 +445,20 @@ main() {
 
   age -d -i "$AGE_IDENTITY_FILE" -o "$archive" "$encrypted"
   tar -tzf "$archive" >/dev/null
-  tar -C "$work_root" -xzf "$archive"
-  recovery_dir="$work_root/po-finder-recovery-$source_run"
+  tar --no-same-owner --no-same-permissions -C "$staging_dir" -xzf "$archive"
+  recovery_dir="$staging_dir/po-finder-recovery-$source_run"
+  if [[ ! -d "$recovery_dir" ]]; then
+    echo "Recovery archive is missing its expected top-level directory." >&2
+    exit 14
+  fi
+  chmod -R go-rwx "$recovery_dir"
   source_manifest="$recovery_dir/manifest-after.txt"
   if [[ "$(sha256sum "$source_manifest" | awk '{print $1}')" != "$marker_manifest_hash" ]]; then
     echo "Manifest hash mismatch; refusing restore drill." >&2
     exit 14
   fi
 
-  storage_manifest="$work_root/verified-storage-manifest.txt"
+  storage_manifest="$staging_dir/verified-storage-manifest.txt"
   verify_storage_manifest "$recovery_dir" "$storage_manifest"
   storage_object_count="$(sed -n 's/^object_count=//p' "$storage_manifest")"
   if [[ ! "$storage_object_count" =~ ^[0-9]+$ ]]; then
@@ -421,7 +483,7 @@ main() {
     # through Supabase's S3 endpoint creates fresh, internally consistent object
     # metadata for the disposable project.
     rclone copy "$recovery_dir/storage" "$TARGET_STORAGE_RCLONE_DESTINATION" --metadata
-    storage_check_log="$work_root/storage-check.log"
+    storage_check_log="$staging_dir/storage-check.log"
     if ! rclone check "$recovery_dir/storage" "$TARGET_STORAGE_RCLONE_DESTINATION" \
       --download > "$storage_check_log" 2>&1; then
       rm -f "$storage_check_log"
@@ -431,17 +493,17 @@ main() {
     rm -f "$storage_check_log"
   fi
 
-  target_manifest="$work_root/target-manifest.txt"
-  write_target_manifest "$target_manifest" "$work_root/target-table-checksums"
+  target_manifest="$staging_dir/target-manifest.txt"
+  write_target_manifest "$target_manifest" "$staging_dir/target-table-checksums"
 
-  grep -E '^[^.[:space:]]+\.[^[:space:]]+ count=' "$source_manifest" | LC_ALL=C sort > "$work_root/source-tables.txt"
-  grep -E '^[^.[:space:]]+\.[^[:space:]]+ count=' "$target_manifest" | LC_ALL=C sort > "$work_root/target-tables.txt"
-  if ! diff -u "$work_root/source-tables.txt" "$work_root/target-tables.txt" > "$work_root/table-manifest-diff.txt"; then
+  grep -E '^[^.[:space:]]+\.[^[:space:]]+ count=' "$source_manifest" | LC_ALL=C sort > "$staging_dir/source-tables.txt"
+  grep -E '^[^.[:space:]]+\.[^[:space:]]+ count=' "$target_manifest" | LC_ALL=C sort > "$staging_dir/target-tables.txt"
+  if ! diff -u "$staging_dir/source-tables.txt" "$staging_dir/target-tables.txt" > "$staging_dir/table-manifest-diff.txt"; then
     echo "Restored table counts/checksums do not match source manifest." >&2
     exit 15
   fi
 
-  cat > "$work_root/drill-report-redacted.json" <<JSON
+  cat > "$report" <<JSON
 {
   "service": "po-finder",
   "kind": "restore-drill-report",
@@ -457,8 +519,7 @@ main() {
   "storageRestoreMode": "${RESTORE_SKIP_STORAGE:-0}"
 }
 JSON
-  rm -f "$archive"
-  echo "$work_root/drill-report-redacted.json"
+  echo "$report"
 }
 
 main "$@"

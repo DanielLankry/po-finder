@@ -6,6 +6,7 @@ import {
   mkdtempSync,
   mkdirSync,
   readFileSync,
+  readdirSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -86,6 +87,10 @@ test("backup scripts are executable and fail closed on secrets", () => {
   assert.match(exportScript, /require_env SOURCE_DB_URL/);
   assert.match(exportScript, /require_env AGE_RECIPIENTS/);
   assert.match(restoreScript, /require_env CONFIRM_DISPOSABLE_RESTORE/);
+  assert.match(exportScript, /umask 077/);
+  assert.match(restoreScript, /umask 077/);
+  assert.match(exportScript, /trap cleanup_export_artifacts EXIT/);
+  assert.match(restoreScript, /trap cleanup_restore_artifacts EXIT/);
 });
 
 test("export controls enforce encrypted off-site recovery markers", () => {
@@ -222,6 +227,33 @@ test("restore rejects a Storage endpoint not bound to the approved project befor
     assert.doesNotMatch(calls, /(^|\n)copy(to)? /, "no recovery set or Storage object may be copied");
   } finally {
     rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("restore rejects rclone Storage endpoint and backend overrides before any rclone access", () => {
+  const endpoint = "https://aaaaaaaaaaaaaaaaaaaa.storage.supabase.co/storage/v1/s3";
+  for (const [name, value] of [
+    ["RCLONE_S3_ENDPOINT", "https://attacker.invalid/storage/v1/s3"],
+    ["RCLONE_CONFIG_TARGET_ENDPOINT", "https://attacker.invalid/storage/v1/s3"],
+    ["RCLONE_CONFIG_TARGET_TYPE", "local"],
+  ]) {
+    const root = mkdtempSync(join(tmpdir(), "po-finder-restore-rclone-env-"));
+    try {
+      const { binDir, log } = setupRestoreMocks(root, endpoint);
+      const result = spawnSync("bash", ["scripts/backup/restore-drill.sh"], {
+        env: restoreEnvironment(binDir, {
+          MOCK_RCLONE_LOG: log,
+          MOCK_STORAGE_ENDPOINT: endpoint,
+          [name]: value,
+        }),
+        encoding: "utf8",
+      });
+      assert.equal(result.status, 11, `${name}: ${result.stderr}`);
+      assert.match(result.stderr, new RegExp(name));
+      assert.equal(existsSync(log), false, `${name}: rclone must not run before override rejection`);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   }
 });
 
@@ -382,6 +414,11 @@ esac`,
       binDir,
       "psql",
       `if [[ "$*" == *--single-transaction* ]]; then
+  for argument in "$@"; do
+    if [[ "$argument" == *.sql ]]; then
+      printf '%s %s\n' "$(stat -c '%a' "$argument")" "$(stat -c '%a' "$(dirname "$argument")")" >> "$MOCK_RESTORE_MODE_LOG"
+    fi
+  done
   exit 0
 fi
 if [[ "$*" == *"select count(*)"* ]]; then
@@ -426,6 +463,7 @@ esac`,
         MOCK_ARCHIVE: archive,
         MOCK_MARKER: marker,
         MOCK_RCLONE_LOG: log,
+        MOCK_RESTORE_MODE_LOG: join(root, "restore-modes.log"),
         MOCK_SOURCE_MANIFEST: join(recoveryDir, "manifest-after.txt"),
         MOCK_SOURCE_RUN: sourceRun,
         MOCK_STORAGE_ENDPOINT: endpoint,
@@ -441,6 +479,15 @@ esac`,
     assert.match(calls, /copy .*target:storage --metadata/);
     assert.doesNotMatch(calls, /copy .*target:storage --immutable/);
     assert.match(calls, /check .*target:storage --download/);
+    assert.deepEqual(
+      readFileSync(join(root, "restore-modes.log"), "utf8").trim().split("\n"),
+      ["600 700", "600 700", "600 700"],
+    );
+    assert.equal(
+      readdirSync(workDir).some((entry) => entry.startsWith(".po-finder-restore.")),
+      false,
+      "failed restore must remove its private cleartext staging directory",
+    );
 
     const successLog = join(root, "rclone-success.log");
     const successWorkDir = join(root, "work-success");
@@ -450,6 +497,7 @@ esac`,
         MOCK_ARCHIVE: archive,
         MOCK_MARKER: marker,
         MOCK_RCLONE_LOG: successLog,
+        MOCK_RESTORE_MODE_LOG: join(root, "restore-success-modes.log"),
         MOCK_SOURCE_MANIFEST: join(recoveryDir, "manifest-after.txt"),
         MOCK_SOURCE_RUN: sourceRun,
         MOCK_STORAGE_ENDPOINT: endpoint,
@@ -467,6 +515,11 @@ esac`,
     const successCalls = readFileSync(successLog, "utf8");
     assert.match(successCalls, /copy .*target:storage --metadata/);
     assert.match(successCalls, /check .*target:storage --download/);
+    assert.equal(
+      readdirSync(successWorkDir).some((entry) => entry.startsWith(".po-finder-restore.")),
+      false,
+      "successful restore must remove its private cleartext staging directory",
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -478,6 +531,7 @@ test("failed remote retention cannot publish the global latest-success marker", 
     const binDir = join(root, "bin");
     const workDir = join(root, "work");
     const log = join(root, "rclone.log");
+    const modeLog = join(root, "export-modes.log");
     mkdirForTest(binDir);
     writeMock(binDir, "psql", "exit 0");
     writeMock(binDir, "jq", "exit 0");
@@ -497,7 +551,8 @@ while [ "$#" -gt 0 ]; do
   shift || true
 done
 mkdir -p "$(dirname "$output")"
-: > "$output"`,
+: > "$output"
+printf '%s %s\n' "$(stat -c '%a' "$output")" "$(stat -c '%a' "$(dirname "$output")")" >> "$MOCK_EXPORT_MODE_LOG"`,
     );
     writeMock(
       binDir,
@@ -539,6 +594,7 @@ esac`,
         BACKUP_WORK_DIR: workDir,
         BACKUP_RUN_ID: runId,
         MOCK_RCLONE_LOG: log,
+        MOCK_EXPORT_MODE_LOG: modeLog,
         MOCK_ENCRYPTED_FILE: join(workDir, `po-finder-recovery-${runId}.tar.gz.age`),
       },
       encoding: "utf8",
@@ -550,6 +606,16 @@ esac`,
       calls,
       /copyto .* destination:po-finder\/latest-success\.json(?:\n|$)/,
       "global success marker must be the final remote operation",
+    );
+    assert.deepEqual(readFileSync(modeLog, "utf8").trim().split("\n"), [
+      "600 700",
+      "600 700",
+      "600 700",
+    ]);
+    assert.equal(
+      readdirSync(workDir).some((entry) => entry.startsWith(".po-finder-export.")),
+      false,
+      "failed export must remove its private cleartext staging directory",
     );
   } finally {
     rmSync(root, { recursive: true, force: true });
@@ -587,6 +653,38 @@ test("marker monitor enforces the 36-hour alert threshold", () => {
   assert.match(markerCheckScript, /completedAtUtc/);
   assert.match(markerCheckScript, /older than/);
   assert.match(runbook, /36\s+hours/);
+});
+
+test("marker monitor rejects a success timestamp in the future", () => {
+  const root = mkdtempSync(join(tmpdir(), "po-finder-marker-future-"));
+  try {
+    const binDir = join(root, "bin");
+    const workDir = join(root, "work");
+    mkdirForTest(binDir);
+    writeMock(
+      binDir,
+      "rclone",
+      `case "\${1:-}" in
+  listremotes) printf 'destination:\n' ;;
+  lsf) exit 0 ;;
+  copyto) printf '{"completedAtUtc":"2999-01-01T00:00:00Z"}\n' > "$3" ;;
+  *) exit 98 ;;
+esac`,
+    );
+    const result = spawnSync("bash", ["scripts/backup/check-latest-success.sh"], {
+      env: {
+        ...process.env,
+        PATH: `${binDir}:${process.env.PATH}`,
+        BACKUP_DESTINATION_RCLONE: "destination:po-finder",
+        BACKUP_WORK_DIR: workDir,
+      },
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 22, result.stderr);
+    assert.match(result.stderr, /dated in the future/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test("runbook records gates, source links, and Sentinel review requirement", () => {
