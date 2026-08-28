@@ -3,7 +3,8 @@
 Owner: Rivet
 Lead: Forge
 Reviewer: Sentinel
-Decision/approval source: DAN-267, recorded by Atlas from Daniel approval on 2026-08-28
+Decision context: DAN-267. Daniel approval is not recorded as of 2026-08-28;
+export scheduling, protected-secret configuration, and restore drills remain unauthorized.
 
 ## Scope
 
@@ -121,10 +122,14 @@ The drill:
 1. Downloads `latest-success.json` and the named encrypted recovery set.
 2. Verifies ciphertext and manifest hashes before decrypting/restoring.
 3. Restores roles, schema, and data to the disposable target in one transaction.
-4. Restores Storage objects when present.
-5. Recomputes durable table counts and checksums on the target.
-6. Fails the drill on any count/checksum mismatch.
-7. Emits a redacted JSON report for Sentinel review.
+4. Verifies the decrypted Storage files against `storage-manifest.txt` before any
+   target write; skip mode is accepted only when the manifest declares zero
+   objects.
+5. Restores Storage objects when present and downloads them through `rclone
+   check` to verify every source object against the disposable target.
+6. Recomputes durable table counts and checksums on the target.
+7. Fails the drill on any database or Storage mismatch.
+8. Emits a redacted JSON report for Sentinel review.
 
 Sentinel review is mandatory before calling the implementation complete. The
 review packet must include the workflow run URL, commit SHA, latest success

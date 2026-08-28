@@ -143,6 +143,22 @@ stable_manifest_lines() {
   grep -E '^(schema_sha256=|[^.[:space:]]+\.[^[:space:]]+ count=)' "$1" | LC_ALL=C sort
 }
 
+write_storage_manifest() {
+  local storage_dir="$1"
+  local out="$2"
+
+  (
+    cd "$storage_dir"
+    while IFS= read -r -d '' object; do
+      sha256sum "$object"
+    done < <(find . -type f -print0 | LC_ALL=C sort -z)
+  ) > "$out"
+  {
+    printf 'object_count=%s\n' "$(find "$storage_dir" -type f -printf . | wc -c | tr -d ' ')"
+    printf 'total_bytes=%s\n' "$(find "$storage_dir" -type f -printf '%s\n' | awk '{s+=$1} END {print s+0}')"
+  } >> "$out"
+}
+
 main() {
   if [[ "${1:-}" == "--help" ]]; then
     usage
@@ -193,13 +209,7 @@ main() {
     printf 'storage_export=skipped\nobject_count=0\ntotal_bytes=0\n' > "$set_dir/storage-manifest.txt"
   else
     rclone copy "$SUPABASE_STORAGE_RCLONE_SOURCE" "$set_dir/storage" --immutable --metadata
-    find "$set_dir/storage" -type f -print0 \
-      | LC_ALL=C sort -z \
-      | xargs -0 sha256sum > "$set_dir/storage-manifest.txt"
-    {
-      printf 'object_count=%s\n' "$(find "$set_dir/storage" -type f | wc -l | tr -d ' ')"
-      printf 'total_bytes=%s\n' "$(find "$set_dir/storage" -type f -printf '%s\n' | awk '{s+=$1} END {print s+0}')"
-    } >> "$set_dir/storage-manifest.txt"
+    write_storage_manifest "$set_dir/storage" "$set_dir/storage-manifest.txt"
   fi
 
   write_manifest "after" "$set_dir" "$set_dir/manifest-after.txt"
