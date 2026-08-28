@@ -13,9 +13,10 @@ Run a disposable Po Finder restore drill from an encrypted recovery set.
 Required environment:
   TARGET_DB_URL                       Disposable Supabase Postgres connection URL.
   APPROVED_DISPOSABLE_TARGET_REF      Target project ref approved for destructive restore.
+  CONFIGURED_DISPOSABLE_TARGET_REF    Protected target ref bound to database and Storage credentials.
   AGE_IDENTITY_FILE                   age private identity file available only to restore operators.
   RESTORE_SOURCE_RCLONE               rclone prefix containing latest-success.json and recovery sets.
-  CONFIRM_DISPOSABLE_RESTORE          Must equal the approved target ref.
+  CONFIRM_DISPOSABLE_RESTORE          Must equal RESTORE:<approved target ref>.
 
 Optional environment:
   RESTORE_WORK_DIR                    Ephemeral work directory. Defaults to a mktemp dir.
@@ -46,6 +47,91 @@ refuse_production_target() {
     echo "Refusing to restore into the known production project/domain." >&2
     exit 10
   fi
+}
+
+validate_project_ref() {
+  local ref="$1"
+  if [[ ! "$ref" =~ ^[a-z0-9]{20}$ ]]; then
+    echo "Disposable target ref must be exactly 20 lowercase alphanumeric characters." >&2
+    exit 11
+  fi
+  refuse_production_target "$ref"
+}
+
+validate_database_target_binding() {
+  local target_url="$1"
+  local approved_ref="$2"
+  local without_scheme authority userinfo hostport username host
+
+  if [[ ! "$target_url" =~ ^postgres(ql)?:// ]]; then
+    echo "TARGET_DB_URL must be a PostgreSQL URL for the approved Supabase project." >&2
+    exit 11
+  fi
+  without_scheme="${target_url#*://}"
+  authority="${without_scheme%%/*}"
+  if [[ "$authority" != *@* ]]; then
+    echo "TARGET_DB_URL does not identify the approved Supabase project." >&2
+    exit 11
+  fi
+  userinfo="${authority%@*}"
+  hostport="${authority##*@}"
+  username="${userinfo%%:*}"
+  host="${hostport%%:*}"
+
+  if [[ "$host" == "db.${approved_ref}.supabase.co" && "$username" == "postgres" ]]; then
+    return 0
+  fi
+  if [[ "$host" == *.pooler.supabase.com && "$username" == "postgres.${approved_ref}" ]]; then
+    return 0
+  fi
+
+  echo "TARGET_DB_URL does not identify the approved Supabase project." >&2
+  exit 11
+}
+
+rclone_remote_name() {
+  local spec="$1"
+  if [[ ! "$spec" =~ ^([A-Za-z0-9][A-Za-z0-9._-]*): ]]; then
+    echo "Invalid rclone remote specification." >&2
+    exit 11
+  fi
+  printf '%s' "${BASH_REMATCH[1]}"
+}
+
+validate_rclone_remote_access() {
+  local spec="$1"
+  local remote
+  remote="$(rclone_remote_name "$spec")"
+  if ! rclone listremotes | grep -Fx "${remote}:" >/dev/null; then
+    echo "Required rclone remote is not configured." >&2
+    exit 11
+  fi
+  if ! rclone lsf "${remote}:" --max-depth 1 >/dev/null; then
+    echo "Required rclone remote is not accessible." >&2
+    exit 11
+  fi
+}
+
+validate_storage_target_binding() {
+  local spec="$1"
+  local approved_ref="$2"
+  local remote redacted endpoint
+  remote="$(rclone_remote_name "$spec")"
+  if ! redacted="$(rclone config redacted "$remote" 2>/dev/null)"; then
+    echo "Unable to inspect the redacted target Storage configuration." >&2
+    exit 11
+  fi
+  endpoint="$(printf '%s\n' "$redacted" | sed -n 's/^[[:space:]]*endpoint[[:space:]]*=[[:space:]]*//p' | head -n 1)"
+  case "$endpoint" in
+    "https://${approved_ref}.storage.supabase.co/storage/v1/s3"|\
+    "https://${approved_ref}.storage.supabase.co/storage/v1/s3/"|\
+    "https://${approved_ref}.supabase.co/storage/v1/s3"|\
+    "https://${approved_ref}.supabase.co/storage/v1/s3/")
+      return 0
+      ;;
+  esac
+  echo "Target Storage remote does not identify the approved Supabase project." >&2
+  exit 11
 }
 
 quote_ident() {
@@ -110,18 +196,29 @@ main() {
   require_cmd tar
   require_env TARGET_DB_URL
   require_env APPROVED_DISPOSABLE_TARGET_REF
+  require_env CONFIGURED_DISPOSABLE_TARGET_REF
   require_env AGE_IDENTITY_FILE
   require_env RESTORE_SOURCE_RCLONE
   require_env CONFIRM_DISPOSABLE_RESTORE
 
   refuse_production_target "$TARGET_DB_URL"
-  if [[ "$CONFIRM_DISPOSABLE_RESTORE" != "$APPROVED_DISPOSABLE_TARGET_REF" ]]; then
-    echo "CONFIRM_DISPOSABLE_RESTORE must exactly match APPROVED_DISPOSABLE_TARGET_REF." >&2
+  validate_project_ref "$APPROVED_DISPOSABLE_TARGET_REF"
+  validate_project_ref "$CONFIGURED_DISPOSABLE_TARGET_REF"
+  if [[ "$APPROVED_DISPOSABLE_TARGET_REF" != "$CONFIGURED_DISPOSABLE_TARGET_REF" ]]; then
+    echo "Approved target ref does not match the protected configured target ref." >&2
     exit 11
   fi
+  if [[ "$CONFIRM_DISPOSABLE_RESTORE" != "RESTORE:${APPROVED_DISPOSABLE_TARGET_REF}" ]]; then
+    echo "CONFIRM_DISPOSABLE_RESTORE must exactly equal RESTORE:<approved target ref>." >&2
+    exit 11
+  fi
+  validate_database_target_binding "$TARGET_DB_URL" "$APPROVED_DISPOSABLE_TARGET_REF"
+  validate_rclone_remote_access "$RESTORE_SOURCE_RCLONE"
 
   if [[ "${RESTORE_SKIP_STORAGE:-0}" != "1" ]]; then
     require_env TARGET_STORAGE_RCLONE_DESTINATION
+    validate_rclone_remote_access "$TARGET_STORAGE_RCLONE_DESTINATION"
+    validate_storage_target_binding "$TARGET_STORAGE_RCLONE_DESTINATION" "$APPROVED_DISPOSABLE_TARGET_REF"
   fi
 
   local run_id work_root marker encrypted archive recovery_dir source_manifest target_manifest

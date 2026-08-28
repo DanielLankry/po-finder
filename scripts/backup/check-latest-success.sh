@@ -21,11 +21,29 @@ require_env() {
   fi
 }
 
+validate_rclone_remote_access() {
+  local spec="$1"
+  if [[ ! "$spec" =~ ^([A-Za-z0-9][A-Za-z0-9._-]*): ]]; then
+    echo "Invalid rclone remote specification." >&2
+    exit 3
+  fi
+  local remote="${BASH_REMATCH[1]}"
+  if ! rclone listremotes | grep -Fx "${remote}:" >/dev/null; then
+    echo "Required rclone remote is not configured." >&2
+    exit 3
+  fi
+  if ! rclone lsf "${remote}:" --max-depth 1 >/dev/null; then
+    echo "Required rclone remote is not accessible." >&2
+    exit 3
+  fi
+}
+
 main() {
   require_cmd date
   require_cmd jq
   require_cmd rclone
   require_env BACKUP_DESTINATION_RCLONE
+  validate_rclone_remote_access "$BACKUP_DESTINATION_RCLONE"
 
   local max_age_hours work_dir marker completed_at completed_epoch now_epoch age_seconds max_age_seconds
   max_age_hours="${BACKUP_MAX_SUCCESS_AGE_HOURS:-36}"

@@ -40,6 +40,29 @@ require_env() {
   fi
 }
 
+rclone_remote_name() {
+  local spec="$1"
+  if [[ ! "$spec" =~ ^([A-Za-z0-9][A-Za-z0-9._-]*): ]]; then
+    echo "Invalid rclone remote specification." >&2
+    exit 3
+  fi
+  printf '%s' "${BASH_REMATCH[1]}"
+}
+
+validate_rclone_remote_access() {
+  local spec="$1"
+  local remote
+  remote="$(rclone_remote_name "$spec")"
+  if ! rclone listremotes | grep -Fx "${remote}:" >/dev/null; then
+    echo "Required rclone remote is not configured." >&2
+    exit 3
+  fi
+  if ! rclone lsf "${remote}:" --max-depth 1 >/dev/null; then
+    echo "Required rclone remote is not accessible." >&2
+    exit 3
+  fi
+}
+
 quote_ident() {
   printf '"%s"' "${1//\"/\"\"}"
 }
@@ -145,6 +168,13 @@ main() {
     require_env SUPABASE_STORAGE_RCLONE_SOURCE
   fi
 
+  if [[ "${BACKUP_SKIP_UPLOAD:-0}" != "1" ]]; then
+    validate_rclone_remote_access "$BACKUP_DESTINATION_RCLONE"
+  fi
+  if [[ "${BACKUP_SKIP_STORAGE:-0}" != "1" ]]; then
+    validate_rclone_remote_access "$SUPABASE_STORAGE_RCLONE_SOURCE"
+  fi
+
   local run_id work_root set_dir archive encrypted marker recipients_args retention_days
   run_id="${BACKUP_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)}"
   work_root="${BACKUP_WORK_DIR:-$(mktemp -d)}"
@@ -228,12 +258,11 @@ JSON
 
   rclone copyto "$encrypted" "$BACKUP_DESTINATION_RCLONE/$run_id/po-finder-recovery.tar.gz.age" --immutable
   rclone copyto "$marker" "$BACKUP_DESTINATION_RCLONE/$run_id/latest-success.json" --immutable
-  rclone copyto "$marker" "$BACKUP_DESTINATION_RCLONE/latest-success.json"
   rclone lsl "$BACKUP_DESTINATION_RCLONE/$run_id/po-finder-recovery.tar.gz.age" | grep -F "$ciphertext_size" >/dev/null
   rclone delete "$BACKUP_DESTINATION_RCLONE" --min-age "${retention_days}d" --include "**/po-finder-recovery.tar.gz.age"
-
   rm -rf "$set_dir" "$archive"
-  echo "Published encrypted recovery set $run_id with marker $BACKUP_DESTINATION_RCLONE/latest-success.json"
+  echo "Publishing verified encrypted recovery set $run_id."
+  rclone copyto "$marker" "$BACKUP_DESTINATION_RCLONE/latest-success.json"
 }
 
 main "$@"

@@ -14,6 +14,10 @@ on:
         description: Approved disposable target ref for restore-drill mode
         required: false
         type: string
+      confirm_disposable_restore:
+        description: Type RESTORE:<approved target ref> for restore-drill mode
+        required: false
+        type: string
   schedule:
     # 02:15 Asia/Jerusalem moves between 23:15 and 00:15 UTC across DST.
     # The job gate below runs scheduled exports only during local 02:00.
@@ -21,7 +25,11 @@ on:
     - cron: "15 0 * * *"
     # Stale-marker monitor. A failed run is the alert path for the protected
     # backup environment owners.
-    - cron: "15 */6 * * *"
+    - cron: "45 5,11,17 * * *"
+
+concurrency:
+  group: po-finder-backup-recovery
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -45,7 +53,7 @@ jobs:
 
       - name: Gate scheduled run to 02:00 Asia/Jerusalem
         id: schedule_gate
-        if: github.event_name == 'schedule'
+        if: github.event_name == 'schedule' && (github.event.schedule == '15 23 * * *' || github.event.schedule == '15 0 * * *')
         run: |
           local_hour="$(TZ=Asia/Jerusalem date +%H)"
           local_minute="$(TZ=Asia/Jerusalem date +%M)"
@@ -59,9 +67,35 @@ jobs:
       - name: Install required tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y age jq postgresql-client rclone
+          sudo apt-get install -y age jq postgresql-client unzip
+          rclone_version="1.75.0"
+          rclone_archive="rclone-v${rclone_version}-linux-amd64.zip"
+          curl --fail --silent --show-error --location \
+            --output "${RUNNER_TEMP}/${rclone_archive}" \
+            "https://github.com/rclone/rclone/releases/download/v${rclone_version}/${rclone_archive}"
+          printf '%s  %s\n' \
+            'aa2804e08f48250e71009c727124b6341cd0288465804a9a09d14663cabafbaa' \
+            "${RUNNER_TEMP}/${rclone_archive}" | sha256sum --check --strict
+          unzip -q "${RUNNER_TEMP}/${rclone_archive}" -d "${RUNNER_TEMP}/rclone"
+          sudo install -m 0755 \
+            "${RUNNER_TEMP}/rclone/rclone-v${rclone_version}-linux-amd64/rclone" \
+            /usr/local/bin/rclone
           npm ci
           echo "$GITHUB_WORKSPACE/node_modules/.bin" >> "$GITHUB_PATH"
+
+      - name: Write protected rclone configuration
+        env:
+          PO_FINDER_BACKUP_RCLONE_CONFIG: ${{ secrets.PO_FINDER_BACKUP_RCLONE_CONFIG }}
+        run: |
+          if [ -z "$PO_FINDER_BACKUP_RCLONE_CONFIG" ]; then
+            echo "Protected rclone configuration is missing." >&2
+            exit 1
+          fi
+          umask 077
+          rclone_config_file="${RUNNER_TEMP}/po-finder-rclone.conf"
+          printf '%s\n' "$PO_FINDER_BACKUP_RCLONE_CONFIG" > "$rclone_config_file"
+          chmod 600 "$rclone_config_file"
+          echo "RCLONE_CONFIG=$rclone_config_file" >> "$GITHUB_ENV"
 
       - name: Validate backup scripts
         run: npm run backup:validate
@@ -86,7 +120,7 @@ jobs:
         run: scripts/backup/export-recovery-set.sh
 
       - name: Check latest success marker freshness
-        if: github.event_name == 'schedule' && steps.schedule_gate.outputs.run_export != 'true'
+        if: github.event_name == 'schedule' && github.event.schedule == '45 5,11,17 * * *'
         env:
           BACKUP_DESTINATION_RCLONE: ${{ secrets.PO_FINDER_BACKUP_DESTINATION_RCLONE }}
         run: scripts/backup/check-latest-success.sh
@@ -99,5 +133,12 @@ jobs:
           RESTORE_SOURCE_RCLONE: ${{ secrets.PO_FINDER_BACKUP_DESTINATION_RCLONE }}
           TARGET_STORAGE_RCLONE_DESTINATION: ${{ secrets.PO_FINDER_RESTORE_STORAGE_RCLONE_DESTINATION }}
           APPROVED_DISPOSABLE_TARGET_REF: ${{ inputs.approved_target_ref }}
-          CONFIRM_DISPOSABLE_RESTORE: ${{ inputs.approved_target_ref }}
+          CONFIGURED_DISPOSABLE_TARGET_REF: ${{ secrets.PO_FINDER_RESTORE_TARGET_REF }}
+          CONFIRM_DISPOSABLE_RESTORE: ${{ inputs.confirm_disposable_restore }}
         run: scripts/backup/restore-drill.sh
+
+      - name: Remove temporary secret files
+        if: always()
+        run: |
+          rm -f "${RUNNER_TEMP}/po-finder-rclone.conf"
+          rm -f "${RUNNER_TEMP}/po-finder-restore-age-identity.txt"
