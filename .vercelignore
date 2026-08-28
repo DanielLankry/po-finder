@@ -7,9 +7,12 @@ test-results
 .playwright-mcp
 .claude
 .codex
+.agents
+marketing-assets
 .env*
 *.log
 *.tsbuildinfo
+pricing-preview.png
 Pokarov Design System.zip
 fix-amber.ps1
 tsc_output.txt

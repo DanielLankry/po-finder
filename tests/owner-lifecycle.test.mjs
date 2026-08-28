@@ -20,6 +20,26 @@ test("unverified businesses stay private until owner verification completes", ()
   assert.equal(details.actionHref, "/dashboard/profile");
 });
 
+test("reserved launch promotions stay private and explain approval-based activation", () => {
+  const details = getOwnerLifecycleDetails(
+    {
+      is_active: false,
+      is_verified: false,
+      expires_at: null,
+      promotion_code: "first-20-3m",
+      promotion_reserved_at: "2026-08-03T11:00:00.000Z",
+      promotion_activated_at: null,
+    },
+    NOW,
+  );
+
+  assert.equal(details.state, "promotion_reserved");
+  assert.equal(details.publicVisible, false);
+  assert.equal(details.pill, "מקום שמור במבצע");
+  assert.match(details.description, /אישור מנהל/);
+  assert.match(details.description, /3 החודשים החינם/);
+});
+
 test("verified inactive businesses are ready to publish through billing", () => {
   const details = getOwnerLifecycleDetails(
     { is_active: false, is_verified: true, expires_at: null },

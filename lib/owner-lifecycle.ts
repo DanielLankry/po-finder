@@ -3,10 +3,14 @@ export type OwnerLifecycleInput = {
   is_active: boolean;
   is_legacy_public?: boolean | null;
   is_verified?: boolean | null;
+  promotion_code?: string | null;
+  promotion_reserved_at?: string | null;
+  promotion_activated_at?: string | null;
 };
 
 export type OwnerLifecycleState =
   | "pending_verification"
+  | "promotion_reserved"
   | "ready_to_publish"
   | "active"
   | "expiring_soon"
@@ -81,6 +85,26 @@ export function getOwnerLifecycleDetails(
     (business.is_legacy_public === true || (hasValidExpiry && expiryMs > nowMs));
 
   if (!isVerified) {
+    if (
+      business.promotion_code === "first-20-3m" &&
+      business.promotion_reserved_at &&
+      !business.promotion_activated_at
+    ) {
+      return {
+        state: "promotion_reserved",
+        tone: "warning",
+        title: "המקום נשמר והטיוטה ממתינה לאימות",
+        description:
+          "פרטי העסק נשמרו באופן פרטי. לאחר אישור מנהל העסק יעלה לאוויר, ורק אז יתחילו 3 החודשים החינם.",
+        pill: "מקום שמור במבצע",
+        actionHref: "/dashboard/profile",
+        actionLabel: "בדיקת פרטי העסק",
+        daysLeft,
+        formattedExpiry,
+        publicVisible: false,
+      };
+    }
+
     return {
       state: "pending_verification",
       tone: "warning",

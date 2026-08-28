@@ -28,11 +28,11 @@ test("duration catalog, renewal, month-end, and LIFO refund are enforced by Post
     .order("sort_order");
   expect(catalogError).toBeNull();
   expect(catalog).toEqual([
-    { code: "listing_1d", kind: "listing", duration_months: null, boost_days: 0, price: 300 },
-    { code: "listing_2d", kind: "listing", duration_months: null, boost_days: 0, price: 500 },
-    { code: "listing_3d", kind: "listing", duration_months: null, boost_days: 0, price: 600 },
-    { code: "listing_7d", kind: "listing", duration_months: null, boost_days: 0, price: 800 },
-    ...[1100, 1900, 2600, 3100, 3600, 4100, 4500, 4900, 5200, 5500, 5800, 6100].map(
+    { code: "listing_1d", kind: "listing", duration_months: null, boost_days: 0, price: 2000 },
+    { code: "listing_2d", kind: "listing", duration_months: null, boost_days: 0, price: 2500 },
+    { code: "listing_3d", kind: "listing", duration_months: null, boost_days: 0, price: 3000 },
+    { code: "listing_7d", kind: "listing", duration_months: null, boost_days: 0, price: 4000 },
+    ...[6000, 8000, 10000, 12000, 14000, 16000, 17500, 19000, 20500, 22000, 23500, 25000].map(
       (price, index) => ({
         code: `listing_${index + 1}m`,
         kind: "listing",
@@ -86,7 +86,7 @@ test("duration catalog, renewal, month-end, and LIFO refund are enforced by Post
       .select("amount_agorot, plan_days, duration_months, entitlement_base_at, entitlement_expires_at")
       .eq("id", first.id)
       .single();
-    expect(firstAttempt).toMatchObject({ amount_agorot: 4100, plan_days: 180, duration_months: 6 });
+    expect(firstAttempt).toMatchObject({ amount_agorot: 16000, plan_days: 180, duration_months: 6 });
     expect(firstAttempt?.entitlement_base_at).toBeTruthy();
     expect(firstAttempt?.entitlement_expires_at).toBeTruthy();
 
@@ -102,7 +102,7 @@ test("duration catalog, renewal, month-end, and LIFO refund are enforced by Post
       .eq("id", renewal.id)
       .single();
     expect(renewalAttempt).toMatchObject({
-      amount_agorot: 1900,
+      amount_agorot: 8000,
       duration_months: 2,
       entitlement_base_at: firstExpiry,
     });

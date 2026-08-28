@@ -3,7 +3,7 @@
 import { useRef, useEffect, useCallback, useState } from "react";
 import Link from "next/link";
 import { NumberTicker } from "@/components/ui/number-ticker";
-import { CheckCircle2, ChevronRight, MapPin, RefreshCw, Star, Search, Store, X } from "lucide-react";
+import { CheckCircle2, ChevronRight, Gift, MapPin, RefreshCw, Star, Search, X } from "lucide-react";
 import type { BusinessWithSchedule } from "@/lib/types";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import { getBusinessAvailability } from "@/lib/utils/schedule";
@@ -13,6 +13,10 @@ import ReviewForm from "./ReviewForm";
 import ReviewsList from "./ReviewsList";
 import SafeBusinessImage from "./SafeBusinessImage";
 import type { Review } from "@/lib/types";
+import ExampleBusinessCard from "@/components/marketing/ExampleBusinessCard";
+import type { LaunchPromotionStatus } from "@/lib/launch-promotion";
+import { FIRST_BUSINESSES_SIGNUP_PATH } from "@/lib/launch-promotion";
+import { trackPostHogEvent } from "@/lib/posthog";
 
 const CATEGORY_CHIP: Record<string, { bg: string; text: string }> = {
   coffee:  { bg: "#FEF3C7", text: "#92400E" },
@@ -42,6 +46,7 @@ interface BusinessListPanelProps {
   error?: string | null;
   onRetry?: () => void;
   isPlatformEmpty?: boolean;
+  promotion?: LaunchPromotionStatus | null;
 }
 
 /** Calculates straight-line distance for optional nearest-first sorting. */
@@ -90,6 +95,7 @@ export default function BusinessListPanel({
   error,
   onRetry,
   isPlatformEmpty = false,
+  promotion = null,
 }: BusinessListPanelProps) {
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const detailScrollRef = useRef<HTMLDivElement>(null);
@@ -308,6 +314,27 @@ export default function BusinessListPanel({
     <div className="flex flex-col h-full" dir="rtl">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="px-5 pt-5 pb-4 border-b-2 border-[#17402D]/10 bg-[#F7F3EA] flex-shrink-0">
+        {promotion?.isOpen && (
+          <Link
+            href={FIRST_BUSINESSES_SIGNUP_PATH}
+            onClick={() => {
+              trackPostHogEvent("launch_promotion_cta_clicked", {
+                campaign_code: promotion.code,
+                placement: "business_list_banner",
+              });
+            }}
+            className="mb-3 flex min-h-11 items-center justify-between gap-3 rounded-xl border-2 border-[#17402D] bg-[#FFF3B0] px-3 py-2 text-[#17402D] shadow-[3px_3px_0_0_#17402D] transition-transform hover:-translate-y-0.5"
+            data-testid="promotion-list-banner"
+          >
+            <span className="flex items-center gap-2 text-xs font-black sm:text-sm">
+              <Gift className="h-4 w-4 shrink-0 text-[#C4552D]" aria-hidden="true" />
+              3 חודשים חינם ל־20 העסקים הראשונים
+            </span>
+            <span className="shrink-0 rounded-full bg-[#17402D] px-2.5 py-1 text-[11px] font-black text-[#FFFDF7]">
+              להצטרפות
+            </span>
+          </Link>
+        )}
         {/* Search input */}
         <div className="relative mb-3">
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#17402D]/60 pointer-events-none" />
@@ -344,7 +371,7 @@ export default function BusinessListPanel({
               </p>
             ) : (
               <p className="font-display text-2xl text-[#17402D]">
-                {isPlatformEmpty ? "היו העסק הראשון בפלטפורמה החדשה שלנו" : "לא נמצאו עסקים זמינים כרגע"}
+                {isPlatformEmpty ? "העסקים הראשונים מתחילים כאן" : "לא נמצאו עסקים זמינים כרגע"}
               </p>
             )}
             {openCount > 0 && (
@@ -382,38 +409,22 @@ export default function BusinessListPanel({
               )}
             </div>
           </div>
+        ) : filtered.length === 0 && isPlatformEmpty ? (
+          <div className="min-h-full px-4 py-8 sm:px-6 sm:py-10">
+            <ExampleBusinessCard />
+          </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full gap-4 px-8 text-center py-16">
-            <div className={`flex h-14 w-14 items-center justify-center rounded-full ${isPlatformEmpty ? "border-2 border-[#17402D] bg-[#FFF3B0] shadow-[3px_3px_0_0_#17402D]" : "bg-[#EFF5F0]"}`}>
-              {isPlatformEmpty ? (
-                <Store className="h-7 w-7 text-[#17402D]" aria-hidden="true" />
-              ) : (
-                <MapPin className="h-7 w-7 text-[#2D6A4F]" aria-hidden="true" />
-              )}
+          <div className="flex h-full flex-col items-center justify-center gap-4 px-8 py-16 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#EFF5F0]">
+              <MapPin className="h-7 w-7 text-[#2D6A4F]" aria-hidden="true" />
             </div>
             <div>
-              <p className={`${isPlatformEmpty ? "font-display text-3xl leading-none text-[#17402D]" : "text-sm font-semibold text-[#222222]"} mb-2`}>
-                {isPlatformEmpty ? "היו העסק הראשון בפלטפורמה החדשה שלנו" : "לא נמצאו עסקים זמינים כרגע"}
+              <p className="mb-2 text-sm font-semibold text-[#222222]">לא נמצאו עסקים זמינים כרגע</p>
+              <p className="text-xs leading-relaxed text-[#717171]">
+                נסו לשנות את הפילטרים
+                <br />
+                או לחזור מאוחר יותר
               </p>
-              <p className="text-[#717171] text-xs leading-relaxed">
-                {isPlatformEmpty ? (
-                  <>הצטרפו עכשיו והופיעו ראשונים במפה של פה קרוב.</>
-                ) : (
-                  <>
-                    נסו לשנות את הפילטרים
-                    <br />
-                    או לחזור מאוחר יותר
-                  </>
-                )}
-              </p>
-              {isPlatformEmpty && (
-                <Link
-                  href="/pricing"
-                  className="brand-button mt-5 inline-flex min-h-11 items-center justify-center rounded-full px-6 text-sm font-black"
-                >
-                  פרסמו את העסק הראשון
-                </Link>
-              )}
             </div>
           </div>
         ) : (

@@ -13,7 +13,7 @@ const NAV = [
   { href: "/admin/content", label: "תוכן", icon: MessagesSquare },
   { href: "/admin/payments", label: "תשלומים", icon: CreditCard },
   { href: "/admin/pricing", label: "מחירון", icon: Tag },
-  { href: "/admin/coupons", label: "קופונים", icon: Ticket },
+  { href: "/admin/coupons", label: "קופונים (לא פעיל)", icon: Ticket },
   { href: "/admin/stats", label: "סטטיסטיקות", icon: BarChart3 },
 ];
 

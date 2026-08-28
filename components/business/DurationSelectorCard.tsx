@@ -67,6 +67,8 @@ export default function DurationSelectorCard({
     0,
     catalog.findIndex((plan) => plan.code === selected.code)
   );
+  // Derive label positions from the catalog so the visual scale stays correct
+  // when exact-day plans are added without turning labels into separate controls.
   const weekIndex = catalog.findIndex((plan) => plan.months === null && plan.days === 7);
   const firstMonthIndex = catalog.findIndex((plan) => plan.months === 1);
   const shortDayCount = catalog.filter(

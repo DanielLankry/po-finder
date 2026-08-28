@@ -82,7 +82,7 @@ export function OwnerLifecycleBanner({
             </h2>
             <OwnerLifecyclePill details={details} />
           </div>
-          {!compact && (
+          {(!compact || details.state === "promotion_reserved") && (
             <p className="mt-1 text-xs leading-relaxed text-stone-700">
               {details.description}
             </p>
@@ -239,7 +239,7 @@ function LifecycleStateIcon({
   if (state === "ready_to_publish") {
     return <CreditCard className={className} aria-hidden="true" />;
   }
-  if (state === "pending_verification") {
+  if (state === "pending_verification" || state === "promotion_reserved") {
     return <Clock3 className={className} aria-hidden="true" />;
   }
   return <AlertCircle className={className} aria-hidden="true" />;

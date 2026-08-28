@@ -77,7 +77,6 @@ async function DashboardContent({
 
   const viewCount = analyticsData?.filter((e: { event_type: string }) => e.event_type === "view").length ?? 0;
   const callCount = analyticsData?.filter((e: { event_type: string }) => e.event_type === "call_click").length ?? 0;
-  const whatsappCount = analyticsData?.filter((e: { event_type: string }) => e.event_type === "whatsapp_click").length ?? 0;
 
   return (
     <>
@@ -197,7 +196,7 @@ async function DashboardContent({
           <span>המספרים מוצגים כסיכום בלבד. אנחנו לא מציגים זהות, שמות או פרטי קשר של מבקרים.</span>
         </div>
         <div className="brand-rule mb-5" aria-hidden="true" />
-        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-4">
           <div className="rounded-xl bg-[#EFF5F0] p-3 text-center">
             <div className="flex items-center justify-center mb-1">
               <Eye className="h-4 w-4 text-[#4A8B66]" aria-hidden="true" />
@@ -211,13 +210,6 @@ async function DashboardContent({
             </div>
             <p className="font-display font-bold text-2xl text-stone-900">{callCount}</p>
             <p className="text-stone-500 text-xs mt-0.5">לחיצות שיחה</p>
-          </div>
-          <div className="rounded-xl bg-[#F6E3D9] p-3 text-center">
-            <div className="flex items-center justify-center mb-1">
-              <MessageCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
-            </div>
-            <p className="font-display font-bold text-2xl text-stone-900">{whatsappCount}</p>
-            <p className="text-stone-500 text-xs mt-0.5">וואטסאפ</p>
           </div>
         </div>
       </div>

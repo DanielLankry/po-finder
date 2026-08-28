@@ -3,7 +3,12 @@ import { z } from "zod";
 import { isAdminRequest } from "@/lib/admin-session";
 import { adminClient } from "@/lib/supabase/admin";
 import { getPlans } from "@/lib/plans-server";
-import { PLAN_CODES } from "@/lib/plans";
+import {
+  MAX_LISTING_PRICE_AGOROT,
+  MIN_LISTING_PRICE_AGOROT,
+  PLAN_CODES,
+  isValidPlanPriceLadder,
+} from "@/lib/plans";
 
 export const runtime = "nodejs";
 
@@ -12,10 +17,15 @@ const planSchema = z.object({
   months: z.number().int().min(1).max(12).nullable(),
   days: z.number().int().min(1).max(360),
   label: z.string().min(1).max(100),
-  price: z.number().int().positive(),
-});
+  price: z
+    .number()
+    .int()
+    .min(MIN_LISTING_PRICE_AGOROT)
+    .max(MAX_LISTING_PRICE_AGOROT)
+    .refine((price) => price % 100 === 0, "price must use whole shekels"),
+}).strict();
 
-const pricingSchema = z.object({ plans: z.array(planSchema).length(PLAN_CODES.length) });
+const pricingSchema = z.object({ plans: z.array(planSchema).length(PLAN_CODES.length) }).strict();
 
 export async function GET(req: NextRequest) {
   if (!(await isAdminRequest(req))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -45,14 +55,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "duration must match the immutable product code" }, { status: 400 });
   }
 
+  const plansByCode = new Map(parsed.data.plans.map((plan) => [plan.code, plan]));
+  const orderedPlans = PLAN_CODES.map((code) => plansByCode.get(code)!);
+  if (!isValidPlanPriceLadder(orderedPlans)) {
+    return NextResponse.json({ error: "prices must increase with duration" }, { status: 400 });
+  }
+
   const db = adminClient();
-  const results = await Promise.all(parsed.data.plans.map((plan) =>
-    db.from("plans").update({
-      label: plan.label,
-      price: plan.price,
-    }).eq("code", plan.code)
-  ));
-  const error = results.find((result) => result.error)?.error;
+  const { error } = await db.rpc("admin_update_duration_pricing", {
+    p_plans: orderedPlans.map(({ code, label, price }) => ({ code, label, price })),
+  });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

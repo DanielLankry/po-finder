@@ -7,14 +7,13 @@ export const BUSINESS_INFO = {
   legalBusinessName: "דניאל לונקרי",
   businessId: "322303736",
   address: "האירוס, מטולה",
-  whatsappNumber: "+972-58-424-2554",
+  phoneNumber: "+972-58-424-2554",
   contactEmail: "support@pokarov.co.il",
   founderName: null as string | null,
 };
 
 export const LAUNCH_OFFER = {
-  regularPriceText: "₪3–₪61 לפי משך ההופעה",
-  launchPriceText: "6 חודשים ב־₪41",
+  regularPriceText: "₪20–₪250 לפי משך ההופעה",
   noCommitmentText: "ללא חידוש אוטומטי",
   mainCtaText: "טיוטה בחינם, ואז בוחרים מיום אחד עד 12 חודשי הופעה.",
   primaryButtonText: "יצירת טיוטה בחינם",
@@ -54,9 +53,3 @@ export const VENDOR_FAQS = [
     answer: "הזמן החדש מתווסף לתאריך התפוגה הקיים, כך שלא מאבדים ימים שכבר שולמו.",
   },
 ];
-
-export function getWhatsAppHref(number = BUSINESS_INFO.whatsappNumber) {
-  if (!number) return null;
-  const digits = number.replace(/\D/g, "");
-  return digits ? `https://wa.me/${digits}` : null;
-}

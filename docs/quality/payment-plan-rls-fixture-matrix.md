@@ -1,7 +1,8 @@
 # Pokarov Payment-Plan and RLS E2E Fixture Matrix
 
-Owner: Forge  
-Issue: DAN-112  
+Owner: Forge
+
+Issue: DAN-112
 Status: ready for Sentinel review
 
 This matrix defines the safe destructive E2E fixture set for Pokarov listing payments and RLS behavior. It is documentation-first: migrations are not executed from this task, and destructive tests remain gated behind `RUN_DESTRUCTIVE=1`.
@@ -49,22 +50,22 @@ Every plan below must be active, kind `listing`, `boost_days = 0`, `requires_ver
 
 | Order | Code | `plan_days` | `duration_months` | Price agorot | Required fixture coverage |
 | --- | --- | ---: | ---: | ---: | --- |
-| 1 | `listing_1d` | 1 | null | 300 | Catalog row and exact-day expiry arithmetic. |
-| 2 | `listing_2d` | 2 | null | 500 | Catalog row and exact-day expiry arithmetic. |
-| 3 | `listing_3d` | 3 | null | 600 | Catalog row and exact-day expiry arithmetic. |
-| 4 | `listing_7d` | 7 | null | 800 | Catalog row and exact-day expiry arithmetic. |
-| 5 | `listing_1m` | 30 | 1 | 1100 | Month-end clamp from `2027-01-31T12:00:00Z` to `2027-02-28T12:00:00Z`. |
-| 6 | `listing_2m` | 60 | 2 | 1900 | Renewal extension and newest-first refund preflight. |
-| 7 | `listing_3m` | 90 | 3 | 2600 | Catalog row. |
-| 8 | `listing_4m` | 120 | 4 | 3100 | Catalog row. |
-| 9 | `listing_5m` | 150 | 5 | 3600 | Catalog row. |
-| 10 | `listing_6m` | 180 | 6 | 4100 | Default paid lifecycle grant. |
-| 11 | `listing_7m` | 210 | 7 | 4500 | Catalog row. |
-| 12 | `listing_8m` | 240 | 8 | 4900 | Catalog row. |
-| 13 | `listing_9m` | 270 | 9 | 5200 | Catalog row. |
-| 14 | `listing_10m` | 300 | 10 | 5500 | Catalog row. |
-| 15 | `listing_11m` | 330 | 11 | 5800 | Catalog row. |
-| 16 | `listing_12m` | 360 | 12 | 6100 | Catalog row. |
+| 1 | `listing_1d` | 1 | null | 2000 | Catalog row and exact-day expiry arithmetic. |
+| 2 | `listing_2d` | 2 | null | 2500 | Catalog row and exact-day expiry arithmetic. |
+| 3 | `listing_3d` | 3 | null | 3000 | Catalog row and exact-day expiry arithmetic. |
+| 4 | `listing_7d` | 7 | null | 4000 | Catalog row and exact-day expiry arithmetic. |
+| 5 | `listing_1m` | 30 | 1 | 6000 | Month-end clamp from `2027-01-31T12:00:00Z` to `2027-02-28T12:00:00Z`. |
+| 6 | `listing_2m` | 60 | 2 | 8000 | Renewal extension and newest-first refund preflight. |
+| 7 | `listing_3m` | 90 | 3 | 10000 | Catalog row. |
+| 8 | `listing_4m` | 120 | 4 | 12000 | Catalog row. |
+| 9 | `listing_5m` | 150 | 5 | 14000 | Catalog row. |
+| 10 | `listing_6m` | 180 | 6 | 16000 | Default paid lifecycle grant. |
+| 11 | `listing_7m` | 210 | 7 | 17500 | Catalog row. |
+| 12 | `listing_8m` | 240 | 8 | 19000 | Catalog row. |
+| 13 | `listing_9m` | 270 | 9 | 20500 | Catalog row. |
+| 14 | `listing_10m` | 300 | 10 | 22000 | Catalog row. |
+| 15 | `listing_11m` | 330 | 11 | 23500 | Catalog row. |
+| 16 | `listing_12m` | 360 | 12 | 25000 | Catalog row. |
 
 Retired `boost_30` rows may remain for historical audit, but new purchase attempts must fail for retired boosts.
 
