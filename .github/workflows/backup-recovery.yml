@@ -91,6 +91,7 @@ jobs:
         env:
           PO_FINDER_RESTORE_AGE_IDENTITY: ${{ secrets.PO_FINDER_RESTORE_AGE_IDENTITY }}
         run: |
+          umask 077
           identity_file="${RUNNER_TEMP}/po-finder-restore-age-identity.txt"
           printf '%s\n' "$PO_FINDER_RESTORE_AGE_IDENTITY" > "$identity_file"
           chmod 600 "$identity_file"
