@@ -46,9 +46,17 @@ function setupRestoreMocks(root, storageEndpoint = "https://wrongwrongwrongwrong
   const binDir = join(root, "bin");
   const log = join(root, "rclone.log");
   mkdirForTest(binDir);
-  for (const command of ["age", "jq", "psql"]) {
+  for (const command of ["age", "psql"]) {
     writeMock(binDir, command, "exit 0");
   }
+  writeMock(
+    binDir,
+    "jq",
+    `case "\${2:-}" in
+  .count) printf '%s\n' "\${MOCK_STORAGE_OBJECT_COUNT:-0}" ;;
+  *) exit 0 ;;
+esac`,
+  );
   writeMock(
     binDir,
     "rclone",
@@ -56,6 +64,7 @@ function setupRestoreMocks(root, storageEndpoint = "https://wrongwrongwrongwrong
 case "\${1:-}" in
   listremotes) printf 'source:\\ntarget:\\n' ;;
   lsf) exit 0 ;;
+  size) printf '{"count":%s,"bytes":0}\n' "\${MOCK_STORAGE_OBJECT_COUNT:-0}" ;;
   config) printf '[target]\\ntype = s3\\nendpoint = %s\\nsecret_access_key = XXX\\n' "$MOCK_STORAGE_ENDPOINT" ;;
   *) exit 97 ;;
 esac`,
@@ -88,6 +97,9 @@ test("export controls enforce encrypted off-site recovery markers", () => {
   assert.match(exportScript, /latest-success\.json/);
   assert.match(exportScript, /BACKUP_RETENTION_DAYS:-35/);
   assert.match(exportScript, /storage-manifest\.txt/);
+  assert.match(exportScript, /-x "storage\.objects"/);
+  assert.match(exportScript, /json_build_object\('bucket_id', bucket_id, 'name', name\)/);
+  assert.match(restoreScript, /json_build_object\('bucket_id', bucket_id, 'name', name\)/);
   const globalMarkerPublish = exportScript.lastIndexOf("$BACKUP_DESTINATION_RCLONE/latest-success.json");
   assert.ok(globalMarkerPublish > exportScript.lastIndexOf("rclone delete"));
   assert.ok(globalMarkerPublish > exportScript.lastIndexOf('rm -rf "$set_dir" "$archive"'));
@@ -116,8 +128,8 @@ test("workflow uses protected environment, pinned actions, and no production res
   assert.match(workflow, /node_modules\/\.bin/);
   assert.match(workflow, /workflow_dispatch/);
   assert.match(workflow, /schedule:/);
-  assert.match(workflow, /TZ=Asia\/Jerusalem/);
-  assert.match(workflow, /run_export=true/);
+  assert.doesNotMatch(workflow, /TZ=Asia\/Jerusalem/);
+  assert.doesNotMatch(workflow, /schedule_gate/);
   assert.match(workflow, /Check latest success marker freshness/);
   assert.match(workflow, /PO_FINDER_RESTORE_AGE_IDENTITY/);
   assert.match(workflow, /PO_FINDER_BACKUP_RCLONE_CONFIG/);
@@ -142,6 +154,27 @@ test("restore rejects an aliased database before any rclone access or write", ()
     assert.equal(result.status, 11, result.stderr);
     assert.match(result.stderr, /does not identify the approved Supabase project/);
     assert.equal(existsSync(log), false, "rclone must not run for an unbound database target");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("restore rejects libpq hostaddr overrides before any rclone access or write", () => {
+  const root = mkdtempSync(join(tmpdir(), "po-finder-restore-hostaddr-binding-"));
+  try {
+    const { binDir, log, storageEndpoint } = setupRestoreMocks(root);
+    const result = spawnSync("bash", ["scripts/backup/restore-drill.sh"], {
+      env: restoreEnvironment(binDir, {
+        TARGET_DB_URL:
+          "postgresql://postgres@db.aaaaaaaaaaaaaaaaaaaa.supabase.co:5432/postgres?hostaddr=127.0.0.1&sslmode=disable",
+        MOCK_RCLONE_LOG: log,
+        MOCK_STORAGE_ENDPOINT: storageEndpoint,
+      }),
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 11, result.stderr);
+    assert.match(result.stderr, /unsupported connection parameter/);
+    assert.equal(existsSync(log), false, "rclone must not run for a hostaddr-overridden target");
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -186,7 +219,29 @@ test("restore accepts matching database and Storage identities before downloadin
   }
 });
 
-test("restore fails when declared Storage objects are absent from the disposable target", () => {
+test("restore rejects a non-empty disposable Storage target before downloading the recovery set", () => {
+  const root = mkdtempSync(join(tmpdir(), "po-finder-restore-nonempty-storage-"));
+  try {
+    const endpoint = "https://aaaaaaaaaaaaaaaaaaaa.storage.supabase.co/storage/v1/s3";
+    const { binDir, log } = setupRestoreMocks(root, endpoint);
+    const result = spawnSync("bash", ["scripts/backup/restore-drill.sh"], {
+      env: restoreEnvironment(binDir, {
+        MOCK_RCLONE_LOG: log,
+        MOCK_STORAGE_ENDPOINT: endpoint,
+        MOCK_STORAGE_OBJECT_COUNT: "1",
+      }),
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 11, result.stderr);
+    assert.match(result.stderr, /Storage must be empty/);
+    const calls = readFileSync(log, "utf8");
+    assert.doesNotMatch(calls, /(^|\n)copy(to)? /, "no recovery set or Storage object may be copied");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("non-empty Storage restore succeeds only when the disposable target matches", () => {
   const root = mkdtempSync(join(tmpdir(), "po-finder-restore-storage-completeness-"));
   try {
     const binDir = join(root, "bin");
@@ -201,18 +256,30 @@ test("restore fails when declared Storage objects are absent from the disposable
     mkdirForTest(binDir);
     mkdirForTest(join(recoveryDir, "database"));
     mkdirForTest(storageDir);
-    for (const name of ["one", "two", "three", "four", "five", "six", "seven"]) {
+    const objectNames = ["five", "four", "one", "seven", "six", "three", "two"];
+    for (const name of objectNames) {
       writeFileSync(join(storageDir, `${name}.txt`), name);
     }
     for (const name of ["roles.sql", "schema.sql", "data.sql"]) {
       writeFileSync(join(recoveryDir, "database", name), "");
     }
-    writeFileSync(join(recoveryDir, "manifest-after.txt"), "label=after\n[tables]\n");
-    const storageEntries = ["five", "four", "one", "seven", "six", "three", "two"]
-      .map((name) => {
-        const contents = readFileSync(join(storageDir, `${name}.txt`));
-        return `${createHash("sha256").update(contents).digest("hex")}  ./${name}.txt`;
-      });
+    const emptyTableChecksum = createHash("sha256").update("").digest("hex");
+    const logicalStorageRows = objectNames
+      .map((name) => JSON.stringify({ bucket_id: "photos", name: `${name}.txt` }))
+      .sort()
+      .join("\n");
+    const logicalStorageChecksum = createHash("sha256")
+      .update(`${logicalStorageRows}\n`)
+      .digest("hex");
+    writeFileSync(
+      join(recoveryDir, "manifest-after.txt"),
+      `label=after\n[tables]\npublic.fixture count=0 sha256=${emptyTableChecksum}\n` +
+        `storage.objects count=7 sha256=${logicalStorageChecksum}\n`,
+    );
+    const storageEntries = objectNames.map((name) => {
+      const contents = readFileSync(join(storageDir, `${name}.txt`));
+      return `${createHash("sha256").update(contents).digest("hex")}  ./${name}.txt`;
+    });
     writeFileSync(
       join(recoveryDir, "storage-manifest.txt"),
       `${storageEntries.join("\n")}\nobject_count=7\ntotal_bytes=27\n`,
@@ -257,10 +324,30 @@ cp "$input" "$output"`,
   .runId) printf '%s\n' "$MOCK_SOURCE_RUN" ;;
   .ciphertextSha256) sha256sum "$MOCK_ARCHIVE" | awk '{print $1}' ;;
   .manifestSha256) sha256sum "$MOCK_SOURCE_MANIFEST" | awk '{print $1}' ;;
+  .count) printf '0\n' ;;
+  .) cat ;;
   *) exit 98 ;;
 esac`,
     );
-    writeMock(binDir, "psql", "exit 0");
+    writeMock(
+      binDir,
+      "psql",
+      `if [[ "$*" == *--single-transaction* ]]; then
+  exit 0
+fi
+if [[ "$*" == *"select count(*)"* ]]; then
+  if [[ "$*" == *storage*objects* ]]; then printf '7\n'; else printf '0\n'; fi
+  exit 0
+fi
+if [[ "$*" == *json_build_object* ]]; then
+  printf '%s\n' "$MOCK_STORAGE_OBJECT_ROWS"
+  exit 0
+fi
+if [[ "$*" == *"copy (select row_to_json"* ]]; then
+  exit 0
+fi
+printf 'public.fixture\nstorage.objects\n'`,
+    );
     writeMock(
       binDir,
       "rclone",
@@ -268,6 +355,7 @@ esac`,
 case "\${1:-}" in
   listremotes) printf 'source:\ntarget:\n' ;;
   lsf) exit 0 ;;
+  size) printf '{"count":0,"bytes":0}\n' ;;
   config) printf '[target]\ntype = s3\nendpoint = %s\n' "$MOCK_STORAGE_ENDPOINT" ;;
   copyto)
     case "$2" in
@@ -277,7 +365,7 @@ case "\${1:-}" in
     esac
     ;;
   copy) exit 0 ;;
-  check) exit 44 ;;
+  check) exit "\${MOCK_STORAGE_CHECK_EXIT:-0}" ;;
   *) exit 96 ;;
 esac`,
     );
@@ -292,14 +380,44 @@ esac`,
         MOCK_SOURCE_MANIFEST: join(recoveryDir, "manifest-after.txt"),
         MOCK_SOURCE_RUN: sourceRun,
         MOCK_STORAGE_ENDPOINT: endpoint,
+        MOCK_STORAGE_CHECK_EXIT: "44",
+        MOCK_STORAGE_OBJECT_ROWS: logicalStorageRows,
       }),
       encoding: "utf8",
     });
     assert.equal(result.status, 16, result.stderr);
     assert.match(result.stderr, /Disposable target Storage objects do not match/);
     const calls = readFileSync(log, "utf8");
-    assert.match(calls, /copy .*target:storage --immutable --metadata/);
+    assert.match(calls, /size target:storage --json/);
+    assert.match(calls, /copy .*target:storage --metadata/);
+    assert.doesNotMatch(calls, /copy .*target:storage --immutable/);
     assert.match(calls, /check .*target:storage --download/);
+
+    const successLog = join(root, "rclone-success.log");
+    const successWorkDir = join(root, "work-success");
+    const success = spawnSync("bash", ["scripts/backup/restore-drill.sh"], {
+      env: restoreEnvironment(binDir, {
+        RESTORE_WORK_DIR: successWorkDir,
+        MOCK_ARCHIVE: archive,
+        MOCK_MARKER: marker,
+        MOCK_RCLONE_LOG: successLog,
+        MOCK_SOURCE_MANIFEST: join(recoveryDir, "manifest-after.txt"),
+        MOCK_SOURCE_RUN: sourceRun,
+        MOCK_STORAGE_ENDPOINT: endpoint,
+        MOCK_STORAGE_CHECK_EXIT: "0",
+        MOCK_STORAGE_OBJECT_ROWS: logicalStorageRows,
+      }),
+      encoding: "utf8",
+    });
+    assert.equal(success.status, 0, success.stderr);
+    const reportPath = success.stdout.trim();
+    assert.equal(existsSync(reportPath), true, "successful non-empty restore must emit a report");
+    const report = JSON.parse(readFileSync(reportPath, "utf8"));
+    assert.equal(report.storageObjectCount, 7);
+    assert.equal(report.storageObjectsMatch, true);
+    const successCalls = readFileSync(successLog, "utf8");
+    assert.match(successCalls, /copy .*target:storage --metadata/);
+    assert.match(successCalls, /check .*target:storage --download/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -391,9 +509,28 @@ esac`,
 
 test("export and monitor cron expressions are disjoint", () => {
   const crons = [...workflow.matchAll(/- cron: "([^"]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(crons, ["15 23 * * *", "15 0 * * *", "45 5,11,17 * * *"]);
+  assert.deepEqual(crons, ["15 0 * * *", "45 5,11,17 * * *"]);
   assert.equal(new Set(crons).size, crons.length);
+  assert.match(workflow, /github\.event\.schedule == '15 0 \* \* \*'/);
   assert.match(workflow, /github\.event\.schedule == '45 5,11,17 \* \* \*'/);
+});
+
+test("fixed UTC export schedule stays at 24-hour intervals across Israel spring-forward", () => {
+  const scheduledRuns = [
+    new Date("2027-03-25T00:15:00Z"),
+    new Date("2027-03-26T00:15:00Z"),
+    new Date("2027-03-27T00:15:00Z"),
+  ];
+  assert.equal(scheduledRuns[1].getTime() - scheduledRuns[0].getTime(), 24 * 60 * 60 * 1000);
+  assert.equal(scheduledRuns[2].getTime() - scheduledRuns[1].getTime(), 24 * 60 * 60 * 1000);
+
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Jerusalem",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  });
+  assert.deepEqual(scheduledRuns.map((run) => formatter.format(run)), ["02:15", "03:15", "03:15"]);
 });
 
 test("marker monitor enforces the 36-hour alert threshold", () => {
