@@ -13,6 +13,7 @@
     "db:pull": "supabase db pull",
     "db:reset": "supabase db reset",
     "db:gen-types": "supabase gen types typescript --linked > lib/database.types.ts",
+    "backup:validate": "node --test tests/backup-controls.test.mjs",
     "vercel:env": "vercel env pull .env.local",
     "vercel:deploy": "vercel deploy",
     "vercel:deploy:prod": "vercel deploy --prod"

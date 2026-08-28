@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $- == *x* ]]; then
+  echo "Refusing to run with shell xtrace enabled; backup checks must not echo secrets." >&2
+  exit 1
+fi
+
+require_cmd() {
+  command -v "$1" >/dev/null 2>&1 || {
+    echo "Missing required command: $1" >&2
+    exit 1
+  }
+}
+
+require_env() {
+  local name="$1"
+  if [[ -z "${!name:-}" ]]; then
+    echo "Missing required environment variable: $name" >&2
+    exit 1
+  fi
+}
+
+main() {
+  require_cmd date
+  require_cmd jq
+  require_cmd rclone
+  require_env BACKUP_DESTINATION_RCLONE
+
+  local max_age_hours work_dir marker completed_at completed_epoch now_epoch age_seconds max_age_seconds
+  max_age_hours="${BACKUP_MAX_SUCCESS_AGE_HOURS:-36}"
+  work_dir="${BACKUP_WORK_DIR:-$(mktemp -d)}"
+  mkdir -p "$work_dir"
+  marker="$work_dir/latest-success.json"
+
+  rclone copyto "$BACKUP_DESTINATION_RCLONE/latest-success.json" "$marker"
+  completed_at="$(jq -r '.completedAtUtc' "$marker")"
+  if [[ -z "$completed_at" || "$completed_at" == "null" ]]; then
+    echo "Latest success marker is missing completedAtUtc." >&2
+    exit 20
+  fi
+
+  completed_epoch="$(date -u -d "$completed_at" +%s)"
+  now_epoch="$(date -u +%s)"
+  age_seconds=$((now_epoch - completed_epoch))
+  max_age_seconds=$((max_age_hours * 60 * 60))
+
+  if (( age_seconds > max_age_seconds )); then
+    echo "Latest recovery-set success marker is older than ${max_age_hours} hours." >&2
+    exit 21
+  fi
+
+  echo "Latest recovery-set success marker age is within ${max_age_hours} hours."
+}
+
+main "$@"
