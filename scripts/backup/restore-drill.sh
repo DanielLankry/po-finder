@@ -384,6 +384,26 @@ with security_state as (
   join pg_namespace n on n.oid = p.pronamespace
   where n.nspname = 'public'
     and p.prokind in ('f', 'p')
+
+  union all
+
+  select 50,
+         n.nspname || '.' || p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ').' ||
+           case when acl.grantee = 0 then 'PUBLIC' else pg_get_userbyid(acl.grantee) end || '.' ||
+           acl.privilege_type,
+         jsonb_build_object(
+           'kind', 'routine_acl',
+           'schema', n.nspname,
+           'identity', p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')',
+           'grantee', case when acl.grantee = 0 then 'PUBLIC' else pg_get_userbyid(acl.grantee) end,
+           'privilege', acl.privilege_type,
+           'grantable', acl.is_grantable
+         )
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+  cross join lateral aclexplode(coalesce(p.proacl, acldefault('f', p.proowner))) as acl
+  where n.nspname = 'public'
+    and p.prokind in ('f', 'p')
 )
 select state::text
 from security_state
@@ -405,6 +425,195 @@ order by table_schema, table_name;
 SQL
 }
 
+schema_hash() {
+  psql_target -A -t <<'SQL' | sha256sum | awk '{print $1}'
+with schema_state as (
+  select 10 as kind_order,
+         n.nspname || '.' || c.relname as object_key,
+         jsonb_build_object(
+           'kind', 'relation',
+           'schema', n.nspname,
+           'name', c.relname,
+           'relation_kind', c.relkind,
+           'persistence', c.relpersistence,
+           'replica_identity', c.relreplident,
+           'options', c.reloptions,
+           'partition_key', pg_get_partkeydef(c.oid),
+           'partition_bound', pg_get_expr(c.relpartbound, c.oid)
+         ) as state
+  from pg_class c
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+    and c.relkind in ('r', 'p', 'v', 'm', 'f', 'S')
+
+  union all
+
+  select 20,
+         n.nspname || '.' || c.relname || '.' || a.attnum,
+         jsonb_build_object(
+           'kind', 'column',
+           'schema', n.nspname,
+           'relation', c.relname,
+           'position', a.attnum,
+           'name', a.attname,
+           'type', format_type(a.atttypid, a.atttypmod),
+           'not_null', a.attnotnull,
+           'default', pg_get_expr(d.adbin, d.adrelid),
+           'identity', a.attidentity,
+           'generated', a.attgenerated,
+           'collation', case when a.attcollation = 0 then null else a.attcollation::regcollation::text end
+         )
+  from pg_class c
+  join pg_namespace n on n.oid = c.relnamespace
+  join pg_attribute a on a.attrelid = c.oid and a.attnum > 0 and not a.attisdropped
+  left join pg_attrdef d on d.adrelid = a.attrelid and d.adnum = a.attnum
+  where n.nspname in ('public', 'auth', 'storage')
+    and c.relkind in ('r', 'p', 'v', 'm', 'f')
+
+  union all
+
+  select 30,
+         n.nspname || '.' || c.relname || '.' || con.conname,
+         jsonb_build_object(
+           'kind', 'constraint',
+           'schema', n.nspname,
+           'relation', c.relname,
+           'name', con.conname,
+           'constraint_kind', con.contype,
+           'deferrable', con.condeferrable,
+           'initially_deferred', con.condeferred,
+           'validated', con.convalidated,
+           'definition', pg_get_constraintdef(con.oid, true)
+         )
+  from pg_constraint con
+  join pg_class c on c.oid = con.conrelid
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+
+  union all
+
+  select 40,
+         n.nspname || '.' || c.relname || '.' || ci.relname,
+         jsonb_build_object(
+           'kind', 'index',
+           'schema', n.nspname,
+           'relation', c.relname,
+           'name', ci.relname,
+           'unique', i.indisunique,
+           'primary', i.indisprimary,
+           'valid', i.indisvalid,
+           'definition', pg_get_indexdef(i.indexrelid)
+         )
+  from pg_index i
+  join pg_class c on c.oid = i.indrelid
+  join pg_class ci on ci.oid = i.indexrelid
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+
+  union all
+
+  select 50,
+         n.nspname || '.' || c.relname || '.' || t.tgname,
+         jsonb_build_object(
+           'kind', 'trigger',
+           'schema', n.nspname,
+           'relation', c.relname,
+           'name', t.tgname,
+           'enabled', t.tgenabled,
+           'definition', pg_get_triggerdef(t.oid, true)
+         )
+  from pg_trigger t
+  join pg_class c on c.oid = t.tgrelid
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+    and not t.tgisinternal
+
+  union all
+
+  select 60,
+         n.nspname || '.' || c.relname,
+         jsonb_build_object(
+           'kind', 'view',
+           'schema', n.nspname,
+           'name', c.relname,
+           'materialized', c.relkind = 'm',
+           'definition', pg_get_viewdef(c.oid, true)
+         )
+  from pg_class c
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+    and c.relkind in ('v', 'm')
+
+  union all
+
+  select 70,
+         n.nspname || '.' || c.relname,
+         jsonb_build_object(
+           'kind', 'sequence',
+           'schema', n.nspname,
+           'name', c.relname,
+           'data_type', format_type(s.seqtypid, null),
+           'start', s.seqstart,
+           'increment', s.seqincrement,
+           'minimum', s.seqmin,
+           'maximum', s.seqmax,
+           'cache', s.seqcache,
+           'cycle', s.seqcycle
+         )
+  from pg_sequence s
+  join pg_class c on c.oid = s.seqrelid
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+
+  union all
+
+  select 80,
+         n.nspname || '.' || t.typname,
+         jsonb_build_object(
+           'kind', 'type',
+           'schema', n.nspname,
+           'name', t.typname,
+           'type_kind', t.typtype,
+           'base_type', case when t.typbasetype = 0 then null else format_type(t.typbasetype, t.typtypmod) end,
+           'not_null', t.typnotnull,
+           'default', t.typdefault,
+           'enum_labels', (
+             select jsonb_agg(e.enumlabel order by e.enumsortorder)
+             from pg_enum e
+             where e.enumtypid = t.oid
+           ),
+           'constraints', (
+             select jsonb_agg(pg_get_constraintdef(con.oid, true) order by con.conname)
+             from pg_constraint con
+             where con.contypid = t.oid
+           )
+         )
+  from pg_type t
+  join pg_namespace n on n.oid = t.typnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+    and t.typtype in ('d', 'e')
+
+  union all
+
+  select 90,
+         n.nspname || '.' || p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')',
+         jsonb_build_object(
+           'kind', 'routine',
+           'schema', n.nspname,
+           'identity', p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')',
+           'definition', pg_get_functiondef(p.oid)
+         )
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname = 'public'
+    and p.prokind in ('f', 'p')
+)
+select state::text
+from schema_state
+order by kind_order, object_key, state::text;
+SQL
+}
+
 write_target_manifest() {
   local out="$1"
   local table_dir="$2"
@@ -413,6 +622,7 @@ write_target_manifest() {
     printf 'label=target\n'
     printf 'created_at_utc=%s\n' "$(date -u +%FT%TZ)"
     printf 'approved_target_ref=%s\n' "$APPROVED_DISPOSABLE_TARGET_REF"
+    printf 'schema_sha256=%s\n' "$(schema_hash)"
     printf '\n[tables]\n'
   } > "$out"
 
@@ -525,6 +735,7 @@ main() {
 
   local run_id work_root staging_dir report marker encrypted archive recovery_dir source_manifest target_manifest
   local source_security_state target_security_state expected_security_hash
+  local expected_schema_hash target_schema_hash
   local storage_manifest storage_object_count
   local required_restore_file
   run_id="${RESTORE_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)}"
@@ -585,6 +796,11 @@ main() {
   fi
 
   source_security_state="$recovery_dir/security-state-after.jsonl"
+  expected_schema_hash="$(sed -n 's/^schema_sha256=//p' "$source_manifest")"
+  if [[ ! "$expected_schema_hash" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "Source manifest is missing a valid schema digest; refusing restore drill." >&2
+    exit 14
+  fi
   expected_security_hash="$(sed -n 's/^security_state_sha256=//p' "$source_manifest")"
   if [[ ! "$expected_security_hash" =~ ^[0-9a-f]{64}$ || ! -f "$source_security_state" ||
     "$(sha256sum "$source_security_state" | awk '{print $1}')" != "$expected_security_hash" ]]; then
@@ -643,6 +859,12 @@ main() {
     exit 15
   fi
 
+  target_schema_hash="$(sed -n 's/^schema_sha256=//p' "$target_manifest")"
+  if [[ ! "$target_schema_hash" =~ ^[0-9a-f]{64}$ || "$target_schema_hash" != "$expected_schema_hash" ]]; then
+    echo "Restored schema state does not match source manifest." >&2
+    exit 18
+  fi
+
   target_security_state="$staging_dir/target-security-state.jsonl"
   write_security_state psql_target "$target_security_state"
   if ! diff -u "$source_security_state" "$target_security_state" > "$staging_dir/security-state-diff.txt"; then
@@ -661,6 +883,7 @@ main() {
   "ciphertextSha256": "$ciphertext_hash",
   "manifestSha256": "$marker_manifest_hash",
   "tableChecksumsMatch": true,
+  "schemaStateMatches": true,
   "securityStateMatches": true,
   "storageObjectCount": $storage_object_count,
   "storageObjectsMatch": true,

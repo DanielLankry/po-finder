@@ -253,16 +253,18 @@ validate_storage_source_binding() {
 reject_rclone_destination_overrides() {
   local spec="$1"
   local remote normalized name
+  local -a endpoint_overrides=(
+    RCLONE_S3_ENDPOINT
+    RCLONE_B2_ENDPOINT
+    RCLONE_AZUREBLOB_ENDPOINT
+    RCLONE_GCS_ENDPOINT
+  )
   remote="$(rclone_remote_name "$spec")"
   normalized="${remote^^}"
   normalized="${normalized//[^A-Z0-9]/_}"
 
-  if [[ -n "${RCLONE_S3_ENDPOINT:-}" ]]; then
-    echo "Refusing inherited rclone backup destination override: RCLONE_S3_ENDPOINT." >&2
-    exit 3
-  fi
-
-  for name in "RCLONE_CONFIG_${normalized}_ENDPOINT" "RCLONE_CONFIG_${normalized}_TYPE"; do
+  for name in "${endpoint_overrides[@]}" \
+    "RCLONE_CONFIG_${normalized}_ENDPOINT" "RCLONE_CONFIG_${normalized}_TYPE"; do
     if [[ -n "${!name:-}" ]]; then
       echo "Refusing inherited rclone backup destination override: $name." >&2
       exit 3
@@ -339,15 +341,190 @@ SQL
 
 schema_hash() {
   psql_source -A -t <<'SQL' | sha256sum | awk '{print $1}'
-select n.nspname, c.relname, c.relkind, a.attnum, a.attname, a.atttypid::regtype::text,
-       a.attnotnull, coalesce(pg_get_expr(d.adbin, d.adrelid), '') as default_expr
-from pg_class c
-join pg_namespace n on n.oid = c.relnamespace
-left join pg_attribute a on a.attrelid = c.oid and a.attnum > 0 and not a.attisdropped
-left join pg_attrdef d on d.adrelid = a.attrelid and d.adnum = a.attnum
-where n.nspname in ('public', 'auth', 'storage')
-  and c.relkind in ('r', 'p', 'v', 'm', 'f')
-order by n.nspname, c.relname, a.attnum nulls first;
+with schema_state as (
+  select 10 as kind_order,
+         n.nspname || '.' || c.relname as object_key,
+         jsonb_build_object(
+           'kind', 'relation',
+           'schema', n.nspname,
+           'name', c.relname,
+           'relation_kind', c.relkind,
+           'persistence', c.relpersistence,
+           'replica_identity', c.relreplident,
+           'options', c.reloptions,
+           'partition_key', pg_get_partkeydef(c.oid),
+           'partition_bound', pg_get_expr(c.relpartbound, c.oid)
+         ) as state
+  from pg_class c
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+    and c.relkind in ('r', 'p', 'v', 'm', 'f', 'S')
+
+  union all
+
+  select 20,
+         n.nspname || '.' || c.relname || '.' || a.attnum,
+         jsonb_build_object(
+           'kind', 'column',
+           'schema', n.nspname,
+           'relation', c.relname,
+           'position', a.attnum,
+           'name', a.attname,
+           'type', format_type(a.atttypid, a.atttypmod),
+           'not_null', a.attnotnull,
+           'default', pg_get_expr(d.adbin, d.adrelid),
+           'identity', a.attidentity,
+           'generated', a.attgenerated,
+           'collation', case when a.attcollation = 0 then null else a.attcollation::regcollation::text end
+         )
+  from pg_class c
+  join pg_namespace n on n.oid = c.relnamespace
+  join pg_attribute a on a.attrelid = c.oid and a.attnum > 0 and not a.attisdropped
+  left join pg_attrdef d on d.adrelid = a.attrelid and d.adnum = a.attnum
+  where n.nspname in ('public', 'auth', 'storage')
+    and c.relkind in ('r', 'p', 'v', 'm', 'f')
+
+  union all
+
+  select 30,
+         n.nspname || '.' || c.relname || '.' || con.conname,
+         jsonb_build_object(
+           'kind', 'constraint',
+           'schema', n.nspname,
+           'relation', c.relname,
+           'name', con.conname,
+           'constraint_kind', con.contype,
+           'deferrable', con.condeferrable,
+           'initially_deferred', con.condeferred,
+           'validated', con.convalidated,
+           'definition', pg_get_constraintdef(con.oid, true)
+         )
+  from pg_constraint con
+  join pg_class c on c.oid = con.conrelid
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+
+  union all
+
+  select 40,
+         n.nspname || '.' || c.relname || '.' || ci.relname,
+         jsonb_build_object(
+           'kind', 'index',
+           'schema', n.nspname,
+           'relation', c.relname,
+           'name', ci.relname,
+           'unique', i.indisunique,
+           'primary', i.indisprimary,
+           'valid', i.indisvalid,
+           'definition', pg_get_indexdef(i.indexrelid)
+         )
+  from pg_index i
+  join pg_class c on c.oid = i.indrelid
+  join pg_class ci on ci.oid = i.indexrelid
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+
+  union all
+
+  select 50,
+         n.nspname || '.' || c.relname || '.' || t.tgname,
+         jsonb_build_object(
+           'kind', 'trigger',
+           'schema', n.nspname,
+           'relation', c.relname,
+           'name', t.tgname,
+           'enabled', t.tgenabled,
+           'definition', pg_get_triggerdef(t.oid, true)
+         )
+  from pg_trigger t
+  join pg_class c on c.oid = t.tgrelid
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+    and not t.tgisinternal
+
+  union all
+
+  select 60,
+         n.nspname || '.' || c.relname,
+         jsonb_build_object(
+           'kind', 'view',
+           'schema', n.nspname,
+           'name', c.relname,
+           'materialized', c.relkind = 'm',
+           'definition', pg_get_viewdef(c.oid, true)
+         )
+  from pg_class c
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+    and c.relkind in ('v', 'm')
+
+  union all
+
+  select 70,
+         n.nspname || '.' || c.relname,
+         jsonb_build_object(
+           'kind', 'sequence',
+           'schema', n.nspname,
+           'name', c.relname,
+           'data_type', format_type(s.seqtypid, null),
+           'start', s.seqstart,
+           'increment', s.seqincrement,
+           'minimum', s.seqmin,
+           'maximum', s.seqmax,
+           'cache', s.seqcache,
+           'cycle', s.seqcycle
+         )
+  from pg_sequence s
+  join pg_class c on c.oid = s.seqrelid
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+
+  union all
+
+  select 80,
+         n.nspname || '.' || t.typname,
+         jsonb_build_object(
+           'kind', 'type',
+           'schema', n.nspname,
+           'name', t.typname,
+           'type_kind', t.typtype,
+           'base_type', case when t.typbasetype = 0 then null else format_type(t.typbasetype, t.typtypmod) end,
+           'not_null', t.typnotnull,
+           'default', t.typdefault,
+           'enum_labels', (
+             select jsonb_agg(e.enumlabel order by e.enumsortorder)
+             from pg_enum e
+             where e.enumtypid = t.oid
+           ),
+           'constraints', (
+             select jsonb_agg(pg_get_constraintdef(con.oid, true) order by con.conname)
+             from pg_constraint con
+             where con.contypid = t.oid
+           )
+         )
+  from pg_type t
+  join pg_namespace n on n.oid = t.typnamespace
+  where n.nspname in ('public', 'auth', 'storage')
+    and t.typtype in ('d', 'e')
+
+  union all
+
+  select 90,
+         n.nspname || '.' || p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')',
+         jsonb_build_object(
+           'kind', 'routine',
+           'schema', n.nspname,
+           'identity', p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')',
+           'definition', pg_get_functiondef(p.oid)
+         )
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname = 'public'
+    and p.prokind in ('f', 'p')
+)
+select state::text
+from schema_state
+order by kind_order, object_key, state::text;
 SQL
 }
 
@@ -435,6 +612,26 @@ with security_state as (
          )
   from pg_proc p
   join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname = 'public'
+    and p.prokind in ('f', 'p')
+
+  union all
+
+  select 50,
+         n.nspname || '.' || p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ').' ||
+           case when acl.grantee = 0 then 'PUBLIC' else pg_get_userbyid(acl.grantee) end || '.' ||
+           acl.privilege_type,
+         jsonb_build_object(
+           'kind', 'routine_acl',
+           'schema', n.nspname,
+           'identity', p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')',
+           'grantee', case when acl.grantee = 0 then 'PUBLIC' else pg_get_userbyid(acl.grantee) end,
+           'privilege', acl.privilege_type,
+           'grantable', acl.is_grantable
+         )
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+  cross join lateral aclexplode(coalesce(p.proacl, acldefault('f', p.proowner))) as acl
   where n.nspname = 'public'
     and p.prokind in ('f', 'p')
 )
@@ -620,6 +817,11 @@ write_storage_manifest() {
 }
 
 main() {
+  local run_id work_root staging_dir set_dir archive encrypted marker retention_days
+  local recipient source_storage_object_count
+  local -a recipients recipients_args
+  local -A seen_recipients=()
+
   if [[ "${1:-}" == "--help" ]]; then
     usage
     exit 0
@@ -633,6 +835,25 @@ main() {
   require_cmd sha256sum
   require_env SOURCE_DB_URL
   require_env AGE_RECIPIENTS
+
+  IFS=',' read -r -a recipients <<< "$AGE_RECIPIENTS"
+  recipients_args=()
+  for recipient in "${recipients[@]}"; do
+    recipient="${recipient#"${recipient%%[![:space:]]*}"}"
+    recipient="${recipient%"${recipient##*[![:space:]]}"}"
+    if [[ -n "$recipient" && -z "${seen_recipients[$recipient]+present}" ]]; then
+      seen_recipients["$recipient"]=1
+      recipients_args+=("-r" "$recipient")
+    fi
+  done
+  if [[ "${#recipients_args[@]}" -lt 4 ]]; then
+    echo "At least two distinct age recipients are required." >&2
+    exit 1
+  fi
+  if ! printf '' | age "${recipients_args[@]}" >/dev/null 2>&1; then
+    echo "AGE_RECIPIENTS contains an invalid age recipient." >&2
+    exit 1
+  fi
 
   validate_database_source_binding "$SOURCE_DB_URL" "$PO_FINDER_PRODUCTION_PROJECT_REF"
   reject_libpq_source_overrides
@@ -659,7 +880,6 @@ main() {
     validate_rclone_remote_access "$SUPABASE_STORAGE_RCLONE_SOURCE"
   fi
 
-  local run_id work_root staging_dir set_dir archive encrypted marker recipients_args retention_days
   run_id="${BACKUP_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)}"
   validate_run_id "$run_id"
   work_root="${BACKUP_WORK_DIR:-$(mktemp -d)}"
@@ -677,6 +897,19 @@ main() {
 
   write_security_state psql_source "$set_dir/security-state-before.jsonl"
   write_manifest "before" "$set_dir" "$set_dir/manifest-before.txt" "$set_dir/security-state-before.jsonl"
+
+  if [[ "${BACKUP_SKIP_STORAGE:-0}" == "1" ]]; then
+    source_storage_object_count="$(psql_source -A -t -c 'select count(*) from storage.objects;')"
+    source_storage_object_count="${source_storage_object_count//[[:space:]]/}"
+    if [[ ! "$source_storage_object_count" =~ ^[0-9]+$ ]]; then
+      echo "Unable to verify that source Storage is empty; refusing skip mode." >&2
+      exit 2
+    fi
+    if [[ "$source_storage_object_count" != "0" ]]; then
+      echo "BACKUP_SKIP_STORAGE is allowed only when source Storage has zero objects." >&2
+      exit 2
+    fi
+  fi
 
   run_quietly "Source database role dump failed; command output withheld." \
     supabase db dump --db-url "$SOURCE_DB_URL" -f "$set_dir/database/roles.sql" --role-only
@@ -709,18 +942,6 @@ main() {
 
   tar -C "$staging_dir" -czf "$archive" "po-finder-recovery-$run_id"
   tar -tzf "$archive" >/dev/null
-
-  IFS=',' read -r -a recipients <<< "$AGE_RECIPIENTS"
-  recipients_args=()
-  for recipient in "${recipients[@]}"; do
-    recipient="${recipient#"${recipient%%[![:space:]]*}"}"
-    recipient="${recipient%"${recipient##*[![:space:]]}"}"
-    [[ -n "$recipient" ]] && recipients_args+=("-r" "$recipient")
-  done
-  if [[ "${#recipients_args[@]}" -lt 4 ]]; then
-    echo "At least two age recipients are required." >&2
-    exit 1
-  fi
 
   age "${recipients_args[@]}" -o "$encrypted" "$archive"
   local manifest_hash ciphertext_hash ciphertext_size completed_at

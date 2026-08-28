@@ -94,6 +94,13 @@ function assertSensitiveOutputWithheld(result, sensitiveValue) {
   );
 }
 
+function canonicalSchemaQuery(script) {
+  const start = script.indexOf("with schema_state as (");
+  const end = script.indexOf("\nSQL\n}", start);
+  assert.ok(start >= 0 && end > start, "script must contain a canonical schema query");
+  return script.slice(start, end);
+}
+
 test("backup scripts are executable and fail closed on secrets", () => {
   assert.equal(statSync("scripts/backup/export-recovery-set.sh").mode & 0o111, 0o111);
   assert.equal(statSync("scripts/backup/restore-drill.sh").mode & 0o111, 0o111);
@@ -111,7 +118,7 @@ test("backup scripts are executable and fail closed on secrets", () => {
 });
 
 test("export controls enforce encrypted off-site recovery markers", () => {
-  assert.match(exportScript, /At least two age recipients are required/);
+  assert.match(exportScript, /At least two distinct age recipients are required/);
   assert.match(exportScript, /manifest-before\.txt/);
   assert.match(exportScript, /manifest-after\.txt/);
   assert.match(exportScript, /stable_manifest_lines/);
@@ -130,6 +137,16 @@ test("export controls enforce encrypted off-site recovery markers", () => {
   assert.match(exportScript, /rclone cat/);
   assert.match(exportScript, /security-state-after\.jsonl/);
   assert.match(exportScript, /managed-schema\.sql/);
+  assert.match(exportScript, /with schema_state as/);
+  assert.match(exportScript, /'kind', 'constraint'/);
+  assert.match(exportScript, /'kind', 'index'/);
+  assert.match(exportScript, /'kind', 'trigger'/);
+  assert.match(exportScript, /'kind', 'view'/);
+  assert.match(exportScript, /'kind', 'sequence'/);
+  assert.match(exportScript, /'kind', 'type'/);
+  assert.match(exportScript, /'kind', 'routine_acl'/);
+  assert.match(exportScript, /acldefault\('f', p\.proowner\)/);
+  assert.equal(canonicalSchemaQuery(exportScript), canonicalSchemaQuery(restoreScript));
   const remoteHashVerification = exportScript.indexOf("remote_ciphertext_hash=");
   const immutableRunMarker = exportScript.indexOf(
     "$BACKUP_DESTINATION_RCLONE/$run_id/latest-success.json",
@@ -160,6 +177,9 @@ test("restore drill refuses production and requires disposable confirmation", ()
   );
   assert.match(restoreScript, /managed-schema\.sql/);
   assert.match(restoreScript, /Security-state hash mismatch/);
+  assert.match(restoreScript, /Source manifest is missing a valid schema digest/);
+  assert.match(restoreScript, /Restored schema state does not match source manifest/);
+  assert.match(restoreScript, /'kind', 'routine_acl'/);
   assert.match(restoreScript, /Restored policies, RLS, ACLs, or critical routine state/);
   assert.doesNotMatch(restoreScript, /Shift_Database/);
 });
@@ -359,6 +379,106 @@ esac`,
   }
 });
 
+test("export rejects backend-global endpoint overrides for every allowed destination", () => {
+  for (const [backendType, overrideName] of [
+    ["s3", "RCLONE_S3_ENDPOINT"],
+    ["b2", "RCLONE_B2_ENDPOINT"],
+    ["azureblob", "RCLONE_AZUREBLOB_ENDPOINT"],
+    ["google cloud storage", "RCLONE_GCS_ENDPOINT"],
+  ]) {
+    const root = mkdtempSync(join(tmpdir(), "po-finder-export-destination-env-"));
+    try {
+      const binDir = join(root, "bin");
+      const log = join(root, "rclone.log");
+      mkdirForTest(binDir);
+      for (const command of ["age", "jq", "psql", "supabase"]) {
+        writeMock(binDir, command, "exit 0");
+      }
+      writeMock(
+        binDir,
+        "rclone",
+        `printf '%s\n' "$*" >> "$MOCK_RCLONE_LOG"
+case "\${1:-}" in
+  config) printf '[destination]\ntype = %s\n' "$MOCK_DESTINATION_TYPE" ;;
+  *) exit 97 ;;
+esac`,
+      );
+
+      const result = spawnSync("bash", ["scripts/backup/export-recovery-set.sh"], {
+        env: {
+          ...process.env,
+          PATH: `${binDir}:${process.env.PATH}`,
+          SOURCE_DB_URL:
+            "postgresql://postgres@db.ymqlqdhelsocibhnanjy.supabase.co:5432/postgres",
+          AGE_RECIPIENTS: "age1recipient-one,age1recipient-two",
+          BACKUP_DESTINATION_RCLONE: "destination:recovery",
+          BACKUP_SKIP_STORAGE: "1",
+          MOCK_DESTINATION_TYPE: backendType,
+          MOCK_RCLONE_LOG: log,
+          [overrideName]: "http://127.0.0.1:1",
+        },
+        encoding: "utf8",
+      });
+      assert.equal(result.status, 3, `${backendType}: ${result.stderr}`);
+      assert.match(result.stderr, new RegExp(overrideName));
+      assert.equal(existsSync(log), false, `${backendType}: rclone must not run before rejection`);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }
+});
+
+test("export requires two distinct, valid age recipients before reading source data", () => {
+  const root = mkdtempSync(join(tmpdir(), "po-finder-export-age-recipients-"));
+  try {
+    const binDir = join(root, "bin");
+    const psqlLog = join(root, "psql.log");
+    mkdirForTest(binDir);
+    for (const command of ["jq", "supabase"]) {
+      writeMock(binDir, command, "exit 0");
+    }
+    writeMock(binDir, "age", `exit "\${MOCK_AGE_EXIT:-0}"`);
+    writeMock(binDir, "psql", `printf '%s\n' "$*" >> "$MOCK_PSQL_LOG"`);
+
+    const result = spawnSync("bash", ["scripts/backup/export-recovery-set.sh"], {
+      env: {
+        ...process.env,
+        PATH: `${binDir}:${process.env.PATH}`,
+        SOURCE_DB_URL:
+          "postgresql://postgres@db.ymqlqdhelsocibhnanjy.supabase.co:5432/postgres",
+        AGE_RECIPIENTS: " age1same-recipient ,age1same-recipient ",
+        BACKUP_SKIP_STORAGE: "1",
+        BACKUP_SKIP_UPLOAD: "1",
+        MOCK_PSQL_LOG: psqlLog,
+      },
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 1, result.stderr);
+    assert.match(result.stderr, /At least two distinct age recipients are required/);
+    assert.equal(existsSync(psqlLog), false, "source database must not be read for duplicate recipients");
+
+    const invalid = spawnSync("bash", ["scripts/backup/export-recovery-set.sh"], {
+      env: {
+        ...process.env,
+        PATH: `${binDir}:${process.env.PATH}`,
+        SOURCE_DB_URL:
+          "postgresql://postgres@db.ymqlqdhelsocibhnanjy.supabase.co:5432/postgres",
+        AGE_RECIPIENTS: "age1recipient-one,not-a-recipient",
+        BACKUP_SKIP_STORAGE: "1",
+        BACKUP_SKIP_UPLOAD: "1",
+        MOCK_AGE_EXIT: "44",
+        MOCK_PSQL_LOG: psqlLog,
+      },
+      encoding: "utf8",
+    });
+    assert.equal(invalid.status, 1, invalid.stderr);
+    assert.match(invalid.stderr, /contains an invalid age recipient/);
+    assert.equal(existsSync(psqlLog), false, "source database must not be read for invalid recipients");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("export withholds source database failure output", () => {
   const root = mkdtempSync(join(tmpdir(), "po-finder-export-psql-redaction-"));
   try {
@@ -399,6 +519,61 @@ exit 55`,
       false,
       "failed export must remove its private cleartext staging directory",
     );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("export cannot publish skip-storage mode when source Storage has objects", () => {
+  const root = mkdtempSync(join(tmpdir(), "po-finder-export-storage-skip-"));
+  try {
+    const binDir = join(root, "bin");
+    const workDir = join(root, "work");
+    mkdirForTest(binDir);
+    writeMock(binDir, "jq", "exit 0");
+    writeMock(binDir, "age", "exit 0");
+    writeMock(
+      binDir,
+      "psql",
+      `if [[ "$*" == *"select count(*) from storage.objects"* ]]; then
+  printf '3\n'
+fi`,
+    );
+    writeMock(
+      binDir,
+      "supabase",
+      `if [ "\${1:-}" = "--version" ]; then
+  printf '2.83.4\n'
+  exit 0
+fi
+output=''
+while [ "$#" -gt 0 ]; do
+  if [ "$1" = '-f' ]; then
+    shift
+    output="$1"
+  fi
+  shift || true
+done
+mkdir -p "$(dirname "$output")"
+: > "$output"`,
+    );
+
+    const result = spawnSync("bash", ["scripts/backup/export-recovery-set.sh"], {
+      env: {
+        ...process.env,
+        PATH: `${binDir}:${process.env.PATH}`,
+        SOURCE_DB_URL:
+          "postgresql://postgres@db.ymqlqdhelsocibhnanjy.supabase.co:5432/postgres",
+        AGE_RECIPIENTS: "age1recipient-one,age1recipient-two",
+        BACKUP_SKIP_STORAGE: "1",
+        BACKUP_SKIP_UPLOAD: "1",
+        BACKUP_WORK_DIR: workDir,
+      },
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 2, result.stderr);
+    assert.match(result.stderr, /allowed only when source Storage has zero objects/);
+    assert.equal(existsSync(join(workDir, "latest-success.json")), false);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -628,8 +803,12 @@ test("non-empty Storage restore succeeds only when the disposable target matches
     for (const name of ["roles.sql", "schema.sql", "data.sql", "managed-schema.sql"]) {
       writeFileSync(join(recoveryDir, "database", name), "");
     }
-    const securityState = "public.fixture\nstorage.objects\n";
+    const schemaState = "canonical-schema-state\n";
+    const securityState =
+      '{"kind":"routine_acl","identity":"owner_rpc()","grantee":"authenticated","privilege":"EXECUTE"}\n' +
+      '{"kind":"routine_security","identity":"owner_rpc()","security_definer":true}\n';
     writeFileSync(join(recoveryDir, "security-state-after.jsonl"), securityState);
+    const schemaStateHash = createHash("sha256").update(schemaState).digest("hex");
     const securityStateHash = createHash("sha256").update(securityState).digest("hex");
     const emptyTableChecksum = createHash("sha256").update("").digest("hex");
     const logicalStorageRows = objectNames
@@ -641,7 +820,8 @@ test("non-empty Storage restore succeeds only when the disposable target matches
       .digest("hex");
     writeFileSync(
       join(recoveryDir, "manifest-after.txt"),
-      `label=after\nsecurity_state_sha256=${securityStateHash}\n[tables]\n` +
+      `label=after\nschema_sha256=${schemaStateHash}\n` +
+        `security_state_sha256=${securityStateHash}\n[tables]\n` +
         `public.fixture count=0 sha256=${emptyTableChecksum}\n` +
         `storage.objects count=7 sha256=${logicalStorageChecksum}\n`,
     );
@@ -685,6 +865,9 @@ while [ "$#" -gt 0 ]; do
   esac
   shift || true
 done
+if [ -z "$output" ]; then
+  exit 0
+fi
 cp "$input" "$output"`,
     );
     writeMock(
@@ -727,6 +910,15 @@ fi
 if [[ "$*" == *"copy (select row_to_json"* ]]; then
   exit 0
 fi
+sql="$(cat)"
+if [[ "$sql" == *"with schema_state as"* ]]; then
+  printf '%s' "$MOCK_SCHEMA_STATE"
+  exit 0
+fi
+if [[ "$sql" == *"with security_state as"* ]]; then
+  printf '%s' "$MOCK_SECURITY_STATE"
+  exit 0
+fi
 printf 'public.fixture\nstorage.objects\n'`,
     );
     writeMock(
@@ -758,6 +950,39 @@ esac`,
     );
 
     const endpoint = "https://aaaaaaaaaaaaaaaaaaaa.storage.supabase.co/storage/v1/s3";
+    const originalManifestText = readFileSync(join(recoveryDir, "manifest-after.txt"), "utf8");
+    const missingSchemaManifestText = originalManifestText.replace(/^schema_sha256=.*\n/m, "");
+    const missingSchemaManifest = join(root, "manifest-missing-schema.txt");
+    const missingSchemaArchive = join(root, "recovery-missing-schema.tar.gz.age");
+    writeFileSync(join(recoveryDir, "manifest-after.txt"), missingSchemaManifestText);
+    writeFileSync(missingSchemaManifest, missingSchemaManifestText);
+    const missingSchemaTar = spawnSync(
+      "tar",
+      ["-C", fixtureRoot, "-czf", missingSchemaArchive, `po-finder-recovery-${sourceRun}`],
+      { encoding: "utf8" },
+    );
+    assert.equal(missingSchemaTar.status, 0, missingSchemaTar.stderr);
+    writeFileSync(join(recoveryDir, "manifest-after.txt"), originalManifestText);
+
+    const missingSchema = spawnSync("bash", ["scripts/backup/restore-drill.sh"], {
+      env: restoreEnvironment(binDir, {
+        RESTORE_WORK_DIR: join(root, "work-missing-schema"),
+        MOCK_ARCHIVE: missingSchemaArchive,
+        MOCK_MARKER: marker,
+        MOCK_RCLONE_LOG: join(root, "rclone-missing-schema.log"),
+        MOCK_RESTORE_MODE_LOG: join(root, "restore-missing-schema-modes.log"),
+        MOCK_SOURCE_MANIFEST: missingSchemaManifest,
+        MOCK_SOURCE_RUN: sourceRun,
+        MOCK_STORAGE_ENDPOINT: endpoint,
+        MOCK_STORAGE_OBJECT_ROWS: logicalStorageRows,
+        MOCK_SCHEMA_STATE: schemaState,
+        MOCK_SECURITY_STATE: securityState,
+      }),
+      encoding: "utf8",
+    });
+    assert.equal(missingSchema.status, 14, missingSchema.stderr);
+    assert.match(missingSchema.stderr, /missing a valid schema digest/);
+
     const databaseFailureSecret = "row=(customer@example.com,private address)";
     const databaseFailureLog = join(root, "rclone-database-failure.log");
     const databaseFailureWorkDir = join(root, "work-database-failure");
@@ -772,6 +997,8 @@ esac`,
         MOCK_SOURCE_RUN: sourceRun,
         MOCK_STORAGE_ENDPOINT: endpoint,
         MOCK_STORAGE_OBJECT_ROWS: logicalStorageRows,
+        MOCK_SCHEMA_STATE: schemaState,
+        MOCK_SECURITY_STATE: securityState,
         MOCK_PSQL_FAILURE_OUTPUT: databaseFailureSecret,
         MOCK_PSQL_RESTORE_EXIT: "47",
       }),
@@ -805,6 +1032,8 @@ esac`,
         MOCK_STORAGE_CHECK_EXIT: "44",
         MOCK_STORAGE_CHECK_FAILURE_OUTPUT: storageFailureSecret,
         MOCK_STORAGE_OBJECT_ROWS: logicalStorageRows,
+        MOCK_SCHEMA_STATE: schemaState,
+        MOCK_SECURITY_STATE: securityState,
       }),
       encoding: "utf8",
     });
@@ -826,6 +1055,45 @@ esac`,
       "failed restore must remove its private cleartext staging directory",
     );
 
+    const schemaMismatch = spawnSync("bash", ["scripts/backup/restore-drill.sh"], {
+      env: restoreEnvironment(binDir, {
+        RESTORE_WORK_DIR: join(root, "work-schema-mismatch"),
+        MOCK_ARCHIVE: archive,
+        MOCK_MARKER: marker,
+        MOCK_RCLONE_LOG: join(root, "rclone-schema-mismatch.log"),
+        MOCK_RESTORE_MODE_LOG: join(root, "restore-schema-mismatch-modes.log"),
+        MOCK_SOURCE_MANIFEST: join(recoveryDir, "manifest-after.txt"),
+        MOCK_SOURCE_RUN: sourceRun,
+        MOCK_STORAGE_ENDPOINT: endpoint,
+        MOCK_STORAGE_OBJECT_ROWS: logicalStorageRows,
+        MOCK_SCHEMA_STATE: "changed-schema-state\n",
+        MOCK_SECURITY_STATE: securityState,
+      }),
+      encoding: "utf8",
+    });
+    assert.equal(schemaMismatch.status, 18, schemaMismatch.stderr);
+    assert.match(schemaMismatch.stderr, /Restored schema state does not match source manifest/);
+
+    const routineAclMismatch = spawnSync("bash", ["scripts/backup/restore-drill.sh"], {
+      env: restoreEnvironment(binDir, {
+        RESTORE_WORK_DIR: join(root, "work-routine-acl-mismatch"),
+        MOCK_ARCHIVE: archive,
+        MOCK_MARKER: marker,
+        MOCK_RCLONE_LOG: join(root, "rclone-routine-acl-mismatch.log"),
+        MOCK_RESTORE_MODE_LOG: join(root, "restore-routine-acl-mismatch-modes.log"),
+        MOCK_SOURCE_MANIFEST: join(recoveryDir, "manifest-after.txt"),
+        MOCK_SOURCE_RUN: sourceRun,
+        MOCK_STORAGE_ENDPOINT: endpoint,
+        MOCK_STORAGE_OBJECT_ROWS: logicalStorageRows,
+        MOCK_SCHEMA_STATE: schemaState,
+        MOCK_SECURITY_STATE:
+          securityState.replace('"grantee":"authenticated"', '"grantee":"PUBLIC"'),
+      }),
+      encoding: "utf8",
+    });
+    assert.equal(routineAclMismatch.status, 17, routineAclMismatch.stderr);
+    assert.match(routineAclMismatch.stderr, /ACLs, or critical routine state do not match/);
+
     const successLog = join(root, "rclone-success.log");
     const successWorkDir = join(root, "work-success");
     const success = spawnSync("bash", ["scripts/backup/restore-drill.sh"], {
@@ -840,6 +1108,8 @@ esac`,
         MOCK_STORAGE_ENDPOINT: endpoint,
         MOCK_STORAGE_CHECK_EXIT: "0",
         MOCK_STORAGE_OBJECT_ROWS: logicalStorageRows,
+        MOCK_SCHEMA_STATE: schemaState,
+        MOCK_SECURITY_STATE: securityState,
       }),
       encoding: "utf8",
     });
@@ -849,6 +1119,7 @@ esac`,
     const report = JSON.parse(readFileSync(reportPath, "utf8"));
     assert.equal(report.storageObjectCount, 7);
     assert.equal(report.storageObjectsMatch, true);
+    assert.equal(report.schemaStateMatches, true);
     assert.equal(report.securityStateMatches, true);
     const successCalls = readFileSync(successLog, "utf8");
     assert.match(successCalls, /copy .*target:storage --metadata/);
@@ -871,7 +1142,13 @@ test("failed remote retention cannot publish the global latest-success marker", 
     const log = join(root, "rclone.log");
     const modeLog = join(root, "export-modes.log");
     mkdirForTest(binDir);
-    writeMock(binDir, "psql", "exit 0");
+    writeMock(
+      binDir,
+      "psql",
+      `if [[ "$*" == *"select count(*) from storage.objects"* ]]; then
+  printf '0\n'
+fi`,
+    );
     writeMock(binDir, "jq", "exit 0");
     writeMock(
       binDir,
@@ -905,6 +1182,9 @@ while [ "$#" -gt 0 ]; do
   esac
   shift || true
 done
+if [ -z "$output" ]; then
+  exit 0
+fi
 cp "$input" "$output"`,
     );
     writeMock(
