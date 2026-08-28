@@ -108,7 +108,12 @@ separately approved incident channel is configured.
 Database, Auth, and Storage staging files are created under a private `0700`
 directory with a `077` umask. Cleartext staging is removed by an exit trap on
 both success and failure; only encrypted output and the non-sensitive marker
-can remain in the export work directory.
+can remain in the export work directory. The scripts discard command output
+from `rclone`, database dumps, and the disposable database restore whenever it
+is not an explicit input to verification. Captured/streamed database and remote
+commands suppress their diagnostic streams and emit only fixed, non-sensitive
+failure messages. Operators must investigate through redacted local
+reproduction; raw command output must never be enabled in Actions.
 
 ## Restore drill workflow
 
