@@ -2,18 +2,26 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertCircle, Calendar, Plus, Receipt } from "lucide-react";
+import { Calendar, Receipt } from "lucide-react";
 import DurationSelectorCard from "@/components/business/DurationSelectorCard";
+import {
+  OwnerLifecycleBanner,
+  OwnerLifecycleLoading,
+  OwnerLifecyclePills,
+  OwnerLifecycleTransientNotice,
+} from "@/components/dashboard/OwnerLifecycleStatus";
 import { PLAN_CODES } from "@/lib/plans";
 import type { Plan, PlanCode } from "@/lib/plans";
 import { trackMetaEvent } from "@/lib/meta-pixel";
 import { trackPostHogEvent } from "@/lib/posthog";
+import type { OwnerPaymentTransientState } from "@/lib/owner-lifecycle";
 
 interface BusinessLite {
   id: string;
   name: string;
   expires_at: string | null;
   is_active: boolean;
+  is_legacy_public?: boolean | null;
   is_verified: boolean;
   promotion_code?: string | null;
   promotion_reserved_at?: string | null;
@@ -30,20 +38,18 @@ export interface PurchaseEvent {
 export default function BillingClient({
   plans,
   nowIso,
+  paymentState,
   purchaseEvent,
 }: {
   plans: Plan[];
   nowIso: string;
+  paymentState: OwnerPaymentTransientState | null;
   purchaseEvent: PurchaseEvent | null;
 }) {
   const [businesses, setBusinesses] = useState<BusinessLite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
-  const [paymentState] = useState(() => {
-    if (typeof window === "undefined") return null;
-    return new URLSearchParams(window.location.search).get("payment");
-  });
   const [initialCode] = useState<PlanCode>(() => {
     if (typeof window === "undefined") return "listing_6m";
     const requested = new URLSearchParams(window.location.search).get("plan");
@@ -56,11 +62,17 @@ export default function BillingClient({
     fetch("/api/businesses?mine=1")
       .then((response) => response.json())
       .then((data) => {
-        if (data.error) setError(data.error);
+        if (data.error) setError(data.error === "Unauthorized" ? "permission" : data.error);
         else setBusinesses(data.businesses ?? []);
       })
       .catch((caught) =>
-        setError(caught instanceof Error ? caught.message : String(caught))
+        setError(
+          typeof navigator !== "undefined" && !navigator.onLine
+            ? "offline"
+            : caught instanceof Error
+              ? caught.message
+              : String(caught)
+        )
       )
       .finally(() => setLoading(false));
   }, []);
@@ -162,15 +174,16 @@ export default function BillingClient({
         </p>
       </div>
 
-      {paymentState === "success" ? (
-        <Notice tone="success" text="התשלום נקלט והזמן נוסף לעסק." />
-      ) : paymentState === "processing" ? (
-        <Notice
-          tone="warning"
-          text="התשלום התקבל ונמצא בבדיקה. לא צריך לשלם שוב — התמיכה קיבלה התראה."
-        />
+      {paymentState ? (
+        <OwnerLifecycleTransientNotice state={paymentState} />
       ) : null}
-      {error ? <Notice tone="error" text={error} /> : null}
+      {error === "offline" ? (
+        <OwnerLifecycleTransientNotice state="offline" />
+      ) : error === "permission" ? (
+        <OwnerLifecycleTransientNotice state="permission" />
+      ) : error ? (
+        <OwnerLifecycleTransientNotice state="error" message={error} />
+      ) : null}
 
       <section className="brand-panel overflow-hidden">
         <div className="flex items-center gap-2 border-b-2 border-[#17402D] bg-[#FFF3B0] px-6 py-4">
@@ -178,50 +191,26 @@ export default function BillingClient({
           <h2 className="font-display text-2xl font-bold text-[#17402D]">העסק שלי</h2>
         </div>
         {loading ? (
-          <div className="p-10 text-center text-sm text-stone-400">טוען...</div>
+          <OwnerLifecycleLoading text="טוענים את מצב העסק והתשלום..." />
         ) : businesses.length === 0 ? (
-          <div className="p-10 text-center">
-            <p className="text-sm text-stone-600">לפני תשלום יוצרים טיוטת עסק בחינם.</p>
-            <Link
-              href="/dashboard/profile"
-              className="brand-button mt-4 inline-flex h-11 items-center gap-2 rounded-xl px-5 text-sm font-bold"
-            >
-              <Plus className="h-4 w-4" /> יצירת טיוטה
-            </Link>
+          <div className="p-5 md:p-7">
+            <OwnerLifecycleTransientNotice state="empty" />
           </div>
         ) : (
           <div className="divide-y-2 divide-stone-200">
             {businesses.map((business) => {
-              const active =
-                business.is_active &&
-                !!business.expires_at &&
-                Date.parse(business.expires_at) > Date.parse(nowIso);
               return (
                 <article key={business.id} className="space-y-5 p-5 md:p-7">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <h3 className="font-display text-3xl text-stone-950">{business.name}</h3>
-                      <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold">
-                        <StatusPill
-                          active={business.is_verified}
-                          activeText="מאומת"
-                          inactiveText="ממתין לאימות"
-                        />
-                        <StatusPill
-                          active={active}
-                          activeText={`מופיע עד ${formatDate(business.expires_at)}`}
-                          inactiveText="לא מופיע לציבור"
-                        />
+                      <div className="mt-2">
+                        <OwnerLifecyclePills business={business} nowIso={nowIso} />
                       </div>
                     </div>
-                    {!business.is_verified ? (
-                      <p className="max-w-sm rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-900">
-                        {business.promotion_code === "first-20-3m"
-                          ? "המקום במבצע נשמר. אחרי אישור מנהל העסק יעלה לאוויר ו־3 החודשים החינם יתחילו."
-                          : "הטיוטה נשמרה. אחרי שהצוות יאמת את העסק אפשר יהיה לבחור זמן ולשלם."}
-                      </p>
-                    ) : null}
                   </div>
+
+                  <OwnerLifecycleBanner business={business} nowIso={nowIso} compact />
 
                   <DurationSelectorCard
                     plans={plans}
@@ -262,60 +251,4 @@ export default function BillingClient({
       </section>
     </div>
   );
-}
-
-function StatusPill({
-  active,
-  activeText,
-  inactiveText,
-}: {
-  active: boolean;
-  activeText: string;
-  inactiveText: string;
-}) {
-  return (
-    <span
-      className={`rounded-full px-3 py-1.5 ${
-        active
-          ? "bg-emerald-100 text-emerald-800"
-          : "bg-stone-200 text-stone-700"
-      }`}
-    >
-      {active ? activeText : inactiveText}
-    </span>
-  );
-}
-
-function Notice({
-  tone,
-  text,
-}: {
-  tone: "success" | "warning" | "error";
-  text: string;
-}) {
-  const classes =
-    tone === "success"
-      ? "border-emerald-300 bg-emerald-50 text-emerald-900"
-      : tone === "warning"
-        ? "border-amber-300 bg-amber-50 text-amber-900"
-        : "border-red-300 bg-red-50 text-red-900";
-  return (
-    <div
-      className={`flex items-start gap-3 rounded-xl border p-4 ${classes}`}
-      role={tone === "error" ? "alert" : "status"}
-      aria-live={tone === "error" ? "assertive" : "polite"}
-    >
-      <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-      <p className="text-sm">{text}</p>
-    </div>
-  );
-}
-
-function formatDate(value: string | null): string {
-  if (!value) return "—";
-  return new Date(value).toLocaleDateString("he-IL", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
 }
