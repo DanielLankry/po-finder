@@ -19,9 +19,8 @@ on:
         required: false
         type: string
   schedule:
-    # 02:15 Asia/Jerusalem moves between 23:15 and 00:15 UTC across DST.
-    # The job gate below runs scheduled exports only during local 02:00.
-    - cron: "15 23 * * *"
+    # Fixed UTC scheduling keeps the export interval at 24 hours through
+    # Asia/Jerusalem daylight-saving transitions (02:15 winter, 03:15 summer).
     - cron: "15 0 * * *"
     # Stale-marker monitor. A failed run is the alert path for the protected
     # backup environment owners.
@@ -50,19 +49,6 @@ jobs:
       - name: Check out repository
         # actions/checkout v4 resolved on 2026-08-28.
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-
-      - name: Gate scheduled run to 02:00 Asia/Jerusalem
-        id: schedule_gate
-        if: github.event_name == 'schedule' && (github.event.schedule == '15 23 * * *' || github.event.schedule == '15 0 * * *')
-        run: |
-          local_hour="$(TZ=Asia/Jerusalem date +%H)"
-          local_minute="$(TZ=Asia/Jerusalem date +%M)"
-          if [ "$local_hour" = "02" ] && [ "$local_minute" -lt "45" ]; then
-            echo "run_export=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "run_export=false" >> "$GITHUB_OUTPUT"
-            echo "Not an export window; current Asia/Jerusalem time is ${local_hour}:${local_minute}."
-          fi
 
       - name: Install required tools
         run: |
@@ -111,7 +97,7 @@ jobs:
           echo "PO_FINDER_RESTORE_AGE_IDENTITY_FILE=$identity_file" >> "$GITHUB_ENV"
 
       - name: Export encrypted recovery set
-        if: (github.event_name == 'schedule' && steps.schedule_gate.outputs.run_export == 'true') || inputs.mode == 'export'
+        if: (github.event_name == 'schedule' && github.event.schedule == '15 0 * * *') || inputs.mode == 'export'
         env:
           SOURCE_DB_URL: ${{ secrets.PO_FINDER_BACKUP_SOURCE_DB_URL }}
           AGE_RECIPIENTS: ${{ secrets.PO_FINDER_BACKUP_AGE_RECIPIENTS }}

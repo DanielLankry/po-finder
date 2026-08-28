@@ -127,9 +127,16 @@ write_manifest() {
     qtable="$(quote_ident "$table")"
     jsonl="$table_dir/${schema}.${table}.jsonl"
     count="$(psql_source -A -t -c "select count(*) from $qschema.$qtable;")"
-    psql_source -A -t -c "copy (select row_to_json(t) from (select * from $qschema.$qtable) t) to stdout;" \
-      | jq -cS . \
-      | LC_ALL=C sort > "$jsonl"
+    if [[ "$schema" == "storage" && "$table" == "objects" ]]; then
+      psql_source -A -t -c \
+        "copy (select json_build_object('bucket_id', bucket_id, 'name', name) from $qschema.$qtable) to stdout;" \
+        | jq -cS . \
+        | LC_ALL=C sort > "$jsonl"
+    else
+      psql_source -A -t -c "copy (select row_to_json(t) from (select * from $qschema.$qtable) t) to stdout;" \
+        | jq -cS . \
+        | LC_ALL=C sort > "$jsonl"
+    fi
     checksum="$(sha256sum "$jsonl" | awk '{print $1}')"
     printf '%s.%s count=%s sha256=%s\n' "$schema" "$table" "$count" "$checksum" >> "$out"
   done < "$tables_file"
@@ -203,7 +210,7 @@ main() {
   supabase db dump --db-url "$SOURCE_DB_URL" -f "$set_dir/database/roles.sql" --role-only
   supabase db dump --db-url "$SOURCE_DB_URL" -f "$set_dir/database/schema.sql"
   supabase db dump --db-url "$SOURCE_DB_URL" -f "$set_dir/database/data.sql" --use-copy --data-only \
-    -x "storage.buckets_vectors" -x "storage.vector_indexes"
+    -x "storage.objects" -x "storage.buckets_vectors" -x "storage.vector_indexes"
 
   if [[ "${BACKUP_SKIP_STORAGE:-0}" == "1" ]]; then
     printf 'storage_export=skipped\nobject_count=0\ntotal_bytes=0\n' > "$set_dir/storage-manifest.txt"

@@ -61,13 +61,19 @@ validate_project_ref() {
 validate_database_target_binding() {
   local target_url="$1"
   local approved_ref="$2"
-  local without_scheme authority userinfo hostport username host
+  local without_scheme authority userinfo hostport username database_and_query database query
+  local parameter name value
+  local -a parameters
 
   if [[ ! "$target_url" =~ ^postgres(ql)?:// ]]; then
     echo "TARGET_DB_URL must be a PostgreSQL URL for the approved Supabase project." >&2
     exit 11
   fi
   without_scheme="${target_url#*://}"
+  if [[ "$without_scheme" == *'#'* || "$without_scheme" != */* ]]; then
+    echo "TARGET_DB_URL must identify the postgres database without a URI fragment." >&2
+    exit 11
+  fi
   authority="${without_scheme%%/*}"
   if [[ "$authority" != *@* ]]; then
     echo "TARGET_DB_URL does not identify the approved Supabase project." >&2
@@ -76,12 +82,59 @@ validate_database_target_binding() {
   userinfo="${authority%@*}"
   hostport="${authority##*@}"
   username="${userinfo%%:*}"
-  host="${hostport%%:*}"
+  database_and_query="${without_scheme#*/}"
+  database="${database_and_query%%\?*}"
 
-  if [[ "$host" == "db.${approved_ref}.supabase.co" && "$username" == "postgres" ]]; then
+  if [[ "$database" != "postgres" ]]; then
+    echo "TARGET_DB_URL must identify the postgres database." >&2
+    exit 11
+  fi
+
+  if [[ "$database_and_query" == *'?'* ]]; then
+    query="${database_and_query#*\?}"
+    if [[ -z "$query" ]]; then
+      echo "TARGET_DB_URL contains an empty connection parameter." >&2
+      exit 11
+    fi
+    IFS='&' read -r -a parameters <<< "$query"
+    for parameter in "${parameters[@]}"; do
+      if [[ "$parameter" != *=* ]]; then
+        echo "TARGET_DB_URL contains an unsupported connection parameter." >&2
+        exit 11
+      fi
+      name="${parameter%%=*}"
+      value="${parameter#*=}"
+      case "$name" in
+        sslmode)
+          [[ "$value" =~ ^(require|verify-ca|verify-full)$ ]] || {
+            echo "TARGET_DB_URL contains an unsafe sslmode." >&2
+            exit 11
+          }
+          ;;
+        connect_timeout)
+          [[ "$value" =~ ^[1-9][0-9]*$ ]] || {
+            echo "TARGET_DB_URL contains an invalid connect_timeout." >&2
+            exit 11
+          }
+          ;;
+        channel_binding)
+          [[ "$value" =~ ^(prefer|require)$ ]] || {
+            echo "TARGET_DB_URL contains an unsafe channel_binding value." >&2
+            exit 11
+          }
+          ;;
+        *)
+          echo "TARGET_DB_URL contains an unsupported connection parameter." >&2
+          exit 11
+          ;;
+      esac
+    done
+  fi
+
+  if [[ "$hostport" =~ ^db\.${approved_ref}\.supabase\.co(:5432)?$ && "$username" == "postgres" ]]; then
     return 0
   fi
-  if [[ "$host" == *.pooler.supabase.com && "$username" == "postgres.${approved_ref}" ]]; then
+  if [[ "$hostport" =~ ^[a-z0-9.-]+\.pooler\.supabase\.com:(5432|6543)$ && "$username" == "postgres.${approved_ref}" ]]; then
     return 0
   fi
 
@@ -134,6 +187,20 @@ validate_storage_target_binding() {
   exit 11
 }
 
+validate_empty_storage_target() {
+  local spec="$1"
+  local target_size target_count
+  if ! target_size="$(rclone size "$spec" --json 2>/dev/null)"; then
+    echo "Unable to inspect the disposable target Storage destination." >&2
+    exit 11
+  fi
+  target_count="$(printf '%s' "$target_size" | jq -r '.count')"
+  if [[ ! "$target_count" =~ ^[0-9]+$ || "$target_count" != "0" ]]; then
+    echo "Disposable target Storage must be empty before a restore drill." >&2
+    exit 11
+  fi
+}
+
 quote_ident() {
   printf '"%s"' "${1//\"/\"\"}"
 }
@@ -174,9 +241,16 @@ write_target_manifest() {
     qtable="$(quote_ident "$table")"
     jsonl="$table_dir/${schema}.${table}.jsonl"
     count="$(psql_target -A -t -c "select count(*) from $qschema.$qtable;")"
-    psql_target -A -t -c "copy (select row_to_json(t) from (select * from $qschema.$qtable) t) to stdout;" \
-      | jq -cS . \
-      | LC_ALL=C sort > "$jsonl"
+    if [[ "$schema" == "storage" && "$table" == "objects" ]]; then
+      psql_target -A -t -c \
+        "copy (select json_build_object('bucket_id', bucket_id, 'name', name) from $qschema.$qtable) to stdout;" \
+        | jq -cS . \
+        | LC_ALL=C sort > "$jsonl"
+    else
+      psql_target -A -t -c "copy (select row_to_json(t) from (select * from $qschema.$qtable) t) to stdout;" \
+        | jq -cS . \
+        | LC_ALL=C sort > "$jsonl"
+    fi
     checksum="$(sha256sum "$jsonl" | awk '{print $1}')"
     printf '%s.%s count=%s sha256=%s\n' "$schema" "$table" "$count" "$checksum" >> "$out"
   done < <(table_list)
@@ -258,6 +332,7 @@ main() {
     require_env TARGET_STORAGE_RCLONE_DESTINATION
     validate_rclone_remote_access "$TARGET_STORAGE_RCLONE_DESTINATION"
     validate_storage_target_binding "$TARGET_STORAGE_RCLONE_DESTINATION" "$APPROVED_DISPOSABLE_TARGET_REF"
+    validate_empty_storage_target "$TARGET_STORAGE_RCLONE_DESTINATION"
   fi
 
   local run_id work_root marker encrypted archive recovery_dir source_manifest target_manifest
@@ -316,7 +391,10 @@ main() {
     --file "$recovery_dir/database/data.sql"
 
   if [[ "${RESTORE_SKIP_STORAGE:-0}" != "1" ]]; then
-    rclone copy "$recovery_dir/storage" "$TARGET_STORAGE_RCLONE_DESTINATION" --immutable --metadata
+    # storage.objects is intentionally absent from data.sql. Uploading the blobs
+    # through Supabase's S3 endpoint creates fresh, internally consistent object
+    # metadata for the disposable project.
+    rclone copy "$recovery_dir/storage" "$TARGET_STORAGE_RCLONE_DESTINATION" --metadata
     storage_check_log="$work_root/storage-check.log"
     if ! rclone check "$recovery_dir/storage" "$TARGET_STORAGE_RCLONE_DESTINATION" \
       --download > "$storage_check_log" 2>&1; then
