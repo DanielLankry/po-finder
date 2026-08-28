@@ -43,12 +43,15 @@ jobs:
       SUPABASE_SOURCE_REGION: ap-northeast-1
       BACKUP_RETENTION_DAYS: "35"
       BACKUP_MAX_SUCCESS_AGE_HOURS: "36"
-      BACKUP_WORK_DIR: ${{ runner.temp }}/po-finder-backup
-      RESTORE_WORK_DIR: ${{ runner.temp }}/po-finder-restore
     steps:
       - name: Check out repository
         # actions/checkout v4 resolved on 2026-08-28.
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Configure runtime work directories
+        run: |
+          echo "BACKUP_WORK_DIR=${RUNNER_TEMP}/po-finder-backup" >> "$GITHUB_ENV"
+          echo "RESTORE_WORK_DIR=${RUNNER_TEMP}/po-finder-restore" >> "$GITHUB_ENV"
 
       - name: Install required tools
         run: |

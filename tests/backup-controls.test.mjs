@@ -140,6 +140,9 @@ test("workflow uses protected environment, pinned actions, and no production res
   assert.match(workflow, /PO_FINDER_BACKUP_RCLONE_CONFIG/);
   assert.match(workflow, /aa2804e08f48250e71009c727124b6341cd0288465804a9a09d14663cabafbaa/);
   assert.match(workflow, /concurrency:/);
+  assert.doesNotMatch(workflow, /\$\{\{\s*runner\.temp\s*\}\}/);
+  assert.match(workflow, /BACKUP_WORK_DIR=\$\{RUNNER_TEMP\}\/po-finder-backup/);
+  assert.match(workflow, /RESTORE_WORK_DIR=\$\{RUNNER_TEMP\}\/po-finder-restore/);
   assert.doesNotMatch(workflow, /pull_request/);
   assert.doesNotMatch(workflow, /PO_FINDER_PRODUCTION_DB_URL/);
   const identityStep = workflow.indexOf("- name: Write restore identity");
