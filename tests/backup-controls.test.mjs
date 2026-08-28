@@ -65,7 +65,7 @@ case "\${1:-}" in
   listremotes) printf 'source:\\ntarget:\\n' ;;
   lsf) exit 0 ;;
   size) printf '{"count":%s,"bytes":0}\n' "\${MOCK_STORAGE_OBJECT_COUNT:-0}" ;;
-  config) printf '[target]\\ntype = s3\\nendpoint = %s\\nsecret_access_key = XXX\\n' "$MOCK_STORAGE_ENDPOINT" ;;
+  config) printf '[target]\\ntype = %s\\nendpoint = %s\\nsecret_access_key = XXX\\n' "\${MOCK_STORAGE_TYPE:-s3}" "$MOCK_STORAGE_ENDPOINT" ;;
   *) exit 97 ;;
 esac`,
   );
@@ -137,6 +137,10 @@ test("workflow uses protected environment, pinned actions, and no production res
   assert.match(workflow, /concurrency:/);
   assert.doesNotMatch(workflow, /pull_request/);
   assert.doesNotMatch(workflow, /PO_FINDER_PRODUCTION_DB_URL/);
+  const identityStep = workflow.indexOf("- name: Write restore identity");
+  const identityUmask = workflow.indexOf("umask 077", identityStep);
+  const identityWrite = workflow.indexOf('printf \'%s\\n\' "$PO_FINDER_RESTORE_AGE_IDENTITY"', identityStep);
+  assert.ok(identityStep >= 0 && identityUmask > identityStep && identityUmask < identityWrite);
 });
 
 test("restore rejects an aliased database before any rclone access or write", () => {
@@ -180,6 +184,27 @@ test("restore rejects libpq hostaddr overrides before any rclone access or write
   }
 });
 
+test("restore rejects inherited libpq target overrides before any rclone access or write", () => {
+  const root = mkdtempSync(join(tmpdir(), "po-finder-restore-libpq-env-binding-"));
+  try {
+    const endpoint = "https://aaaaaaaaaaaaaaaaaaaa.storage.supabase.co/storage/v1/s3";
+    const { binDir, log } = setupRestoreMocks(root, endpoint);
+    const result = spawnSync("bash", ["scripts/backup/restore-drill.sh"], {
+      env: restoreEnvironment(binDir, {
+        PGHOSTADDR: "127.0.0.1",
+        MOCK_RCLONE_LOG: log,
+        MOCK_STORAGE_ENDPOINT: endpoint,
+      }),
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 11, result.stderr);
+    assert.match(result.stderr, /Refusing inherited libpq target override: PGHOSTADDR/);
+    assert.equal(existsSync(log), false, "rclone must not run for an inherited libpq target override");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("restore rejects a Storage endpoint not bound to the approved project before download or write", () => {
   const root = mkdtempSync(join(tmpdir(), "po-finder-restore-storage-binding-"));
   try {
@@ -197,6 +222,30 @@ test("restore rejects a Storage endpoint not bound to the approved project befor
     assert.doesNotMatch(calls, /(^|\n)copy(to)? /, "no recovery set or Storage object may be copied");
   } finally {
     rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("restore rejects non-S3 Storage remotes with misleading approved endpoints", () => {
+  for (const storageType of ["alias", "local"]) {
+    const root = mkdtempSync(join(tmpdir(), `po-finder-restore-${storageType}-binding-`));
+    try {
+      const endpoint = "https://aaaaaaaaaaaaaaaaaaaa.storage.supabase.co/storage/v1/s3";
+      const { binDir, log } = setupRestoreMocks(root, endpoint);
+      const result = spawnSync("bash", ["scripts/backup/restore-drill.sh"], {
+        env: restoreEnvironment(binDir, {
+          MOCK_RCLONE_LOG: log,
+          MOCK_STORAGE_ENDPOINT: endpoint,
+          MOCK_STORAGE_TYPE: storageType,
+        }),
+        encoding: "utf8",
+      });
+      assert.equal(result.status, 11, `${storageType}: ${result.stderr}`);
+      assert.match(result.stderr, /must use the rclone s3 backend/);
+      const calls = readFileSync(log, "utf8");
+      assert.doesNotMatch(calls, /(^|\n)copy(to)? /, "no recovery set or Storage object may be copied");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   }
 });
 

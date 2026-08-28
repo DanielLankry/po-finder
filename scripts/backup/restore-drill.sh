@@ -142,6 +142,26 @@ validate_database_target_binding() {
   exit 11
 }
 
+reject_libpq_target_overrides() {
+  local name
+  local -a target_overrides=(
+    PGHOST
+    PGHOSTADDR
+    PGPORT
+    PGDATABASE
+    PGUSER
+    PGSERVICE
+    PGSERVICEFILE
+  )
+
+  for name in "${target_overrides[@]}"; do
+    if [[ -n "${!name:-}" ]]; then
+      echo "Refusing inherited libpq target override: $name." >&2
+      exit 11
+    fi
+  done
+}
+
 rclone_remote_name() {
   local spec="$1"
   if [[ ! "$spec" =~ ^([A-Za-z0-9][A-Za-z0-9._-]*): ]]; then
@@ -168,13 +188,18 @@ validate_rclone_remote_access() {
 validate_storage_target_binding() {
   local spec="$1"
   local approved_ref="$2"
-  local remote redacted endpoint
+  local remote redacted backend_type endpoint
   remote="$(rclone_remote_name "$spec")"
   if ! redacted="$(rclone config redacted "$remote" 2>/dev/null)"; then
     echo "Unable to inspect the redacted target Storage configuration." >&2
     exit 11
   fi
+  backend_type="$(printf '%s\n' "$redacted" | sed -n 's/^[[:space:]]*type[[:space:]]*=[[:space:]]*//p' | head -n 1)"
   endpoint="$(printf '%s\n' "$redacted" | sed -n 's/^[[:space:]]*endpoint[[:space:]]*=[[:space:]]*//p' | head -n 1)"
+  if [[ "$backend_type" != "s3" ]]; then
+    echo "Target Storage remote must use the rclone s3 backend." >&2
+    exit 11
+  fi
   case "$endpoint" in
     "https://${approved_ref}.storage.supabase.co/storage/v1/s3"|\
     "https://${approved_ref}.storage.supabase.co/storage/v1/s3/"|\
@@ -326,6 +351,7 @@ main() {
     exit 11
   fi
   validate_database_target_binding "$TARGET_DB_URL" "$APPROVED_DISPOSABLE_TARGET_REF"
+  reject_libpq_target_overrides
   validate_rclone_remote_access "$RESTORE_SOURCE_RCLONE"
 
   if [[ "${RESTORE_SKIP_STORAGE:-0}" != "1" ]]; then
