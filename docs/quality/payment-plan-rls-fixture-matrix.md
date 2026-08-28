@@ -1,7 +1,8 @@
 # Pokarov Payment-Plan and RLS E2E Fixture Matrix
 
-Owner: Forge  
-Issue: DAN-112  
+Owner: Forge
+
+Issue: DAN-112
 Status: ready for Sentinel review
 
 This matrix defines the safe destructive E2E fixture set for Pokarov listing payments and RLS behavior. It is documentation-first: migrations are not executed from this task, and destructive tests remain gated behind `RUN_DESTRUCTIVE=1`.
