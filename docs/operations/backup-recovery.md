@@ -69,7 +69,12 @@ and perform a read-only root listing to validate configuration and credentials.
 The export also binds the database host/user and the redacted Storage S3
 endpoint to production project `ymqlqdhelsocibhnanjy`; aliases, a second
 project ref, a non-S3 backend, and libpq/rclone endpoint overrides fail before
-any source read or off-site write.
+any source read or off-site write. The encrypted backup destination is inspected
+separately and must use an object-storage backend (`s3`, `b2`, `azureblob`, or
+`google cloud storage`). A Supabase Storage endpoint, the production project
+reference, reuse of the production Storage source remote, or a destination
+type/endpoint environment override fails before any remote access. This is the
+enforced off-site boundary; a protected remote name alone is not sufficient.
 
 Each successful export:
 
