@@ -23,6 +23,20 @@ require_env() {
   fi
 }
 
+run_quietly() {
+  local failure_message="$1"
+  shift
+  local status
+
+  if "$@" >/dev/null 2>&1; then
+    return 0
+  else
+    status=$?
+    echo "$failure_message" >&2
+    return "$status"
+  fi
+}
+
 validate_rclone_remote_access() {
   local spec="$1"
   if [[ ! "$spec" =~ ^([A-Za-z0-9][A-Za-z0-9._-]*): ]]; then
@@ -30,11 +44,11 @@ validate_rclone_remote_access() {
     exit 3
   fi
   local remote="${BASH_REMATCH[1]}"
-  if ! rclone listremotes | grep -Fx "${remote}:" >/dev/null; then
+  if ! rclone listremotes 2>/dev/null | grep -Fx "${remote}:" >/dev/null; then
     echo "Required rclone remote is not configured." >&2
     exit 3
   fi
-  if ! rclone lsf "${remote}:" --max-depth 1 >/dev/null; then
+  if ! rclone lsf "${remote}:" --max-depth 1 >/dev/null 2>&1; then
     echo "Required rclone remote is not accessible." >&2
     exit 3
   fi
@@ -53,7 +67,8 @@ main() {
   mkdir -p "$work_dir"
   marker="$work_dir/latest-success.json"
 
-  rclone copyto "$BACKUP_DESTINATION_RCLONE/latest-success.json" "$marker"
+  run_quietly "Latest recovery-set marker download failed; command output withheld." \
+    rclone copyto "$BACKUP_DESTINATION_RCLONE/latest-success.json" "$marker"
   completed_at="$(jq -r '.completedAtUtc' "$marker")"
   if [[ -z "$completed_at" || "$completed_at" == "null" ]]; then
     echo "Latest success marker is missing completedAtUtc." >&2

@@ -54,6 +54,20 @@ require_env() {
   fi
 }
 
+run_quietly() {
+  local failure_message="$1"
+  shift
+  local status
+
+  if "$@" >/dev/null 2>&1; then
+    return 0
+  else
+    status=$?
+    echo "$failure_message" >&2
+    return "$status"
+  fi
+}
+
 validate_run_id() {
   local run_id="$1"
   if [[ ! "$run_id" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$ ]]; then
@@ -179,11 +193,11 @@ validate_rclone_remote_access() {
   local spec="$1"
   local remote
   remote="$(rclone_remote_name "$spec")"
-  if ! rclone listremotes | grep -Fx "${remote}:" >/dev/null; then
+  if ! rclone listremotes 2>/dev/null | grep -Fx "${remote}:" >/dev/null; then
     echo "Required rclone remote is not configured." >&2
     exit 3
   fi
-  if ! rclone lsf "${remote}:" --max-depth 1 >/dev/null; then
+  if ! rclone lsf "${remote}:" --max-depth 1 >/dev/null 2>&1; then
     echo "Required rclone remote is not accessible." >&2
     exit 3
   fi
@@ -241,7 +255,15 @@ quote_ident() {
 }
 
 psql_source() {
-  psql "$SOURCE_DB_URL" -X -v ON_ERROR_STOP=1 "$@"
+  local status
+
+  if psql "$SOURCE_DB_URL" -X -v ON_ERROR_STOP=1 "$@" 2>/dev/null; then
+    return 0
+  else
+    status=$?
+    echo "Source database command failed; command output withheld." >&2
+    return "$status"
+  fi
 }
 
 table_list() {
@@ -596,10 +618,13 @@ main() {
   write_security_state psql_source "$set_dir/security-state-before.jsonl"
   write_manifest "before" "$set_dir" "$set_dir/manifest-before.txt" "$set_dir/security-state-before.jsonl"
 
-  supabase db dump --db-url "$SOURCE_DB_URL" -f "$set_dir/database/roles.sql" --role-only
-  supabase db dump --db-url "$SOURCE_DB_URL" -f "$set_dir/database/schema.sql"
-  supabase db dump --db-url "$SOURCE_DB_URL" -f "$set_dir/database/data.sql" --use-copy --data-only \
-    -x "storage.objects" -x "storage.buckets_vectors" -x "storage.vector_indexes"
+  run_quietly "Source database role dump failed; command output withheld." \
+    supabase db dump --db-url "$SOURCE_DB_URL" -f "$set_dir/database/roles.sql" --role-only
+  run_quietly "Source database schema dump failed; command output withheld." \
+    supabase db dump --db-url "$SOURCE_DB_URL" -f "$set_dir/database/schema.sql"
+  run_quietly "Source database data dump failed; command output withheld." \
+    supabase db dump --db-url "$SOURCE_DB_URL" -f "$set_dir/database/data.sql" --use-copy --data-only \
+      -x "storage.objects" -x "storage.buckets_vectors" -x "storage.vector_indexes"
   write_managed_schema_ddl "$set_dir/database/managed-schema.sql"
   chmod 600 "$set_dir/database/roles.sql" "$set_dir/database/schema.sql" \
     "$set_dir/database/data.sql" "$set_dir/database/managed-schema.sql"
@@ -607,7 +632,8 @@ main() {
   if [[ "${BACKUP_SKIP_STORAGE:-0}" == "1" ]]; then
     printf 'storage_export=skipped\nobject_count=0\ntotal_bytes=0\n' > "$set_dir/storage-manifest.txt"
   else
-    rclone copy "$SUPABASE_STORAGE_RCLONE_SOURCE" "$set_dir/storage" --immutable --metadata
+    run_quietly "Source Storage export failed; command output withheld." \
+      rclone copy "$SUPABASE_STORAGE_RCLONE_SOURCE" "$set_dir/storage" --immutable --metadata
     chmod -R go-rwx "$set_dir/storage"
     write_storage_manifest "$set_dir/storage" "$set_dir/storage-manifest.txt"
   fi
@@ -666,10 +692,12 @@ JSON
     return 0
   fi
 
-  rclone copyto "$encrypted" "$BACKUP_DESTINATION_RCLONE/$run_id/po-finder-recovery.tar.gz.age" --immutable
+  run_quietly "Encrypted recovery-set upload failed; command output withheld." \
+    rclone copyto "$encrypted" \
+      "$BACKUP_DESTINATION_RCLONE/$run_id/po-finder-recovery.tar.gz.age" --immutable
   local remote_ciphertext_hash
   if ! remote_ciphertext_hash="$(
-    rclone cat "$BACKUP_DESTINATION_RCLONE/$run_id/po-finder-recovery.tar.gz.age" \
+    rclone cat "$BACKUP_DESTINATION_RCLONE/$run_id/po-finder-recovery.tar.gz.age" 2>/dev/null \
       | sha256sum \
       | awk '{print $1}'
   )"; then
@@ -680,11 +708,15 @@ JSON
     echo "Uploaded ciphertext hash mismatch; refusing to publish success markers." >&2
     exit 4
   fi
-  rclone copyto "$marker" "$BACKUP_DESTINATION_RCLONE/$run_id/latest-success.json" --immutable
-  rclone delete "$BACKUP_DESTINATION_RCLONE" --min-age "${retention_days}d" --include "**/po-finder-recovery.tar.gz.age"
+  run_quietly "Immutable recovery-set marker upload failed; command output withheld." \
+    rclone copyto "$marker" "$BACKUP_DESTINATION_RCLONE/$run_id/latest-success.json" --immutable
+  run_quietly "Encrypted recovery-set retention failed; command output withheld." \
+    rclone delete "$BACKUP_DESTINATION_RCLONE" --min-age "${retention_days}d" \
+      --include "**/po-finder-recovery.tar.gz.age"
   rm -rf "$set_dir" "$archive"
   echo "Publishing verified encrypted recovery set $run_id."
-  rclone copyto "$marker" "$BACKUP_DESTINATION_RCLONE/latest-success.json"
+  run_quietly "Global recovery-set marker upload failed; command output withheld." \
+    rclone copyto "$marker" "$BACKUP_DESTINATION_RCLONE/latest-success.json"
 }
 
 main "$@"

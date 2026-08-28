@@ -67,7 +67,11 @@ case "\${1:-}" in
   lsf) exit 0 ;;
   size) printf '{"count":%s,"bytes":0}\n' "\${MOCK_STORAGE_OBJECT_COUNT:-0}" ;;
   config) printf '[target]\\ntype = %s\\nendpoint = %s\\nsecret_access_key = XXX\\n' "\${MOCK_STORAGE_TYPE:-s3}" "$MOCK_STORAGE_ENDPOINT" ;;
-  *) exit 97 ;;
+  *)
+    printf '%s\n' "\${MOCK_SENSITIVE_OUTPUT:-}"
+    printf '%s\n' "\${MOCK_SENSITIVE_OUTPUT:-}" >&2
+    exit 97
+    ;;
 esac`,
   );
   return { binDir, log, storageEndpoint };
@@ -75,6 +79,19 @@ esac`,
 
 function mkdirForTest(path) {
   mkdirSync(path, { recursive: true });
+}
+
+function assertSensitiveOutputWithheld(result, sensitiveValue) {
+  assert.equal(
+    result.stdout.includes(sensitiveValue),
+    false,
+    "stdout must not expose sensitive output",
+  );
+  assert.equal(
+    result.stderr.includes(sensitiveValue),
+    false,
+    "stderr must not expose sensitive output",
+  );
 }
 
 test("backup scripts are executable and fail closed on secrets", () => {
@@ -200,6 +217,51 @@ esac`,
     const calls = readFileSync(log, "utf8");
     assert.match(calls, /^config redacted storage$/m);
     assert.doesNotMatch(calls, /(^|\n)(copy|copyto|cat|delete) /, "mismatched sources must not upload");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("export withholds source database failure output", () => {
+  const root = mkdtempSync(join(tmpdir(), "po-finder-export-psql-redaction-"));
+  try {
+    const binDir = join(root, "bin");
+    const workDir = join(root, "work");
+    const sensitiveValue = "customer@example.com row=(private customer context)";
+    mkdirForTest(binDir);
+    for (const command of ["age", "jq", "supabase"]) {
+      writeMock(binDir, command, "exit 0");
+    }
+    writeMock(
+      binDir,
+      "psql",
+      `printf '%s\n' "$MOCK_SENSITIVE_OUTPUT"
+printf '%s\n' "$MOCK_SENSITIVE_OUTPUT" >&2
+exit 55`,
+    );
+
+    const result = spawnSync("bash", ["scripts/backup/export-recovery-set.sh"], {
+      env: {
+        ...process.env,
+        PATH: `${binDir}:${process.env.PATH}`,
+        SOURCE_DB_URL:
+          "postgresql://postgres@db.ymqlqdhelsocibhnanjy.supabase.co:5432/postgres",
+        AGE_RECIPIENTS: "age1recipient-one,age1recipient-two",
+        BACKUP_SKIP_STORAGE: "1",
+        BACKUP_SKIP_UPLOAD: "1",
+        BACKUP_WORK_DIR: workDir,
+        MOCK_SENSITIVE_OUTPUT: sensitiveValue,
+      },
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 55, result.stderr);
+    assert.match(result.stderr, /Source database command failed; command output withheld/);
+    assertSensitiveOutputWithheld(result, sensitiveValue);
+    assert.equal(
+      readdirSync(workDir).some((entry) => entry.startsWith(".po-finder-export.")),
+      false,
+      "failed export must remove its private cleartext staging directory",
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -367,14 +429,18 @@ test("restore accepts matching database and Storage identities before downloadin
   try {
     const endpoint = "https://aaaaaaaaaaaaaaaaaaaa.storage.supabase.co/storage/v1/s3";
     const { binDir, log } = setupRestoreMocks(root, endpoint);
+    const sensitiveValue = "photos/private/customer-upload.jpg";
     const result = spawnSync("bash", ["scripts/backup/restore-drill.sh"], {
       env: restoreEnvironment(binDir, {
         MOCK_RCLONE_LOG: log,
         MOCK_STORAGE_ENDPOINT: endpoint,
+        MOCK_SENSITIVE_OUTPUT: sensitiveValue,
       }),
       encoding: "utf8",
     });
     assert.equal(result.status, 97, result.stderr);
+    assert.match(result.stderr, /Recovery-set marker download failed; command output withheld/);
+    assertSensitiveOutputWithheld(result, sensitiveValue);
     assert.match(readFileSync(log, "utf8"), /copyto source:backups\/latest-success\.json/);
   } finally {
     rmSync(root, { recursive: true, force: true });
@@ -506,6 +572,11 @@ esac`,
       printf '%s %s\n' "$(stat -c '%a' "$argument")" "$(stat -c '%a' "$(dirname "$argument")")" >> "$MOCK_RESTORE_MODE_LOG"
     fi
   done
+  if [ -n "\${MOCK_PSQL_FAILURE_OUTPUT:-}" ]; then
+    printf '%s\n' "$MOCK_PSQL_FAILURE_OUTPUT"
+    printf '%s\n' "$MOCK_PSQL_FAILURE_OUTPUT" >&2
+    exit "\${MOCK_PSQL_RESTORE_EXIT:-47}"
+  fi
   exit 0
 fi
 if [[ "$*" == *"select count(*)"* ]]; then
@@ -538,12 +609,52 @@ case "\${1:-}" in
     esac
     ;;
   copy) exit 0 ;;
-  check) exit "\${MOCK_STORAGE_CHECK_EXIT:-0}" ;;
+  check)
+    if [ -n "\${MOCK_STORAGE_CHECK_FAILURE_OUTPUT:-}" ]; then
+      printf '%s\n' "$MOCK_STORAGE_CHECK_FAILURE_OUTPUT"
+      printf '%s\n' "$MOCK_STORAGE_CHECK_FAILURE_OUTPUT" >&2
+    fi
+    exit "\${MOCK_STORAGE_CHECK_EXIT:-0}"
+    ;;
   *) exit 96 ;;
 esac`,
     );
 
     const endpoint = "https://aaaaaaaaaaaaaaaaaaaa.storage.supabase.co/storage/v1/s3";
+    const databaseFailureSecret = "row=(customer@example.com,private address)";
+    const databaseFailureLog = join(root, "rclone-database-failure.log");
+    const databaseFailureWorkDir = join(root, "work-database-failure");
+    const databaseFailure = spawnSync("bash", ["scripts/backup/restore-drill.sh"], {
+      env: restoreEnvironment(binDir, {
+        RESTORE_WORK_DIR: databaseFailureWorkDir,
+        MOCK_ARCHIVE: archive,
+        MOCK_MARKER: marker,
+        MOCK_RCLONE_LOG: databaseFailureLog,
+        MOCK_RESTORE_MODE_LOG: join(root, "restore-database-failure-modes.log"),
+        MOCK_SOURCE_MANIFEST: join(recoveryDir, "manifest-after.txt"),
+        MOCK_SOURCE_RUN: sourceRun,
+        MOCK_STORAGE_ENDPOINT: endpoint,
+        MOCK_STORAGE_OBJECT_ROWS: logicalStorageRows,
+        MOCK_PSQL_FAILURE_OUTPUT: databaseFailureSecret,
+        MOCK_PSQL_RESTORE_EXIT: "47",
+      }),
+      encoding: "utf8",
+    });
+    assert.equal(databaseFailure.status, 47, databaseFailure.stderr);
+    assert.match(databaseFailure.stderr, /Disposable database restore failed; command output withheld/);
+    assertSensitiveOutputWithheld(databaseFailure, databaseFailureSecret);
+    assert.doesNotMatch(
+      readFileSync(databaseFailureLog, "utf8"),
+      /copy .*target:storage --metadata/,
+      "Storage must not be written after a failed database restore",
+    );
+    assert.equal(
+      readdirSync(databaseFailureWorkDir).some((entry) => entry.startsWith(".po-finder-restore.")),
+      false,
+      "failed database restore must remove its private cleartext staging directory",
+    );
+
+    const storageFailureSecret = "photos/private/customer-storage-object.jpg";
     const result = spawnSync("bash", ["scripts/backup/restore-drill.sh"], {
       env: restoreEnvironment(binDir, {
         RESTORE_WORK_DIR: workDir,
@@ -555,12 +666,14 @@ esac`,
         MOCK_SOURCE_RUN: sourceRun,
         MOCK_STORAGE_ENDPOINT: endpoint,
         MOCK_STORAGE_CHECK_EXIT: "44",
+        MOCK_STORAGE_CHECK_FAILURE_OUTPUT: storageFailureSecret,
         MOCK_STORAGE_OBJECT_ROWS: logicalStorageRows,
       }),
       encoding: "utf8",
     });
     assert.equal(result.status, 16, result.stderr);
     assert.match(result.stderr, /Disposable target Storage objects do not match/);
+    assertSensitiveOutputWithheld(result, storageFailureSecret);
     const calls = readFileSync(log, "utf8");
     assert.match(calls, /size target:storage --json/);
     assert.match(calls, /copy .*target:storage --metadata/);
@@ -671,12 +784,17 @@ case "\${1:-}" in
       cat "$MOCK_ENCRYPTED_FILE"
     fi
     ;;
-  delete) exit 42 ;;
+  delete)
+    printf '%s\n' "\${MOCK_RCLONE_FAILURE_OUTPUT:-}"
+    printf '%s\n' "\${MOCK_RCLONE_FAILURE_OUTPUT:-}" >&2
+    exit 42
+    ;;
   *) exit 98 ;;
 esac`,
     );
 
     const runId = "20260828T030000Z";
+    const retentionFailureSecret = "photos/private/retention-customer-object.jpg";
     const result = spawnSync("bash", ["scripts/backup/export-recovery-set.sh"], {
       env: {
         ...process.env,
@@ -691,10 +809,13 @@ esac`,
         MOCK_RCLONE_LOG: log,
         MOCK_EXPORT_MODE_LOG: modeLog,
         MOCK_ENCRYPTED_FILE: join(workDir, `po-finder-recovery-${runId}.tar.gz.age`),
+        MOCK_RCLONE_FAILURE_OUTPUT: retentionFailureSecret,
       },
       encoding: "utf8",
     });
     assert.equal(result.status, 42, result.stderr);
+    assert.match(result.stderr, /Encrypted recovery-set retention failed; command output withheld/);
+    assertSensitiveOutputWithheld(result, retentionFailureSecret);
     const calls = readFileSync(log, "utf8");
     assert.match(calls, /delete destination:po-finder/);
     assert.doesNotMatch(
@@ -808,6 +929,45 @@ esac`,
     });
     assert.equal(result.status, 22, result.stderr);
     assert.match(result.stderr, /dated in the future/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("marker monitor withholds rclone failure output", () => {
+  const root = mkdtempSync(join(tmpdir(), "po-finder-marker-rclone-redaction-"));
+  try {
+    const binDir = join(root, "bin");
+    const workDir = join(root, "work");
+    const sensitiveValue = "photos/private/customer-marker-object.jpg";
+    mkdirForTest(binDir);
+    writeMock(
+      binDir,
+      "rclone",
+      `case "\${1:-}" in
+  listremotes) printf 'destination:\n' ;;
+  lsf) exit 0 ;;
+  copyto)
+    printf '%s\n' "$MOCK_SENSITIVE_OUTPUT"
+    printf '%s\n' "$MOCK_SENSITIVE_OUTPUT" >&2
+    exit 51
+    ;;
+  *) exit 98 ;;
+esac`,
+    );
+    const result = spawnSync("bash", ["scripts/backup/check-latest-success.sh"], {
+      env: {
+        ...process.env,
+        PATH: `${binDir}:${process.env.PATH}`,
+        BACKUP_DESTINATION_RCLONE: "destination:po-finder",
+        BACKUP_WORK_DIR: workDir,
+        MOCK_SENSITIVE_OUTPUT: sensitiveValue,
+      },
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 51, result.stderr);
+    assert.match(result.stderr, /Latest recovery-set marker download failed; command output withheld/);
+    assertSensitiveOutputWithheld(result, sensitiveValue);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

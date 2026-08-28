@@ -55,6 +55,20 @@ require_env() {
   fi
 }
 
+run_quietly() {
+  local failure_message="$1"
+  shift
+  local status
+
+  if "$@" >/dev/null 2>&1; then
+    return 0
+  else
+    status=$?
+    echo "$failure_message" >&2
+    return "$status"
+  fi
+}
+
 validate_run_id() {
   local run_id="$1"
   if [[ ! "$run_id" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$ ]]; then
@@ -217,11 +231,11 @@ validate_rclone_remote_access() {
   local spec="$1"
   local remote
   remote="$(rclone_remote_name "$spec")"
-  if ! rclone listremotes | grep -Fx "${remote}:" >/dev/null; then
+  if ! rclone listremotes 2>/dev/null | grep -Fx "${remote}:" >/dev/null; then
     echo "Required rclone remote is not configured." >&2
     exit 11
   fi
-  if ! rclone lsf "${remote}:" --max-depth 1 >/dev/null; then
+  if ! rclone lsf "${remote}:" --max-depth 1 >/dev/null 2>&1; then
     echo "Required rclone remote is not accessible." >&2
     exit 11
   fi
@@ -273,7 +287,15 @@ quote_ident() {
 }
 
 psql_target() {
-  psql "$TARGET_DB_URL" -X -v ON_ERROR_STOP=1 "$@"
+  local status
+
+  if psql "$TARGET_DB_URL" -X -v ON_ERROR_STOP=1 "$@" 2>/dev/null; then
+    return 0
+  else
+    status=$?
+    echo "Disposable target database command failed; command output withheld." >&2
+    return "$status"
+  fi
 }
 
 write_security_state() {
@@ -503,7 +525,7 @@ main() {
 
   local run_id work_root staging_dir report marker encrypted archive recovery_dir source_manifest target_manifest
   local source_security_state target_security_state expected_security_hash
-  local storage_manifest storage_object_count storage_check_log
+  local storage_manifest storage_object_count
   local required_restore_file
   run_id="${RESTORE_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)}"
   validate_run_id "$run_id"
@@ -523,7 +545,8 @@ main() {
   encrypted="$staging_dir/po-finder-recovery.tar.gz.age"
   archive="$staging_dir/po-finder-recovery.tar.gz"
 
-  rclone copyto "$RESTORE_SOURCE_RCLONE/latest-success.json" "$marker"
+  run_quietly "Recovery-set marker download failed; command output withheld." \
+    rclone copyto "$RESTORE_SOURCE_RCLONE/latest-success.json" "$marker"
   local source_run source_project_ref ciphertext_hash marker_manifest_hash
   source_run="$(jq -r '.runId' "$marker")"
   source_project_ref="$(jq -r '.sourceProjectRef' "$marker")"
@@ -539,7 +562,8 @@ main() {
   fi
   validate_run_id "$source_run"
 
-  rclone copyto "$RESTORE_SOURCE_RCLONE/$source_run/po-finder-recovery.tar.gz.age" "$encrypted"
+  run_quietly "Encrypted recovery-set download failed; command output withheld." \
+    rclone copyto "$RESTORE_SOURCE_RCLONE/$source_run/po-finder-recovery.tar.gz.age" "$encrypted"
   if [[ "$(sha256sum "$encrypted" | awk '{print $1}')" != "$ciphertext_hash" ]]; then
     echo "Ciphertext hash mismatch; refusing restore drill." >&2
     exit 13
@@ -586,29 +610,27 @@ main() {
     exit 16
   fi
 
-  psql_target \
-    --single-transaction \
-    --variable ON_ERROR_STOP=1 \
-    --command 'ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated' \
-    --file "$recovery_dir/database/roles.sql" \
-    --file "$recovery_dir/database/schema.sql" \
-    --command 'SET session_replication_role = replica' \
-    --file "$recovery_dir/database/data.sql" \
-    --file "$recovery_dir/database/managed-schema.sql"
+  run_quietly "Disposable database restore failed; command output withheld." \
+    psql_target \
+      --single-transaction \
+      --variable ON_ERROR_STOP=1 \
+      --command 'ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated' \
+      --file "$recovery_dir/database/roles.sql" \
+      --file "$recovery_dir/database/schema.sql" \
+      --command 'SET session_replication_role = replica' \
+      --file "$recovery_dir/database/data.sql" \
+      --file "$recovery_dir/database/managed-schema.sql"
 
   if [[ "${RESTORE_SKIP_STORAGE:-0}" != "1" ]]; then
     # storage.objects is intentionally absent from data.sql. Uploading the blobs
     # through Supabase's S3 endpoint creates fresh, internally consistent object
     # metadata for the disposable project.
-    rclone copy "$recovery_dir/storage" "$TARGET_STORAGE_RCLONE_DESTINATION" --metadata
-    storage_check_log="$staging_dir/storage-check.log"
-    if ! rclone check "$recovery_dir/storage" "$TARGET_STORAGE_RCLONE_DESTINATION" \
-      --download > "$storage_check_log" 2>&1; then
-      rm -f "$storage_check_log"
-      echo "Disposable target Storage objects do not match the recovery set." >&2
+    run_quietly "Disposable target Storage upload failed; command output withheld." \
+      rclone copy "$recovery_dir/storage" "$TARGET_STORAGE_RCLONE_DESTINATION" --metadata
+    if ! run_quietly "Disposable target Storage objects do not match the recovery set." \
+      rclone check "$recovery_dir/storage" "$TARGET_STORAGE_RCLONE_DESTINATION" --download; then
       exit 16
     fi
-    rm -f "$storage_check_log"
   fi
 
   target_manifest="$staging_dir/target-manifest.txt"
