@@ -225,7 +225,7 @@ function LoginForm() {
             </button>
           </form>
 
-          <p className="text-center text-[11px] text-[#9CA3AF] mt-6">
+          <p className="text-center text-[11px] text-[#6B7280] mt-6">
             בכניסה אתם מסכימים ל
             <Link href="/terms" className="hover:underline">תנאי השימוש</Link>
             {" "}ול

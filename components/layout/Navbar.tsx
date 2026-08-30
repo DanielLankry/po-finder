@@ -285,7 +285,7 @@ export default function Navbar({ onLocationSelect, favCount = 0, onFavoritesOpen
               <MagneticButton distance={0.45}>
                 <Link
                   href={showDashboardCta ? "/dashboard" : "/pricing"}
-                  className="group flex items-center gap-1.5 h-10 px-5 rounded-full font-bold text-sm text-white bg-[#C4552D] hover:bg-[#A8441F] border-2 border-[#8A3618] shadow-[2px_2px_0_0_#8A3618] hover:shadow-[3px_3px_0_0_#8A3618] hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4552D]"
+                  className="group flex items-center gap-1.5 h-10 px-5 rounded-full font-bold text-sm text-white bg-[#C0522B] hover:bg-[#A8441F] border-2 border-[#8A3618] shadow-[2px_2px_0_0_#8A3618] hover:shadow-[3px_3px_0_0_#8A3618] hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C0522B]"
                 >
                   {showDashboardCta ? (
                     <LayoutDashboard className="h-4 w-4" aria-hidden="true" />

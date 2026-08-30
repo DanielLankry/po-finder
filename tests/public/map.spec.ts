@@ -26,7 +26,8 @@ test('home renders map and search', async ({ page }) => {
 
 test('home has interactive controls', async ({ page }) => {
   await page.goto('/');
-  const buttons = page.getByRole('button');
-  const count = await buttons.count();
-  expect(count, 'expected interactive buttons on home').toBeGreaterThan(0);
+  await expect(
+    page.getByRole('button', { name: 'הכל', exact: true }),
+    'expected the primary category control on home',
+  ).toBeVisible();
 });
