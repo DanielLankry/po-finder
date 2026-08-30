@@ -395,7 +395,7 @@ export default function BusinessListPanel({
               <p className={`${isPlatformEmpty ? "font-display text-3xl leading-none text-[#17402D]" : "text-sm font-semibold text-[#222222]"} mb-2`}>
                 {isPlatformEmpty ? "היו העסק הראשון בפלטפורמה החדשה שלנו" : "לא נמצאו עסקים זמינים כרגע"}
               </p>
-              <p className="text-[#717171] text-xs leading-relaxed">
+              <p className="text-[#686868] text-xs leading-relaxed">
                 {isPlatformEmpty ? (
                   <>הצטרפו עכשיו והופיעו ראשונים במפה של פה קרוב.</>
                 ) : (
