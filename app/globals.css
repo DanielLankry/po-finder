@@ -690,7 +690,7 @@
 
 .brand-button {
   border: 2px solid #8A3618;
-  background: #C4552D;
+  background: #C0522B;
   box-shadow: 3px 3px 0 0 #8A3618;
   color: #FFFFFF;
 }
@@ -734,7 +734,7 @@
 
 .business-type-button[data-active="true"] {
   border-color: #8A3618;
-  background: #C4552D;
+  background: #C0522B;
   box-shadow: 3px 3px 0 0 #8A3618;
   color: #FFFFFF;
 }

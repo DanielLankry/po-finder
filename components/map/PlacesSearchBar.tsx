@@ -184,7 +184,7 @@ export default function PlacesSearchBar({
             onFocus={() => predictions.length > 0 && setOpen(true)}
             placeholder={placeholder}
             disabled={!isLoaded}
-            className="w-full h-11 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] ps-9 pe-10 text-base md:text-sm text-[#222222] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:border-transparent focus:bg-white transition-all disabled:opacity-50"
+            className="w-full h-11 rounded-full border border-[#DDDDDD] bg-[#F7F5F0] ps-9 pe-10 text-base md:text-sm text-[#222222] placeholder:text-[#5F5F5F] focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:border-transparent focus:bg-white transition-all disabled:opacity-50"
             dir="rtl"
             aria-label="חיפוש מיקום"
             role="combobox"

@@ -180,7 +180,7 @@ export default function DurationSelectorCard({
               />
             ))}
           </div>
-          <p className="mt-3 text-center text-xs font-bold text-[#17402D]/65" dir="rtl">
+          <p className="mt-3 text-center text-xs font-bold text-[#476556]" dir="rtl">
             יום אחד · יומיים · 3 ימים · שבוע · 1–12 חודשים
           </p>
         </div>
