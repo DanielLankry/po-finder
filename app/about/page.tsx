@@ -1,15 +1,13 @@
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { Mail, MessageCircle, ArrowLeft, MapPin, CreditCard, Users, CircleHelp } from "lucide-react";
-import { BRAND_NAME, BUSINESS_INFO, LAUNCH_OFFER, getWhatsAppHref } from "@/lib/site-config";
+import { Mail, ArrowLeft, MapPin, CreditCard, Users, CircleHelp } from "lucide-react";
+import { BRAND_NAME, BUSINESS_INFO, LAUNCH_OFFER } from "@/lib/site-config";
 
 export const metadata = {
   title: "אודות",
   description: "מי אנחנו, למי פה קרוב מתאימה, איך השירות עובד ואיך יוצרים קשר.",
 };
-
-const whatsappHref = getWhatsAppHref();
 
 export default function AboutPage() {
   return (
@@ -102,22 +100,9 @@ export default function AboutPage() {
             <section className="bg-stone-50 rounded-3xl p-6 border border-stone-200">
               <h2 className="font-display font-bold text-xl text-stone-900 mb-3">יצירת קשר</h2>
               <p className="text-stone-700">
-                {whatsappHref
-                  ? "לפרטים, הצטרפות או שאלות לגבי השירות ניתן לפנות אלינו בוואטסאפ או במייל."
-                  : "לפרטים, הצטרפות או שאלות לגבי השירות ניתן לפנות אלינו במייל."}
+                לפרטים, הצטרפות או שאלות לגבי השירות ניתן לפנות אלינו במייל.
               </p>
               <div className="mt-5 flex flex-col sm:flex-row gap-3">
-                {whatsappHref ? (
-                  <a
-                    href={whatsappHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-full bg-[#25D366] text-white font-semibold hover:bg-[#1EB856] transition-colors"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    דברו איתנו בוואטסאפ
-                  </a>
-                ) : null}
                 <a
                   href={`mailto:${BUSINESS_INFO.contactEmail}`}
                   className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-full border border-stone-200 bg-white text-stone-700 font-semibold hover:bg-stone-50 transition-colors"
