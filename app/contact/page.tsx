@@ -5,7 +5,7 @@ import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Mail, Send, MessageCircle, Store, Bug, ShieldCheck, CreditCard, HelpCircle } from "lucide-react";
-import { BUSINESS_INFO, getWhatsAppHref } from "@/lib/site-config";
+import { BUSINESS_INFO } from "@/lib/site-config";
 
 const SUBJECTS = [
   { value: "general", label: "שאלה כללית", icon: HelpCircle },
@@ -15,8 +15,6 @@ const SUBJECTS = [
   { value: "billing", label: "חיוב ותשלומים", icon: CreditCard },
   { value: "other", label: "אחר", icon: MessageCircle },
 ];
-
-const whatsappHref = getWhatsAppHref();
 
 export default function ContactPage() {
   const [formState, setFormState] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -60,22 +58,9 @@ export default function ContactPage() {
           <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm overflow-hidden mb-6">
             <div className="bg-[#EFF5F0] border-b border-[#DDEBE0] px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <p className="text-sm text-[#17402D]">
-                {whatsappHref
-                  ? "לפרטים, הצטרפות או שאלות לגבי השירות ניתן לפנות אלינו בוואטסאפ או במייל."
-                  : "לפרטים, הצטרפות או שאלות לגבי השירות ניתן לפנות אלינו במייל."}
+                לפרטים, הצטרפות או שאלות לגבי השירות ניתן לפנות אלינו במייל.
               </p>
               <div className="flex flex-wrap gap-2">
-                {whatsappHref ? (
-                  <a
-                    href={whatsappHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-full bg-[#25D366] text-white text-sm font-semibold hover:bg-[#1EB856] transition-colors"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    דברו איתנו בוואטסאפ
-                  </a>
-                ) : null}
                 <a
                   href={`mailto:${BUSINESS_INFO.contactEmail}`}
                   className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-full border border-[#C3DCC9] bg-white text-[#17402D] text-sm font-semibold hover:bg-[#F9FFF9] transition-colors"
