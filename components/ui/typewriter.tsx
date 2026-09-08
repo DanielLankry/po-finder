@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react"
-import { motion, useReducedMotion, Variants } from "framer-motion"
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react"
+import { motion, Variants } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
@@ -26,6 +26,19 @@ interface TypewriterProps {
   /** CSS text-shadow value for a glow effect */
   glowColor?: string
 }
+
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)"
+
+const subscribeToReducedMotion = (onStoreChange: () => void) => {
+  const mediaQuery = window.matchMedia(REDUCED_MOTION_QUERY)
+  mediaQuery.addEventListener("change", onStoreChange)
+  return () => mediaQuery.removeEventListener("change", onStoreChange)
+}
+
+const getReducedMotionSnapshot = () =>
+  window.matchMedia(REDUCED_MOTION_QUERY).matches
+
+const getReducedMotionServerSnapshot = () => false
 
 const Typewriter = ({
   text,
@@ -62,7 +75,11 @@ const Typewriter = ({
   const [isDeleting, setIsDeleting] = useState(false)
   const [currentTextIndex, setCurrentTextIndex] = useState(0)
   const [reducedTextIndex, setReducedTextIndex] = useState(0)
-  const shouldReduceMotion = useReducedMotion()
+  const shouldReduceMotion = useSyncExternalStore(
+    subscribeToReducedMotion,
+    getReducedMotionSnapshot,
+    getReducedMotionServerSnapshot
+  )
 
   useEffect(() => {
     if (shouldReduceMotion) return

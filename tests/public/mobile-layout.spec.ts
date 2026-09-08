@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { collectErrors } from "../utils/console";
 
 const MOBILE_ROUTES = [
   "/",
@@ -115,6 +116,7 @@ test.describe("mobile layout regression coverage", () => {
   });
 
   test("navbar audience swaps complete phrases when motion is reduced", async ({ page }) => {
+    const errors = collectErrors(page);
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.addInitScript(() => {
       sessionStorage.setItem("po-first-businesses-offer-seen", "1");
@@ -125,6 +127,7 @@ test.describe("mobile layout regression coverage", () => {
     const changingTextVisual = page.getByTestId("navbar-changing-text-visual");
     await expect(changingTextVisual).toHaveText("לעסקים קטנים");
     await expect(changingTextVisual).toHaveText("לדוכנים", { timeout: 4_000 });
+    expect(errors, `console errors with reduced motion:\n${errors.join("\n")}`).toEqual([]);
   });
 
   for (const viewport of RESPONSIVE_VIEWPORTS) {
