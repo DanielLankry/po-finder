@@ -8,6 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
+  OwnerLifecycleBanner,
+  OwnerLifecycleLoading,
+  OwnerLifecyclePills,
+} from "@/components/dashboard/OwnerLifecycleStatus";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -42,6 +47,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nowIso] = useState(() => new Date().toISOString());
 
   const supabase = createClient();
 
@@ -174,9 +180,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 rounded-full border-4 border-[#C3DCC9] border-t-[#2D6A4F] animate-spin" />
-      </div>
+      <OwnerLifecycleLoading text="טוען את פרטי העסק..." />
     );
   }
 
@@ -186,11 +190,17 @@ export default function ProfilePage() {
       <h1 className="font-display font-bold text-xl text-stone-900 mb-6">
         {business ? "עריכת פרטי העסק" : "יצירת פרופיל עסק"}
       </h1>
-      <p className="mb-5 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-        {isPromotionJourney || business?.promotion_code === "first-20-3m"
-          ? "ביצירת הפרופיל נשמר מקום במבצע, כל עוד נותרו מקומות. העסק יתפרסם רק אחרי אישור מנהל, ואז יתחילו 3 החודשים החינם."
-          : "זו טיוטה פרטית בחינם. היא תופיע לציבור רק אחרי אימות העסק ותשלום על רישום פעיל."}
-      </p>
+      <div className="mb-5">
+        {business ? (
+          <OwnerLifecycleBanner business={business} nowIso={nowIso} />
+        ) : (
+          <p className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+            {isPromotionJourney
+              ? "ביצירת הפרופיל נשמר מקום במבצע, כל עוד נותרו מקומות. העסק יתפרסם רק אחרי אישור מנהל, ואז יתחילו 3 החודשים החינם."
+              : "זו טיוטה פרטית בחינם. היא תופיע לציבור רק אחרי אימות העסק ותשלום על רישום פעיל."}
+          </p>
+        )}
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div data-tour="profile-name">
@@ -375,7 +385,11 @@ export default function ProfilePage() {
             <Eye className="h-4 w-4 text-[#8A3618]" />
             <p className="font-bold text-[#8A3618]">תצוגה מקדימה</p>
           </div>
-          <span className="rounded-full border border-[#8A3618] bg-white px-2.5 py-1 text-[10px] font-bold text-[#8A3618]">טיוטה פרטית</span>
+          {business ? (
+            <OwnerLifecyclePills business={business} nowIso={nowIso} />
+          ) : (
+            <span className="rounded-full border border-[#8A3618] bg-white px-2.5 py-1 text-[10px] font-bold text-[#8A3618]">טיוטה פרטית</span>
+          )}
         </div>
         <div className="overflow-hidden rounded-2xl border-2 border-[#17402D] bg-[#FFFDF7] shadow-[4px_4px_0_0_#17402D]">
           <div className="flex h-36 items-center justify-center bg-[linear-gradient(135deg,#DDEBE0,#FFF3B0)]">

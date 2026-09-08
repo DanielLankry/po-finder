@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
           name: business.name,
           expires_at: business.expires_at,
           is_active: business.is_active,
+          is_legacy_public: business.is_legacy_public,
           is_verified: business.is_verified,
         })),
       });

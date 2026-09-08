@@ -68,7 +68,7 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
   const origin = process.env.NEXT_PUBLIC_SITE_URL ?? req.nextUrl.origin;
 
   if (!parsedOrder.success) {
-    return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
+    return NextResponse.redirect(getBillingRedirect(origin, "cancelled"));
   }
   const order = parsedOrder.data;
 
@@ -80,18 +80,19 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     .single();
 
   if (!attempt) {
-    return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
+    return NextResponse.redirect(getBillingRedirect(origin, "failed"));
   }
 
   // Idempotence — if we already settled this attempt, just route the user.
   if (attempt.status === "succeeded") {
-    const successUrl = new URL("/dashboard/billing", origin);
-    successUrl.searchParams.set("payment", "success");
-    successUrl.searchParams.set("attempt", attempt.id);
-    return NextResponse.redirect(successUrl);
+    return NextResponse.redirect(
+      getBillingRedirect(origin, "success", attempt.id)
+    );
   }
   if (attempt.status === "refunded" || attempt.status === "failed") {
-    return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
+    return NextResponse.redirect(
+      getBillingRedirect(origin, "failed", attempt.id)
+    );
   }
 
   // Keep a bounded diagnostic snapshot without retaining provider MACs, card
@@ -121,7 +122,9 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     if (error) {
       console.error("[/api/payments/return] failed to retain pending verification:", error);
     }
-    return NextResponse.redirect(`${origin}/dashboard/billing?payment=processing`);
+    return NextResponse.redirect(
+      getBillingRedirect(origin, "processing", attempt.id)
+    );
   }
 
   if (!verified) {
@@ -138,7 +141,9 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     if (error) {
       console.error("[/api/payments/return] failed to record verify failure:", error);
     }
-    return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
+    return NextResponse.redirect(
+      getBillingRedirect(origin, "failed", attempt.id)
+    );
   }
 
   if (!isSuccessfulHypReturn(params)) {
@@ -155,7 +160,9 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     if (error) {
       console.error("[/api/payments/return] failed to record declined payment:", error);
     }
-    return NextResponse.redirect(`${origin}/pricing?payment=cancelled`);
+    return NextResponse.redirect(
+      getBillingRedirect(origin, "failed", attempt.id)
+    );
   }
 
   const { error: settleError } = await admin.rpc("settle_payment_attempt", {
@@ -180,12 +187,22 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     // Leave the attempt pending for safe reconciliation. Never label a verified
     // card charge as failed when entitlement application needs attention.
     return NextResponse.redirect(
-      `${origin}/dashboard/billing?payment=processing`
+      getBillingRedirect(origin, "processing", attempt.id)
     );
   }
 
-  const successUrl = new URL("/dashboard/billing", origin);
-  successUrl.searchParams.set("payment", "success");
-  successUrl.searchParams.set("attempt", attempt.id);
-  return NextResponse.redirect(successUrl);
+  return NextResponse.redirect(
+    getBillingRedirect(origin, "success", attempt.id)
+  );
+}
+
+function getBillingRedirect(
+  origin: string,
+  payment: "success" | "processing" | "cancelled" | "failed",
+  attemptId?: string,
+) {
+  const url = new URL("/dashboard/billing", origin);
+  url.searchParams.set("payment", payment);
+  if (attemptId) url.searchParams.set("attempt", attemptId);
+  return url;
 }
