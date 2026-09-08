@@ -20,7 +20,7 @@ import PlacesSearchBar from "@/components/map/PlacesSearchBar";
 import type { LocationResult } from "@/components/map/PlacesSearchBar";
 import { BadgeCheck, Beef, CakeSlice, Coffee, Eye, Flower2, Gem, Leaf, MapPin, Phone, Shirt, UtensilsCrossed, Wheat } from "lucide-react";
 import { getLatestOwnedBusiness } from "@/lib/db/owned-businesses";
-import { trackMetaEvent } from "@/lib/meta-pixel";
+import { trackMetaBusinessLead } from "@/lib/meta-lead";
 import { trackPostHogEvent } from "@/lib/posthog";
 
 const CATEGORY_ICONS: Record<BusinessCategory, React.ComponentType<{ className?: string }>> = {
@@ -154,11 +154,11 @@ export default function ProfilePage() {
               category: form.category,
             });
           }
+          trackMetaBusinessLead({
+            businessId: inserted.id,
+            category: form.category,
+          });
         }
-        trackMetaEvent("Lead", {
-          content_name: "business_draft",
-          content_category: form.category,
-        });
         trackPostHogEvent("business_draft_created", {
           category: form.category,
         });

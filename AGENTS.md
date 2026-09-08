@@ -22,6 +22,8 @@ Keep secrets in `.env.local` only; use `.env.local.example` as the template for 
 Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do not reintroduce `middleware.ts`. Visible Hebrew branding should remain `פה קרוב`, while `pokarov.co.il` is reserved for domains, email addresses, and technical identifiers.
 
 ## Project Patterns
+- Paid launch traffic lands on `/vendors?campaign=first-20-3m`; the offer copy and direct signup CTA render only when the server-checked `promotion_campaigns` aggregate says the bounded campaign is open.
+- Meta business-draft Leads share `business-<uuid>` across browser Pixel and server CAPI for deduplication; CAPI is consent-gated and requires the server-only `META_CONVERSIONS_API_ACCESS_TOKEN` in Vercel.
 - HYP checkout keeps the legacy `/p/` APISign flow but sends both legacy (`SuccessUrl`, `Order`) and CreditGuard-style (`successUrl`, `uniqueid`, `returnUrl`) return fields.
 - HYP completion redirects may arrive on page routes such as `/pricing`; `proxy.ts` detects HYP return parameters and redirects them to `/api/payments/return` for settlement.
 - Dashboard access is centralized in `lib/dashboard-access.ts`; the navbar reads `/api/account/status` instead of duplicating paid-state Supabase queries client-side.
