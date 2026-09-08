@@ -1,7 +1,7 @@
 # Po-Finder (פה קרוב) - Tasks
 
 > Small business discovery app (Next.js 16 + Supabase + Google Maps)
-> Last updated: 2026-08-11
+> Last updated: 2026-09-08
 
 ---
 
@@ -99,6 +99,9 @@
   - Summary: Removed WhatsApp contact, sharing, entry, admin, public-data, and analytics surfaces while keeping email, phone, and QR alternatives, and changed the promised support response time from three to two business days.
 
 ### Launch Readiness
+- [x] Match the Meta launch campaign to the vendor landing page and deduplicated Lead tracking — 2026-09-08
+  - Files modified: `.env.local.example`, `app/api/meta/lead/route.ts`, `app/api/promotions/first-20/route.ts`, `app/dashboard/profile/page.tsx`, `app/vendors/page.tsx`, `components/marketing/CampaignLandingTracker.tsx`, `lib/launch-promotion-server.ts`, `lib/meta-conversions.ts`, `lib/meta-lead.ts`, `tests/meta-capi.test.mjs`, `tests/vendors-campaign-landing.test.mjs`, `TASKS.md`, `AGENTS.md`
+  - Summary: Added a live-availability-gated three-month campaign landing path and consent-aware Pixel/CAPI Lead deduplication so paid traffic sees the promised offer and successful business drafts become reliable optimization events.
 - [x] Complete the ordered production hardening rollout — 2026-07-16
   - Files modified: `.vercelignore`, `TASKS.md`, `AGENTS.md`
   - Summary: Applied the exact bounded-pricing migration, deployed and verified the compatible Vercel production build, then applied the final privacy migration; confirmed the live alias, all 16 ₪20–₪250 prices, database-enforced checkout amounts, anonymous REST denials for sensitive columns, clean Supabase privilege checks, and responsive mobile rendering.
