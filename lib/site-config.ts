@@ -7,7 +7,6 @@ export const BUSINESS_INFO = {
   legalBusinessName: "דניאל לונקרי",
   businessId: "322303736",
   address: "האירוס, מטולה",
-  phoneNumber: "+972-58-424-2554",
   contactEmail: "support@pokarov.co.il",
   founderName: null as string | null,
 };

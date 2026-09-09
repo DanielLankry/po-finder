@@ -8,24 +8,32 @@ This is an engineering compliance audit, not legal advice. A licensed Israeli la
 ## What Was Changed
 
 - Rewrote the public `Privacy Policy`, `Terms of Use`, `Cancellation/Refund Policy`, and `Accessibility Statement` to match the actual product flows: Supabase auth, public business listings, reviews, HYP payments, contact forms, analytics, maps, emails, and local storage.
-- Added a shared `LegalIdentity` block so legal pages surface the operator name, business number, address, contact email, phone/WhatsApp, and domain from `BUSINESS_INFO`.
+- Added a shared `LegalIdentity` block so legal pages surface the operator name, business number, address, support email, and domain from `BUSINESS_INFO` without publishing a personal phone number.
 - Gated both PostHog and Vercel Analytics behind the same explicit cookie consent.
 - Added a footer control so users can reopen cookie preferences.
 - Added checkout acceptance copy linking to terms, refund policy, and privacy policy.
 - Added a dashboard profile notice that business profile fields are intended for public display.
 - Escaped contact form and email-template values before inserting them into HTML emails.
 
-## Critical Blocker
+## Legal Review Note
 
-`lib/site-config.ts` still has missing legal identity fields:
+The public legal identity is configured through `lib/site-config.ts` with:
 
 - `legalBusinessName`
 - `businessId`
 - `address`
-- `phoneNumber` or another public phone/contact channel
+- `contactEmail` as the public support channel
 - optionally `founderName`
 
-For paid online transactions, these details should be completed before public paid traffic or checkout. The legal pages now intentionally show a warning when those fields are missing.
+For paid online transactions, a licensed Israeli lawyer should confirm that these disclosures and the email-only support channel satisfy the final operating setup.
+
+### Personal phone review — 2026-09-09
+
+The current paid product is a business listing purchased for business use; public discovery is free. On that basis, no requirement to publish the operator's personal mobile was identified, and the phone row is removed entirely. Operator name, registration number, postal address, support email, and accessibility contact remain available.
+
+This is conditional on the current business model, not a blanket exemption from telephone contact duties. The Consumer Protection Law defines a consumer by primarily personal, domestic, or family use (section 1); section 14T requires cancellation channels and disclosure for applicable consumer transactions. Reassess those duties before selling consumer services. Accessibility regulation 91 requires an accessibility coordinator for employers with at least 25 employees and publication of contact routes; reassess if that threshold applies. Neither finding establishes a need to publish this particular personal number.
+
+Sources checked: [Consumer Protection Law, sections 1 and 14T](https://he.wikisource.org/wiki/חוק_הגנת_הצרכן), [government service-accessibility regulations, regulation 91](https://www.gov.il/BlobFolder/guide/accommodating_service_providing_rules/he/sitedocs_service_acessibility_regulations.pdf).
 
 ## Israeli Compliance Areas Covered
 
