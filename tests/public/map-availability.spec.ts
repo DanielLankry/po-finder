@@ -47,6 +47,7 @@ test("confirmed-closed businesses stay off both the list and map", async ({
 }, testInfo) => {
   await page.addInitScript(() => {
     localStorage.setItem("po-cookie-consent", "declined");
+    sessionStorage.setItem("po-first-businesses-offer-seen", "1");
   });
   await page.route("**/api/businesses?includeSchedule=1", async (route) => {
     await route.fulfill({

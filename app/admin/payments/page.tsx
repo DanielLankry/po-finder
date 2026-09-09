@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CreditCard, RotateCcw } from "lucide-react";
+import { AlertTriangle, CreditCard, RefreshCw, RotateCcw } from "lucide-react";
 
 interface Attempt {
   id: string;
@@ -25,21 +25,26 @@ interface Attempt {
 export default function AdminPaymentsPage() {
   const [items, setItems] = useState<Attempt[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [refundingId, setRefundingId] = useState<string | null>(null);
   const [serviceUpdatingId, setServiceUpdatingId] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
-    const r = await fetch("/api/admin/payments", { credentials: "same-origin" });
-    if (r.ok) {
-      const d = await r.json();
-      setItems(d.items ?? []);
+    setLoadError("");
+    try {
+      const response = await fetch("/api/admin/payments", { credentials: "same-origin" });
+      const body = await response.json().catch(() => ({}));
+      if (response.ok) setItems(body.items ?? []);
+      else setLoadError(body.error ?? "שגיאה בטעינת התשלומים");
+    } catch {
+      setLoadError("לא ניתן לטעון את התשלומים. בדקו את החיבור ונסו שוב.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
   }, []);
 
@@ -76,6 +81,7 @@ export default function AdminPaymentsPage() {
 
   const fmt = (a: number) => `₪${(a / 100).toFixed(2)}`;
   const fmtDate = (s: string | null) => (s ? new Date(s).toLocaleString("he-IL") : "—");
+  const pendingCount = items.filter((item) => item.status === "pending").length;
   const statusBadge = (s: Attempt["status"]) => {
     const map: Record<Attempt["status"], string> = {
       pending: "bg-stone-100 text-stone-700",
@@ -94,15 +100,40 @@ export default function AdminPaymentsPage() {
 
   return (
     <div className="p-4 md:p-8" dir="rtl">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="h-10 w-10 rounded-xl bg-[#EFF5F0] flex items-center justify-center">
-          <CreditCard className="h-5 w-5 text-[#2D6A4F]" />
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-[#EFF5F0] flex items-center justify-center">
+            <CreditCard className="h-5 w-5 text-[#2D6A4F]" />
+          </div>
+          <div>
+            <h1 className="font-extrabold text-2xl text-[#111]">תשלומים</h1>
+            <p className="text-[#888] text-sm">היסטוריית עסקאות מ-HYP</p>
+          </div>
         </div>
-        <div>
-          <h1 className="font-extrabold text-2xl text-[#111]">תשלומים</h1>
-          <p className="text-[#888] text-sm">היסטוריית עסקאות מ-HYP</p>
-        </div>
+        <button
+          onClick={load}
+          disabled={loading}
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl border-2 border-[#17402D]/25 bg-white px-4 text-sm font-bold text-[#17402D] disabled:opacity-50"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> רענון
+        </button>
       </div>
+
+      {loadError ? (
+        <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
+          {loadError}
+        </p>
+      ) : null}
+
+      {pendingCount > 0 ? (
+        <div role="alert" className="mb-5 flex items-start gap-3 rounded-xl border-2 border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
+          <p>
+            <strong>{pendingCount} עסקאות עדיין ממתינות.</strong> מזהה Order מוצג בטבלה לצורך בדיקה מול HYP.
+            אין לסמן עסקה כשולמה לפי זמן או אישור לקוח בלבד; נדרש אימות דרך מערכת הסליקה.
+          </p>
+        </div>
+      ) : null}
 
       {loading ? (
         <p className="text-stone-500 text-sm">טוען...</p>
@@ -156,7 +187,8 @@ export default function AdminPaymentsPage() {
                     <td className="px-4 py-3 font-semibold text-[#111]">{fmt(a.amount_agorot)}</td>
                     <td className="px-4 py-3">{statusBadge(a.status)}</td>
                     <td className="px-4 py-3 text-xs text-[#888]" dir="ltr">
-                      {a.hyp_transaction_id ?? "—"}
+                      <div>Order: {a.id}</div>
+                      <div>{a.hyp_transaction_id ? `Trans: ${a.hyp_transaction_id}` : "Trans: —"}</div>
                       {a.hyp_card_mask && <div className="text-[10px]">****{a.hyp_card_mask}</div>}
                     </td>
                     <td className="px-4 py-3">

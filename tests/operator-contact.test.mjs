@@ -17,7 +17,10 @@ const supportSurfaces = [
 test("public operator contact surfaces expose email without WhatsApp", () => {
   for (const path of supportSurfaces) {
     const source = read(path);
-    assert.doesNotMatch(source, /getWhatsAppHref|whatsappHref|טלפון \/ WhatsApp/);
+    assert.doesNotMatch(
+      source,
+      /getWhatsAppHref|whatsappHref|whatsappNumber|phoneNumber|wa\.me|טלפון \/ WhatsApp/,
+    );
     assert.doesNotMatch(source, new RegExp(operatorNumber.replace(/[+]/g, "\\+")));
     assert.doesNotMatch(source, new RegExp(operatorDigits));
   }
@@ -30,8 +33,9 @@ test("public operator contact surfaces expose email without WhatsApp", () => {
   assert.match(siteConfig, /contactEmail: "support@pokarov\.co\.il"/);
 });
 
-test("listed businesses keep their own WhatsApp contact action", () => {
-  const businessPage = read("app/businesses/[id]/page.tsx");
-  assert.match(businessPage, /business\.whatsapp/);
-  assert.match(businessPage, /https:\/\/wa\.me\/\$\{business\.whatsapp/);
+test("listed businesses keep the phone contact action from current master", () => {
+  const statusCard = read("components/business/StatusCard.tsx");
+  assert.match(statusCard, /business\.phone/);
+  assert.match(statusCard, /tel:\$\{business\.phone\}/);
+  assert.doesNotMatch(statusCard, /business\.whatsapp|wa\.me/);
 });

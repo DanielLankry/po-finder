@@ -1,9 +1,18 @@
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { Mail, PenLine, MapPin, Handshake, Search, Clock3, Percent, Heart } from "lucide-react";
 import Reveal from "@/components/ui/reveal";
 import { Marquee } from "@/components/ui/marquee";
+import CampaignLandingTracker from "@/components/marketing/CampaignLandingTracker";
 import { BRAND_NAME, BUSINESS_INFO, LAUNCH_OFFER, VENDOR_FAQS } from "@/lib/site-config";
+import {
+  FIRST_BUSINESSES_PROMOTION_CODE,
+  FIRST_BUSINESSES_SIGNUP_PATH,
+} from "@/lib/launch-promotion";
+import { getFirstBusinessesPromotionStatus } from "@/lib/launch-promotion-server";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "הצטרפות עסקים",
@@ -37,6 +46,27 @@ const STEPS = [
   },
 ];
 
+const PROMOTION_STEPS = [
+  {
+    step: "1",
+    title: "יוצרים טיוטה בחינם",
+    desc: "פותחים חשבון וממלאים את פרטי העסק. ברגע שהטיוטה נשמרת, המקום במבצע נשמר בכפוף לזמינות.",
+    Icon: PenLine,
+  },
+  {
+    step: "2",
+    title: "העסק עובר אימות",
+    desc: "מנהל פה קרוב בודק את פרטי העסק. זמן ההמתנה לא יורד מתקופת ההטבה.",
+    Icon: MapPin,
+  },
+  {
+    step: "3",
+    title: "3 החודשים מתחילים",
+    desc: "אחרי האישור העסק מופיע במפה וברשימה למשך שלושה חודשים מלאים, ללא חיוב אוטומטי.",
+    Icon: Handshake,
+  },
+];
+
 const BENEFITS = [
   {
     Icon: Search,
@@ -60,46 +90,95 @@ const BENEFITS = [
   },
 ];
 
-export default function VendorsPage() {
+interface VendorsPageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+/** Renders a message-matched landing page only while the bounded campaign is open. */
+export default async function VendorsPage({ searchParams }: VendorsPageProps) {
+  const params = await searchParams;
+  const campaignParam = Array.isArray(params.campaign)
+    ? params.campaign[0]
+    : params.campaign;
+  const campaignRequested = campaignParam === FIRST_BUSINESSES_PROMOTION_CODE;
+  const promotion = campaignRequested
+    ? await getFirstBusinessesPromotionStatus()
+    : null;
+  const campaignOpen = promotion?.isOpen === true;
+  const steps = campaignOpen ? PROMOTION_STEPS : STEPS;
+  const primaryHref = campaignOpen ? FIRST_BUSINESSES_SIGNUP_PATH : "/pricing";
+  const primaryLabel = campaignOpen
+    ? "שמירת מקום בחינם"
+    : LAUNCH_OFFER.primaryButtonText;
+
   return (
     <div dir="rtl" className="brand-canvas min-h-screen font-sans">
       <Navbar />
+      {campaignOpen ? (
+        <CampaignLandingTracker campaignCode={FIRST_BUSINESSES_PROMOTION_CODE} />
+      ) : null}
 
       {/* ── Hero — poster style ── */}
       <section className="relative overflow-hidden pt-28 pb-16 px-4">
         <div className="relative max-w-4xl mx-auto text-center">
           <Reveal>
             <span className="inline-block mb-6 bg-white text-[#1F5038] text-sm font-bold px-4 py-1.5 rounded-full border-2 border-[#17402D] shadow-[2px_2px_0_0_#17402D]">
-              הצטרפות לעסקים קטנים, דוכנים ועסקים ניידים
+              {campaignOpen
+                ? "מבצע השקה • עד 20 עסקים • עד 31.12.2026"
+                : "הצטרפות לעסקים קטנים, דוכנים ועסקים ניידים"}
             </span>
           </Reveal>
 
           <Reveal delay={0.1}>
             <h1 className="font-display text-6xl md:text-7xl lg:text-8xl text-[#17402D] leading-none mb-6">
-              הופיעו על <span className="marker-highlight">המפה</span> של {BRAND_NAME}
+              {campaignOpen ? (
+                <>
+                  3 חודשים <span className="marker-highlight">חינם</span> לעסק מקומי
+                </>
+              ) : (
+                <>
+                  הופיעו על <span className="marker-highlight">המפה</span> של {BRAND_NAME}
+                </>
+              )}
             </h1>
           </Reveal>
 
           <Reveal delay={0.2}>
             <p className="text-lg md:text-xl text-[#57534E] max-w-2xl mx-auto mb-8 leading-relaxed">
-              לקוחות רואים אתכם בזמן אמת לפי מיקום, שעות פעילות וקטגוריה — בלי אפליקציה ובלי תהליך מסובך.
+              {campaignOpen
+                ? "20 העסקים הראשונים שיוצרים טיוטה ושעוברים אימות מקבלים שלושה חודשי הופעה במפה — ללא תשלום וללא חידוש אוטומטי."
+                : "לקוחות רואים אתכם בזמן אמת לפי מיקום, שעות פעילות וקטגוריה — בלי אפליקציה ובלי תהליך מסובך."}
             </p>
           </Reveal>
 
           <Reveal delay={0.3}>
             <div className="sticker max-w-2xl mx-auto p-6 mb-10 -rotate-1">
-              <p className="text-xl font-bold text-[#17402D] mb-1">{LAUNCH_OFFER.mainCtaText}</p>
-              <p className="text-[#57534E]">{LAUNCH_OFFER.secondaryText}</p>
+              <p className="text-xl font-bold text-[#17402D] mb-1">
+                {campaignOpen
+                  ? "יוצרים טיוטה בחינם ושומרים מקום במבצע"
+                  : LAUNCH_OFFER.mainCtaText}
+              </p>
+              <p className="text-[#57534E]">
+                {campaignOpen
+                  ? "ההטבה מתחילה רק לאחר אישור מנהל; בכפוף למקומות פנויים ולתנאי המבצע."
+                  : LAUNCH_OFFER.secondaryText}
+              </p>
             </div>
           </Reveal>
+
+          {campaignRequested && !campaignOpen ? (
+            <p className="mx-auto mb-8 max-w-2xl rounded-xl border-2 border-[#8A3618] bg-[#F7E7DE] px-4 py-3 text-sm font-bold text-[#8A3618]">
+              מבצע 20 העסקים אינו זמין כרגע. עדיין אפשר ליצור טיוטה בחינם ולבחור תקופת הופעה לאחר האימות.
+            </p>
+          ) : null}
 
           <Reveal delay={0.4}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link
-                href="/pricing"
+                href={primaryHref}
                 className="poster-hover w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#C4552D] hover:bg-[#A8441F] text-white font-bold text-lg px-8 py-4 rounded-2xl border-2 border-[#8A3618] shadow-[4px_4px_0_0_#8A3618]"
               >
-                {LAUNCH_OFFER.primaryButtonText}
+                {primaryLabel}
                 <span className="text-xl">←</span>
               </Link>
               <a
@@ -133,12 +212,16 @@ export default function VendorsPage() {
       <section className="py-20 px-4">
         <div className="max-w-5xl mx-auto">
           <Reveal className="text-center mb-14">
-            <h2 className="font-display text-5xl md:text-6xl text-[#17402D] mb-3">איך זה עובד?</h2>
-            <p className="text-[#78716C] text-lg">שלושה צעדים פשוטים עד שהעסק מופיע על המפה</p>
+            <h2 className="font-display text-5xl md:text-6xl text-[#17402D] mb-3">
+              {campaignOpen ? "איך שומרים מקום?" : "איך זה עובד?"}
+            </h2>
+            <p className="text-[#78716C] text-lg">
+              שלושה צעדים פשוטים עד שהעסק מופיע על המפה
+            </p>
           </Reveal>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {STEPS.map(({ step, title, desc, Icon }, i) => (
+            {steps.map(({ step, title, desc, Icon }, i) => (
               <Reveal key={step} delay={i * 0.12}>
                 <div className="sticker poster-hover relative p-7 pt-10 text-center h-full">
                   <div className="absolute -top-5 right-1/2 translate-x-1/2 w-10 h-10 bg-[#C4552D] text-white font-display text-2xl rounded-full flex items-center justify-center border-2 border-[#8A3618]">
@@ -209,16 +292,24 @@ export default function VendorsPage() {
         <div className="max-w-2xl mx-auto text-center">
           <Reveal>
             <h2 className="font-display text-5xl md:text-6xl text-[#F7F3EA] mb-4">מוכנים להצטרף?</h2>
-            <p className="text-[#C3DCC9] text-lg mb-2">{LAUNCH_OFFER.mainCtaText}</p>
-            <p className="text-[#9DC4A8] text-sm mb-10">{LAUNCH_OFFER.secondaryText}</p>
+            <p className="text-[#C3DCC9] text-lg mb-2">
+              {campaignOpen
+                ? "צרו טיוטת עסק ושמרו מקום בין 20 המצטרפים הראשונים."
+                : LAUNCH_OFFER.mainCtaText}
+            </p>
+            <p className="text-[#9DC4A8] text-sm mb-10">
+              {campaignOpen
+                ? "בכפוף למקומות פנויים, אימות העסק ואישור מנהל • עד 31.12.2026"
+                : LAUNCH_OFFER.secondaryText}
+            </p>
           </Reveal>
           <Reveal delay={0.15}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/pricing"
+                href={primaryHref}
                 className="poster-hover inline-flex items-center justify-center gap-2 bg-[#C4552D] hover:bg-[#A8441F] text-white font-bold text-lg px-10 py-4 rounded-2xl border-2 border-[#F7F3EA] shadow-[4px_4px_0_0_rgba(247,243,234,0.35)]"
               >
-                {LAUNCH_OFFER.primaryButtonText}
+                {primaryLabel}
                 <span className="text-xl">←</span>
               </Link>
               <a
@@ -232,6 +323,7 @@ export default function VendorsPage() {
           </Reveal>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

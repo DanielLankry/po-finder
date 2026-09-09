@@ -1,10 +1,10 @@
 import { adminClient } from "./supabase/admin";
-import { PLAN_CODES, PLANS } from "./plans";
-import type { Plan, PlanCode, PlanKind } from "./plans";
+import { PLAN_CODES, PLANS, resolvePlanCatalog } from "./plans";
+import type { Plan, PlanCandidate, PlanCode, PlanKind } from "./plans";
 
 interface PlanRow {
   code: PlanCode;
-  kind: "listing";
+  kind: PlanKind;
   days: number;
   duration_months: number | null;
   boost_days: number;
@@ -15,17 +15,17 @@ interface PlanRow {
   requires_verification: boolean;
 }
 
-function mapPlan(row: PlanRow): Plan {
+function mapPlan(row: PlanRow): PlanCandidate {
   return {
     code: row.code,
-    kind: "listing",
+    kind: row.kind,
     months: row.duration_months,
     days: row.days,
-    boostDays: 0,
+    boostDays: row.boost_days,
     label: row.label,
     price: row.price,
     isActive: row.is_active,
-    maxRedemptions: null,
+    maxRedemptions: row.max_redemptions,
     requiresVerification: row.requires_verification,
   };
 }
@@ -43,10 +43,7 @@ export async function getPlans(): Promise<Plan[]> {
       .order("sort_order", { ascending: true });
     if (error || !data?.length) return [...PLANS];
     const databasePlans = (data as PlanRow[]).map(mapPlan);
-    return PLANS.map(
-      (fallback) =>
-        databasePlans.find((plan) => plan.code === fallback.code) ?? fallback
-    );
+    return resolvePlanCatalog(databasePlans);
   } catch {
     return [...PLANS];
   }

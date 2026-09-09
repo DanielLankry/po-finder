@@ -1,16 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Analytics } from "@vercel/analytics/next";
+import type { BeforeSendMiddleware } from "@vercel/speed-insights";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const CONSENT_KEY = "po-cookie-consent";
+const filterSpeedInsightByConsent: BeforeSendMiddleware = (event) =>
+  localStorage.getItem(CONSENT_KEY) === "accepted" ? event : null;
 
 export default function ConsentAnalytics() {
   const [enabled, setEnabled] = useState(false);
+  const enabledRef = useRef(false);
 
   useEffect(() => {
     function syncConsent() {
-      setEnabled(localStorage.getItem(CONSENT_KEY) === "accepted");
+      const nextEnabled = localStorage.getItem(CONSENT_KEY) === "accepted";
+
+      if (enabledRef.current && !nextEnabled) {
+        window.location.reload();
+        return;
+      }
+
+      enabledRef.current = nextEnabled;
+      setEnabled(nextEnabled);
     }
 
     syncConsent();
@@ -22,5 +35,14 @@ export default function ConsentAnalytics() {
     };
   }, []);
 
-  return enabled ? <Analytics /> : null;
+  if (!enabled) {
+    return null;
+  }
+
+  return (
+    <>
+      <Analytics />
+      <SpeedInsights beforeSend={filterSpeedInsightByConsent} />
+    </>
+  );
 }

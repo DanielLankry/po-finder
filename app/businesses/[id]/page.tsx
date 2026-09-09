@@ -20,6 +20,7 @@ import Footer from "@/components/layout/Footer";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import type { WeeklyScheduleEntry } from "@/lib/types";
 import { getIsraelDateContext, resolveEffectiveSchedule } from "@/lib/utils/schedule";
+import { serializeJsonLd } from "@/lib/json-ld";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -119,7 +120,7 @@ export default async function BusinessPage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(localBusinessSchema) }}
       />
       <Navbar />
       <ViewTracker businessId={id} />
@@ -223,25 +224,8 @@ export default async function BusinessPage({ params }: Props) {
             </div>
           </div>
         </div>
-
-        {/* Mobile sticky WhatsApp bar */}
-        {business.whatsapp && (
-          <div className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-stone-200 p-4 safe-area-bottom">
-            <a
-              href={`https://wa.me/${business.whatsapp.replace(/\D/g, "")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#1EB856] text-white font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
-            >
-              שלחו הודעה בוואטסאפ
-            </a>
-          </div>
-        )}
       </div>
       <Footer />
-      {business.whatsapp && (
-        <div className="h-[calc(5rem+env(safe-area-inset-bottom))] lg:hidden" aria-hidden="true" />
-      )}
     </>
   );
 }

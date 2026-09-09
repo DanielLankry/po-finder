@@ -15,6 +15,7 @@
 /playwright-report
 /test-results
 /playwright/.cache
+/.lighthouseci
 
 # next.js
 /.next/
@@ -48,6 +49,7 @@ next-env.d.ts
 # local tooling / scratch
 .claude/
 .codex/
+.codex-release/
 .playwright-mcp/
 *.log
 tsc_output.txt

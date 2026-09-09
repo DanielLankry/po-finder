@@ -23,6 +23,9 @@ interface BusinessLite {
   is_active: boolean;
   is_legacy_public?: boolean | null;
   is_verified: boolean;
+  promotion_code?: string | null;
+  promotion_reserved_at?: string | null;
+  promotion_activated_at?: string | null;
 }
 
 export interface PurchaseEvent {
