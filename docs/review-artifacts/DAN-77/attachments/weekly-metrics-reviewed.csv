@@ -1,0 +1,33 @@
+section,metric_or_dimension,period,value,secondary_value,notes
+traffic,pageviews,2026-07-26/2026-08-01,37,,Complete UTC week; host pokarov.co.il; test-account filter enabled
+traffic,pageviews,2026-07-19/2026-07-25,7,,Prior complete UTC week
+traffic,unique_visitors,2026-07-26/2026-08-01,1,,Distinct visitors at weekly interval
+traffic,unique_visitors,2026-07-19/2026-07-25,2,,Distinct visitors at weekly interval
+traffic,first_time_visitors,2026-07-26/2026-08-01,1,,PostHog first_time_for_user
+traffic,returning_visitors,2026-07-26/2026-08-01,0,,Unique minus first-time
+traffic,first_time_visitors,2026-07-19/2026-07-25,1,,PostHog first_time_for_user
+traffic,returning_visitors,2026-07-19/2026-07-25,1,,Unique minus first-time
+traffic,pageviews_per_visitor,2026-07-26/2026-08-01,37.0,,37 / 1
+traffic,pageviews_per_visitor,2026-07-19/2026-07-25,3.5,,7 / 2
+funnel,Homepage,2026-07-26/2026-08-01,1,1.0000,Ordered within 7 days
+funnel,Pricing,2026-07-26/2026-08-01,1,1.0000,Rate versus prior step
+funnel,Registration,2026-07-26/2026-08-01,1,1.0000,Rate versus prior step
+funnel,Billing,2026-07-26/2026-08-01,0,0.0000,Rate versus prior step
+funnel,Homepage,2026-07-19/2026-07-25,2,1.0000,Ordered within 7 days
+funnel,Pricing,2026-07-19/2026-07-25,0,0.0000,Rate versus prior step
+funnel,Registration,2026-07-19/2026-07-25,0,,No prior-step entrants
+funnel,Billing,2026-07-19/2026-07-25,0,,No prior-step entrants
+page,/auth/register,2026-07-26/2026-08-01,13,1,Pageviews and overlapping unique visitors
+page,/pricing,2026-07-26/2026-08-01,12,1,Pageviews and overlapping unique visitors
+page,/,2026-07-26/2026-08-01,6,1,Pageviews and overlapping unique visitors
+page,/contact,2026-07-26/2026-08-01,6,1,Pageviews and overlapping unique visitors
+page,/,2026-07-19/2026-07-25,3,2,Pageviews and overlapping unique visitors
+page,/admin/login,2026-07-19/2026-07-25,2,1,Pageviews and overlapping unique visitors
+page,/dashboard/schedule,2026-07-19/2026-07-25,1,1,Pageviews and overlapping unique visitors
+page,/pricing,2026-07-19/2026-07-25,1,1,Pageviews and overlapping unique visitors
+referrer,Direct,2026-07-26/2026-08-01,37,1,Pageviews and overlapping unique visitors
+referrer,Direct,2026-07-19/2026-07-25,5,1,Pageviews and overlapping unique visitors
+referrer,Facebook,2026-07-19/2026-07-25,2,1,Pageviews and overlapping unique visitors
+seo,sitemap_urls,2026-08-02,2,,Homepage and /about; not an indexed-page count
+availability,search_console,2026-07-26/2026-08-01,,,Unavailable; restricted property access required
+availability,listing_and_lead_aggregates,2026-07-26/2026-08-01,,,Unavailable; read-only aggregate Supabase query not approved
