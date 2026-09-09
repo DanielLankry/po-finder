@@ -7,6 +7,12 @@
 
 ## DONE
 
+### Personal contact privacy
+- [x] Remove the operator's personal phone from public legal pages — 2026-09-09
+  - Files modified: `lib/site-config.ts`, `components/legal/LegalIdentity.tsx`, `docs/legal-compliance-audit.md`, `tests/personal-contact-privacy.test.mjs`, `TASKS.md`, `AGENTS.md`
+  - Summary: Removed the personal phone from the shared legal identity and kept `support@pokarov.co.il` as the public platform-support channel.
+  - Verification: 103 Node tests, repository lint, and production build passed. Live public/auth Playwright checks: 141 passed, 37 conditionally skipped. Live contact submission and admin UI reply reached Resend `delivered`; history survived reload, unauthorized requests returned 401, and the exact synthetic message/reply were cleaned up.
+
 ### Private support inbox
 - [x] Reply to contact-form customers from the site's support identity — 2026-09-09
   - Files modified: `app/admin/contact/page.tsx`, `app/admin/layout.tsx`, `app/api/admin/contact/route.ts`, `app/api/admin/contact/[id]/reply/route.ts`, `app/api/contact/route.ts`, `lib/email-templates.ts`, `lib/email.ts`, `supabase/migrations/20260909092059_support_inbox.sql`, `tests/email-reply-routing.test.mjs`, `tests/support-inbox.test.mjs`, `TASKS.md`, `AGENTS.md`
