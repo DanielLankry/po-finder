@@ -359,7 +359,45 @@ export function contactAutoReplyTemplate(name: string, subjectLabel: string): st
   `);
 }
 
-// ── 5. Expiry Reminder ────────────────────────────────────────────────────────
+// ── 5. Personal Support Reply ────────────────────────────────────────────────
+/** Builds a branded, human reply without exposing the administrator's mailbox. */
+export function supportReplyTemplate(
+  name: string,
+  subjectLabel: string,
+  message: string
+): string {
+  const safeName = escapeHtml(name);
+  const safeSubjectLabel = escapeHtml(subjectLabel);
+  const safeMessage = escapeHtml(message).replace(/\r?\n/g, "<br>");
+
+  return wrapper(`
+    <tr>
+      <td style="background: #EFF5F0; border-bottom: 2px solid #17402D; padding: 30px 28px 28px; text-align: center;">
+        ${BRAND_LOCKUP_HTML}
+        <p style="font-family: ${BODY_FONT}; font-size: 13px; font-weight: 800; color: #8A3618; margin: 18px 0 8px;">תשובה אישית מצוות התמיכה</p>
+        <h1 style="font-family: ${DISPLAY_FONT}; font-size: 36px; line-height: 1; font-weight: 700; color: #17402D; margin: 0 0 8px;">חזרנו אליך</h1>
+        <p style="font-family: ${BODY_FONT}; font-size: 15px; color: #2D6A4F; margin: 0;">בנושא: ${safeSubjectLabel}</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 28px 32px 24px;">
+        <p style="font-family: ${BODY_FONT}; font-size: 16px; color: #17402D; line-height: 1.7; margin: 0 0 18px;">שלום ${safeName},</p>
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #FFF8DC; border: 2px solid #17402D; border-radius: 14px; box-shadow: 4px 4px 0 #17402D;">
+          <tr>
+            <td style="padding: 22px 24px; font-family: ${BODY_FONT}; font-size: 16px; color: #292524; line-height: 1.75;">
+              ${safeMessage}
+            </td>
+          </tr>
+        </table>
+        <p style="font-family: ${BODY_FONT}; font-size: 14px; color: #57534E; line-height: 1.7; margin: 24px 0 0;">
+          אפשר להשיב ישירות למייל הזה — התשובה תגיע אל <strong style="color: #17402D;">support@pokarov.co.il</strong>.
+        </p>
+      </td>
+    </tr>
+  `);
+}
+
+// ── 6. Expiry Reminder ────────────────────────────────────────────────────────
 export function expiryReminderTemplate(
   businessName: string,
   expiresAt: Date,

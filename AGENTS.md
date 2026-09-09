@@ -24,7 +24,8 @@ Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do
 ## Project Patterns
 - Transactional email HTML mirrors the product-paper UI with warm paper, green ink, terracotta CTAs, strong borders, and hard offset shadows; keep hosted Resend drafts and `lib/email-templates.ts` visually aligned.
 - A successful self-service business insert sends the owner registration receipt and the admin review alert through `Promise.allSettled`, so Resend delivery failures are logged but never roll back the saved business.
-- Transactional messages continue to send from `noreply@pokarov.co.il`, but every customer-facing message must set `Reply-To: support@pokarov.co.il`; the internal new-business alert instead replies directly to the submitted owner email.
+- Automated transactional messages send from `noreply@pokarov.co.il`, while administrator-authored contact replies send from `support@pokarov.co.il`; every customer-facing message keeps `Reply-To: support@pokarov.co.il`, and only the internal new-business alert replies directly to the submitted owner email.
+- Contact-form messages and reply audits live in locked `contact_messages` and `contact_replies` tables; browser roles have no grants, and the signed admin routes are the only UI path to the service-role-backed support inbox.
 - Paid launch traffic lands on `/vendors?campaign=first-20-3m`; the offer copy and direct signup CTA render only when the server-checked `promotion_campaigns` aggregate says the bounded campaign is open.
 - Meta business-draft Leads share `business-<uuid>` across browser Pixel and server CAPI for deduplication; CAPI is consent-gated and requires the server-only `META_CONVERSIONS_API_ACCESS_TOKEN` in Vercel.
 - HYP checkout keeps the legacy `/p/` APISign flow but sends both legacy (`SuccessUrl`, `Order`) and CreditGuard-style (`successUrl`, `uniqueid`, `returnUrl`) return fields.
@@ -71,6 +72,7 @@ Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do
 - Recurring autonomous operations are defined under `.agents/`: the site engineer may open tested low-risk PRs but cannot deploy or mutate production, while the Meta marketing agent remains recommendation-only until explicit campaign authority and real targets are provided.
 
 ## Known Issues
+- Production must receive `20260909085248_support_inbox.sql` before deploying the admin support inbox; until then contact-form persistence intentionally fails instead of pretending a message was delivered.
 - Production must receive `20260811100008_first_twenty_business_promotion.sql` before the campaign-enabled app is promoted; the API intentionally degrades to no offer when the aggregate table is absent.
 - Production has `20260715144513_launch_privacy_hardening.sql` applied; preserve that migration version so future CLI pushes do not try to replay the policy cutover.
 - If HYP charges a card but no browser return reaches `/api/payments/return`, existing pending attempts must be reconciled manually or via a future transaction inquiry integration.
@@ -84,6 +86,7 @@ Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do
 - The legacy `coupons` table has no payment-attempt reservation, per-user redemption, cancellation, or refund linkage; issuance and reactivation are intentionally blocked until those product rules and an atomic schema are defined.
 
 ## Architecture Decisions
+- A valid contact form is persisted before email notifications, so the private admin inbox is the source of truth; notification and auto-reply failures do not discard the customer's saved message.
 - The PostHog-inspired direction is interpreted as Hebrew neighborhood field notes—warm paper, green ink, terracotta accents, offset shadows, and map geometry—so the site keeps its own `פה קרוב` identity rather than copying another product.
 - Launch pricing is one duration-based listing product with no subscription, boost sale, promoted badge, or promoted sorting; legacy boost rows/columns remain only for historical audit and refund compatibility.
 - Full admin control is exposed through allowlisted server routes for businesses, users, reviews/events, payments, and pricing; the coupon area intentionally permits only inspection, deactivation, and deletion of inert legacy rows. Destructive user/content actions require explicit confirmation and remain behind the signed admin session.

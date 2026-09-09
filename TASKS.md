@@ -7,6 +7,11 @@
 
 ## DONE
 
+### Private support inbox
+- [x] Reply to contact-form customers from the site's support identity — 2026-09-09
+  - Files modified: `app/admin/contact/page.tsx`, `app/admin/layout.tsx`, `app/api/admin/contact/route.ts`, `app/api/admin/contact/[id]/reply/route.ts`, `app/api/contact/route.ts`, `lib/email-templates.ts`, `lib/email.ts`, `supabase/migrations/20260909085248_support_inbox.sql`, `tests/email-reply-routing.test.mjs`, `tests/support-inbox.test.mjs`, `TASKS.md`, `AGENTS.md`
+  - Summary: Added a private admin conversation queue that persists contact submissions and sends branded, audited replies from `support@pokarov.co.il` without exposing the administrator's personal mailbox.
+
 ### Branded business lifecycle emails
 - [x] Match business emails to the product-paper theme and confirm new registrations — 2026-09-09
   - Files modified: `lib/email-templates.ts`, `lib/email.ts`, `lib/db/businesses.ts`, `tests/business-registration-email.test.mjs`, `tests/email-reply-routing.test.mjs`, `TASKS.md`, `AGENTS.md`
