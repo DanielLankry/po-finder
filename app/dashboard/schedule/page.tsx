@@ -1,5 +1,9 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
+import { useOwnerFormAnchor } from "@/lib/hooks/useOwnerFormAnchor";
+import { notifyOwnerDataChanged } from "@/components/dashboard/OwnerWorkspace";
+
 import { useState, useEffect, useRef } from "react";
 import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 import { createClient } from "@/lib/supabase/client";
@@ -36,7 +40,16 @@ type DayForm = {
 const EMPTY_DAY: DayForm = { is_active: false, open_time: "", close_time: "", address: "", lat: "", lng: "", note: "" };
 
 export default function SchedulePage() {
-  const [tab, setTab] = useState<"weekly" | "override">("weekly");
+  const requestedId = useSearchParams().get("businessId");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const tab = searchParams.get("tab") === "override" ? "override" : "weekly";
+  // The URL is the tab's source of truth, including links from completion and today's status.
+  function setTab(value: "weekly" | "override") {
+    const next = new URLSearchParams(searchParams.toString());
+    next.set("tab", value);
+    router.replace(`/dashboard/schedule?${next}`, { scroll: false });
+  }
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -56,6 +69,7 @@ export default function SchedulePage() {
   });
   const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
 
+  useOwnerFormAnchor(loading);
   const supabase = createClient();
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
@@ -73,7 +87,7 @@ export default function SchedulePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
 
-      const biz = await getLatestOwnedBusiness(supabase);
+      const biz = await getLatestOwnedBusiness(supabase, requestedId);
 
       if (!biz) { setLoading(false); return; }
       setBusinessId(biz.id);
@@ -123,7 +137,7 @@ export default function SchedulePage() {
       setLoading(false);
     }
     load();
-  }, [supabase]);
+  }, [supabase, requestedId]);
 
   // ── Weekly save ────────────────────────────────────────────────────────────
   async function handleWeeklySave() {
@@ -164,7 +178,7 @@ export default function SchedulePage() {
       .upsert(rows, { onConflict: "business_id,day_of_week" });
 
     if (err) setError("שגיאה בשמירת התבנית. נסו שוב.");
-    else setSuccess("✓ התבנית השבועית נשמרה בהצלחה!");
+    else { setSuccess("✓ התבנית השבועית נשמרה בהצלחה!"); notifyOwnerDataChanged(); }
     setSaving(false);
   }
 
@@ -204,16 +218,18 @@ export default function SchedulePage() {
       .single();
 
     if (err) setError("שגיאה בשמירה. נסו שוב.");
-    else { setSchedule(data); setSuccess("✓ לוח הזמנים להיום פורסם!"); }
+    else { setSchedule(data); setSuccess("✓ השינוי להיום נשמר. מצב הפרסום של העסק לא השתנה."); notifyOwnerDataChanged(); }
     setSaving(false);
   }
 
   async function handleOverrideDelete() {
     if (!schedule) return;
-    await supabase.from("business_schedules").delete().eq("id", schedule.id);
+    const { error: deleteError } = await supabase.from("business_schedules").delete().eq("id", schedule.id).eq("business_id", businessId!);
+    if (deleteError) { setError("לא הצלחנו להסיר את השינוי היומי. נסו שוב."); return; }
     setSchedule(null);
     setOverrideForm({ address: "", lat: "", lng: "", open_time: "", close_time: "", note: "" });
-    setSuccess("✓ תיקון היומי הוסר — יוצג לפי התבנית השבועית");
+    setSuccess("✓ השינוי היומי הוסר — יוצג לפי התבנית השבועית");
+    notifyOwnerDataChanged();
   }
 
   // ── Address helpers ────────────────────────────────────────────────────────
@@ -284,7 +300,7 @@ export default function SchedulePage() {
 
       {/* ── WEEKLY TEMPLATE ─────────────────────────────────────────────────── */}
       {tab === "weekly" && (
-        <div className="brand-panel bg-[#FFFDF7] p-4 sm:p-6" data-tour="schedule-template">
+        <div className="brand-panel bg-[#FFFDF7] p-4 sm:p-6" id="schedule-template" data-tour="schedule-template">
           <h1 className="font-bold text-xl text-stone-900 mb-1">תבנית שבועית</h1>
           <p className="text-stone-500 text-sm mb-6">הגדירו את ימי ושעות הפעילות הקבועים שלכם. שעת סגירה מוקדמת משעת הפתיחה מסמנת פעילות שחוצה חצות. ניתן לשנות יום ספציפי בטאב &quot;תיקון להיום&quot;.</p>
 
@@ -332,7 +348,7 @@ export default function SchedulePage() {
                         />
                       </div>
                     )}
-                    {!f.is_active && <span className="text-stone-400 text-xs">לא פעיל</span>}
+                    {!f.is_active && <span className="text-stone-400 text-sm">לא פעיל</span>}
                   </div>
 
                   {/* Address + note (expanded when active) */}
@@ -392,7 +408,7 @@ export default function SchedulePage() {
           <div className="flex items-center justify-between mb-1">
             <h1 className="font-bold text-xl text-stone-900">תיקון להיום</h1>
             {schedule && (
-              <button onClick={handleOverrideDelete} className="text-xs text-red-500 hover:text-red-700 font-medium">
+              <button onClick={handleOverrideDelete} className="text-sm text-red-500 hover:text-red-700 font-medium">
                 הסר תיקון
               </button>
             )}

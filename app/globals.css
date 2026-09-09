@@ -989,3 +989,13 @@ p, li, span:not([class*="font-bold"]):not([class*="font-semibold"]), td, th, blo
 .font-display span:not([class*="font-sans"]) {
   font-family: var(--font-poster), sans-serif;
 }
+
+/* Owner inputs stay readable without mobile browser auto-zoom; anchor links clear the header. */
+#dashboard-content input:not([type="checkbox"]):not([type="radio"]),
+#dashboard-content textarea,
+#dashboard-content select {
+  font-size: 1rem;
+}
+#dashboard-content [id] {
+  scroll-margin-top: 6rem;
+}

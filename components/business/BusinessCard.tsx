@@ -87,7 +87,7 @@ export default function BusinessCard({
             {/* Optional "Open Now" badge over image */}
             {availability === "open" && (
               <div className="brand-chip absolute top-3 right-3 z-10 px-3 py-1.5 pointer-events-none">
-                 <span className="text-[12px] font-bold tracking-wide text-[#2D6A4F]">
+                 <span className="text-sm font-bold tracking-wide text-[#2D6A4F]">
                    פתוח עכשיו
                  </span>
               </div>
@@ -106,7 +106,7 @@ export default function BusinessCard({
               {business.avg_rating > 0 && (
                 <div className="flex items-center gap-1 flex-shrink-0 mt-0.5">
                   <Star className="h-3.5 w-3.5 fill-green-800 text-green-800" aria-hidden="true" />
-                  <span className="text-[13px] font-bold text-ink">
+                  <span className="text-sm font-bold text-ink">
                     {business.avg_rating.toFixed(1)}
                   </span>
                 </div>
@@ -123,7 +123,7 @@ export default function BusinessCard({
             {/* Line 3: Status / Hours / Category */}
             <p className="text-[14px] text-[#717171] mt-1 font-medium flex gap-1.5 items-center">
                <span
-                 className="font-semibold px-2 py-0.5 rounded-md text-[13px]"
+                 className="font-semibold px-2 py-0.5 rounded-md text-sm"
                  style={{ backgroundColor: chip?.background ?? "#F3F4F6", color: chip?.ink ?? "#374151" }}
                >
                  {CATEGORY_LABELS[business.category]}

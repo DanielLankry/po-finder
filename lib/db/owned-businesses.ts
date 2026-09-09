@@ -10,10 +10,12 @@ export async function getOwnedBusinesses(
   return (data ?? []) as Business[];
 }
 
-/** Returns the owner's newest business row, matching the one-profile UI. */
+/** Resolves an explicitly selected owned row; unknown IDs must never edit a different business. */
 export async function getLatestOwnedBusiness(
   supabase: SupabaseClient,
+  requestedId?: string | null,
 ): Promise<Business | null> {
   const businesses = await getOwnedBusinesses(supabase);
+  if (requestedId) return businesses.find((business) => business.id === requestedId) ?? null;
   return businesses[0] ?? null;
 }

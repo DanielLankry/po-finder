@@ -1,5 +1,9 @@
 ﻿"use client";
 
+import { useSearchParams } from "next/navigation";
+import { useOwnerFormAnchor } from "@/lib/hooks/useOwnerFormAnchor";
+import { notifyOwnerDataChanged } from "@/components/dashboard/OwnerWorkspace";
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -8,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
-  OwnerLifecycleBanner,
   OwnerLifecycleLoading,
   OwnerLifecyclePills,
 } from "@/components/dashboard/OwnerLifecycleStatus";
@@ -42,6 +45,7 @@ const CATEGORY_ICONS: Record<BusinessCategory, React.ComponentType<{ className?:
 };
 
 export default function ProfilePage() {
+  const requestedId = useSearchParams().get("businessId");
   const [isPromotionJourney, setIsPromotionJourney] = useState(false);
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,6 +55,7 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [nowIso] = useState(() => new Date().toISOString());
 
+  useOwnerFormAnchor(loading);
   const supabase = createClient();
 
   useEffect(() => {
@@ -78,7 +83,7 @@ export default function ProfilePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const data = await getLatestOwnedBusiness(supabase);
+      const data = await getLatestOwnedBusiness(supabase, requestedId);
 
       if (data) {
         setBusiness(data);
@@ -99,7 +104,7 @@ export default function ProfilePage() {
       setLoading(false);
     }
     load();
-  }, [supabase]);
+  }, [supabase, requestedId]);
 
   function update(field: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -169,6 +174,8 @@ export default function ProfilePage() {
           category: form.category,
         });
       }
+      if (business) setBusiness({ ...business, ...payload });
+      notifyOwnerDataChanged();
       setSuccess(true);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : (err as { message?: string })?.message;
@@ -184,6 +191,8 @@ export default function ProfilePage() {
     );
   }
 
+  if (requestedId && !business) return <p role="alert">העסק שנבחר אינו זמין בחשבון הזה.</p>;
+
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]" dir="rtl">
       <div className="brand-panel p-6">
@@ -191,13 +200,11 @@ export default function ProfilePage() {
         {business ? "עריכת פרטי העסק" : "יצירת פרופיל עסק"}
       </h1>
       <div className="mb-5">
-        {business ? (
-          <OwnerLifecycleBanner business={business} nowIso={nowIso} />
-        ) : (
+        {!business && (
           <p className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
             {isPromotionJourney
               ? "ביצירת הפרופיל נשמר מקום במבצע, כל עוד נותרו מקומות. העסק יתפרסם רק אחרי אישור מנהל, ואז יתחילו 3 החודשים החינם."
-              : "זו טיוטה פרטית בחינם. היא תופיע לציבור רק אחרי אימות העסק ותשלום על רישום פעיל."}
+              : "זו טיוטה פרטית בחינם. היא תופיע לציבור אחרי אישור הצוות ותשלום או הפעלת הטבה תקפה."}
           </p>
         )}
       </div>
@@ -229,7 +236,7 @@ export default function ProfilePage() {
           />
         </FormField>
 
-        <div data-tour="profile-address">
+        <div id="profile-address" data-tour="profile-address">
         <FormField label="כתובת העסק" hint="חפשו כתובת או בחרו מיקום מהמפה">
           <PlacesSearchBar
             onLocationSelect={(loc: LocationResult) => {
@@ -384,7 +391,7 @@ export default function ProfilePage() {
       </form>
       </div>
 
-      <aside className="brand-panel-orange sticky top-24 overflow-hidden p-5">
+      <aside id="profile-preview" className="brand-panel-orange sticky top-24 overflow-hidden p-5">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Eye className="h-4 w-4 text-[#8A3618]" />
@@ -393,7 +400,7 @@ export default function ProfilePage() {
           {business ? (
             <OwnerLifecyclePills business={business} nowIso={nowIso} />
           ) : (
-            <span className="rounded-full border border-[#8A3618] bg-white px-2.5 py-1 text-[10px] font-bold text-[#8A3618]">טיוטה פרטית</span>
+            <span className="rounded-full border border-[#8A3618] bg-white px-2.5 py-1 text-sm font-bold text-[#8A3618]">טיוטה פרטית</span>
           )}
         </div>
         <div className="overflow-hidden rounded-2xl border-2 border-[#17402D] bg-[#FFFDF7] shadow-[4px_4px_0_0_#17402D]">
@@ -404,16 +411,16 @@ export default function ProfilePage() {
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h2 className="font-display text-3xl leading-none text-stone-950">{form.name.trim() || "שם העסק"}</h2>
-                <p className="mt-1 text-xs font-bold text-[#2D6A4F]">{CATEGORY_LABELS[form.category]}</p>
+                <p className="mt-1 text-sm font-bold text-[#2D6A4F]">{CATEGORY_LABELS[form.category]}</p>
               </div>
               {business?.is_verified ? <BadgeCheck className="h-5 w-5 shrink-0 text-[#2D6A4F]" aria-label="עסק מאומת" /> : null}
             </div>
             <p className="min-h-10 text-sm leading-relaxed text-stone-600">{form.description.trim() || "התיאור שתכתבו יופיע כאן."}</p>
-            {form.address ? <p className="flex items-center gap-2 text-xs text-stone-600"><MapPin className="h-3.5 w-3.5 text-[#C4552D]" />{form.address}</p> : null}
-            {form.phone ? <p className="flex items-center gap-2 text-xs text-stone-600" dir="ltr"><Phone className="h-3.5 w-3.5 text-[#2D6A4F]" />{form.phone}</p> : null}
+            {form.address ? <p className="flex items-center gap-2 text-sm text-stone-600"><MapPin className="h-3.5 w-3.5 text-[#C4552D]" />{form.address}</p> : null}
+            {form.phone ? <p className="flex items-center gap-2 text-sm text-stone-600" dir="ltr"><Phone className="h-3.5 w-3.5 text-[#2D6A4F]" />{form.phone}</p> : null}
           </div>
         </div>
-        <p className="mt-4 text-xs leading-relaxed text-stone-600">אפשר לערוך ולצפות בטיוטה בלי לשלם. אחרי אימות, בוחרים משך הופעה ורק אז הכרטיס נכנס למפה ולרשימה.</p>
+        <p className="mt-4 text-sm leading-relaxed text-stone-600">זו תצוגה של העריכה הנוכחית. השינויים יתעדכנו רק אחרי שמירה. פרסום לציבור דורש אישור הצוות ותשלום או הטבה תקפה.</p>
       </aside>
     </div>
   );
@@ -438,7 +445,7 @@ function FormField({
         {label}
         {required && <span className="text-red-500 me-1"> *</span>}
       </Label>
-      {hint && <p className="text-stone-400 text-xs mb-1.5">{hint}</p>}
+      {hint && <p className="text-stone-400 text-sm mb-1.5">{hint}</p>}
       {children}
     </div>
   );

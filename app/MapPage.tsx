@@ -47,27 +47,42 @@ export default function MapPage() {
   const { favorites, toggle: toggleFavorite, count: favCount } = useFavorites();
 
   useEffect(() => {
+    const controller = new AbortController();
     async function fetchBusinesses() {
-      setLoading(true);
+      if (loadRequest === 0) setLoading(true);
       setLoadError(null);
       try {
         const response = await fetch("/api/businesses?includeSchedule=1", {
           cache: "no-store",
+          signal: controller.signal,
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json() as { businesses?: BusinessWithSchedule[] };
         setBusinesses(data.businesses ?? []);
       } catch (error) {
+        if (controller.signal.aborted) return;
         console.error("Failed to load public businesses:", error);
         setBusinesses([]);
         setLoadError("לא הצלחנו לטעון את העסקים. בדקו את החיבור ונסו שוב.");
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     }
 
     fetchBusinesses();
+    return () => controller.abort();
   }, [loadRequest]);
+
+  useEffect(() => {
+    // Re-resolve overnight rows at Israel midnight and refresh open-now filtering on the clock.
+    const refresh = () => { if (document.visibilityState === "visible") setLoadRequest((value) => value + 1); };
+    let timer: ReturnType<typeof setTimeout>;
+    const tick = () => { refresh(); timer = setTimeout(tick, 60_000 - Date.now() % 60_000 + 50); };
+    timer = setTimeout(tick, 60_000 - Date.now() % 60_000 + 50);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { clearTimeout(timer); window.removeEventListener("focus", refresh); document.removeEventListener("visibilitychange", refresh); };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -121,7 +136,7 @@ export default function MapPage() {
   }, [selectedBusinessId, visibleBusinesses]);
 
   return (
-    <div className="brand-canvas ambient-motion h-[100dvh] min-h-[520px] flex flex-col overflow-hidden" dir="rtl">
+    <div className="brand-canvas ambient-motion h-[100dvh] min-h-[320px] flex flex-col overflow-hidden" dir="rtl">
       <Navbar
         onLocationSelect={(loc) => {
           setSearchCenter(loc);
@@ -145,7 +160,8 @@ export default function MapPage() {
 
       {/* Main split content */}
       <div
-        className="flex overflow-hidden mt-[calc(72px+var(--public-filter-height,116px))] h-[calc(100dvh-72px-var(--public-filter-height,116px))]"
+        data-testid="discovery-content"
+        className="flex min-h-0 flex-1 overflow-hidden mt-[calc(72px+var(--public-filter-height,116px))]"
       >
         {/* List panel — single-view below 1440px, right side in wide desktop split view */}
         <div
@@ -208,19 +224,19 @@ export default function MapPage() {
       </div>
 
       {/* Privacy footer bar */}
-      <div className="fixed bottom-0 inset-x-0 z-10 pointer-events-none flex justify-center pb-[max(0.375rem,env(safe-area-inset-bottom))] px-2">
-        <div className="pointer-events-auto flex max-w-full items-center gap-2 overflow-hidden rounded-full border-2 border-[#17402D]/15 bg-white/90 px-3 py-1.5 text-[11px] text-[#666] shadow-sm backdrop-blur-sm sm:gap-3 sm:px-4">
+      <div className="order-last flex shrink-0 justify-center px-2 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <div className="pointer-events-auto flex max-w-full items-center gap-2 overflow-hidden rounded-full border-2 border-[#17402D]/15 bg-white/90 px-3 py-1.5 text-sm text-[#405348] shadow-sm backdrop-blur-sm sm:gap-3 sm:px-4">
           <strong className="text-[#555]">פה קרוב</strong>
-          <span className="truncate"> — עסקים קטנים וניידים קרוב אליכם</span>
+          <span className="hidden sm:inline truncate"> — עסקים קטנים וניידים קרוב אליכם</span>
           <span className="w-px h-3 bg-[#DDD]" />
           <a href="/privacy" className="shrink-0 hover:text-[#1F5038] transition-colors">פרטיות</a>
           <span className="w-px h-3 bg-[#DDD]" />
-          <a href="/terms" className="hidden shrink-0 hover:text-[#1F5038] transition-colors xs:inline">תנאים</a>
+          <a href="/terms" className="shrink-0 hover:text-[#1F5038] transition-colors">תנאים</a>
         </div>
       </div>
 
-      {/* Mobile floating toggle */}
-      <div className="min-[1440px]:hidden fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] inset-x-0 z-20 flex justify-center pointer-events-none fade-in-up stagger-2">
+      {/* Reserved row: the toggle never overlays a card or map control. */}
+      <div data-testid="discovery-view-controls" className="min-[1440px]:hidden flex shrink-0 justify-center border-t-2 border-[#17402D]/15 bg-[#F7F3EA] px-3 py-2">
         <button
           onClick={() => setMobileView((v) => (v === "list" ? "map" : "list"))}
           className="pointer-events-auto flex items-center gap-2.5 h-12 px-6 rounded-full bg-[#17402D] text-[#F7F3EA] font-bold text-[15px] border-2 border-[#F7F3EA]/25 shadow-[4px_4px_0_0_rgba(23,64,45,0.35)] hover:scale-105 transition-all duration-300 active:scale-95"
