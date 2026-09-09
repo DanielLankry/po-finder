@@ -54,7 +54,7 @@ export default function BusinessPopup({
           <X className="h-4 w-4" aria-hidden="true" />
         </button>
 
-        <span className="brand-chip absolute bottom-3 right-3 px-3 py-1 text-xs">
+        <span className="brand-chip absolute bottom-3 right-3 px-3 py-1 text-sm">
           {CATEGORY_LABELS[business.category]}
         </span>
       </div>
@@ -65,7 +65,7 @@ export default function BusinessPopup({
             <h3 className="font-display text-2xl leading-none text-[#17402D]">
               {business.name}
             </h3>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-bold text-[#17402D]/70">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-bold text-[#17402D]/70">
               {business.avg_rating > 0 && (
                 <span className="inline-flex items-center gap-1">
                   <Star className="h-3.5 w-3.5 fill-[#F4B942] text-[#8A3618]" aria-hidden="true" />
@@ -84,7 +84,7 @@ export default function BusinessPopup({
           </div>
 
           <span
-            className={`shrink-0 rounded-full border-2 px-2.5 py-1 text-xs font-black ${
+            className={`shrink-0 rounded-full border-2 px-2.5 py-1 text-sm font-black ${
               availability === "open"
                 ? "border-[#17402D] bg-[#DDEBE0] text-[#17402D]"
                 : availability === "closed"

@@ -1,5 +1,8 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { useOwnerFormAnchor } from "@/lib/hooks/useOwnerFormAnchor";
+
 import { useFeedback } from "@/components/providers/FeedbackProvider";
 
 import { useState, useEffect } from "react";
@@ -23,6 +26,7 @@ function formatHebrewDate(dateStr: string): string {
 }
 
 export default function EventsPage() {
+  const requestedId = useSearchParams().get("businessId");
   const { confirmAction } = useFeedback();
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [events, setEvents] = useState<BusinessEvent[]>([]);
@@ -42,6 +46,7 @@ export default function EventsPage() {
     price: "",
   });
 
+  useOwnerFormAnchor(loading);
   const supabase = createClient();
 
   useEffect(() => {
@@ -49,7 +54,7 @@ export default function EventsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
 
-      const biz = await getLatestOwnedBusiness(supabase);
+      const biz = await getLatestOwnedBusiness(supabase, requestedId);
 
       if (!biz) { setLoading(false); return; }
       setBusinessId(biz.id);
@@ -64,7 +69,7 @@ export default function EventsPage() {
       setLoading(false);
     }
     load();
-  }, [supabase]);
+  }, [supabase, requestedId]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

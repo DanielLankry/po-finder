@@ -311,7 +311,7 @@ export default function BusinessListPanel({
   ).length;
 
   return (
-    <div className="flex flex-col h-full" dir="rtl">
+    <div className="flex min-h-0 flex-col h-full" dir="rtl">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="px-5 pt-5 pb-4 border-b-2 border-[#17402D]/10 bg-[#F7F3EA] flex-shrink-0">
         {promotion?.isOpen && (
@@ -389,7 +389,7 @@ export default function BusinessListPanel({
       </div>
 
       {/* ── Scrollable cards ───────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto bg-[#F7F3EA] scrollbar-thin">
+      <div className="min-h-0 flex-1 overflow-y-auto bg-[#F7F3EA] scrollbar-thin" data-testid="business-list-scroll">
         {loading ? (
           // Show 6 shimmer skeleton cards while data loads
           Array.from({ length: 6 }, (_, i) => <SkeletonCard key={i} />)
@@ -428,7 +428,7 @@ export default function BusinessListPanel({
             </div>
           </div>
         ) : (
-          <div className="p-4 lg:p-6 pb-24">
+          <div className="p-4 lg:p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {filtered.map((business, index) => (
                 <div
