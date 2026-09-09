@@ -5,6 +5,10 @@ import type { Business, BusinessCategory, KashrutStatus } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 import { signPhotoRecords } from "@/lib/storage/photo-urls";
 import { getLatestOwnedBusiness, getOwnedBusinesses } from "@/lib/db/owned-businesses";
+import {
+  sendBusinessRegistrationReceivedEmail,
+  sendNewBusinessAlert,
+} from "@/lib/email";
 
 // Keep public reads compatible with column-level privacy grants in the launch migration.
 const PUBLIC_BUSINESS_SELECT = `
@@ -141,7 +145,25 @@ export async function createBusiness(formData: FormData) {
   const data = await getLatestOwnedBusiness(supabase);
   if (!data) throw new Error("Created business was not returned");
 
-  // Email notification moved to webhook after payment
+  if (user.email) {
+    const notifications = await Promise.allSettled([
+      sendBusinessRegistrationReceivedEmail(user.email, data.name),
+      sendNewBusinessAlert({
+        id: data.id,
+        name: data.name,
+        category: data.category,
+        phone: data.phone,
+        owner_email: user.email,
+      }),
+    ]);
+
+    for (const notification of notifications) {
+      if (notification.status === "rejected") {
+        console.error("Failed to send business registration email:", notification.reason);
+      }
+    }
+  }
+
   revalidatePath("/dashboard");
   return data as Business;
 }

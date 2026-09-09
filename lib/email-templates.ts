@@ -1,11 +1,27 @@
-// High-quality HTML email templates for Pah Karov
-// Uses Google Fonts (Rubik), inline CSS for email client compatibility
+// Transactional HTML email templates for Pah Karov.
+// The visual language mirrors the site's warm paper, green ink, terracotta
+// actions, strong borders, and offset print-shop shadows.
 
 const BASE_STYLES = `
-  @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=Karantina:wght@700&family=Rubik:wght@400;500;600;700;800&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Rubik', Arial, sans-serif; background: #F3F4F6; direction: rtl; }
+  body { font-family: 'Assistant', Arial, sans-serif; background: #F7F3EA; direction: rtl; }
 `;
+
+const BODY_FONT = "'Assistant', Arial, sans-serif";
+const DISPLAY_FONT = "'Karantina', 'Assistant', Arial, sans-serif";
+
+const BRAND_LOCKUP_HTML = `
+<table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+  <tr>
+    <td style="vertical-align: middle; padding-left: 10px;">
+      <img src="https://pokarov.co.il/logo.png" width="42" height="42" alt="" style="display: block; width: 42px; height: 42px; border: 0;" />
+    </td>
+    <td style="vertical-align: middle;">
+      <span style="font-family: ${DISPLAY_FONT}; font-size: 32px; line-height: 1; font-weight: 700; color: #17402D;">פה קרוב</span>
+    </td>
+  </tr>
+</table>`;
 
 function escapeHtml(value: string): string {
   return value
@@ -19,14 +35,14 @@ function escapeHtml(value: string): string {
 const FOOTER_HTML = `
 <table cellpadding="0" cellspacing="0" border="0" width="100%">
   <tr>
-    <td align="center" style="padding: 32px 24px 24px; border-top: 1px solid #E5E7EB; margin-top: 32px;">
-      <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 13px; color: #9CA3AF; margin-bottom: 6px;">
+    <td align="center" style="padding: 28px 24px 22px; border-top: 2px dashed #17402D;">
+      <p style="font-family: ${BODY_FONT}; font-size: 13px; color: #17402D; margin-bottom: 6px;">
         פה קרוב — גלו עסקים קטנים וניידים קרוב אליכם
       </p>
-      <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 12px; color: #D1D5DB;">
-        <a href="https://pokarov.co.il" style="color: #2D6A4F; text-decoration: none;">pokarov.co.il</a>
+      <p style="font-family: ${BODY_FONT}; font-size: 12px; color: #57534E;">
+        <a href="https://pokarov.co.il" style="color: #2D6A4F; text-decoration: underline;">pokarov.co.il</a>
         &nbsp;·&nbsp;
-        <a href="mailto:support@pokarov.co.il" style="color: #9CA3AF; text-decoration: none;">support@pokarov.co.il</a>
+        <a href="mailto:support@pokarov.co.il" style="color: #2D6A4F; text-decoration: underline;">support@pokarov.co.il</a>
       </p>
     </td>
   </tr>
@@ -42,14 +58,14 @@ function wrapper(content: string): string {
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <style>${BASE_STYLES}</style>
 </head>
-<body style="background-color: #F3F4F6; margin: 0; padding: 0; direction: rtl;">
-  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #F3F4F6; min-height: 100vh;">
+<body style="background-color: #F7F3EA; margin: 0; padding: 0; direction: rtl;">
+  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #F7F3EA; background-image: linear-gradient(rgba(23,64,45,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(23,64,45,0.045) 1px, transparent 1px); background-size: 32px 32px;">
     <tr>
       <td align="center" style="padding: 24px 16px;">
         <table cellpadding="0" cellspacing="0" border="0" width="560" style="max-width: 560px; width: 100%;">
           <!-- Card -->
           <tr>
-            <td style="background: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.07);">
+            <td style="background: #FFFDF7; border: 2px solid #17402D; border-radius: 18px; overflow: hidden; box-shadow: 7px 7px 0 #17402D;">
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 ${content}
                 <tr><td style="padding: 0 32px 8px;">${FOOTER_HTML}</td></tr>
@@ -64,7 +80,56 @@ function wrapper(content: string): string {
 </html>`;
 }
 
-// ── 1. Business Approved Email ───────────────────────────────────────────────
+// ── 1. Business Registration Received ───────────────────────────────────────
+/** Builds the owner receipt shown immediately after a business draft is saved.
+ * It confirms the review state and points owners toward profile improvements
+ * while keeping the launch-offer start date tied explicitly to approval.
+ */
+export function businessRegistrationReceivedTemplate(businessName: string): string {
+  const safeBusinessName = escapeHtml(businessName);
+
+  return wrapper(`
+    <tr>
+      <td style="background: #EFF5F0; border-bottom: 2px solid #17402D; padding: 30px 28px 28px; text-align: center;">
+        ${BRAND_LOCKUP_HTML}
+        <table cellpadding="0" cellspacing="0" border="0" style="margin: 20px auto 14px;">
+          <tr>
+            <td align="center" style="width: 58px; height: 58px; background: #FFF8DC; border: 2px solid #17402D; border-radius: 14px; box-shadow: 4px 4px 0 #17402D; color: #17402D; font-size: 28px; line-height: 58px;">📌</td>
+          </tr>
+        </table>
+        <h1 style="font-family: ${DISPLAY_FONT}; font-size: 38px; line-height: 1; font-weight: 700; color: #17402D; margin: 0 0 10px;">העסק נרשם בהצלחה</h1>
+        <p style="font-family: ${BODY_FONT}; font-size: 16px; color: #2D6A4F; margin: 0; font-weight: 700;">${safeBusinessName} מחכה לבדיקה שלנו</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 34px 32px 24px;">
+        <p style="font-family: ${BODY_FONT}; font-size: 16px; color: #44403C; line-height: 1.7; margin-bottom: 24px;">
+          קיבלנו את פרטי העסק <strong style="color: #17402D;">${safeBusinessName}</strong>. נבדוק אותם ונשלח מייל נוסף ברגע שהעסק יעלה לאוויר.
+        </p>
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #FFF8DC; border-radius: 14px; border: 2px solid #17402D; box-shadow: 3px 3px 0 #17402D; margin-bottom: 26px;">
+          <tr>
+            <td style="padding: 20px 22px;">
+              <p style="font-family: ${BODY_FONT}; font-size: 14px; font-weight: 800; color: #17402D; margin: 0 0 10px;">בינתיים כדאי להשלים:</p>
+              <p style="font-family: ${BODY_FONT}; font-size: 14px; color: #44403C; line-height: 1.8; margin: 0;">📷 תמונות טובות &nbsp;·&nbsp; 🕒 שעות פעילות &nbsp;·&nbsp; ✍️ תיאור קצר ומדויק</p>
+            </td>
+          </tr>
+        </table>
+        <p style="font-family: ${BODY_FONT}; font-size: 14px; color: #57534E; line-height: 1.7; margin: 0 0 24px;">
+          אם העסק זכאי למבצע שלושת החודשים, התקופה תתחיל רק ביום אישור העסק — זמן ההמתנה לא ייגרע ממנה.
+        </p>
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td align="center">
+              <a href="https://pokarov.co.il/dashboard/profile" style="display: inline-block; background: #C4552D; color: #FFFFFF; border: 2px solid #8A3618; font-family: ${BODY_FONT}; font-size: 16px; font-weight: 800; text-decoration: none; padding: 13px 34px; border-radius: 12px; box-shadow: 4px 4px 0 #8A3618;">להשלמת פרטי העסק ←</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  `);
+}
+
+// ── 2. Business Approved Email ───────────────────────────────────────────────
 export function businessApprovedTemplate(businessName: string, expiresAt?: Date): string {
   const safeBusinessName = escapeHtml(businessName);
   const expiryStr = expiresAt
@@ -72,37 +137,17 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
     : null;
 
   return wrapper(`
-    <!-- Header gradient -->
+    <!-- Neighborhood field-note header -->
     <tr>
-      <td>
-        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+      <td style="background: #EFF5F0; border-bottom: 2px solid #17402D; padding: 30px 28px 28px; text-align: center;">
+        ${BRAND_LOCKUP_HTML}
+        <table cellpadding="0" cellspacing="0" border="0" style="margin: 20px auto 14px;">
           <tr>
-            <td style="background: linear-gradient(135deg, #2D6A4F 0%, #1F5038 100%); padding: 40px 32px 36px; text-align: center; border-radius: 20px 20px 0 0;">
-              <!-- Logo white version -->
-              <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 20px;">
-                <tr>
-                  <td>
-                    <svg width="44" height="55" viewBox="0 0 40 50" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));">
-                      <path d="M20 0C9.507 0 1 8.507 1 19c0 13.255 17.5 29.5 18.25 30.188a1.125 1.125 0 0 0 1.5 0C21.5 48.5 39 32.255 39 19 39 8.507 30.493 0 20 0z" fill="rgba(255,255,255,0.95)"/>
-                      <text x="20" y="26" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="20" fill="#2D6A4F">פ</text>
-                    </svg>
-                  </td>
-                  <td style="padding-right: 10px; vertical-align: middle;">
-                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 22px; font-weight: 800; color: white; letter-spacing: -0.5px;">פה קרוב</span>
-                  </td>
-                </tr>
-              </table>
-              <!-- Checkmark -->
-              <div style="width: 64px; height: 64px; background: rgba(255,255,255,0.2); border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;">
-                <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
-                  <tr><td align="center" style="font-size: 32px; line-height: 64px; width: 64px; height: 64px;">✓</td></tr>
-                </table>
-              </div>
-              <h1 style="font-family: 'Rubik', Arial, sans-serif; font-size: 26px; font-weight: 800; color: white; margin: 0 0 8px;">העסק שלך אושר! 🎉</h1>
-              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: rgba(255,255,255,0.85); margin: 0;">${expiryStr ? `${safeBusinessName} עבר אימות ועלה לאוויר` : `${safeBusinessName} עבר אימות ומוכן לרישום`}</p>
-            </td>
+            <td align="center" style="width: 58px; height: 58px; background: #C4552D; border: 2px solid #8A3618; border-radius: 14px; box-shadow: 4px 4px 0 #8A3618; color: #FFFFFF; font-family: Arial, sans-serif; font-size: 30px; line-height: 58px; font-weight: 800;">✓</td>
           </tr>
         </table>
+        <h1 style="font-family: ${DISPLAY_FONT}; font-size: 38px; line-height: 1; font-weight: 700; color: #17402D; margin: 0 0 10px;">העסק שלך על המפה</h1>
+        <p style="font-family: ${BODY_FONT}; font-size: 16px; color: #2D6A4F; margin: 0; font-weight: 700;">${expiryStr ? `${safeBusinessName} אושר ועלה לאוויר` : `${safeBusinessName} אושר ומוכן להפעלה`}</p>
       </td>
     </tr>
 
@@ -119,7 +164,7 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
         </p>
 
         <!-- Info box -->
-        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #F0FDF4; border-radius: 14px; border: 1px solid #DDEBE0; margin-bottom: 24px;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #FFF8DC; border-radius: 14px; border: 2px solid #17402D; box-shadow: 3px 3px 0 #17402D; margin-bottom: 26px;">
           <tr>
             <td style="padding: 20px 24px;">
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
@@ -151,8 +196,8 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
             <td align="center" style="padding-bottom: 8px;">
-              <a href="https://pokarov.co.il/${expiryStr ? "dashboard" : "dashboard/billing"}" style="display: inline-block; background: linear-gradient(135deg, #2D6A4F, #1F5038); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 40px; border-radius: 50px; box-shadow: 0 4px 16px rgba(45,106,79,0.35);">
-                ${expiryStr ? "צפייה בעסק שלי ←" : "בחירת משך הופעה ←"}
+              <a href="https://pokarov.co.il/${expiryStr ? "dashboard" : "dashboard/billing"}" style="display: inline-block; background: #C4552D; color: #FFFFFF; border: 2px solid #8A3618; font-family: ${BODY_FONT}; font-size: 16px; font-weight: 800; text-decoration: none; padding: 13px 34px; border-radius: 12px; box-shadow: 4px 4px 0 #8A3618;">
+                ${expiryStr ? "לפתיחת העסק שלי ←" : "לבחירת משך פרסום ←"}
               </a>
             </td>
           </tr>
@@ -166,7 +211,7 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
   `);
 }
 
-// ── 2. New Business Alert (to admin) ────────────────────────────────────────
+// ── 3. New Business Alert (to admin) ────────────────────────────────────────
 export function newBusinessAlertTemplate(business: {
   name: string;
   category: string;
@@ -183,24 +228,19 @@ export function newBusinessAlertTemplate(business: {
   };
 
   return wrapper(`
-    <!-- Header -->
+    <!-- Admin field-note header -->
     <tr>
-      <td>
-        <table cellpadding="0" cellspacing="0" border="0" width="100%">
-          <tr>
-            <td style="background: linear-gradient(135deg, #1E3A5F 0%, #1E40AF 100%); padding: 32px; text-align: center; border-radius: 20px 20px 0 0;">
-              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;">לוח ניהול פה קרוב</p>
-              <h1 style="font-family: 'Rubik', Arial, sans-serif; font-size: 24px; font-weight: 800; color: white; margin: 0;">🏪 עסק חדש ממתין לאישור</h1>
-            </td>
-          </tr>
-        </table>
+      <td style="background: #EFF5F0; border-bottom: 2px solid #17402D; padding: 28px 28px 26px; text-align: center;">
+        ${BRAND_LOCKUP_HTML}
+        <p style="font-family: ${BODY_FONT}; font-size: 12px; font-weight: 800; color: #8A3618; letter-spacing: 1px; margin: 18px 0 8px;">פתק חדש למנהל</p>
+        <h1 style="font-family: ${DISPLAY_FONT}; font-size: 35px; line-height: 1; font-weight: 700; color: #17402D; margin: 0;">עסק חדש מחכה לבדיקה</h1>
       </td>
     </tr>
 
     <!-- Business details -->
     <tr>
       <td style="padding: 32px 32px 24px;">
-        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #F8FAFC; border-radius: 14px; border: 1px solid #E2E8F0; overflow: hidden;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #FFF8DC; border-radius: 14px; border: 2px solid #17402D; box-shadow: 3px 3px 0 #17402D; overflow: hidden;">
           <tr>
             <td style="padding: 0;">
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
@@ -233,8 +273,8 @@ export function newBusinessAlertTemplate(business: {
         <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 24px;">
           <tr>
             <td align="center">
-              <a href="${safeBusiness.adminUrl}" style="display: inline-block; background: linear-gradient(135deg, #1E40AF, #1E3A5F); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 15px; font-weight: 700; text-decoration: none; padding: 13px 36px; border-radius: 50px;">
-                עבור לאישור ←
+              <a href="${safeBusiness.adminUrl}" style="display: inline-block; background: #C4552D; color: #FFFFFF; border: 2px solid #8A3618; font-family: ${BODY_FONT}; font-size: 15px; font-weight: 800; text-decoration: none; padding: 13px 34px; border-radius: 12px; box-shadow: 4px 4px 0 #8A3618;">
+                לבדיקה ואישור ←
               </a>
             </td>
           </tr>
@@ -244,38 +284,19 @@ export function newBusinessAlertTemplate(business: {
   `);
 }
 
-// ── 3. Contact Form Auto-Reply ────────────────────────────────────────────────
+// ── 4. Contact Form Auto-Reply ────────────────────────────────────────────────
 export function contactAutoReplyTemplate(name: string, subjectLabel: string): string {
   const safeName = escapeHtml(name);
   const safeSubjectLabel = escapeHtml(subjectLabel);
 
   return wrapper(`
-    <!-- Header -->
+    <!-- Friendly field-note header -->
     <tr>
-      <td>
-        <table cellpadding="0" cellspacing="0" border="0" width="100%">
-          <tr>
-            <td style="padding: 40px 32px 32px; text-align: center; border-radius: 20px 20px 0 0;">
-              <!-- Logo -->
-              <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 24px;">
-                <tr>
-                  <td>
-                    <svg width="44" height="55" viewBox="0 0 40 50" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
-                      <defs><linearGradient id="pg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6FA583"/><stop offset="100%" stop-color="#2D6A4F"/></linearGradient></defs>
-                      <path d="M20 0C9.507 0 1 8.507 1 19c0 13.255 17.5 29.5 18.25 30.188a1.125 1.125 0 0 0 1.5 0C21.5 48.5 39 32.255 39 19 39 8.507 30.493 0 20 0z" fill="url(#pg2)"/>
-                      <text x="20" y="26" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="20" fill="white">פ</text>
-                    </svg>
-                  </td>
-                  <td style="padding-right: 10px; vertical-align: middle;">
-                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #2D6A4F;">פה קרוב</span>
-                  </td>
-                </tr>
-              </table>
-              <h1 style="font-family: 'Rubik', Arial, sans-serif; font-size: 24px; font-weight: 800; color: #111827; margin: 0 0 8px;">קיבלנו את פנייתך 📬</h1>
-              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: #6B7280; margin: 0;">תודה על פנייתך, ${safeName}</p>
-            </td>
-          </tr>
-        </table>
+      <td style="background: #EFF5F0; border-bottom: 2px solid #17402D; padding: 30px 28px 28px; text-align: center;">
+        ${BRAND_LOCKUP_HTML}
+        <p style="font-family: ${BODY_FONT}; font-size: 13px; font-weight: 800; color: #8A3618; margin: 18px 0 8px;">הפתק שלך הגיע אלינו</p>
+        <h1 style="font-family: ${DISPLAY_FONT}; font-size: 36px; line-height: 1; font-weight: 700; color: #17402D; margin: 0 0 8px;">קיבלנו את פנייתך</h1>
+        <p style="font-family: ${BODY_FONT}; font-size: 15px; color: #2D6A4F; margin: 0;">תודה שפנית אלינו, ${safeName}</p>
       </td>
     </tr>
 
@@ -290,7 +311,7 @@ export function contactAutoReplyTemplate(name: string, subjectLabel: string): st
         </p>
 
         <!-- Timeline -->
-        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #F7F3EA; border-radius: 14px; border: 1px solid #E5E7EB; margin-bottom: 24px;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #FFF8DC; border-radius: 14px; border: 2px solid #17402D; box-shadow: 3px 3px 0 #17402D; margin-bottom: 24px;">
           <tr>
             <td style="padding: 20px 24px;">
               <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 13px; font-weight: 700; color: #2D6A4F; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">⏱ מה קורה עכשיו?</p>
@@ -322,7 +343,7 @@ export function contactAutoReplyTemplate(name: string, subjectLabel: string): st
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
             <td align="center">
-              <a href="https://pokarov.co.il" style="display: inline-block; background: linear-gradient(135deg, #2D6A4F, #1F5038); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 15px; font-weight: 700; text-decoration: none; padding: 13px 36px; border-radius: 50px; box-shadow: 0 4px 14px rgba(45,106,79,0.3);">
+              <a href="https://pokarov.co.il" style="display: inline-block; background: #C4552D; color: #FFFFFF; border: 2px solid #8A3618; font-family: ${BODY_FONT}; font-size: 15px; font-weight: 800; text-decoration: none; padding: 13px 34px; border-radius: 12px; box-shadow: 4px 4px 0 #8A3618;">
                 בחזרה לפה קרוב ←
               </a>
             </td>
@@ -333,7 +354,7 @@ export function contactAutoReplyTemplate(name: string, subjectLabel: string): st
   `);
 }
 
-// ── 4. Expiry Reminder ────────────────────────────────────────────────────────
+// ── 5. Expiry Reminder ────────────────────────────────────────────────────────
 export function expiryReminderTemplate(
   businessName: string,
   expiresAt: Date,
@@ -345,18 +366,17 @@ export function expiryReminderTemplate(
   const expiryStr = expiresAt.toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" });
 
   return wrapper(`
-    <!-- Header amber -->
+    <!-- Expiry field-note header -->
     <tr>
-      <td>
-        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+      <td style="background: #F7E7DE; border-bottom: 2px solid #8A3618; padding: 30px 28px 28px; text-align: center;">
+        ${BRAND_LOCKUP_HTML}
+        <table cellpadding="0" cellspacing="0" border="0" style="margin: 18px auto 12px;">
           <tr>
-            <td style="background: linear-gradient(135deg, #D97706 0%, #B45309 100%); padding: 36px 32px; text-align: center; border-radius: 20px 20px 0 0;">
-              <p style="font-size: 40px; margin-bottom: 12px;">⏰</p>
-              <h1 style="font-family: 'Rubik', Arial, sans-serif; font-size: 22px; font-weight: 800; color: white; margin: 0 0 6px;">הרישום שלך עומד לפוג</h1>
-              <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 15px; color: rgba(255,255,255,0.85); margin: 0;">נשארו <strong>${daysBefore} ימים</strong> לרישום ${safeBusinessName}</p>
-            </td>
+            <td align="center" style="width: 58px; height: 58px; background: #FFF8DC; border: 2px solid #8A3618; border-radius: 14px; box-shadow: 4px 4px 0 #8A3618; font-size: 29px; line-height: 58px;">⏳</td>
           </tr>
         </table>
+        <h1 style="font-family: ${DISPLAY_FONT}; font-size: 36px; line-height: 1; font-weight: 700; color: #8A3618; margin: 0 0 8px;">הפרסום עומד להסתיים</h1>
+        <p style="font-family: ${BODY_FONT}; font-size: 15px; color: #8A3618; margin: 0; font-weight: 700;">נשארו ${daysBefore} ימים לפרסום ${safeBusinessName}</p>
       </td>
     </tr>
 
@@ -369,7 +389,7 @@ export function expiryReminderTemplate(
         </p>
 
         <!-- Urgency box -->
-        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #FEF3C7; border-radius: 14px; border: 1px solid #FDE68A; margin-bottom: 24px;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #FFF8DC; border-radius: 14px; border: 2px solid #8A3618; box-shadow: 3px 3px 0 #8A3618; margin-bottom: 24px;">
           <tr>
             <td style="padding: 18px 24px;">
               <p style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #92400E; margin: 0;">
@@ -383,8 +403,8 @@ export function expiryReminderTemplate(
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
             <td align="center">
-              <a href="${safeRenewUrl}" style="display: inline-block; background: linear-gradient(135deg, #D97706, #B45309); color: white; font-family: 'Rubik', Arial, sans-serif; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 40px; border-radius: 50px; box-shadow: 0 4px 14px rgba(217,119,6,0.35);">
-                חדשו את הרישום ←
+              <a href="${safeRenewUrl}" style="display: inline-block; background: #C4552D; color: #FFFFFF; border: 2px solid #8A3618; font-family: ${BODY_FONT}; font-size: 16px; font-weight: 800; text-decoration: none; padding: 13px 34px; border-radius: 12px; box-shadow: 4px 4px 0 #8A3618;">
+                להארכת הפרסום ←
               </a>
             </td>
           </tr>
