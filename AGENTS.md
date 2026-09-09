@@ -22,6 +22,12 @@ Keep secrets in `.env.local` only; use `.env.local.example` as the template for 
 Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do not reintroduce `middleware.ts`. Visible Hebrew branding should remain `פה קרוב`, while `pokarov.co.il` is reserved for domains, email addresses, and technical identifiers.
 
 ## Project Patterns
+- Email verification is enforced by hosted Supabase Confirm email plus custom SMTP; keep both enabled. Signup uses the branded `supabase/templates/confirmation.html` and recovery uses `recovery.html`; repository edits do not update hosted templates automatically.
+- Signup confirmation carries `TokenHash` in the URL fragment to `/auth/confirm`, clears it from the address bar, and requires a same-origin POST to `/auth/callback`; preserve the landing page's `same-origin` referrer policy because `no-referrer` makes native POST Origin null.
+- The confirmation page excludes PostHog, Meta, Vercel analytics and browser Sentry initialization. Keep credentials out of analytics and logs, preserve `registration_next` through `safeRedirectPath`, and never allow metadata to create an admin role.
+- Shared `FeedbackProvider` queues awaited confirmations and notices using the branded Radix dialog. Use `useFeedback()` instead of native alert/confirm, preserving cancellation and focus restoration.
+- Photo batch uploads track their first successful primary photo locally and reject overlapping batches; React photos state remains stale inside one upload loop.
+- The owner-only `/api/businesses?mine=1` mapper must forward all three promotion fields from `get_my_businesses`, or billing loses the launch reservation state.
 - Transactional email HTML mirrors the product-paper UI with warm paper, green ink, terracotta CTAs, strong borders, and hard offset shadows; keep hosted Resend drafts and `lib/email-templates.ts` visually aligned.
 - A successful self-service business insert sends the owner registration receipt and the admin review alert through `Promise.allSettled`, so Resend delivery failures are logged but never roll back the saved business.
 - Automated transactional messages send from `noreply@pokarov.co.il`, while administrator-authored contact replies send from `support@pokarov.co.il`; every customer-facing message keeps `Reply-To: support@pokarov.co.il`, and only the internal new-business alert replies directly to the submitted owner email.
