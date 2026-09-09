@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { z } from "zod";
 import { contactAutoReplyTemplate } from "@/lib/email-templates";
+import { ADMIN_EMAIL, FROM_EMAIL } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -60,8 +61,8 @@ export async function POST(req: NextRequest) {
 
     // Send to support
     const { error: supportError } = await resend.emails.send({
-      from: "פה קרוב <noreply@pokarov.co.il>",
-      to: "support@pokarov.co.il",
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
       replyTo: email,
       subject: `[פנייה חדשה] ${subjectLabel} — ${name}`,
       html: `
@@ -94,8 +95,9 @@ export async function POST(req: NextRequest) {
 
     // Auto-reply to sender with beautiful template
     const { error: autoReplyError } = await resend.emails.send({
-      from: "פה קרוב <noreply@pokarov.co.il>",
+      from: FROM_EMAIL,
       to: email,
+      replyTo: ADMIN_EMAIL,
       subject: "קיבלנו את פנייתך — פה קרוב",
       html: contactAutoReplyTemplate(name, subjectLabel),
     });
