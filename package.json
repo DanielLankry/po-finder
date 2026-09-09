@@ -15,7 +15,8 @@
     "db:gen-types": "supabase gen types typescript --linked > lib/database.types.ts",
     "vercel:env": "vercel env pull .env.local",
     "vercel:deploy": "vercel deploy",
-    "vercel:deploy:prod": "vercel deploy --prod"
+    "vercel:deploy:prod": "vercel deploy --prod",
+    "perf:baseline": "npx --yes @lhci/cli@0.15.1 autorun --config=./lighthouserc.cjs"
   },
   "dependencies": {
     "@react-google-maps/api": "^2.20.8",
@@ -23,6 +24,7 @@
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.110.5",
     "@vercel/analytics": "^1.6.1",
+    "@vercel/speed-insights": "^2.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "driver.js": "^1.4.0",
