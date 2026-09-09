@@ -1,5 +1,7 @@
 "use client";
 
+import { useFeedback } from "@/components/providers/FeedbackProvider";
+
 import { useEffect, useState } from "react";
 import { AlertTriangle, CreditCard, RefreshCw, RotateCcw } from "lucide-react";
 
@@ -23,6 +25,7 @@ interface Attempt {
 }
 
 export default function AdminPaymentsPage() {
+  const { confirmAction, notify } = useFeedback();
   const [items, setItems] = useState<Attempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -49,7 +52,7 @@ export default function AdminPaymentsPage() {
   }, []);
 
   async function refund(id: string) {
-    if (!confirm("לבטל את העסקה ולסמן כהוחזרה?")) return;
+    if (!await confirmAction("לבטל את העסקה ולסמן כהוחזרה?")) return;
     setRefundingId(id);
     const r = await fetch(`/api/admin/payments/${id}/refund`, {
       method: "POST",
@@ -57,7 +60,7 @@ export default function AdminPaymentsPage() {
     });
     const d = await r.json();
     if (!r.ok) {
-      alert(`שגיאה: ${d.error ?? "unknown"}\n${d.detail ?? d.raw ?? ""}`);
+      await notify(`שגיאה: ${d.error ?? "unknown"}\n${d.detail ?? d.raw ?? ""}`);
     }
     setRefundingId(null);
     load();
@@ -72,7 +75,7 @@ export default function AdminPaymentsPage() {
     });
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
-      alert(`שגיאה: ${body.error ?? "unknown"}`);
+      await notify(`שגיאה: ${body.error ?? "unknown"}`);
     } else {
       setItems((current) => current.map((item) => item.id === id ? { ...item, service_status: serviceStatus } : item));
     }
@@ -138,11 +141,11 @@ export default function AdminPaymentsPage() {
       {loading ? (
         <p className="text-stone-500 text-sm">טוען...</p>
       ) : items.length === 0 ? (
-        <div className="bg-white border border-stone-200 rounded-2xl p-10 text-center text-stone-500 text-sm">
+        <div className="brand-panel p-10 text-center text-stone-500 text-sm">
           אין עדיין תשלומים
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-sm">
+        <div className="brand-panel overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-[#F9FAFB] text-xs text-[#888] font-bold">

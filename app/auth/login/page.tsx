@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Typewriter } from "@/components/ui/typewriter";
 import { Eye, EyeOff } from "lucide-react";
 import { safeRedirectPath } from "@/lib/safe-redirect";
+import { EmailVerificationPanel } from "@/components/auth/EmailVerificationPanel";
 
 export default function LoginPage() {
   return (
@@ -32,6 +33,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPass, setShowPass] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
 
   const supabase = createClient();
 
@@ -52,15 +54,24 @@ function LoginForm() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error || !data.user) {
-      setError("כתובת מייל או סיסמה שגויים. נסו שוב.");
-    } else {
-      const dest = await postLoginDestination(data.user.id);
-      router.push(dest);
-      router.refresh();
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (error || !data.user) {
+        if (error?.code === "email_not_confirmed") {
+          setNeedsVerification(true);
+        } else {
+          setError(error?.status === 429 ? "יותר מדי ניסיונות כניסה. המתינו דקה ונסו שוב." : "כתובת מייל או סיסמה שגויים. נסו שוב.");
+        }
+      } else {
+        const dest = await postLoginDestination(data.user.id);
+        router.push(dest);
+        router.refresh();
+      }
+    } catch {
+      setError("לא ניתן להתחבר כרגע. בדקו את החיבור לאינטרנט ונסו שוב.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function handleGoogleLogin() {
@@ -121,6 +132,22 @@ function LoginForm() {
       {/* ── Form side — RIGHT in RTL ──────────────────────────────────────── */}
       <div className="flex flex-1 items-center justify-center p-5 sm:p-8 lg:p-14">
         <div className="brand-panel w-full max-w-[460px] p-6 sm:p-9">
+
+          {needsVerification ? (
+            <EmailVerificationPanel
+              email={email.trim()}
+              callbackUrl={`${window.location.origin}/auth/callback?signup=1${explicitRedirect ? `&next=${encodeURIComponent(explicitRedirect)}` : ""}`}
+              next={explicitRedirect ?? undefined}
+              onChangeEmail={() => setNeedsVerification(false)}
+            />
+          ) : (
+          <>
+          {searchParams.get("error") === "auth_callback_error" && (
+            <p role="alert" className="brand-notice-error mb-5">קישור האימות אינו תקף או שכבר נעשה בו שימוש. נסו להיכנס; אם החשבון עדיין לא אומת, תוכלו לבקש כאן קישור חדש.</p>
+          )}
+          {searchParams.get("message") === "password_updated" && (
+            <p role="status" className="brand-notice-success mb-5">הסיסמה עודכנה. אפשר להיכנס עם הסיסמה החדשה.</p>
+          )}
 
           {/* Mobile logo */}
           <div className="flex justify-center mb-8 lg:hidden">
@@ -218,7 +245,7 @@ function LoginForm() {
               </Link>
             </div>
 
-            {error && <p role="alert" className="text-red-500 text-sm bg-red-50 px-4 py-2.5 rounded-xl">{error}</p>}
+            {error && <p role="alert" className="brand-notice-error">{error}</p>}
 
             <button
               type="submit"
@@ -235,6 +262,8 @@ function LoginForm() {
             {" "}ול
             <Link href="/privacy" className="hover:underline">מדיניות הפרטיות</Link>
           </p>
+          </>
+          )}
         </div>
       </div>
     </div>

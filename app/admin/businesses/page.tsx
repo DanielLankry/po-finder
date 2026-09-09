@@ -1,5 +1,7 @@
 "use client";
 
+import { useFeedback } from "@/components/providers/FeedbackProvider";
+
 import { useEffect, useState, useCallback } from "react";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import type { BusinessCategory, KashrutStatus } from "@/lib/types";
@@ -47,6 +49,7 @@ const EMPTY_FORM = {
 };
 
 export default function AdminBusinessesPage() {
+  const { confirmAction, notify } = useFeedback();
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -71,7 +74,7 @@ export default function AdminBusinessesPage() {
   async function approve(business: Business) {
     if (
       business.promotion_code === "first-20-3m" &&
-      !confirm(`לאשר את ${business.name}? האישור יפרסם את העסק ויתחיל עכשיו 3 חודשים חינם.`)
+      !await confirmAction(`לאשר את ${business.name}? האישור יפרסם את העסק ויתחיל עכשיו 3 חודשים חינם.`)
     ) {
       return;
     }
@@ -83,16 +86,16 @@ export default function AdminBusinessesPage() {
       body: JSON.stringify({ businessId: business.id }),
     });
     if (res.ok) fetchAll();
-    else alert("שגיאה באישור העסק");
+    else await notify("שגיאה באישור העסק");
     setActionLoading(null);
   }
 
   async function deleteBiz(businessId: string) {
-    if (!confirm("בטוח למחוק את העסק?")) return;
+    if (!await confirmAction("בטוח למחוק את העסק?")) return;
     setActionLoading(businessId);
     const res = await fetch(`/api/admin/businesses/${businessId}`, { method: "DELETE" });
     if (res.ok) setBusinesses((prev) => prev.filter((b) => b.id !== businessId));
-    else alert("שגיאה במחיקה");
+    else await notify("שגיאה במחיקה");
     setActionLoading(null);
   }
 
@@ -113,7 +116,7 @@ export default function AdminBusinessesPage() {
     const message = currentlyPublic
       ? `להסתיר את ${business.name} מהאתר?`
       : `להציג את ${business.name}${updates.expires_at ? " ל־30 יום" : ""}?`;
-    if (!confirm(message)) return;
+    if (!await confirmAction(message)) return;
 
     setActionLoading(business.id);
     const response = await fetch(`/api/admin/businesses/${business.id}`, {
@@ -124,7 +127,7 @@ export default function AdminBusinessesPage() {
     const body = await response.json().catch(() => ({}));
     if (response.ok) {
       setBusinesses((current) => current.map((item) => item.id === business.id ? body.business as Business : item));
-    } else alert(body.error ?? "שגיאה בעדכון מצב העסק");
+    } else await notify(body.error ?? "שגיאה בעדכון מצב העסק");
     setActionLoading(null);
   }
 
@@ -143,7 +146,7 @@ export default function AdminBusinessesPage() {
       setForm(EMPTY_FORM);
       setShowAddForm(false);
     } catch (err) {
-      alert("שגיאה: " + (err instanceof Error ? err.message : String(err)));
+      await notify("שגיאה: " + (err instanceof Error ? err.message : String(err)));
     }
     setAddLoading(false);
   }
@@ -178,7 +181,7 @@ export default function AdminBusinessesPage() {
       setBusinesses((prev) => prev.map((b) => b.id === editBiz.id ? data.business as Business : b));
       setEditBiz(null);
     } catch (err) {
-      alert("שגיאה: " + (err instanceof Error ? err.message : String(err)));
+      await notify("שגיאה: " + (err instanceof Error ? err.message : String(err)));
     }
     setEditLoading(false);
   }

@@ -35,6 +35,7 @@ export default function PostHogProvider({ children }: { children: React.ReactNod
     window.addEventListener("po-cookie-consent-accepted", onConsent);
     window.addEventListener("po-cookie-consent-declined", onDecline);
     return () => {
+      disablePostHog();
       window.removeEventListener("po-cookie-consent-accepted", onConsent);
       window.removeEventListener("po-cookie-consent-declined", onDecline);
     };
