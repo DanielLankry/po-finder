@@ -192,12 +192,17 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
           </tr>
         </table>
 
+        ${expiryStr ? `
+        <p style="font-family: ${BODY_FONT}; font-size: 14px; color: #57534E; line-height: 1.7; margin: 0 0 24px;">
+          עכשיו כשהעסק מפורסם, כדאי לעבור עליו כמו לקוח: להוסיף תמונות עדכניות, לוודא ששעות הפעילות נכונות ולחדד את התיאור.
+        </p>` : ""}
+
         <!-- CTA -->
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
             <td align="center" style="padding-bottom: 8px;">
               <a href="https://pokarov.co.il/${expiryStr ? "dashboard" : "dashboard/billing"}" style="display: inline-block; background: #C4552D; color: #FFFFFF; border: 2px solid #8A3618; font-family: ${BODY_FONT}; font-size: 16px; font-weight: 800; text-decoration: none; padding: 13px 34px; border-radius: 12px; box-shadow: 4px 4px 0 #8A3618;">
-                ${expiryStr ? "לפתיחת העסק שלי ←" : "לבחירת משך פרסום ←"}
+                ${expiryStr ? "לצפייה ושיפור העסק ←" : "לבחירת משך פרסום ←"}
               </a>
             </td>
           </tr>
