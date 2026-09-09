@@ -1,11 +1,16 @@
 # Po-Finder (פה קרוב) - Tasks
 
 > Small business discovery app (Next.js 16 + Supabase + Google Maps)
-> Last updated: 2026-09-08
+> Last updated: 2026-09-09
 
 ---
 
 ## DONE
+
+### Customer email replies
+- [x] Route transactional email replies through the site support address — 2026-09-09
+  - Files modified: `lib/email.ts`, `app/api/contact/route.ts`, `tests/email-reply-routing.test.mjs`, `TASKS.md`, `AGENTS.md`
+  - Summary: Added explicit Reply-To routing so customer replies reach `support@pokarov.co.il`, while new-business alerts can be answered directly to the owner.
 
 ### Nightly Quality
 - [x] Keep the mobile navbar audience rotating when motion is reduced — 2026-08-11

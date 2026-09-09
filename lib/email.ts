@@ -23,6 +23,7 @@ export async function sendNewBusinessAlert(business: {
   await resend.emails.send({
     from: FROM_EMAIL,
     to: ADMIN_EMAIL,
+    replyTo: business.owner_email,
     subject: `🏪 עסק חדש ממתין לאישור — ${business.name}`,
     html: newBusinessAlertTemplate({
       name: business.name,
@@ -39,6 +40,7 @@ export async function sendBusinessApprovedEmail(to: string, businessName: string
   await resend.emails.send({
     from: FROM_EMAIL,
     to,
+    replyTo: ADMIN_EMAIL,
     subject: `✅ העסק שלך אושר — ${businessName}`,
     html: businessApprovedTemplate(businessName, expiresAt),
   });
@@ -49,6 +51,7 @@ export async function sendContactAutoReply(to: string, name: string, subjectLabe
   await resend.emails.send({
     from: FROM_EMAIL,
     to,
+    replyTo: ADMIN_EMAIL,
     subject: `קיבלנו את פנייתך — פה קרוב`,
     html: contactAutoReplyTemplate(name, subjectLabel),
   });
@@ -64,6 +67,7 @@ export async function sendExpiryReminder(
   const { error } = await resend.emails.send({
     from: FROM_EMAIL,
     to,
+    replyTo: ADMIN_EMAIL,
     subject: `⏰ הרישום של ${businessName} עומד לפוג בעוד ${daysBefore} ימים`,
     html: expiryReminderTemplate(
       businessName,
