@@ -38,7 +38,7 @@ export async function sendNewBusinessAlert(business: {
   owner_email: string;
 }) {
   const adminUrl = `https://pokarov.co.il/admin`;
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: FROM_EMAIL,
     to: ADMIN_EMAIL,
     replyTo: business.owner_email,
@@ -51,17 +51,19 @@ export async function sendNewBusinessAlert(business: {
       adminUrl,
     }),
   });
+  if (error) throw new Error(error.message);
 }
 
 // ── Business owner: listing approved ─────────────────────────────────────────
-export async function sendBusinessApprovedEmail(to: string, businessName: string, expiresAt?: Date) {
-  await resend.emails.send({
+export async function sendBusinessApprovedEmail(to: string, businessName: string, expiresAt?: Date, isActive = !!expiresAt) {
+  const { error } = await resend.emails.send({
     from: FROM_EMAIL,
     to,
     replyTo: ADMIN_EMAIL,
     subject: `✅ העסק שלך אושר — ${businessName}`,
-    html: businessApprovedTemplate(businessName, expiresAt),
+    html: businessApprovedTemplate(businessName, expiresAt, isActive),
   });
+  if (error) throw new Error(error.message);
 }
 
 // ── Contact form auto-reply ───────────────────────────────────────────────────

@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
+import { dispatchPaymentEmails } from "@/lib/payment-email-outbox";
 import { isAdminRequest } from "@/lib/admin-session";
 import { adminClient } from "@/lib/supabase/admin";
 import { refundTransaction } from "@/lib/hyp";
@@ -82,5 +83,6 @@ export async function POST(
     );
   }
 
+  after(() => dispatchPaymentEmails(attempt.id));
   return NextResponse.json({ ok: true, raw });
 }
