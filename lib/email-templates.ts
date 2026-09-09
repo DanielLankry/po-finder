@@ -80,6 +80,21 @@ function wrapper(content: string): string {
 </html>`;
 }
 
+/** Shared paper card for account security and billing notifications.
+ * Callers must escape any dynamic values before composing bodyHtml.
+ */
+export function notificationTemplate(title: string, bodyHtml: string, actionLabel: string, actionUrl: string): string {
+  return wrapper(`
+    <tr><td style="background:#EFF5F0;border-bottom:2px solid #17402D;padding:30px 24px;text-align:center;">
+      ${BRAND_LOCKUP_HTML}
+      <h1 style="font-family:${BODY_FONT};font-size:28px;line-height:1.35;color:#17402D;margin:24px 0 0;">${escapeHtml(title)}</h1>
+    </td></tr>
+    <tr><td style="padding:28px 24px;font-family:${BODY_FONT};font-size:16px;line-height:1.8;color:#17402D;text-align:right;">
+      ${bodyHtml}
+      <p style="text-align:center;margin:26px 0 12px;"><a href="${escapeHtml(actionUrl)}" style="display:inline-block;background:#C4552D;color:#FFFFFF;border:2px solid #8A3618;border-radius:12px;box-shadow:4px 4px 0 #8A3618;padding:12px 22px;font-weight:800;text-decoration:none;">${escapeHtml(actionLabel)}</a></p>
+    </td></tr>`);
+}
+
 // ── 1. Business Registration Received ───────────────────────────────────────
 /** Builds the owner receipt shown immediately after a business draft is saved.
  * It confirms the review state and points owners toward profile improvements
@@ -130,11 +145,12 @@ export function businessRegistrationReceivedTemplate(businessName: string): stri
 }
 
 // ── 2. Business Approved Email ───────────────────────────────────────────────
-export function businessApprovedTemplate(businessName: string, expiresAt?: Date): string {
+export function businessApprovedTemplate(businessName: string, expiresAt?: Date, isActive = !!expiresAt): string {
   const safeBusinessName = escapeHtml(businessName);
   const expiryStr = expiresAt
-    ? expiresAt.toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" })
+    ? expiresAt.toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jerusalem" })
     : null;
+  const needsPayment = !isActive && !expiryStr;
 
   return wrapper(`
     <!-- Neighborhood field-note header -->
@@ -146,8 +162,8 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
             <td align="center" style="width: 58px; height: 58px; background: #C4552D; border: 2px solid #8A3618; border-radius: 14px; box-shadow: 4px 4px 0 #8A3618; color: #FFFFFF; font-family: Arial, sans-serif; font-size: 30px; line-height: 58px; font-weight: 800;">✓</td>
           </tr>
         </table>
-        <h1 style="font-family: ${DISPLAY_FONT}; font-size: 38px; line-height: 1; font-weight: 700; color: #17402D; margin: 0 0 10px;">העסק שלך על המפה</h1>
-        <p style="font-family: ${BODY_FONT}; font-size: 16px; color: #2D6A4F; margin: 0; font-weight: 700;">${expiryStr ? `${safeBusinessName} אושר ועלה לאוויר` : `${safeBusinessName} אושר ומוכן להפעלה`}</p>
+        <h1 style="font-family: ${DISPLAY_FONT}; font-size: 38px; line-height: 1; font-weight: 700; color: #17402D; margin: 0 0 10px;">${isActive ? "העסק שלך על המפה" : "העסק שלך אושר"}</h1>
+        <p style="font-family: ${BODY_FONT}; font-size: 16px; color: #2D6A4F; margin: 0; font-weight: 700;">${isActive ? `${safeBusinessName} אושר ועלה לאוויר` : `${safeBusinessName} אושר ומוכן להפעלה`}</p>
       </td>
     </tr>
 
@@ -158,9 +174,11 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
           שלום! 👋<br><br>
           אנחנו שמחים לבשר שהעסק <strong style="color: #111827;">${safeBusinessName}</strong> עבר את תהליך האימות בפה קרוב.
           <br><br>
-          ${expiryStr
-            ? `הפרסום התחיל עכשיו ויישאר פעיל עד <strong>${expiryStr}</strong>. זמן ההמתנה לאישור לא ירד מתקופת ההטבה.`
-            : "כדי לפרסם אותו ללקוחות במפה וברשימה, אפשר לבחור עכשיו את משך ההופעה מלוח החיובים."}
+          ${isActive
+            ? `העסק מופיע עכשיו במפה וברשימה.${expiryStr ? ` הפרסום יישאר פעיל עד <strong>${expiryStr}</strong>.` : ""}`
+            : needsPayment
+              ? "כדי לפרסם אותו ללקוחות במפה וברשימה, אפשר לבחור עכשיו את משך ההופעה מלוח החיובים."
+              : `הרישום בתוקף עד <strong>${expiryStr}</strong>, אך העסק כרגע אינו מוצג לציבור. להפעלת ההצגה פנו לתמיכה.`}
         </p>
 
         <!-- Info box -->
@@ -171,20 +189,20 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
                 <tr>
                   <td style="padding-bottom: 12px;">
                     <span style="font-size: 18px;">📍</span>
-                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #17402D; margin-right: 8px;">${expiryStr ? "מופיע עכשיו במפה וברשימה" : "מוכן להפעלה לאחר תשלום"}</span>
+                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #17402D; margin-right: 8px;">${isActive ? "מופיע עכשיו במפה וברשימה" : needsPayment ? "מוכן להפעלה לאחר תשלום" : "הצגת העסק מושהית"}</span>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding-bottom: 12px;">
                     <span style="font-size: 18px;">⭐</span>
-                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #17402D; margin-right: 8px;">לקוחות יכולים להשאיר ביקורות</span>
+                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #17402D; margin-right: 8px;">${isActive ? "לקוחות יכולים להשאיר ביקורות" : "לאחר ההפעלה לקוחות יוכלו להשאיר ביקורות"}</span>
                   </td>
                 </tr>
                 ${expiryStr ? `
                 <tr>
                   <td>
                     <span style="font-size: 18px;">📅</span>
-                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #17402D; margin-right: 8px;">פעיל עד ${expiryStr}</span>
+                    <span style="font-family: 'Rubik', Arial, sans-serif; font-size: 14px; font-weight: 600; color: #17402D; margin-right: 8px;">תוקף הרישום: ${expiryStr}</span>
                   </td>
                 </tr>` : ""}
               </table>
@@ -192,7 +210,7 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
           </tr>
         </table>
 
-        ${expiryStr ? `
+        ${isActive ? `
         <p style="font-family: ${BODY_FONT}; font-size: 14px; color: #57534E; line-height: 1.7; margin: 0 0 24px;">
           עכשיו כשהעסק מפורסם, כדאי לעבור עליו כמו לקוח: להוסיף תמונות עדכניות, לוודא ששעות הפעילות נכונות ולחדד את התיאור.
         </p>` : ""}
@@ -201,8 +219,8 @@ export function businessApprovedTemplate(businessName: string, expiresAt?: Date)
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
             <td align="center" style="padding-bottom: 8px;">
-              <a href="https://pokarov.co.il/${expiryStr ? "dashboard" : "dashboard/billing"}" style="display: inline-block; background: #C4552D; color: #FFFFFF; border: 2px solid #8A3618; font-family: ${BODY_FONT}; font-size: 16px; font-weight: 800; text-decoration: none; padding: 13px 34px; border-radius: 12px; box-shadow: 4px 4px 0 #8A3618;">
-                ${expiryStr ? "לצפייה ושיפור העסק ←" : "לבחירת משך פרסום ←"}
+              <a href="https://pokarov.co.il/${needsPayment ? "dashboard/billing" : "dashboard"}" style="display: inline-block; background: #C4552D; color: #FFFFFF; border: 2px solid #8A3618; font-family: ${BODY_FONT}; font-size: 16px; font-weight: 800; text-decoration: none; padding: 13px 34px; border-radius: 12px; box-shadow: 4px 4px 0 #8A3618;">
+                ${needsPayment ? "לבחירת משך פרסום ←" : "לניהול העסק ←"}
               </a>
             </td>
           </tr>
@@ -406,7 +424,7 @@ export function expiryReminderTemplate(
 ): string {
   const safeBusinessName = escapeHtml(businessName);
   const safeRenewUrl = escapeHtml(renewUrl);
-  const expiryStr = expiresAt.toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" });
+  const expiryStr = expiresAt.toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jerusalem" });
 
   return wrapper(`
     <!-- Expiry field-note header -->

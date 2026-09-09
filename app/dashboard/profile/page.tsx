@@ -28,6 +28,7 @@ import PlacesSearchBar from "@/components/map/PlacesSearchBar";
 import type { LocationResult } from "@/components/map/PlacesSearchBar";
 import { BadgeCheck, Beef, CakeSlice, Coffee, Eye, Flower2, Gem, Leaf, MapPin, Phone, Shirt, UtensilsCrossed, Wheat } from "lucide-react";
 import { getLatestOwnedBusiness } from "@/lib/db/owned-businesses";
+import { createBusiness } from "@/lib/db/businesses";
 import { trackMetaBusinessLead } from "@/lib/meta-lead";
 import { trackPostHogEvent } from "@/lib/posthog";
 
@@ -50,6 +51,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [notificationWarning, setNotificationWarning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nowIso] = useState(() => new Date().toISOString());
 
@@ -151,12 +153,10 @@ export default function ProfilePage() {
           .eq("id", business.id);
         if (updateError) throw updateError;
       } else {
-        const { error: insertError } = await supabase
-          .from("businesses")
-          .insert({ owner_id: user.id, is_active: false, ...payload });
-        if (insertError) throw insertError;
-        // Update local state so next save does UPDATE not INSERT
-        const inserted = await getLatestOwnedBusiness(supabase, requestedId);
+        // The server saves the draft and sends the owner receipt and admin review alert.
+        const result = await createBusiness(payload);
+        const inserted = result.business;
+        setNotificationWarning(result.notificationWarning);
         if (inserted) {
           setBusiness(inserted);
           if (inserted.promotion_code === "first-20-3m") {
@@ -204,7 +204,7 @@ export default function ProfilePage() {
           <p className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
             {isPromotionJourney
               ? "ביצירת הפרופיל נשמר מקום במבצע, כל עוד נותרו מקומות. העסק יתפרסם רק אחרי אישור מנהל, ואז יתחילו 3 החודשים החינם."
-              : "זו טיוטה פרטית בחינם. היא תופיע לציבור רק אחרי אימות העסק ותשלום על רישום פעיל."}
+              : "זו טיוטה פרטית בחינם. היא תופיע לציבור אחרי אישור הצוות ותשלום או הפעלת הטבה תקפה."}
           </p>
         )}
       </div>
@@ -358,6 +358,11 @@ export default function ProfilePage() {
         </FormField>
 
         {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
+        {notificationWarning && (
+          <p role="status" className="brand-panel-orange p-3 text-sm">
+            העסק נשמר וממתין לבדיקה, אך הייתה תקלה בשליחת הודעת המייל. אין צורך ליצור אותו שוב; אפשר לעקוב אחר הסטטוס בלוח הבקרה.
+          </p>
+        )}
         {success && (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
             <span className="flex items-center gap-2 font-medium">

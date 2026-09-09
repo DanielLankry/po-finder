@@ -15,7 +15,7 @@ Implemented 2026-09-09, following the owner's five-item scope.
 
 | Check | Result |
 | --- | --- |
-| `node --test tests/*.test.mjs` | 128 passed, including 18 new owner-progress cases |
+| `node --experimental-test-module-mocks --test tests/*.test.mjs` | 166 passed after integrating the latest email changes, including 18 new owner-progress cases |
 | `npm run lint` | Passed without warnings |
 | `npx tsc --noEmit` | Passed |
 | `npm run build` | Passed |
@@ -26,7 +26,7 @@ Implemented 2026-09-09, following the owner's five-item scope.
 | Account endpoint tests | Anonymous 401, unowned selection 404, private/no-store, scoped reads and failure handling |
 | Live DB read permissions | Inspected authenticated grants; payment status query executed in a read-only rolled-back transaction without a forbidden `user_id` filter |
 
-The endpoint tests exercise the actual handler with provider boundaries stubbed. Owner-state screenshots use explicitly labelled fictional local fixtures; they do not prove a complete production owner write flow. The temporary fixture route was removed before the production build. Public browser checks read the existing site data only.
+The endpoint tests exercise the actual handler with provider boundaries stubbed. Owner-state screenshots use explicitly labelled fictional local fixtures; they do not prove a complete production owner write flow. The temporary fixture route was removed before the production build. Public browser checks read the existing site data only. The integrated email tests require Node's module-mock flag; the unflagged command cannot load those provider mocks.
 
 ## Evidence
 
