@@ -1,5 +1,7 @@
 "use client";
 
+import { useFeedback } from "@/components/providers/FeedbackProvider";
+
 import { useCallback, useEffect, useState } from "react";
 import { CalendarDays, MessageSquareText, RefreshCw, Star, Trash2 } from "lucide-react";
 
@@ -26,6 +28,7 @@ interface ModeratedEvent {
 
 /** Provide a single moderation queue for public reviews and business events. */
 export default function AdminContentPage() {
+  const { confirmAction, notify } = useFeedback();
   const [tab, setTab] = useState<"reviews" | "events">("reviews");
   const [reviews, setReviews] = useState<ModeratedReview[]>([]);
   const [events, setEvents] = useState<ModeratedEvent[]>([]);
@@ -40,9 +43,9 @@ export default function AdminContentPage() {
     if (response.ok) {
       setReviews(body.reviews ?? []);
       setEvents(body.events ?? []);
-    } else alert(body.error ?? "שגיאה בטעינת התוכן");
+    } else await notify(body.error ?? "שגיאה בטעינת התוכן");
     setLoading(false);
-  }, []);
+  }, [notify]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -51,14 +54,14 @@ export default function AdminContentPage() {
 
   /** Remove one moderated item and update the matching queue immediately. */
   async function remove(type: "reviews" | "events", id: string) {
-    if (!confirm("למחוק את התוכן לצמיתות?")) return;
+    if (!await confirmAction("למחוק את התוכן לצמיתות?")) return;
     setDeletingId(id);
     const response = await fetch(`/api/admin/content/${type}/${id}`, { method: "DELETE" });
     const body = await response.json().catch(() => ({}));
     if (response.ok) {
       if (type === "reviews") setReviews((current) => current.filter((item) => item.id !== id));
       else setEvents((current) => current.filter((item) => item.id !== id));
-    } else alert(body.error ?? "שגיאה במחיקת התוכן");
+    } else await notify(body.error ?? "שגיאה במחיקת התוכן");
     setDeletingId(null);
   }
 

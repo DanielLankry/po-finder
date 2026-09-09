@@ -1,5 +1,7 @@
 "use client";
 
+import { useFeedback } from "@/components/providers/FeedbackProvider";
+
 import { useCallback, useEffect, useState } from "react";
 import { Ban, RefreshCw, Save, ShieldCheck, Trash2, UserRoundCheck, Users } from "lucide-react";
 
@@ -21,6 +23,7 @@ function isBanned(user: AdminUser): boolean {
 
 /** Give the administrator profile, suspension, and deletion controls for users. */
 export default function AdminUsersPage() {
+  const { confirmAction, notify } = useFeedback();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -31,9 +34,9 @@ export default function AdminUsersPage() {
     const response = await fetch("/api/admin/users");
     const body = await response.json().catch(() => ({}));
     if (response.ok) setUsers(body.users ?? []);
-    else alert(body.error ?? "שגיאה בטעינת משתמשים");
+    else await notify(body.error ?? "שגיאה בטעינת משתמשים");
     setLoading(false);
-  }, []);
+  }, [notify]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -54,14 +57,14 @@ export default function AdminUsersPage() {
       body: JSON.stringify({ action: "update_profile", name: user.name, role: user.role }),
     });
     const body = await response.json().catch(() => ({}));
-    if (!response.ok) alert(body.error ?? "שגיאה בשמירת המשתמש");
+    if (!response.ok) await notify(body.error ?? "שגיאה בשמירת המשתמש");
     setBusyId(null);
   }
 
   /** Suspend or restore authentication without deleting owned site data. */
   async function toggleBan(user: AdminUser) {
     const action = isBanned(user) ? "unban" : "ban";
-    if (action === "ban" && !confirm(`לחסום את ${user.email} מכניסה לאתר?`)) return;
+    if (action === "ban" && !await confirmAction(`לחסום את ${user.email} מכניסה לאתר?`)) return;
     setBusyId(user.id);
     const response = await fetch(`/api/admin/users/${user.id}`, {
       method: "PATCH",
@@ -70,19 +73,19 @@ export default function AdminUsersPage() {
     });
     const body = await response.json().catch(() => ({}));
     if (response.ok) updateLocal(user.id, { banned_until: body.banned_until ?? null });
-    else alert(body.error ?? "שגיאה בעדכון החסימה");
+    else await notify(body.error ?? "שגיאה בעדכון החסימה");
     setBusyId(null);
   }
 
   /** Permanently remove the auth user and all database rows that cascade from it. */
   async function deleteUser(user: AdminUser) {
     const warning = `מחיקה לצמיתות של ${user.email} תמחק גם עסקים ותוכן בבעלותו. להמשיך?`;
-    if (!confirm(warning)) return;
+    if (!await confirmAction(warning)) return;
     setBusyId(user.id);
     const response = await fetch(`/api/admin/users/${user.id}`, { method: "DELETE" });
     const body = await response.json().catch(() => ({}));
     if (response.ok) setUsers((current) => current.filter((item) => item.id !== user.id));
-    else alert(body.error ?? "שגיאה במחיקת המשתמש");
+    else await notify(body.error ?? "שגיאה במחיקת המשתמש");
     setBusyId(null);
   }
 

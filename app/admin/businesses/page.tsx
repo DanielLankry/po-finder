@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { useFeedback } from "@/components/providers/FeedbackProvider";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import type { BusinessCategory, KashrutStatus } from "@/lib/types";
 import { CheckCircle, XCircle, Phone, ExternalLink, RefreshCw, Plus, Pencil, MapPin, PauseCircle, PlayCircle } from "lucide-react";
@@ -49,6 +50,7 @@ const EMPTY_FORM = {
 };
 
 export default function AdminBusinessesPage() {
+  const { confirmAction, notify } = useFeedback();
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -78,7 +80,7 @@ export default function AdminBusinessesPage() {
   async function approve(business: Business) {
     if (
       business.promotion_code === "first-20-3m" &&
-      !confirm(`לאשר את ${business.name}? האישור יפרסם את העסק ויתחיל עכשיו 3 חודשים חינם.`)
+      !await confirmAction(`לאשר את ${business.name}? האישור יפרסם את העסק ויתחיל עכשיו 3 חודשים חינם.`)
     ) {
       return;
     }
@@ -103,7 +105,7 @@ export default function AdminBusinessesPage() {
   }
 
   async function deleteBiz(businessId: string) {
-    if (!confirm("בטוח למחוק את העסק?")) return;
+    if (!await confirmAction("בטוח למחוק את העסק?")) return;
     setActionLoading(businessId);
     setFeedback(null);
     try {
@@ -134,7 +136,7 @@ export default function AdminBusinessesPage() {
     const message = currentlyPublic
       ? `להסתיר את ${business.name} מהאתר?`
       : `להציג את ${business.name}${updates.expires_at ? " ל־30 יום" : ""}?`;
-    if (!confirm(message)) return;
+    if (!await confirmAction(message)) return;
 
     setActionLoading(business.id);
     setFeedback(null);
@@ -170,7 +172,7 @@ export default function AdminBusinessesPage() {
       setForm(EMPTY_FORM);
       setShowAddForm(false);
     } catch (err) {
-      alert("שגיאה: " + (err instanceof Error ? err.message : String(err)));
+      await notify("שגיאה: " + (err instanceof Error ? err.message : String(err)));
     }
     setAddLoading(false);
   }
@@ -207,7 +209,7 @@ export default function AdminBusinessesPage() {
       if (data.notificationStatus === "failed") setFeedback(APPROVAL_EMAIL_WARNING);
       setEditBiz(null);
     } catch (err) {
-      alert("שגיאה: " + (err instanceof Error ? err.message : String(err)));
+      await notify("שגיאה: " + (err instanceof Error ? err.message : String(err)));
     }
     setEditLoading(false);
   }

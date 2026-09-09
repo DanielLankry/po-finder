@@ -183,11 +183,11 @@
   --site-paper-pattern-size: auto, auto, 22px 22px, 110px 80px, 220px 160px, 220px 160px;
   --site-paper-pattern-position: center, center, 0 0, 30px 12px, 0 0, 72px 28px;
   --background: #FFFFFF;
-  --foreground: #0A0A0A;
+  --foreground: #17402D;
   --card: #FFFFFF;
-  --card-foreground: #0A0A0A;
+  --card-foreground: #17402D;
   --popover: #FFFFFF;
-  --popover-foreground: #0A0A0A;
+  --popover-foreground: #17402D;
   --primary: #2D6A4F;
   --primary-foreground: #FFFFFF;
   --secondary: #4A8B66;
@@ -684,6 +684,35 @@
   border-color: #2D6A4F;
   box-shadow: 3px 3px 0 0 #2D6A4F;
   outline: none;
+}
+
+.brand-control[aria-invalid="true"] {
+  border-color: #B42318;
+}
+
+.brand-notice-error,
+.brand-notice-success {
+  border: 2px solid;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+.brand-notice-error {
+  border-color: #B42318;
+  color: #8A241B;
+  background: #FFF1EC;
+  box-shadow: 2px 2px 0 0 rgba(180, 35, 24, 0.18);
+}
+
+.brand-notice-success {
+  border-color: #2D6A4F;
+  color: #17402D;
+  background: #EFF5F0;
+  box-shadow: 2px 2px 0 0 rgba(23, 64, 45, 0.18);
 }
 
 .brand-button {

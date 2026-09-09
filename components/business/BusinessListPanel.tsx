@@ -429,7 +429,7 @@ export default function BusinessListPanel({
           </div>
         ) : (
           <div className="p-4 lg:p-6 pb-24">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {filtered.map((business, index) => (
                 <div
                   key={business.id}

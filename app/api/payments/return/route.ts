@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
+import { dispatchPaymentEmails } from "@/lib/payment-email-outbox";
 import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 import { adminClient } from "@/lib/supabase/admin";
@@ -85,6 +86,7 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
 
   // Idempotence — if we already settled this attempt, just route the user.
   if (attempt.status === "succeeded") {
+    after(() => dispatchPaymentEmails(attempt.id));
     return NextResponse.redirect(
       getBillingRedirect(origin, "success", attempt.id)
     );
@@ -191,6 +193,7 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     );
   }
 
+  after(() => dispatchPaymentEmails(attempt.id));
   return NextResponse.redirect(
     getBillingRedirect(origin, "success", attempt.id)
   );
