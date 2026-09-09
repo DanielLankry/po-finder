@@ -61,13 +61,14 @@ export function EmailVerificationPanel({ email, callbackUrl, next, onChangeEmail
       <div className="brand-chip mx-auto flex h-16 w-16 justify-center" aria-hidden="true">
         <MailCheck className="h-8 w-8" />
       </div>
-      <h1 id="verify-email-title" className="font-display text-4xl leading-tight text-ink">עוד שלב אחד: אימות המייל</h1>
+      <h1 id="verify-email-title" className="font-display text-4xl leading-tight text-ink">{next?.startsWith("/dashboard") ? "השלב הראשון: אימות המייל" : "עוד שלב אחד: אימות המייל"}</h1>
       <p className="text-sm leading-relaxed text-stone-600">
         {justSent ? "שלחנו קישור אימות אל" : "צריך לאמת את כתובת המייל לפני הכניסה לחשבון"}
         <strong dir="ltr" className="mt-2 block break-all text-ink">{email}</strong>
       </p>
       <div className="brand-panel-soft p-4 text-start text-sm leading-relaxed text-ink">
         פתחו את ההודעה ולחצו על קישור האימות כדי להמשיך. עד לאימות החשבון לא ניתן להיכנס או לפרסם עסק.
+        {next?.startsWith("/dashboard") && <p className="mt-2 font-semibold">זה השלב הראשון בדרך לפרסום: אימות מייל, פרופיל עסק, אישור הצוות, תשלום או הטבה ופרסום.</p>}
         <p className="mt-2 text-stone-600">לא מצאתם? בדקו גם בספאם ובקידומי מכירות.</p>
       </div>
       {notice && <p role="status" className="brand-notice-success">{notice}</p>}

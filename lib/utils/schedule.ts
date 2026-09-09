@@ -110,12 +110,14 @@ function sourceStatus(
  */
 export function getIsraelDateContext(now: Date = new Date()): IsraelDateContext {
   const current = formatIsraelParts(now);
-  const previous = formatIsraelParts(new Date(now.getTime() - 24 * 60 * 60 * 1000));
+  // Subtract a calendar day, not 24 elapsed hours: DST can otherwise skip a date.
+  const [year, month, day] = current.date.split("-").map(Number);
+  const previous = new Date(Date.UTC(year, month - 1, day - 1));
 
   return {
     ...current,
-    previousDate: previous.date,
-    previousDayOfWeek: previous.dayOfWeek,
+    previousDate: previous.toISOString().slice(0, 10),
+    previousDayOfWeek: previous.getUTCDay(),
   };
 }
 
@@ -222,4 +224,28 @@ export function isOpenNow(
  */
 export function getTodayDateString(): string {
   return getIsraelDateContext().date;
+}
+
+/** Uses the public resolver for the owner's clock and identifies the editable source. */
+export function getOwnerDayStatus(
+  daily: BusinessSchedule[],
+  weekly: WeeklyScheduleEntry[],
+  now: Date = new Date(),
+) {
+  const context = getIsraelDateContext(now);
+  const resolved = resolveEffectiveSchedule({
+    now,
+    todayDate: context.date,
+    previousDate: context.previousDate,
+    todayDaily: daily.find((row) => row.date === context.date),
+    previousDaily: daily.find((row) => row.date === context.previousDate),
+    todayWeekly: weekly.find((row) => row.day_of_week === context.dayOfWeek),
+    previousWeekly: weekly.find((row) => row.day_of_week === context.previousDayOfWeek),
+  });
+  return {
+    ...resolved,
+    availability: getBusinessAvailability({ today_schedule: resolved.schedule, hours_status: resolved.hoursStatus }, now),
+    source: !resolved.schedule ? null : daily.some((row) => row.id === resolved.schedule!.id) ? "daily" as const : "weekly" as const,
+    overnight: Boolean(resolved.schedule && resolved.schedule.date === context.previousDate),
+  };
 }

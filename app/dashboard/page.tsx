@@ -1,12 +1,10 @@
 import Link from "next/link";
-import { Plus, Clock, Star, Camera, MapPin, MessageCircle, Eye, Phone, Hand, ShieldCheck } from "lucide-react";
+import { Plus, Clock, Star, Camera, Eye, Phone, Hand, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessesByOwner } from "@/lib/db/businesses";
-import { getTodaySchedule } from "@/lib/db/schedules";
-import { isOpenNow } from "@/lib/utils/schedule";
 import type { Business } from "@/lib/types";
-import BusinessSelector from "@/components/dashboard/BusinessSelector";
-import { OwnerLifecycleBanner } from "@/components/dashboard/OwnerLifecycleStatus";
+import TodayStatus from "@/components/dashboard/TodayStatus";
+import { ownerPath } from "@/lib/owner-progress";
 import ShareButtons from "@/components/business/ShareButtons";
 
 export default async function DashboardPage({
@@ -58,12 +56,8 @@ async function DashboardContent({
   businesses: Business[];
   selectedId?: string;
 }) {
-  const business = businesses.find((b) => b.id === selectedId) ?? businesses[0];
+  const business = selectedId ? businesses.find((b) => b.id === selectedId) : businesses[0];
   if (!business) return null;
-
-  const schedule = await getTodaySchedule(business.id);
-  const isOpen = isOpenNow(schedule);
-  const nowIso = new Date().toISOString();
 
   // Analytics: last 30 days
   const supabase = await createClient();
@@ -80,10 +74,6 @@ async function DashboardContent({
 
   return (
     <>
-      {businesses.length > 1 && (
-        <BusinessSelector businesses={businesses} selectedId={business.id} />
-      )}
-
       <div className="brand-panel-soft relative overflow-hidden p-5 sm:p-6">
         <div className="absolute -left-5 -top-5 h-16 w-16 rotate-12 rounded-2xl border-2 border-[#8A3618] bg-[#F6E3D9]" aria-hidden="true" />
         <div className="flex items-center gap-3 flex-wrap">
@@ -97,65 +87,7 @@ async function DashboardContent({
         </p>
       </div>
 
-      <OwnerLifecycleBanner business={business} nowIso={nowIso} />
-
-      {/* Today's status card */}
-      <div
-        className={`rounded-[18px] p-6 border-2 shadow-[4px_4px_0_0_#17402D] ${
-          isOpen
-            ? "bg-emerald-50 border-[#17402D]"
-            : "bg-white border-[#17402D]"
-        }`}
-      >
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display font-bold text-lg text-stone-900">
-            סטטוס היום
-          </h2>
-          <span
-            className={`text-sm font-bold px-3 py-1 rounded-full border-2 ${
-              isOpen
-                ? "bg-emerald-500 text-white border-[#17402D]"
-                : "bg-stone-200 text-stone-600 border-stone-500"
-            }`}
-          >
-            {isOpen ? "פתוח עכשיו ●" : schedule ? "סגור" : "לא פורסם"}
-          </span>
-        </div>
-
-        {schedule ? (
-          <div className="text-stone-600 text-sm space-y-1.5">
-            {schedule.address && (
-              <p className="flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5 text-[#2D6A4F] flex-shrink-0" aria-hidden="true" />
-                {schedule.address}
-              </p>
-            )}
-            {schedule.open_time && schedule.close_time && (
-              <p className="flex items-center gap-1.5 tabular-nums">
-                <Clock className="h-3.5 w-3.5 text-[#2D6A4F] flex-shrink-0" aria-hidden="true" />
-                {schedule.open_time.slice(0, 5)} – {schedule.close_time.slice(0, 5)}
-              </p>
-            )}
-            {schedule.note && (
-              <p className="flex items-center gap-1.5">
-                <MessageCircle className="h-3.5 w-3.5 text-[#2D6A4F] flex-shrink-0" aria-hidden="true" />
-                {schedule.note}
-              </p>
-            )}
-          </div>
-        ) : (
-          <p className="text-stone-500 text-sm">
-            לא פרסמתם לוח זמנים להיום
-          </p>
-        )}
-
-        <Link
-          href="/dashboard/schedule"
-          className="brand-button inline-flex items-center justify-center h-10 px-5 mt-4 rounded-xl font-bold text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4552D] focus-visible:ring-offset-2"
-        >
-          {schedule ? "עריכת לוח הזמנים" : "פרסמו לוח זמנים"}
-        </Link>
-      </div>
+      <TodayStatus />
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -179,7 +111,7 @@ async function DashboardContent({
           icon={<Camera className="h-5 w-5 text-[#4A8B66]" />}
           label="ניהול תמונות"
           value="הוסיפו תמונות"
-          href="/dashboard/photos"
+          href={ownerPath("/dashboard/photos", business.id)}
         />
       </div>
 
@@ -188,10 +120,10 @@ async function DashboardContent({
         <h2 className="font-display font-bold text-base text-stone-900 mb-1">
           אנליטיקה — 30 הימים האחרונים
         </h2>
-        <p className="text-stone-400 text-xs mb-4">
+        <p className="text-stone-400 text-sm mb-4">
           נתוני ביקורים ופעולות על הדף הציבורי
         </p>
-        <div className="mb-4 flex items-start gap-2 rounded-xl border border-[#17402D]/20 bg-[#EFF5F0] px-3 py-2 text-xs leading-relaxed text-stone-600">
+        <div className="mb-4 flex items-start gap-2 rounded-xl border border-[#17402D]/20 bg-[#EFF5F0] px-3 py-2 text-sm leading-relaxed text-stone-600">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#2D6A4F]" aria-hidden="true" />
           <span>המספרים מוצגים כסיכום בלבד. אנחנו לא מציגים זהות, שמות או פרטי קשר של מבקרים.</span>
         </div>
@@ -202,14 +134,14 @@ async function DashboardContent({
               <Eye className="h-4 w-4 text-[#4A8B66]" aria-hidden="true" />
             </div>
             <p className="font-display font-bold text-2xl text-stone-900">{viewCount}</p>
-            <p className="text-stone-500 text-xs mt-0.5">צפיות</p>
+            <p className="text-stone-500 text-sm mt-0.5">צפיות</p>
           </div>
           <div className="rounded-xl bg-[#FFF3B0]/60 p-3 text-center">
             <div className="flex items-center justify-center mb-1">
               <Phone className="h-4 w-4 text-emerald-500" aria-hidden="true" />
             </div>
             <p className="font-display font-bold text-2xl text-stone-900">{callCount}</p>
-            <p className="text-stone-500 text-xs mt-0.5">לחיצות שיחה</p>
+            <p className="text-stone-500 text-sm mt-0.5">לחיצות שיחה</p>
           </div>
         </div>
       </div>
@@ -219,7 +151,7 @@ async function DashboardContent({
         <h2 className="font-display font-bold text-base text-stone-900 mb-1">
           שתף את הדף שלי
         </h2>
-        <p className="text-xs text-stone-500 mb-4">שלח ללקוחות קישור לדף העסק שלך</p>
+        <p className="text-sm text-stone-500 mb-4">שלח ללקוחות קישור לדף העסק שלך</p>
         <ShareButtons businessId={business.id} businessName={business.name} />
       </div>
 

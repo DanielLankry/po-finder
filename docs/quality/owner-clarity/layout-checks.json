@@ -1,0 +1,50 @@
+[
+  {
+    "contentBottom": 778.90625,
+    "controlsTop": 778.90625,
+    "controlsVisible": true,
+    "horizontalOverflow": false,
+    "overlap": false,
+    "width": 320
+  },
+  {
+    "contentBottom": 778.90625,
+    "controlsTop": 778.90625,
+    "controlsVisible": true,
+    "horizontalOverflow": false,
+    "overlap": false,
+    "width": 360
+  },
+  {
+    "contentBottom": 778.90625,
+    "controlsTop": 778.90625,
+    "controlsVisible": true,
+    "horizontalOverflow": false,
+    "overlap": false,
+    "width": 390
+  },
+  {
+    "contentBottom": 778.90625,
+    "controlsTop": 778.90625,
+    "controlsVisible": true,
+    "horizontalOverflow": false,
+    "overlap": false,
+    "width": 430
+  },
+  {
+    "contentBottom": 778.90625,
+    "controlsTop": 778.90625,
+    "controlsVisible": true,
+    "horizontalOverflow": false,
+    "overlap": false,
+    "width": 768
+  },
+  {
+    "contentBottom": 844.90625,
+    "controlsTop": 0,
+    "controlsVisible": false,
+    "horizontalOverflow": false,
+    "overlap": false,
+    "width": 1440
+  }
+]

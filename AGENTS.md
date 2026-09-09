@@ -12,6 +12,8 @@ This codebase uses TypeScript with strict mode, React function components, and t
 ## Testing Guidelines
 Tests are Playwright-first. Name specs `*.spec.ts` under `tests/<area>/`. Public route, auth, and SEO coverage already live under `tests/public` and `tests/auth`; destructive paid/unpaid business flows are isolated under `tests/destructive`. Run Playwright with `npx playwright test`. Set `PLAYWRIGHT_BASE_URL` when targeting a non-default environment.
 
+Run the native regression suite with `node --experimental-test-module-mocks --test tests/*.test.mjs`; the email/provider tests require the module-mock flag.
+
 ## Commit & Pull Request Guidelines
 Recent history follows Conventional Commit style such as `fix(payments): ...`, `fix(ux): ...`, and `diag(payments): ...`. Keep that format for new commits. PRs should include a short problem statement, the concrete user-facing change, any required env or migration steps, and screenshots for visible UI updates. Link the relevant issue or task when one exists.
 
@@ -22,6 +24,11 @@ Keep secrets in `.env.local` only; use `.env.local.example` as the template for 
 Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do not reintroduce `middleware.ts`. Visible Hebrew branding should remain `פה קרוב`, while `pokarov.co.il` is reserved for domains, email addresses, and technical identifiers.
 
 ## Project Patterns
+- Owner progress comes from the authenticated, private/no-store `/api/account/progress` read model and `lib/owner-progress.ts`; profile completion is guidance and must never grant approval or publication. `OwnerWorkspace` refreshes on saves, route changes, focus and minute boundaries without remounting unsaved forms.
+- Dashboard links must preserve `businessId`, including completion anchors and schedule tabs. An explicitly requested unowned/missing business returns no match rather than silently editing the latest owned business.
+- Authenticated payment queries must use readable columns and RLS for user scoping; `payment_attempts.user_id` is intentionally excluded from SELECT grants, including filters. Establish business ownership before reading its payment status.
+- Previous-day schedule context uses calendar subtraction from the Israel date, never an elapsed 24-hour subtraction across DST. Owner availability uses the same resolver as public discovery and stays separate from approval/publication.
+- The mobile map/list toggle occupies a reserved flex row below the discovery content, with the footer in normal flow. Do not restore a fixed overlay or compensate with arbitrary card-list bottom padding.
 - Payment emails are queued atomically by the private payment-status trigger in migration `20260909122231_payment_email_outbox.sql`; only service-role workers claim jobs, and every retry uses the immutable stored HTML request and stable Resend key.
 - Supabase password/email-change notifications are enabled and branded; rebuild the three source templates with `scripts/build-security-email-templates.mjs`, and keep the hosted settings aligned.
 - `/admin/payment-emails` distinguishes provider acceptance from delivery; Hobby retries are daily, and uncertain sends older than 23 hours require Resend reconciliation rather than blind resend.

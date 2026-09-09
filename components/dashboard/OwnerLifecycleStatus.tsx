@@ -83,7 +83,7 @@ export function OwnerLifecycleBanner({
             <OwnerLifecyclePill details={details} />
           </div>
           {!compact && (
-            <p className="mt-1 text-xs leading-relaxed text-stone-700">
+            <p className="mt-1 text-sm leading-relaxed text-stone-700">
               {details.description}
             </p>
           )}
@@ -91,7 +91,7 @@ export function OwnerLifecycleBanner({
       </div>
       <Link
         href={details.actionHref}
-        className={`inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl px-4 py-2 text-xs font-black transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4552D] focus-visible:ring-offset-2 ${classes.button}`}
+        className={`inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl px-4 py-2 text-sm font-black transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4552D] focus-visible:ring-offset-2 ${classes.button}`}
       >
         {details.actionLabel}
       </Link>
@@ -109,11 +109,11 @@ export function OwnerLifecyclePills({
   const details = getOwnerLifecycleDetails(business, nowIso);
 
   return (
-    <div className="flex flex-wrap gap-2 text-xs font-black">
+    <div className="flex flex-wrap gap-2 text-sm font-black">
       <StatusPill
         active={business.is_verified === true}
-        activeText="מאומת"
-        inactiveText="ממתין לאימות"
+        activeText="אושר על ידי הצוות"
+        inactiveText="ממתין לאישור הצוות"
       />
       <OwnerLifecyclePill details={details} />
     </div>
@@ -170,7 +170,7 @@ export function OwnerLifecycleTransientNotice({
         </div>
         <div className="min-w-0">
           <h2 className="text-sm font-black text-stone-950">{details.title}</h2>
-          <p className="mt-1 text-xs leading-relaxed text-stone-700">
+          <p className="mt-1 text-sm leading-relaxed text-stone-700">
             {details.description}
           </p>
         </div>
@@ -178,7 +178,7 @@ export function OwnerLifecycleTransientNotice({
       {details.actionHref && details.actionLabel ? (
         <Link
           href={details.actionHref}
-          className={`inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl px-4 py-2 text-xs font-black transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4552D] focus-visible:ring-offset-2 ${classes.button}`}
+          className={`inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl px-4 py-2 text-sm font-black transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4552D] focus-visible:ring-offset-2 ${classes.button}`}
         >
           {details.actionLabel}
         </Link>
@@ -198,7 +198,7 @@ export function OwnerLifecycleLoading({ text = "טוען..." }: { text?: string 
 
 function OwnerLifecyclePill({ details }: { details: OwnerLifecycleDetails }) {
   return (
-    <span className={`inline-flex items-center rounded-full border-2 px-3 py-1 text-xs font-black ${TONE_CLASSES[details.tone].pill}`}>
+    <span className={`inline-flex items-center rounded-full border-2 px-3 py-1 text-sm font-black ${TONE_CLASSES[details.tone].pill}`}>
       {details.pill}
     </span>
   );

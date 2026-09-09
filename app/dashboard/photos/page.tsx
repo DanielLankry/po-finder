@@ -1,5 +1,9 @@
 ﻿"use client";
 
+import { useSearchParams } from "next/navigation";
+import { useOwnerFormAnchor } from "@/lib/hooks/useOwnerFormAnchor";
+import { notifyOwnerDataChanged } from "@/components/dashboard/OwnerWorkspace";
+
 import { useFeedback } from "@/components/providers/FeedbackProvider";
 
 import { useState, useEffect, useRef } from "react";
@@ -11,6 +15,7 @@ import { getLatestOwnedBusiness } from "@/lib/db/owned-businesses";
 import SafeBusinessImage from "@/components/business/SafeBusinessImage";
 
 export default function PhotosPage() {
+  const requestedId = useSearchParams().get("businessId");
   const { confirmAction } = useFeedback();
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -20,6 +25,7 @@ export default function PhotosPage() {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadInFlight = useRef(false);
+  useOwnerFormAnchor(loading);
   const supabase = createClient();
 
   useEffect(() => {
@@ -27,7 +33,7 @@ export default function PhotosPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const biz = await getLatestOwnedBusiness(supabase);
+      const biz = await getLatestOwnedBusiness(supabase, requestedId);
 
       if (!biz) { setLoading(false); return; }
       setBusinessId(biz.id);
@@ -42,7 +48,7 @@ export default function PhotosPage() {
       setLoading(false);
     }
     load();
-  }, [supabase]);
+  }, [supabase, requestedId]);
 
   async function uploadFiles(files: FileList | File[]) {
     if (!businessId || uploadInFlight.current) return;
@@ -103,6 +109,7 @@ export default function PhotosPage() {
     } finally {
       uploadInFlight.current = false;
       setUploading(false);
+      notifyOwnerDataChanged();
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
@@ -118,6 +125,7 @@ export default function PhotosPage() {
       return;
     }
     setPhotos((prev) => prev.map((p) => ({ ...p, is_primary: p.id === photoId })));
+    notifyOwnerDataChanged();
   }
 
   async function deletePhoto(photo: Photo) {
@@ -147,6 +155,7 @@ export default function PhotosPage() {
       remaining[0] = { ...remaining[0], is_primary: true };
     }
     setPhotos(remaining);
+    notifyOwnerDataChanged();
   }
 
   if (loading) {
@@ -167,7 +176,7 @@ export default function PhotosPage() {
 
         {/* Drag & drop zone */}
         <div
-          data-tour="photos-upload"
+          id="photos-upload" data-tour="photos-upload"
           className={`border-2 border-dashed rounded-2xl p-8 text-center transition-colors cursor-pointer ${
             dragOver
               ? "border-[#2D6A4F] bg-[#EFF5F0]"
@@ -193,7 +202,7 @@ export default function PhotosPage() {
           <p className="text-stone-600 font-medium text-sm">
             גררו תמונות לכאן או לחצו להעלאה
           </p>
-          <p className="text-stone-400 text-xs mt-1">PNG, JPG, WEBP עד 10MB</p>
+          <p className="text-stone-400 text-sm mt-1">PNG, JPG, WEBP עד 10MB</p>
           {uploading && (
             <p className="text-[#2D6A4F] text-sm mt-2 font-medium">...מעלה</p>
           )}
@@ -225,7 +234,7 @@ export default function PhotosPage() {
 
                 {/* Primary badge */}
                 {photo.is_primary && (
-                  <div className="absolute top-2 right-2 bg-[#2D6A4F] text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <div className="absolute top-2 right-2 bg-[#2D6A4F] text-white text-sm px-2 py-0.5 rounded-full flex items-center gap-1">
                     <Star className="h-3 w-3 fill-white" aria-hidden="true" />
                     ראשית
                   </div>
@@ -236,7 +245,7 @@ export default function PhotosPage() {
                   {!photo.is_primary && (
                     <button
                       onClick={() => setPrimary(photo.id)}
-                      className="min-h-11 bg-white text-stone-700 text-xs font-bold px-3 py-2 rounded-xl hover:bg-[#EFF5F0] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
+                      className="min-h-11 bg-white text-stone-700 text-sm font-bold px-3 py-2 rounded-xl hover:bg-[#EFF5F0] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
                       aria-label="הגדרה כתמונה ראשית"
                     >
                       הגדרה כראשית
