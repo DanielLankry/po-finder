@@ -19,7 +19,7 @@ export function ConfirmEmailForm() {
     if (!hasReadToken.current) {
       hasReadToken.current = true;
       // Initialize from the external browser URL after hydration.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       readToken();
     }
     // Opening a new email link in this same tab may only change the fragment.

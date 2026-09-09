@@ -54,12 +54,12 @@ export default function BusinessCard({
       <button
         onClick={onClick}
         disabled={disabled}
-        className={`w-full text-right transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] rounded-[24px] group relative bg-white block p-3.5 ${disabled ? "cursor-default" : "cursor-pointer"} ${
+        className={`brand-panel w-full text-right transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4552D] focus-visible:ring-offset-2 group relative block p-3.5 ${disabled ? "cursor-default" : "cursor-pointer"} ${
           isSelected 
-            ? "shadow-[0_8px_24px_rgba(45,106,79,0.25)] scale-[1.02]" 
+            ? "ring-2 ring-[#C4552D] ring-offset-2" 
             : isHovered 
-              ? "shadow-[0_20px_40px_rgba(0,0,0,0.12)] scale-[1.02] transform -translate-y-1"
-              : "shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)] transform hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98]"
+              ? "-translate-y-0.5"
+              : "hover:-translate-y-0.5 active:translate-y-0 motion-reduce:transform-none"
         }`}
         aria-pressed={isSelected}
         aria-disabled={disabled}
@@ -67,7 +67,7 @@ export default function BusinessCard({
       >
         <div className="flex flex-col gap-3.5" dir="rtl">
           {/* ── Photo wrapper (aspect square) ───────────────────────────────── */}
-          <div className="relative w-full aspect-[4/3] rounded-[16px] overflow-hidden bg-[#EDE8DC] isolate">
+          <div className="relative w-full aspect-[4/3] rounded-xl border border-[#17402D]/20 overflow-hidden bg-[#EDE8DC] isolate">
             <SafeBusinessImage
               src={primaryPhoto?.url}
               alt={`תמונה של ${business.name}`}
@@ -86,7 +86,7 @@ export default function BusinessCard({
             
             {/* Optional "Open Now" badge over image */}
             {availability === "open" && (
-              <div className="absolute top-3 right-3 z-10 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg pointer-events-none transition-transform duration-300 group-hover:-translate-y-0.5 border border-white/20">
+              <div className="brand-chip absolute top-3 right-3 z-10 px-3 py-1.5 pointer-events-none">
                  <span className="text-[12px] font-bold tracking-wide text-[#2D6A4F]">
                    פתוח עכשיו
                  </span>
@@ -99,14 +99,14 @@ export default function BusinessCard({
             {/* Line 1: Name and rating */}
             <div className="flex justify-between items-start gap-2">
               <span className="flex items-center gap-1.5 min-w-0">
-                <p className={`font-extrabold text-[17px] leading-tight line-clamp-1 truncate tracking-tight transition-colors duration-200 ${isHovered ? 'text-[#2D6A4F]' : 'text-[#111111] group-hover:text-[#2D6A4F]'}`}>
+                <p className="font-display font-bold text-2xl leading-tight line-clamp-1 truncate text-ink">
                   {business.name}
                 </p>
               </span>
               {business.avg_rating > 0 && (
                 <div className="flex items-center gap-1 flex-shrink-0 mt-0.5">
-                  <Star className="h-3.5 w-3.5 fill-[#222222] text-[#222222]" aria-hidden="true" />
-                  <span className="text-[13px] font-bold text-[#222222]">
+                  <Star className="h-3.5 w-3.5 fill-green-800 text-green-800" aria-hidden="true" />
+                  <span className="text-[13px] font-bold text-ink">
                     {business.avg_rating.toFixed(1)}
                   </span>
                 </div>
@@ -115,7 +115,7 @@ export default function BusinessCard({
 
             {/* Line 2: Address / Neighborhood */}
             {address && (
-              <p className="text-[14px] text-[#888888] line-clamp-1 truncate font-medium">
+              <p className="text-sm text-stone-600 line-clamp-1 truncate font-medium">
                 {address}
               </p>
             )}
@@ -144,7 +144,7 @@ export default function BusinessCard({
         <button
           type="button"
           onClick={onFavoriteToggle}
-          className="absolute left-7 top-7 z-10 flex h-11 w-11 items-center justify-center rounded-full border-2 border-white/80 bg-white/95 text-stone-600 shadow-md backdrop-blur-md transition-all hover:scale-105 hover:text-rose-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+          className="brand-icon-button absolute left-7 top-7 z-10 flex h-11 w-11 items-center justify-center rounded-full hover:text-rose-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4552D] focus-visible:ring-offset-2"
           aria-label={isFavorited ? "הסר ממועדפים" : "שמור למועדפים"}
           aria-pressed={isFavorited}
         >
