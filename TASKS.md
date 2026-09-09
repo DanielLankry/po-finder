@@ -1,11 +1,26 @@
 # Po-Finder (פה קרוב) - Tasks
 
 > Small business discovery app (Next.js 16 + Supabase + Google Maps)
-> Last updated: 2026-09-08
+> Last updated: 2026-09-09
 
 ---
 
 ## DONE
+
+### Private support inbox
+- [x] Reply to contact-form customers from the site's support identity — 2026-09-09
+  - Files modified: `app/admin/contact/page.tsx`, `app/admin/layout.tsx`, `app/api/admin/contact/route.ts`, `app/api/admin/contact/[id]/reply/route.ts`, `app/api/contact/route.ts`, `lib/email-templates.ts`, `lib/email.ts`, `supabase/migrations/20260909092059_support_inbox.sql`, `tests/email-reply-routing.test.mjs`, `tests/support-inbox.test.mjs`, `TASKS.md`, `AGENTS.md`
+  - Summary: Added a private admin conversation queue that persists contact submissions and sends branded, audited replies from `support@pokarov.co.il` without exposing the administrator's personal mailbox.
+
+### Branded business lifecycle emails
+- [x] Match business emails to the product-paper theme and confirm new registrations — 2026-09-09
+  - Files modified: `lib/email-templates.ts`, `lib/email.ts`, `lib/db/businesses.ts`, `tests/business-registration-email.test.mjs`, `tests/email-reply-routing.test.mjs`, `TASKS.md`, `AGENTS.md`
+  - Summary: Reworked transactional email surfaces around the site's warm paper, green ink, terracotta actions, strong borders, and hard shadows, and added non-blocking owner/admin notifications when a business draft is created.
+
+### Customer email replies
+- [x] Route transactional email replies through the site support address — 2026-09-09
+  - Files modified: `lib/email.ts`, `app/api/contact/route.ts`, `tests/email-reply-routing.test.mjs`, `TASKS.md`, `AGENTS.md`
+  - Summary: Added explicit Reply-To routing so customer replies reach `support@pokarov.co.il`, while new-business alerts can be answered directly to the owner.
 
 ### Nightly Quality
 - [x] Keep the mobile navbar audience rotating when motion is reduced — 2026-08-11
