@@ -4,6 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
 import { getDashboardAccessForUser } from "@/lib/dashboard-access";
+import OwnerWorkspace from "@/components/dashboard/OwnerWorkspace";
 
 export const metadata = { title: "לוח בקרה" };
 
@@ -42,7 +43,7 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
           <div className="flex flex-col md:flex-row gap-8">
             <DashboardSidebar />
             <main className="flex-1 min-w-0" id="dashboard-content">
-              {children}
+              <OwnerWorkspace>{children}</OwnerWorkspace>
             </main>
           </div>
         </div>

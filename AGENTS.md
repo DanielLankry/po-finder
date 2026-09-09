@@ -22,6 +22,11 @@ Keep secrets in `.env.local` only; use `.env.local.example` as the template for 
 Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do not reintroduce `middleware.ts`. Visible Hebrew branding should remain `פה קרוב`, while `pokarov.co.il` is reserved for domains, email addresses, and technical identifiers.
 
 ## Project Patterns
+- Owner progress comes from the authenticated, private/no-store `/api/account/progress` read model and `lib/owner-progress.ts`; profile completion is guidance and must never grant approval or publication. `OwnerWorkspace` refreshes on saves, route changes, focus and minute boundaries without remounting unsaved forms.
+- Dashboard links must preserve `businessId`, including completion anchors and schedule tabs. An explicitly requested unowned/missing business returns no match rather than silently editing the latest owned business.
+- Authenticated payment queries must use readable columns and RLS for user scoping; `payment_attempts.user_id` is intentionally excluded from SELECT grants, including filters. Establish business ownership before reading its payment status.
+- Previous-day schedule context uses calendar subtraction from the Israel date, never an elapsed 24-hour subtraction across DST. Owner availability uses the same resolver as public discovery and stays separate from approval/publication.
+- The mobile map/list toggle occupies a reserved flex row below the discovery content, with the footer in normal flow. Do not restore a fixed overlay or compensate with arbitrary card-list bottom padding.
 - Email verification is enforced by hosted Supabase Confirm email plus custom SMTP; keep both enabled. Signup uses the branded `supabase/templates/confirmation.html` and recovery uses `recovery.html`; repository edits do not update hosted templates automatically.
 - Signup confirmation carries `TokenHash` in the URL fragment to `/auth/confirm`, clears it from the address bar, and requires a same-origin POST to `/auth/callback`; preserve the landing page's `same-origin` referrer policy because `no-referrer` makes native POST Origin null.
 - The confirmation page excludes PostHog, Meta, Vercel analytics and browser Sentry initialization. Keep credentials out of analytics and logs, preserve `registration_next` through `safeRedirectPath`, and never allow metadata to create an admin role.

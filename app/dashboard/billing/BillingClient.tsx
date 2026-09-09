@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useOwnerWorkspace } from "@/components/dashboard/OwnerWorkspace";
 import { Calendar, Receipt } from "lucide-react";
 import DurationSelectorCard from "@/components/business/DurationSelectorCard";
 import {
-  OwnerLifecycleBanner,
   OwnerLifecycleLoading,
   OwnerLifecyclePills,
   OwnerLifecycleTransientNotice,
@@ -46,6 +47,8 @@ export default function BillingClient({
   paymentState: OwnerPaymentTransientState | null;
   purchaseEvent: PurchaseEvent | null;
 }) {
+  const selectedId = useSearchParams().get("businessId");
+  const { data: workspace } = useOwnerWorkspace();
   const [businesses, setBusinesses] = useState<BusinessLite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -198,32 +201,44 @@ export default function BillingClient({
           </div>
         ) : (
           <div className="divide-y-2 divide-stone-200">
-            {businesses.map((business) => {
+            {businesses.filter((item) => !(selectedId ?? workspace?.business?.id) || item.id === (selectedId ?? workspace?.business?.id)).map((storedBusiness) => {
+              const business = workspace?.business?.id === storedBusiness.id ? workspace.business : storedBusiness;
+              const promotionCovered = business.promotion_code === "first-20-3m" && Boolean(business.promotion_activated_at) && business.is_active && Boolean(business.expires_at && Date.parse(business.expires_at) > Date.parse(workspace?.updatedAt ?? nowIso));
+              const paymentBlocked = workspace?.business?.id === business.id && workspace.journey.paymentActionBlocked;
+              const effectiveNow = workspace?.updatedAt ?? nowIso;
+              const durationControl = <DurationSelectorCard
+                plans={plans}
+                nowIso={effectiveNow}
+                baseExpiry={business.expires_at}
+                initialCode={initialCode}
+                disabled={!workspace || paymentBlocked || checkoutLoading !== null}
+                loading={checkoutLoading?.endsWith(`:${business.id}`) ?? false}
+                onAction={(plan) => startCheckout(plan, business.id)}
+              />;
               return (
                 <article key={business.id} className="space-y-5 p-5 md:p-7">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <h3 className="font-display text-3xl text-stone-950">{business.name}</h3>
                       <div className="mt-2">
-                        <OwnerLifecyclePills business={business} nowIso={nowIso} />
+                        <OwnerLifecyclePills business={business} nowIso={effectiveNow} />
                       </div>
                     </div>
                   </div>
 
-                  <OwnerLifecycleBanner business={business} nowIso={nowIso} compact />
-
-                  <DurationSelectorCard
-                    plans={plans}
-                    nowIso={nowIso}
-                    baseExpiry={business.expires_at}
-                    initialCode={initialCode}
-                    disabled={!business.is_verified || checkoutLoading !== null}
-                    loading={checkoutLoading?.endsWith(`:${business.id}`) ?? false}
-                    onAction={(plan) => startCheckout(plan, business.id)}
-                  />
-                  <p className="text-center text-xs text-stone-500">
-                    התוקף מתחיל אחרי תשלום מוצלח. בסיום העסק יורד אוטומטית מהאתר,
-                    ולוח הבקרה נשאר זמין לחידוש.
+                  {!business.is_verified ? (
+                    <p className="text-sm leading-relaxed text-[#405348]">בחירת תקופה בתשלום תיפתח לאחר אישור הצוות. אם נשמר מקום בהטבה, היא תופעל עם האישור ללא תשלום.</p>
+                  ) : paymentBlocked ? (
+                    <p className="text-sm leading-relaxed text-[#8A3618]">יש לברר את מצב העסק או התשלום הקודם לפני תשלום נוסף. <Link href="/contact" className="font-bold underline">פנייה לצוות</Link></p>
+                  ) : promotionCovered ? (
+                    <details><summary className="min-h-11 cursor-pointer text-base font-bold text-[#17402D]">ההטבה פעילה · הארכת התקופה בתשלום לבחירה</summary>{durationControl}</details>
+                  ) : durationControl}
+                  <p className="text-center text-sm text-stone-500">
+                    {business.promotion_code === "first-20-3m" && !business.promotion_activated_at
+                      ? "תקופת ההטבה תתחיל עם אישור הצוות. זמן ההמתנה לאישור אינו נגרע ממנה."
+                      : promotionCovered
+                        ? "התקופה הנוכחית מכוסה בהטבה. הארכה בתשלום תתווסף לסוף התקופה הקיימת."
+                        : "תשלום מוצלח מתחיל תקופה חדשה או מאריך תקופה בתוקף. בסיום התקופה העסק יורד מהאתר, ולוח הבקרה נשאר זמין לחידוש."}
                   </p>
                 </article>
               );
