@@ -112,6 +112,7 @@ export default function PrivacyPage() {
                 {[
                   ["Supabase", "מסד נתונים, אימות משתמשים ואחסון תמונות", "https://supabase.com/privacy"],
                   ["Vercel", "אחסון, פריסה, תשתית אתר ואנליטיקה לאחר הסכמה", "https://vercel.com/legal/privacy-policy"],
+                  ["Vercel Speed Insights", "מדדי ביצועים אנונימיים לדפים (LCP/INP/CLS ונתונים טכניים נלווים) לאחר הסכמה", "https://vercel.com/docs/speed-insights/privacy-policy"],
                   ["PostHog", "אנליטיקה התנהגותית לאחר הסכמה", "https://posthog.com/privacy"],
                   ["Meta Pixel", "מדידת פרסום והמרות לאחר הסכמה", "https://www.facebook.com/privacy/policy/"],
                   ["Google Maps Platform", "מפה, חיפוש כתובות ותצוגת מיקומים", "https://policies.google.com/privacy"],
@@ -142,7 +143,7 @@ export default function PrivacyPage() {
               <ul className="list-disc list-inside space-y-2 text-stone-600">
                 <li>עוגיות הכרחיות: סשן התחברות, אבטחה ותפעול בסיסי. לא ניתן לספק חשבון משתמש בלעדיהן.</li>
                 <li>אחסון מקומי הכרחי/פונקציונלי: העדפות נגישות, מועדפים לאורחים, מצב סיור והעדפת עוגיות.</li>
-                <li>אנליטיקה ופרסום: PostHog, Vercel Analytics ו-Meta Pixel מופעלים רק לאחר לחיצה על &quot;אישור&quot; בבאנר העוגיות.</li>
+                <li>אנליטיקה ופרסום: PostHog, Vercel Analytics, Vercel Speed Insights ו-Meta Pixel מופעלים רק לאחר לחיצה על &quot;אישור&quot; בבאנר העוגיות.</li>
               </ul>
               <p className="mt-3 text-sm text-stone-500">
                 אפשר לפתוח מחדש את בחירת העוגיות דרך הקישור &quot;העדפות עוגיות&quot; בתחתית האתר.
