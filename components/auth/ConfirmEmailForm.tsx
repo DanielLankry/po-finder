@@ -10,14 +10,21 @@ export function ConfirmEmailForm() {
   const [tokenHash, setTokenHash] = useState<string | null>(null);
   const hasReadToken = useRef(false);
   useEffect(() => {
-    // Strict Mode replays effects; the fragment must only be consumed once.
-    if (hasReadToken.current) return;
-    hasReadToken.current = true;
-    const token = new URLSearchParams(window.location.hash.slice(1)).get("token_hash") ?? "";
-    window.history.replaceState(window.history.state, "", window.location.pathname);
-    // This state is initialized from an external browser URL after hydration.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setTokenHash(token);
+    const readToken = () => {
+      const token = new URLSearchParams(window.location.hash.slice(1)).get("token_hash") ?? "";
+      window.history.replaceState(window.history.state, "", window.location.pathname);
+      setTokenHash(token);
+    };
+    // Strict Mode replays effects; the initial fragment must only be consumed once.
+    if (!hasReadToken.current) {
+      hasReadToken.current = true;
+      // Initialize from the external browser URL after hydration.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      readToken();
+    }
+    // Opening a new email link in this same tab may only change the fragment.
+    window.addEventListener("hashchange", readToken);
+    return () => window.removeEventListener("hashchange", readToken);
   }, []);
   const validToken = tokenHash !== null && /^[a-zA-Z0-9_-]{32,256}$/.test(tokenHash);
   return (
