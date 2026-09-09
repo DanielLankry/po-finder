@@ -5,12 +5,14 @@ import {
   newBusinessAlertTemplate,
   contactAutoReplyTemplate,
   expiryReminderTemplate,
+  supportReplyTemplate,
 } from "./email-templates";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const ADMIN_EMAIL = "support@pokarov.co.il";
 export const FROM_EMAIL = "פה קרוב <noreply@pokarov.co.il>";
+export const SUPPORT_FROM_EMAIL = "פה קרוב <support@pokarov.co.il>";
 
 // ── Business owner: registration received ────────────────────────────────────
 /** Sends a non-marketing receipt so an owner knows the draft reached review.
@@ -64,13 +66,32 @@ export async function sendBusinessApprovedEmail(to: string, businessName: string
 
 // ── Contact form auto-reply ───────────────────────────────────────────────────
 export async function sendContactAutoReply(to: string, name: string, subjectLabel: string) {
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: FROM_EMAIL,
     to,
     replyTo: ADMIN_EMAIL,
     subject: `קיבלנו את פנייתך — פה קרוב`,
     html: contactAutoReplyTemplate(name, subjectLabel),
   });
+  if (error) throw new Error(error.message);
+}
+
+/** Send an administrator's reply from the public support identity. */
+export async function sendSupportReply(
+  to: string,
+  name: string,
+  subjectLabel: string,
+  message: string
+) {
+  const { data, error } = await resend.emails.send({
+    from: SUPPORT_FROM_EMAIL,
+    to,
+    replyTo: ADMIN_EMAIL,
+    subject: `מענה לפנייתך: ${subjectLabel} — פה קרוב`,
+    html: supportReplyTemplate(name, subjectLabel, message),
+  });
+  if (error) throw new Error(error.message);
+  return data?.id ?? null;
 }
 
 // ── Expiry reminder ───────────────────────────────────────────────────────────

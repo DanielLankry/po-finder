@@ -10,8 +10,8 @@ const contactRoute = await readFile(
 
 test("customer-facing transactional emails route replies to support", () => {
   const supportReplyCount = emailModule.match(/replyTo: ADMIN_EMAIL/g)?.length ?? 0;
-  assert.equal(supportReplyCount, 4);
-  assert.match(contactRoute, /to: email,[\s\S]*?replyTo: ADMIN_EMAIL/);
+  assert.equal(supportReplyCount, 5);
+  assert.match(emailModule, /from: SUPPORT_FROM_EMAIL,[\s\S]*?replyTo: ADMIN_EMAIL/);
 });
 
 test("new business alerts route replies directly to the owner", () => {
@@ -21,9 +21,8 @@ test("new business alerts route replies directly to the owner", () => {
   );
 });
 
-test("the contact notification still routes replies to the customer", () => {
-  assert.match(
-    contactRoute,
-    /to: ADMIN_EMAIL,[\s\S]*?replyTo: email/,
-  );
+test("contact notifications point administrators to the private inbox", () => {
+  assert.match(contactRoute, /\.from\("contact_messages"\)[\s\S]*?\.insert/);
+  assert.match(contactRoute, /https:\/\/pokarov\.co\.il\/admin\/contact/);
+  assert.doesNotMatch(contactRoute, /replyTo: email/);
 });
