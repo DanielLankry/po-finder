@@ -7,6 +7,13 @@
 
 ## DONE
 
+### Business notifications and admin approval fixes
+- [x] Connect draft creation to email notifications and correct admin approval feedback — 2026-09-09
+  - Files modified: `app/dashboard/profile/page.tsx`, `lib/business-registration.ts`, `lib/db/businesses.ts`, `lib/email.ts`, `lib/email-templates.ts`, `lib/admin-business-update.ts`, `app/api/admin/businesses/approve/route.ts`, `app/api/admin/businesses/[id]/route.ts`, `app/admin/businesses/page.tsx`, `scripts/email-draft-catalog.mjs`, `scripts/sync-email-drafts.mjs`, `tests/admin-business-approval.test.mjs`, `tests/business-registration-flow.test.mjs`, `tests/email-delivery.test.mjs`, `tests/email-draft-catalog.test.mjs`, `tests/utils/source-loader.mjs`, `tests/admin/business-dialogs.spec.ts`, `docs/admin-email-fixes.md`, `AGENTS.md`, `TASKS.md`.
+  - Summary: Connected the owner form to the notification action, unified both approval routes with concurrency protection and visible delivery errors, corrected active/unpaid/paused email copy, and made admin add/edit dialogs keyboard accessible.
+  - Verification: 30 focused Node tests, eight desktop/mobile Playwright fixture checks, full repository lint, and production build passed; six Resend drafts were updated and read back as aligned. Integration limits are recorded in `docs/admin-email-fixes.md`.
+  - Release status: Local branch `codex/admin-email-fixes`; app changes are not deployed. Hosted draft changes are previews and do not send mail.
+
 ### Personal contact privacy
 - [x] Remove the operator's personal phone from public legal pages — 2026-09-09
   - Files modified: `lib/site-config.ts`, `components/legal/LegalIdentity.tsx`, `docs/legal-compliance-audit.md`, `tests/personal-contact-privacy.test.mjs`, `TASKS.md`, `AGENTS.md`
