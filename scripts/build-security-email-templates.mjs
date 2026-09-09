@@ -27,5 +27,5 @@ export const securityTemplates = [
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const dir = new URL("../supabase/templates/", import.meta.url);
   mkdirSync(dir, { recursive: true });
-  for (const template of securityTemplates) writeFileSync(new URL(`${template.slug}.html`, dir), template.html);
+  for (const template of securityTemplates) writeFileSync(new URL(`${template.slug}.html`, dir), template.html.replace(/[\t ]+$/gm, ""));
 }
