@@ -12,6 +12,8 @@ This codebase uses TypeScript with strict mode, React function components, and t
 ## Testing Guidelines
 Tests are Playwright-first. Name specs `*.spec.ts` under `tests/<area>/`. Public route, auth, and SEO coverage already live under `tests/public` and `tests/auth`; destructive paid/unpaid business flows are isolated under `tests/destructive`. Run Playwright with `npx playwright test`. Set `PLAYWRIGHT_BASE_URL` when targeting a non-default environment.
 
+Run the native regression suite with `node --experimental-test-module-mocks --test tests/*.test.mjs`; the email/provider tests require the module-mock flag.
+
 ## Commit & Pull Request Guidelines
 Recent history follows Conventional Commit style such as `fix(payments): ...`, `fix(ux): ...`, and `diag(payments): ...`. Keep that format for new commits. PRs should include a short problem statement, the concrete user-facing change, any required env or migration steps, and screenshots for visible UI updates. Link the relevant issue or task when one exists.
 
@@ -27,6 +29,13 @@ Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do
 - Authenticated payment queries must use readable columns and RLS for user scoping; `payment_attempts.user_id` is intentionally excluded from SELECT grants, including filters. Establish business ownership before reading its payment status.
 - Previous-day schedule context uses calendar subtraction from the Israel date, never an elapsed 24-hour subtraction across DST. Owner availability uses the same resolver as public discovery and stays separate from approval/publication.
 - The mobile map/list toggle occupies a reserved flex row below the discovery content, with the footer in normal flow. Do not restore a fixed overlay or compensate with arbitrary card-list bottom padding.
+- Payment emails are queued atomically by the private payment-status trigger in migration `20260909122231_payment_email_outbox.sql`; only service-role workers claim jobs, and every retry uses the immutable stored HTML request and stable Resend key.
+- Supabase password/email-change notifications are enabled and branded; rebuild the three source templates with `scripts/build-security-email-templates.mjs`, and keep the hosted settings aligned.
+- `/admin/payment-emails` distinguishes provider acceptance from delivery; Hobby retries are daily, and uncertain sends older than 23 hours require Resend reconciliation rather than blind resend.
+- The owner profile creates drafts through the validated `createBusiness` server action; do not restore a browser-side INSERT that skips owner/admin notifications. Read the exact inserted ID through `get_my_businesses`, and preserve the saved draft when email delivery fails.
+- Both admin approval entry points use `lib/admin-business-update.ts`, compare the previous verification flag before updating, and notify only on a false-to-true transition using the database's returned promotion/expiry state. Surface `notificationStatus: "failed"` in the admin UI.
+- Resend's six hosted drafts are review previews, generated from the same `lib/email-templates.ts` renderers used for sent HTML. `scripts/sync-email-drafts.mjs` checks drift by default; `--write-drafts` backs up and updates drafts without publishing or sending. Use `CUSTOMER_NAME` consistently in the contact preview.
+- Admin dialog fixture tests are opt-in with `RUN_ADMIN_UI_FIXTURES=1` and a loopback `PLAYWRIGHT_BASE_URL`; they serve an existing production build through Playwright interception and mock all APIs, requiring no server listener or live credentials.
 - Email verification is enforced by hosted Supabase Confirm email plus custom SMTP; keep both enabled. Signup uses the branded `supabase/templates/confirmation.html` and recovery uses `recovery.html`; repository edits do not update hosted templates automatically.
 - Signup confirmation carries `TokenHash` in the URL fragment to `/auth/confirm`, clears it from the address bar, and requires a same-origin POST to `/auth/callback`; preserve the landing page's `same-origin` referrer policy because `no-referrer` makes native POST Origin null.
 - The confirmation page excludes PostHog, Meta, Vercel analytics and browser Sentry initialization. Keep credentials out of analytics and logs, preserve `registration_next` through `safeRedirectPath`, and never allow metadata to create an admin role.

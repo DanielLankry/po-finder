@@ -1,11 +1,12 @@
 "use client";
 
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useFeedback } from "@/components/providers/FeedbackProvider";
-
-import { useEffect, useState, useCallback } from "react";
 import { CATEGORY_LABELS, KASHRUT_LABELS } from "@/lib/types";
 import type { BusinessCategory, KashrutStatus } from "@/lib/types";
-import { CheckCircle, XCircle, Phone, ExternalLink, RefreshCw, Plus, X, Pencil, MapPin, PauseCircle, PlayCircle } from "lucide-react";
+import { CheckCircle, XCircle, Phone, ExternalLink, RefreshCw, Plus, Pencil, MapPin, PauseCircle, PlayCircle } from "lucide-react";
+
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface Business {
   id: string;
@@ -58,15 +59,20 @@ export default function AdminBusinessesPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [addLoading, setAddLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const res = await fetch("/api/admin/businesses");
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/admin/businesses");
+      if (!res.ok) throw new Error("לא ניתן לטעון את העסקים. נסו לרענן או להתחבר מחדש.");
       const data = await res.json();
       setBusinesses(data.businesses ?? []);
+    } catch (error) {
+      setFeedback(adminActionError(error, "טעינת העסקים נכשלה. נסו לרענן."));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
@@ -80,23 +86,37 @@ export default function AdminBusinessesPage() {
     }
 
     setActionLoading(business.id);
-    const res = await fetch("/api/admin/businesses/approve", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ businessId: business.id }),
-    });
-    if (res.ok) fetchAll();
-    else await notify("שגיאה באישור העסק");
-    setActionLoading(null);
+    setFeedback(null);
+    try {
+      const res = await fetch("/api/admin/businesses/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ businessId: business.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "שגיאה באישור העסק");
+      if (data.notificationStatus === "failed") setFeedback(APPROVAL_EMAIL_WARNING);
+      await fetchAll();
+    } catch (error) {
+      setFeedback(adminActionError(error, "אישור העסק נכשל. נסו שוב."));
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   async function deleteBiz(businessId: string) {
     if (!await confirmAction("בטוח למחוק את העסק?")) return;
     setActionLoading(businessId);
-    const res = await fetch(`/api/admin/businesses/${businessId}`, { method: "DELETE" });
-    if (res.ok) setBusinesses((prev) => prev.filter((b) => b.id !== businessId));
-    else await notify("שגיאה במחיקה");
-    setActionLoading(null);
+    setFeedback(null);
+    try {
+      const res = await fetch(`/api/admin/businesses/${businessId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("שגיאה במחיקה");
+      setBusinesses((prev) => prev.filter((b) => b.id !== businessId));
+    } catch (error) {
+      setFeedback(adminActionError(error, "המחיקה נכשלה. נסו שוב."));
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   /** Pause a public listing or reactivate it with a fresh 30-day window when expired. */
@@ -119,16 +139,22 @@ export default function AdminBusinessesPage() {
     if (!await confirmAction(message)) return;
 
     setActionLoading(business.id);
-    const response = await fetch(`/api/admin/businesses/${business.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
-    });
-    const body = await response.json().catch(() => ({}));
-    if (response.ok) {
+    setFeedback(null);
+    try {
+      const response = await fetch(`/api/admin/businesses/${business.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error ?? "שגיאה בעדכון מצב העסק");
       setBusinesses((current) => current.map((item) => item.id === business.id ? body.business as Business : item));
-    } else await notify(body.error ?? "שגיאה בעדכון מצב העסק");
-    setActionLoading(null);
+      if (body.notificationStatus === "failed") setFeedback(APPROVAL_EMAIL_WARNING);
+    } catch (error) {
+      setFeedback(adminActionError(error, "עדכון מצב העסק נכשל. נסו שוב."));
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   async function handleAdd(e: React.FormEvent) {
@@ -155,6 +181,7 @@ export default function AdminBusinessesPage() {
     e.preventDefault();
     if (!editBiz) return;
     setEditLoading(true);
+    setFeedback(null);
     try {
       const res = await fetch(`/api/admin/businesses/${editBiz.id}`, {
         method: "PATCH",
@@ -179,6 +206,7 @@ export default function AdminBusinessesPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "שגיאה לא ידועה");
       setBusinesses((prev) => prev.map((b) => b.id === editBiz.id ? data.business as Business : b));
+      if (data.notificationStatus === "failed") setFeedback(APPROVAL_EMAIL_WARNING);
       setEditBiz(null);
     } catch (err) {
       await notify("שגיאה: " + (err instanceof Error ? err.message : String(err)));
@@ -205,7 +233,7 @@ export default function AdminBusinessesPage() {
           <p className="text-[#888] text-sm">{pending.length} ממתינים לאימות · {verified.length} מאומתים · {active.length} מוצגים כעת</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={fetchAll} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-[#E5E7EB] text-sm text-[#555] hover:bg-[#F9F9F9] transition-colors">
+          <button onClick={() => { setFeedback(null); void fetchAll(); }} aria-label="רענון רשימת העסקים" className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-[#E5E7EB] text-sm text-[#555] hover:bg-[#F9F9F9] transition-colors">
             <RefreshCw className="h-4 w-4" />
             <span className="hidden sm:inline">רענן</span>
           </button>
@@ -220,80 +248,75 @@ export default function AdminBusinessesPage() {
         </div>
       </div>
 
+      {feedback && <p role="alert" className="brand-panel-orange mb-5 p-4 text-sm">{feedback}</p>}
+
       {/* Add Business Modal */}
       {showAddForm && (
-        <div className="brand-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowAddForm(false)}>
-          <div className="brand-dialog-surface max-h-[90vh] w-full max-w-xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="brand-dialog-header flex items-center justify-between p-5">
-              <h2 className="font-display text-3xl leading-none text-[#17402D]">הוספת עסק ידני</h2>
-              <button onClick={() => setShowAddForm(false)} className="brand-icon-button h-11 w-11">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+        <BusinessModal title="הוספת עסק ידני" onClose={() => setShowAddForm(false)} busy={addLoading}>
             <form onSubmit={handleAdd} className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-[#111] mb-1">מזהה בעל העסק (UUID) *</label>
-                  <input required value={form.owner_id} onChange={(e) => setForm({...form, owner_id: e.target.value})}
+                  <label htmlFor="admin-business-field-1" className="block text-sm font-semibold text-[#111] mb-1">מזהה בעל העסק (UUID) *</label>
+                  <input id="admin-business-field-1" required value={form.owner_id} onChange={(e) => setForm({...form, owner_id: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" dir="ltr" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-[#111] mb-1">שם העסק *</label>
-                  <input required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})}
+                  <label htmlFor="admin-business-field-2" className="block text-sm font-semibold text-[#111] mb-1">שם העסק *</label>
+                  <input id="admin-business-field-2" required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" placeholder="שם העסק" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">קטגוריה</label>
-                  <select value={form.category} onChange={(e) => setForm({...form, category: e.target.value as BusinessCategory})}
+                  <label htmlFor="admin-business-field-3" className="block text-sm font-semibold text-[#111] mb-1">קטגוריה</label>
+                  <select id="admin-business-field-3" value={form.category} onChange={(e) => setForm({...form, category: e.target.value as BusinessCategory})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]">
                     {Object.entries(CATEGORY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">כשרות</label>
-                  <select value={form.kashrut} onChange={(e) => setForm({...form, kashrut: e.target.value as KashrutStatus})}
+                  <label htmlFor="admin-business-field-4" className="block text-sm font-semibold text-[#111] mb-1">כשרות</label>
+                  <select id="admin-business-field-4" value={form.kashrut} onChange={(e) => setForm({...form, kashrut: e.target.value as KashrutStatus})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]">
                     {Object.entries(KASHRUT_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">טלפון</label>
-                  <input value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})}
+                  <label htmlFor="admin-business-field-5" className="block text-sm font-semibold text-[#111] mb-1">טלפון</label>
+                  <input id="admin-business-field-5" value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" placeholder="050-0000000" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">מספר עוסק</label>
-                  <input value={form.business_number} onChange={(e) => setForm({...form, business_number: e.target.value})}
+                  <label htmlFor="admin-business-field-6" className="block text-sm font-semibold text-[#111] mb-1">מספר עוסק</label>
+                  <input id="admin-business-field-6" value={form.business_number} onChange={(e) => setForm({...form, business_number: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" placeholder="555555555" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-[#111] mb-1">כתובת</label>
-                  <input value={form.address} onChange={(e) => setForm({...form, address: e.target.value})}
+                  <label htmlFor="admin-business-field-7" className="block text-sm font-semibold text-[#111] mb-1">כתובת</label>
+                  <input id="admin-business-field-7" value={form.address} onChange={(e) => setForm({...form, address: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" placeholder="שוק הכרמל, תל אביב" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">קו רוחב (lat)</label>
-                  <input value={form.lat} onChange={(e) => setForm({...form, lat: e.target.value})}
+                  <label htmlFor="admin-business-field-8" className="block text-sm font-semibold text-[#111] mb-1">קו רוחב (lat)</label>
+                  <input id="admin-business-field-8" value={form.lat} onChange={(e) => setForm({...form, lat: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" dir="ltr" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">קו אורך (lng)</label>
-                  <input value={form.lng} onChange={(e) => setForm({...form, lng: e.target.value})}
+                  <label htmlFor="admin-business-field-9" className="block text-sm font-semibold text-[#111] mb-1">קו אורך (lng)</label>
+                  <input id="admin-business-field-9" value={form.lng} onChange={(e) => setForm({...form, lng: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" dir="ltr" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-[#111] mb-1">תיאור</label>
-                  <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} rows={2}
+                  <label htmlFor="admin-business-field-10" className="block text-sm font-semibold text-[#111] mb-1">תיאור</label>
+                  <textarea id="admin-business-field-10" value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} rows={2}
                     className="w-full rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] resize-none" placeholder="תיאור קצר..." />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">אינסטגרם</label>
-                  <input value={form.instagram} onChange={(e) => setForm({...form, instagram: e.target.value})}
+                  <label htmlFor="admin-business-field-11" className="block text-sm font-semibold text-[#111] mb-1">אינסטגרם</label>
+                  <input id="admin-business-field-11" value={form.instagram} onChange={(e) => setForm({...form, instagram: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" placeholder="username" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">תוקף (חודשים)</label>
-                  <select value={form.duration_months} onChange={(e) => setForm({...form, duration_months: e.target.value})}
+                  <label htmlFor="admin-business-field-12" className="block text-sm font-semibold text-[#111] mb-1">תוקף (חודשים)</label>
+                  <select id="admin-business-field-12" value={form.duration_months} onChange={(e) => setForm({...form, duration_months: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]">
                     <option value="1">חודש</option><option value="3">3 חודשים</option>
                     <option value="6">חצי שנה</option><option value="12">שנה</option>
@@ -306,84 +329,76 @@ export default function AdminBusinessesPage() {
                 {addLoading ? "מוסיף..." : "הוסף עסק לאתר"}
               </button>
             </form>
-          </div>
-        </div>
+        </BusinessModal>
       )}
 
       {/* Edit Modal */}
       {editBiz && (
-        <div className="brand-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setEditBiz(null)}>
-          <div className="brand-dialog-surface max-h-[90vh] w-full max-w-xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="brand-dialog-header flex items-center justify-between p-5">
-              <h2 className="font-display text-3xl leading-none text-[#17402D]">עריכת עסק — {editBiz.name}</h2>
-              <button onClick={() => setEditBiz(null)} className="brand-icon-button h-11 w-11">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+        <BusinessModal title={"עריכת עסק — " + editBiz.name} onClose={() => setEditBiz(null)} busy={editLoading}>
             <form onSubmit={handleEdit} className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-[#111] mb-1">שם העסק *</label>
-                  <input required value={editBiz.name} onChange={(e) => setEditBiz({...editBiz, name: e.target.value})}
+                  <label htmlFor="admin-business-field-13" className="block text-sm font-semibold text-[#111] mb-1">שם העסק *</label>
+                  <input id="admin-business-field-13" required value={editBiz.name} onChange={(e) => setEditBiz({...editBiz, name: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">קטגוריה</label>
-                  <select value={editBiz.category} onChange={(e) => setEditBiz({...editBiz, category: e.target.value})}
+                  <label htmlFor="admin-business-field-14" className="block text-sm font-semibold text-[#111] mb-1">קטגוריה</label>
+                  <select id="admin-business-field-14" value={editBiz.category} onChange={(e) => setEditBiz({...editBiz, category: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]">
                     {Object.entries(CATEGORY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">כשרות</label>
-                  <select value={editBiz.kashrut} onChange={(e) => setEditBiz({...editBiz, kashrut: e.target.value})}
+                  <label htmlFor="admin-business-field-15" className="block text-sm font-semibold text-[#111] mb-1">כשרות</label>
+                  <select id="admin-business-field-15" value={editBiz.kashrut} onChange={(e) => setEditBiz({...editBiz, kashrut: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]">
                     {Object.entries(KASHRUT_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">טלפון</label>
-                  <input value={editBiz.phone ?? ""} onChange={(e) => setEditBiz({...editBiz, phone: e.target.value})}
+                  <label htmlFor="admin-business-field-16" className="block text-sm font-semibold text-[#111] mb-1">טלפון</label>
+                  <input id="admin-business-field-16" value={editBiz.phone ?? ""} onChange={(e) => setEditBiz({...editBiz, phone: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-[#111] mb-1">כתובת</label>
-                  <input value={editBiz.address ?? ""} onChange={(e) => setEditBiz({...editBiz, address: e.target.value})}
+                  <label htmlFor="admin-business-field-17" className="block text-sm font-semibold text-[#111] mb-1">כתובת</label>
+                  <input id="admin-business-field-17" value={editBiz.address ?? ""} onChange={(e) => setEditBiz({...editBiz, address: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">קו רוחב (lat)</label>
-                  <input value={editBiz.lat ?? ""} onChange={(e) => setEditBiz({...editBiz, lat: parseFloat(e.target.value) || null})}
+                  <label htmlFor="admin-business-field-18" className="block text-sm font-semibold text-[#111] mb-1">קו רוחב (lat)</label>
+                  <input id="admin-business-field-18" value={editBiz.lat ?? ""} onChange={(e) => setEditBiz({...editBiz, lat: e.target.value === "" ? null : Number(e.target.value)})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" dir="ltr" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">קו אורך (lng)</label>
-                  <input value={editBiz.lng ?? ""} onChange={(e) => setEditBiz({...editBiz, lng: parseFloat(e.target.value) || null})}
+                  <label htmlFor="admin-business-field-19" className="block text-sm font-semibold text-[#111] mb-1">קו אורך (lng)</label>
+                  <input id="admin-business-field-19" value={editBiz.lng ?? ""} onChange={(e) => setEditBiz({...editBiz, lng: e.target.value === "" ? null : Number(e.target.value)})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" dir="ltr" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">אתר</label>
-                  <input value={editBiz.website ?? ""} onChange={(e) => setEditBiz({...editBiz, website: e.target.value})}
+                  <label htmlFor="admin-business-field-20" className="block text-sm font-semibold text-[#111] mb-1">אתר</label>
+                  <input id="admin-business-field-20" value={editBiz.website ?? ""} onChange={(e) => setEditBiz({...editBiz, website: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" dir="ltr" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">אינסטגרם</label>
-                  <input value={editBiz.instagram ?? ""} onChange={(e) => setEditBiz({...editBiz, instagram: e.target.value})}
+                  <label htmlFor="admin-business-field-21" className="block text-sm font-semibold text-[#111] mb-1">אינסטגרם</label>
+                  <input id="admin-business-field-21" value={editBiz.instagram ?? ""} onChange={(e) => setEditBiz({...editBiz, instagram: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#111] mb-1">מספר עוסק</label>
-                  <input value={editBiz.business_number ?? ""} onChange={(e) => setEditBiz({...editBiz, business_number: e.target.value})}
+                  <label htmlFor="admin-business-field-22" className="block text-sm font-semibold text-[#111] mb-1">מספר עוסק</label>
+                  <input id="admin-business-field-22" value={editBiz.business_number ?? ""} onChange={(e) => setEditBiz({...editBiz, business_number: e.target.value})}
                     className="w-full h-11 rounded-xl border border-[#E5E7EB] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-[#111] mb-1">תיאור</label>
-                  <textarea value={editBiz.description ?? ""} onChange={(e) => setEditBiz({...editBiz, description: e.target.value})} rows={3}
+                  <label htmlFor="admin-business-field-23" className="block text-sm font-semibold text-[#111] mb-1">תיאור</label>
+                  <textarea id="admin-business-field-23" value={editBiz.description ?? ""} onChange={(e) => setEditBiz({...editBiz, description: e.target.value})} rows={3}
                     className="w-full rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] resize-none" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-[#111] mb-1">תאריך תפוגה</label>
-                  <input
+                  <label htmlFor="admin-business-field-24" className="block text-sm font-semibold text-[#111] mb-1">תאריך תפוגה</label>
+                  <input id="admin-business-field-24"
                     type="datetime-local"
                     value={toLocalDateTimeValue(editBiz.expires_at)}
                     onChange={(e) => setEditBiz({ ...editBiz, expires_at: fromLocalDateTimeValue(e.target.value) })}
@@ -405,8 +420,7 @@ export default function AdminBusinessesPage() {
                 {editLoading ? "שומר..." : "שמור שינויים"}
               </button>
             </form>
-          </div>
-        </div>
+        </BusinessModal>
       )}
 
       {/* Pending */}
@@ -435,6 +449,42 @@ export default function AdminBusinessesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+const APPROVAL_EMAIL_WARNING = "העסק אושר ונשמר, אך מייל האישור לא נשלח. יש לעדכן את בעל העסק דרך התמיכה ולבדוק את שירות המייל. אין צורך לאשר את העסק שוב.";
+
+/** Keep browser/network diagnostics out of the Hebrew operational feedback. */
+function adminActionError(error: unknown, fallback: string): string {
+  return error instanceof Error && !(error instanceof TypeError) && !(error instanceof SyntaxError)
+    ? error.message : fallback;
+}
+
+/** Restore focus to the row action because these controlled dialogs have no Radix trigger. */
+function BusinessModal({ title, onClose, busy, children }: {
+  title: string; onClose: () => void; busy: boolean; children: React.ReactNode;
+}) {
+  const previousFocus = useRef<HTMLElement | null>(null);
+  return (
+    <Dialog open onOpenChange={(open) => { if (!open && !busy) onClose(); }}>
+      <DialogContent
+        dir="rtl"
+        className="max-h-[90dvh] overflow-y-auto p-0 sm:max-w-xl"
+        onOpenAutoFocus={() => { previousFocus.current = document.activeElement as HTMLElement | null; }}
+        onCloseAutoFocus={(event) => {
+          if (previousFocus.current?.isConnected) {
+            event.preventDefault();
+            previousFocus.current.focus();
+          }
+        }}
+      >
+        <div className="brand-dialog-header p-5 pr-20 text-right">
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription className="mt-2">עדכנו את פרטי העסק ושמרו את השינויים.</DialogDescription>
+        </div>
+        {children}
+      </DialogContent>
+    </Dialog>
   );
 }
 

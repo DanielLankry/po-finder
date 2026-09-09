@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { isAdminRequest } from "@/lib/admin-session";
 import { adminClient } from "@/lib/supabase/admin";
+import { updateAdminBusiness } from "@/lib/admin-business-update";
 
 export const runtime = "nodejs";
 
@@ -50,13 +51,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 
   const admin = adminClient();
-  const { data, error } = await admin
-    .from("businesses")
-    .update(parsed.data)
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ business: data });
+  const result = await updateAdminBusiness(admin, id, parsed.data);
+  if ("error" in result) return NextResponse.json({ error: result.error }, { status: result.status });
+  return NextResponse.json(result);
 }
