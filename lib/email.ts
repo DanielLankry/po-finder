@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import {
+  businessRegistrationReceivedTemplate,
   businessApprovedTemplate,
   newBusinessAlertTemplate,
   contactAutoReplyTemplate,
@@ -10,6 +11,21 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const ADMIN_EMAIL = "support@pokarov.co.il";
 export const FROM_EMAIL = "פה קרוב <noreply@pokarov.co.il>";
+
+// ── Business owner: registration received ────────────────────────────────────
+/** Sends a non-marketing receipt so an owner knows the draft reached review.
+ * Resend receives the shared branded HTML and routes any direct reply to support.
+ */
+export async function sendBusinessRegistrationReceivedEmail(to: string, businessName: string) {
+  const { error } = await resend.emails.send({
+    from: FROM_EMAIL,
+    to,
+    replyTo: ADMIN_EMAIL,
+    subject: `קיבלנו את העסק שלך — ${businessName}`,
+    html: businessRegistrationReceivedTemplate(businessName),
+  });
+  if (error) throw new Error(error.message);
+}
 
 // ── Admin alert: new business pending approval ────────────────────────────────
 export async function sendNewBusinessAlert(business: {

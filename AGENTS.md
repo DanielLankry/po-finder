@@ -22,6 +22,8 @@ Keep secrets in `.env.local` only; use `.env.local.example` as the template for 
 Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do not reintroduce `middleware.ts`. Visible Hebrew branding should remain `פה קרוב`, while `pokarov.co.il` is reserved for domains, email addresses, and technical identifiers.
 
 ## Project Patterns
+- Transactional email HTML mirrors the product-paper UI with warm paper, green ink, terracotta CTAs, strong borders, and hard offset shadows; keep hosted Resend drafts and `lib/email-templates.ts` visually aligned.
+- A successful self-service business insert sends the owner registration receipt and the admin review alert through `Promise.allSettled`, so Resend delivery failures are logged but never roll back the saved business.
 - Transactional messages continue to send from `noreply@pokarov.co.il`, but every customer-facing message must set `Reply-To: support@pokarov.co.il`; the internal new-business alert instead replies directly to the submitted owner email.
 - Paid launch traffic lands on `/vendors?campaign=first-20-3m`; the offer copy and direct signup CTA render only when the server-checked `promotion_campaigns` aggregate says the bounded campaign is open.
 - Meta business-draft Leads share `business-<uuid>` across browser Pixel and server CAPI for deduplication; CAPI is consent-gated and requires the server-only `META_CONVERSIONS_API_ACCESS_TOKEN` in Vercel.

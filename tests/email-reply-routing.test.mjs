@@ -10,7 +10,7 @@ const contactRoute = await readFile(
 
 test("customer-facing transactional emails route replies to support", () => {
   const supportReplyCount = emailModule.match(/replyTo: ADMIN_EMAIL/g)?.length ?? 0;
-  assert.equal(supportReplyCount, 3);
+  assert.equal(supportReplyCount, 4);
   assert.match(contactRoute, /to: email,[\s\S]*?replyTo: ADMIN_EMAIL/);
 });
 

@@ -7,6 +7,11 @@
 
 ## DONE
 
+### Branded business lifecycle emails
+- [x] Match business emails to the product-paper theme and confirm new registrations — 2026-09-09
+  - Files modified: `lib/email-templates.ts`, `lib/email.ts`, `lib/db/businesses.ts`, `tests/business-registration-email.test.mjs`, `tests/email-reply-routing.test.mjs`, `TASKS.md`, `AGENTS.md`
+  - Summary: Reworked transactional email surfaces around the site's warm paper, green ink, terracotta actions, strong borders, and hard shadows, and added non-blocking owner/admin notifications when a business draft is created.
+
 ### Customer email replies
 - [x] Route transactional email replies through the site support address — 2026-09-09
   - Files modified: `lib/email.ts`, `app/api/contact/route.ts`, `tests/email-reply-routing.test.mjs`, `TASKS.md`, `AGENTS.md`
