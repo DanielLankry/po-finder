@@ -36,6 +36,9 @@ export async function GET(req: NextRequest) {
           is_active: business.is_active,
           is_legacy_public: business.is_legacy_public,
           is_verified: business.is_verified,
+          promotion_code: business.promotion_code,
+          promotion_reserved_at: business.promotion_reserved_at,
+          promotion_activated_at: business.promotion_activated_at,
         })),
       });
     }

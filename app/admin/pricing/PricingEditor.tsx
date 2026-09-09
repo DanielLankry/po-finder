@@ -112,7 +112,7 @@ export default function PricingEditor({ initialPlans }: { initialPlans: Plan[] }
         {plans.map((plan) => (
           <div
             key={plan.code}
-            className="space-y-4 rounded-2xl border-2 border-[#E5E7EB] bg-white p-5 shadow-sm"
+            className="brand-panel-soft space-y-4 p-5"
           >
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EFF5F0]">

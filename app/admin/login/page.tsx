@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function AdminLogin() {
@@ -26,13 +27,13 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F3EA] flex items-center justify-center" dir="rtl">
-      <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-sm p-10 w-full max-w-sm">
+    <div className="brand-canvas min-h-screen flex items-center justify-center px-5 py-10" dir="rtl">
+      <div className="brand-panel p-7 sm:p-10 w-full max-w-[460px]">
         <div className="text-center mb-8">
           <div className="h-14 w-14 rounded-2xl bg-[#EFF5F0] flex items-center justify-center mx-auto mb-4">
-            <svg width="28" height="35" viewBox="0 0 40 50" fill="none"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#6FA583"/><stop offset="100%" stopColor="#2D6A4F"/></linearGradient></defs><path d="M20 0C9.507 0 1 8.507 1 19c0 13.255 17.5 29.5 18.25 30.188a1.125 1.125 0 0 0 1.5 0C21.5 48.5 39 32.255 39 19 39 8.507 30.493 0 20 0z" fill="url(#g)"/><text x="20" y="26" textAnchor="middle" fontFamily="sans-serif" fontWeight="800" fontSize="20" fill="white">פ</text></svg>
+            <Image src="/logo.png" alt="פה קרוב" width={56} height={56} />
           </div>
-          <h1 className="font-extrabold text-xl text-[#111]">לוח ניהול פה קרוב</h1>
+          <h1 className="font-display text-3xl text-ink">לוח ניהול פה קרוב</h1>
           <p className="text-[#888] text-sm mt-1">כניסה מוגבלת לצוות בלבד</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -42,14 +43,15 @@ export default function AdminLogin() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="סיסמת ניהול"
             required
-            className="w-full h-12 rounded-xl border border-[#E5E7EB] bg-[#F7F3EA] px-4 text-[#111] focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:bg-white transition-all"
+            aria-label="סיסמת ניהול"
+            autoComplete="current-password"
+            className="brand-control w-full h-12 rounded-xl px-4 text-ink"
           />
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          {error && <p role="alert" className="brand-notice-error">{error}</p>}
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-12 rounded-xl text-white font-bold transition-all disabled:opacity-60"
-            style={{ background: "linear-gradient(135deg, #2D6A4F, #1F5038)" }}
+            className="brand-button w-full h-12 rounded-xl font-bold transition-all disabled:opacity-60"
           >
             {loading ? "מתחבר..." : "כניסה"}
           </button>
