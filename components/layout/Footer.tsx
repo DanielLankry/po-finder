@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import CookiePreferencesButton from "./CookiePreferencesButton";
 
 const LINKS = [
@@ -13,27 +14,29 @@ const LINKS = [
 export default function Footer() {
   return (
     <footer
-      className="border-t border-slate-200 bg-[#F7F3EA] py-8"
+      className="brand-canvas border-t-2 border-[#17402D] py-8"
       dir="rtl"
       aria-label="כותרת תחתית"
     >
-      <div className="max-w-[1280px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="mx-auto flex max-w-[1280px] flex-col items-center justify-between gap-4 px-4 sm:flex-row">
         <Link
           href="/"
-          className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] rounded-lg"
+          className="flex min-h-11 items-center gap-2 rounded-xl px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
           aria-label="פה קרוב — דף הבית"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="פה קרוב" className="h-7 w-auto" />
+          <Image src="/logo.png" alt="" width={36} height={36} className="h-9 w-9" />
+          <span className="brand-wordmark text-xl text-[#17402D]">פה קרוב</span>
         </Link>
 
-        <nav aria-label="קישורי תחתית">
-          <ul className="flex flex-wrap items-center gap-4 sm:gap-6">
+        <div className="brand-rule w-full sm:hidden" aria-hidden="true" />
+
+        <nav className="max-w-full" aria-label="קישורי תחתית">
+          <ul className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 sm:gap-x-2">
             {LINKS.map(({ href, label }) => (
               <li key={href}>
                 <Link
                   href={href}
-                  className="text-slate-500 text-sm hover:text-[#2D6A4F] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F] rounded"
+                  className="inline-flex min-h-11 items-center rounded-full px-3 text-sm font-bold text-[#17402D]/70 transition-colors hover:bg-[#DDEBE0] hover:text-[#17402D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D6A4F]"
                 >
                   {label}
                 </Link>
@@ -45,7 +48,9 @@ export default function Footer() {
           </ul>
         </nav>
 
-        <p className="text-slate-400 text-xs">
+        <div className="brand-rule w-full sm:hidden" aria-hidden="true" />
+
+        <p className="text-xs font-semibold text-[#17402D]/55">
           © 2026 פה קרוב. כל הזכויות שמורות.
         </p>
       </div>

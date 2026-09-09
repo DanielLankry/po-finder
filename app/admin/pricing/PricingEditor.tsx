@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import { BadgeCheck, Info, Save } from "lucide-react";
-import { PLANS, getPlanByCode, getPlanDurationLabel } from "@/lib/plans";
+import {
+  MAX_LISTING_PRICE_AGOROT,
+  MIN_LISTING_PRICE_AGOROT,
+  PLANS,
+  getPlanByCode,
+  getPlanDurationLabel,
+  isValidPlanPriceLadder,
+} from "@/lib/plans";
 import type { Plan, PlanCode } from "@/lib/plans";
 
 type EditablePlan = Pick<Plan, "code" | "months" | "days" | "label" | "price">;
@@ -24,6 +31,8 @@ export default function PricingEditor({ initialPlans }: { initialPlans: Plan[] }
   const [plans, setPlans] = useState<EditablePlan[]>(toEditable(initialPlans));
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const hasValidPriceLadder = isValidPlanPriceLadder(plans);
 
   function updatePlan(
     code: PlanCode,
@@ -38,21 +47,33 @@ export default function PricingEditor({ initialPlans }: { initialPlans: Plan[] }
       )
     );
     setSaved(false);
+    setSaveError("");
   }
 
   async function handleSave() {
-    setSaving(true);
-    const response = await fetch("/api/admin/pricing", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ plans }),
-    });
-    if (response.ok) setSaved(true);
-    else {
-      const body = await response.json().catch(() => ({}));
-      alert(typeof body.error === "string" ? body.error : "שגיאה בשמירה");
+    if (!hasValidPriceLadder) {
+      setSaveError("המחירים חייבים להיות בשקלים שלמים, בין ₪20 ל־₪250, ולעלות עם משך הפרסום.");
+      return;
     }
-    setSaving(false);
+
+    setSaving(true);
+    setSaveError("");
+    try {
+      const response = await fetch("/api/admin/pricing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plans }),
+      });
+      if (response.ok) setSaved(true);
+      else {
+        const body = await response.json().catch(() => ({}));
+        setSaveError(typeof body.error === "string" ? body.error : "שגיאה בשמירה");
+      }
+    } catch {
+      setSaveError("לא ניתן היה לשמור את המחירון. בדקו את החיבור ונסו שוב.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -76,9 +97,16 @@ export default function PricingEditor({ initialPlans }: { initialPlans: Plan[] }
         <Info className="mt-0.5 h-5 w-5 shrink-0 text-[#4A8B66]" />
         <p className="text-sm text-[#1F5038]">
           משך הזמן וקוד המוצר נעולים כדי לשמור על חידושים והחזרים מדויקים.
-          שינוי מחיר או שם חל רק על רכישות חדשות.
+          שינוי מחיר או שם חל רק על רכישות חדשות. המחירון נשמר בין ₪20 ל־₪250
+          ובסדר עולה לפי משך הפרסום.
         </p>
       </div>
+
+      {saveError ? (
+        <p role="alert" className="mb-6 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-700">
+          {saveError}
+        </p>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {plans.map((plan) => (
@@ -105,7 +133,9 @@ export default function PricingEditor({ initialPlans }: { initialPlans: Plan[] }
             <Field label="מחיר (₪)">
               <input
                 type="number"
-                min={1}
+                min={MIN_LISTING_PRICE_AGOROT / 100}
+                max={MAX_LISTING_PRICE_AGOROT / 100}
+                step={1}
                 value={plan.price / 100}
                 onChange={(event) =>
                   updatePlan(plan.code, "price", Number(event.target.value) * 100)

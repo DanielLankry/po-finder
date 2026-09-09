@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
+import { z } from "zod";
 import { adminClient } from "@/lib/supabase/admin";
 import { verifyReturnSignature } from "@/lib/hyp";
 import {
@@ -7,7 +8,8 @@ import {
   getHypCardMask,
   getHypResponseCode,
   getHypTransactionId,
-  getPaymentAttemptId,
+  getBoundPaymentAttemptId,
+  getPaymentReturnAuditSnapshot,
   isSuccessfulHypReturn,
 } from "@/lib/payment-state";
 
@@ -61,13 +63,14 @@ async function readPostReturnParams(req: NextRequest): Promise<URLSearchParams> 
 }
 
 async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
-  const order = getPaymentAttemptId(params);
+  const parsedOrder = z.string().uuid().safeParse(getBoundPaymentAttemptId(params));
   const responseCode = getHypResponseCode(params);
   const origin = process.env.NEXT_PUBLIC_SITE_URL ?? req.nextUrl.origin;
 
-  if (!order) {
+  if (!parsedOrder.success) {
     return NextResponse.redirect(getBillingRedirect(origin, "cancelled"));
   }
+  const order = parsedOrder.data;
 
   const admin = adminClient();
   const { data: attempt } = await admin
@@ -92,9 +95,9 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
     );
   }
 
-  // Fold the redirect query into a JSON snapshot for support / debugging.
-  const rawReturn: Record<string, string> = {};
-  for (const [k, v] of params.entries()) rawReturn[k] = v;
+  // Keep a bounded diagnostic snapshot without retaining provider MACs, card
+  // tokens, personal IDs, or arbitrary user-controlled callback metadata.
+  const rawReturn = getPaymentReturnAuditSnapshot(params);
 
   let verified: boolean;
   try {
@@ -133,7 +136,8 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
         raw_return: rawReturn,
         completed_at: new Date().toISOString(),
       })
-      .eq("id", attempt.id);
+      .eq("id", attempt.id)
+      .eq("status", "pending");
     if (error) {
       console.error("[/api/payments/return] failed to record verify failure:", error);
     }
@@ -151,7 +155,8 @@ async function settlePaymentReturn(req: NextRequest, params: URLSearchParams) {
         raw_return: rawReturn,
         completed_at: new Date().toISOString(),
       })
-      .eq("id", attempt.id);
+      .eq("id", attempt.id)
+      .eq("status", "pending");
     if (error) {
       console.error("[/api/payments/return] failed to record declined payment:", error);
     }

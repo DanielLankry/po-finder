@@ -2,7 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  getBoundPaymentAttemptId,
   getPaymentAttemptId,
+  getProviderPaymentAttemptId,
+  getPaymentReturnAuditSnapshot,
   getHypAuthCode,
   getHypCardMask,
   getHypResponseCode,
@@ -27,6 +30,25 @@ test("payment return attempt id can come from our callback URL or HYP aliases", 
   assert.equal(getPaymentAttemptId(new URLSearchParams("order=lower-order")), "lower-order");
   assert.equal(getPaymentAttemptId(new URLSearchParams("uniqueid=hyp-unique")), "hyp-unique");
   assert.equal(getPaymentAttemptId(new URLSearchParams("uniqueID=hyp-modern")), "hyp-modern");
+});
+
+test("payment settlement requires one matching provider-bound attempt id", () => {
+  assert.equal(
+    getBoundPaymentAttemptId(
+      new URLSearchParams("attempt=attempt-1&Order=attempt-1&uniqueid=attempt-1")
+    ),
+    "attempt-1",
+  );
+  assert.equal(getProviderPaymentAttemptId(new URLSearchParams("attempt=local&Order=signed")), "signed");
+  assert.equal(getBoundPaymentAttemptId(new URLSearchParams("attempt=attempt-1")), null);
+  assert.equal(
+    getBoundPaymentAttemptId(new URLSearchParams("attempt=expensive&Order=cheap")),
+    null,
+  );
+  assert.equal(
+    getBoundPaymentAttemptId(new URLSearchParams("Order=attempt-1&Order=attempt-2")),
+    null,
+  );
 });
 
 test("HYP completion redirects can be detected when they land on a page route", () => {
@@ -67,11 +89,34 @@ test("HYP return helpers understand legacy and CreditGuard callback fields", () 
   assert.equal(getHypResponseCode(modern), "000");
   assert.equal(getHypTransactionId(modern), "tx-1");
   assert.equal(getHypAuthCode(modern), "auth-2");
-  assert.equal(getHypCardMask(modern), "411111******1111");
+  assert.equal(getHypCardMask(modern), "1111");
 
   assert.equal(isSuccessfulHypReturn(new URLSearchParams("CCode=1")), false);
   assert.equal(isSuccessfulHypReturn(new URLSearchParams("responseMac=mac&errorCode=101")), false);
   assert.equal(isSuccessfulHypReturn(new URLSearchParams("")), false);
+});
+
+test("payment audit snapshots exclude provider secrets and arbitrary metadata", () => {
+  const params = new URLSearchParams({
+    uniqueid: "attempt-1",
+    txId: "transaction-1",
+    errorCode: "000",
+    cardMask: "4111111111111111",
+    responseMac: "replayable-mac",
+    cardToken: "provider-card-token",
+    cardExp: "0129",
+    personalId: "sensitive-id",
+    ACode: "provider-auth-code",
+    attackerControlled: "do-not-store",
+  });
+
+  assert.deepEqual(getPaymentReturnAuditSnapshot(params), {
+    uniqueid: "attempt-1",
+    txId: "transaction-1",
+    errorCode: "000",
+    cardMask: "1111",
+  });
+  assert.doesNotMatch(JSON.stringify(getPaymentReturnAuditSnapshot(params)), /4111111111111111/);
 });
 
 test("missing public profile can be created from an authenticated checkout user", () => {

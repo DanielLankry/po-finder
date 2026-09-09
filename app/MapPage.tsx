@@ -14,6 +14,8 @@ import type { BusinessCategory, BusinessWithSchedule } from "@/lib/types";
 import type { LocationResult } from "@/components/map/PlacesSearchBar";
 import { getBusinessAvailability } from "@/lib/utils/schedule";
 import { matchesBusinessDiscovery } from "@/lib/business-discovery";
+import type { LaunchPromotionStatus } from "@/lib/launch-promotion";
+import FirstBusinessesOfferModal from "@/components/marketing/FirstBusinessesOfferModal";
 
 const BusinessMap = dynamic(() => import("@/components/map/BusinessMap"), {
   ssr: false,
@@ -38,6 +40,7 @@ export default function MapPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loadRequest, setLoadRequest] = useState(0);
+  const [promotion, setPromotion] = useState<LaunchPromotionStatus | null>(null);
   const [favoritesPanelOpen, setFavoritesPanelOpen] = useState(false);
   const searchQuery = searchParams.get("q")?.slice(0, 120) ?? "";
   const [businessSearch, setBusinessSearch] = useState(searchQuery);
@@ -65,6 +68,27 @@ export default function MapPage() {
 
     fetchBusinesses();
   }, [loadRequest]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/promotions/first-20", { cache: "no-store" })
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json() as Promise<{ promotion?: LaunchPromotionStatus | null }>;
+      })
+      .then((data) => {
+        if (!cancelled) setPromotion(data.promotion ?? null);
+      })
+      .catch((error) => {
+        console.error("Failed to load launch promotion:", error);
+        if (!cancelled) setPromotion(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     setBusinessSearch(searchQuery);
@@ -145,6 +169,7 @@ export default function MapPage() {
             error={loadError}
             onRetry={() => setLoadRequest((request) => request + 1)}
             isPlatformEmpty={!loading && !loadError && businesses.length === 0}
+            promotion={promotion}
           />
         </div>
 
@@ -226,7 +251,7 @@ export default function MapPage() {
         selectedBusinessId={selectedBusinessId}
       />
 
-
+      <FirstBusinessesOfferModal promotion={promotion} />
     </div>
   );
 }

@@ -47,6 +47,10 @@ export interface Business {
   expires_at?: string | null;
   /** Active visibility boost expiry — boosted ⇔ non-null and in the future. */
   boost_expires_at?: string | null;
+  /** Server-managed bounded campaign reservation; returned only to the owner/admin RPC. */
+  promotion_code?: string | null;
+  promotion_reserved_at?: string | null;
+  promotion_activated_at?: string | null;
   created_at: string;
 }
 

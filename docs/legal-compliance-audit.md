@@ -22,7 +22,7 @@ This is an engineering compliance audit, not legal advice. A licensed Israeli la
 - `legalBusinessName`
 - `businessId`
 - `address`
-- `whatsappNumber` or another public phone/contact channel
+- `phoneNumber` or another public phone/contact channel
 - optionally `founderName`
 
 For paid online transactions, these details should be completed before public paid traffic or checkout. The legal pages now intentionally show a warning when those fields are missing.

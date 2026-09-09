@@ -23,6 +23,12 @@ test("CreditGuard response MAC is calculated from documented redirect fields", (
   );
   assert.equal(verifyCreditGuardResponseMac(params, "secret"), true);
 
+  params.set("attempt", "unsigned-other-attempt");
+  assert.equal(
+    buildCreditGuardResponseMac(params, "secret"),
+    "2/oDHQ4rew5x+6SBZ7wrAnAymaKvxHUloYK9xyIaNgI=",
+  );
+
   params.set("uniqueID", "attempt-2");
   assert.equal(verifyCreditGuardResponseMac(params, "secret"), false);
 });

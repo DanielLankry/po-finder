@@ -1,14 +1,18 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { adminClient } from "@/lib/supabase/admin";
 import type { Review } from "@/lib/types";
 import { revalidatePath } from "next/cache";
+
+const PUBLIC_REVIEW_SELECT =
+  "id, business_id, rating, comment, reviewer_name, created_at";
 
 export async function getReviews(businessId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("reviews")
-    .select("*, user:users(name, avatar_url)")
+    .select(PUBLIC_REVIEW_SELECT)
     .eq("business_id", businessId)
     .order("created_at", { ascending: false });
 
@@ -21,9 +25,11 @@ export async function getUserReview(businessId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data, error } = await supabase
+  // user_id is intentionally not selectable through the browser Data API.
+  // This server-only lookup binds the privileged query to the verified user.
+  const { data, error } = await adminClient()
     .from("reviews")
-    .select("*")
+    .select("id, business_id, user_id, rating, comment, reviewer_name, created_at")
     .eq("business_id", businessId)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -44,7 +50,7 @@ export async function createReview(formData: FormData) {
   const { data, error } = await supabase
     .from("reviews")
     .insert({ business_id: businessId, user_id: user.id, rating, comment })
-    .select()
+    .select(PUBLIC_REVIEW_SELECT)
     .single();
 
   if (error) throw error;
@@ -65,8 +71,7 @@ export async function updateReview(reviewId: string, formData: FormData) {
     .from("reviews")
     .update({ rating, comment })
     .eq("id", reviewId)
-    .eq("user_id", user.id)
-    .select()
+    .select(PUBLIC_REVIEW_SELECT)
     .single();
 
   if (error) throw error;
@@ -82,8 +87,7 @@ export async function deleteReview(reviewId: string, businessId: string) {
   const { error } = await supabase
     .from("reviews")
     .delete()
-    .eq("id", reviewId)
-    .eq("user_id", user.id);
+    .eq("id", reviewId);
 
   if (error) throw error;
   revalidatePath(`/businesses/${businessId}`);
