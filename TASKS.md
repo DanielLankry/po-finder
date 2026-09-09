@@ -7,6 +7,13 @@
 
 ## DONE
 
+### Email verification and consistent account theme
+- [x] Enable and verify signup email confirmation, unify shared UI, and fix audit findings — 2026-09-09
+  - Files modified: `AGENTS.md`, `app/admin/businesses/page.tsx`, `app/admin/content/page.tsx`, `app/admin/coupons/page.tsx`, `app/admin/login/page.tsx`, `app/admin/payments/page.tsx`, `app/admin/pricing/PricingEditor.tsx`, `app/admin/users/page.tsx`, `app/api/businesses/route.ts`, `app/api/payments/checkout/route.ts`, `app/auth/callback/route.ts`, `app/auth/confirm/page.tsx`, `app/auth/forgot-password/page.tsx`, `app/auth/login/page.tsx`, `app/auth/register/page.tsx`, `app/auth/reset-password/page.tsx`, `app/dashboard/events/page.tsx`, `app/dashboard/photos/page.tsx`, `app/dashboard/schedule/page.tsx`, `app/error.tsx`, `app/global-error.tsx`, `app/globals.css`, `app/layout.tsx`, `components/auth/ConfirmEmailForm.tsx`, `components/auth/EmailVerificationPanel.tsx`, `components/business/BusinessCard.tsx`, `components/business/BusinessListPanel.tsx`, `components/providers/FeedbackProvider.tsx`, `components/providers/MetaPixelProvider.tsx`, `components/providers/PostHogProvider.tsx`, `components/providers/TrackingBoundary.tsx`, `components/ui/button.tsx`, `components/ui/input.tsx`, `components/ui/select.tsx`, `components/ui/textarea.tsx`, `instrumentation-client.ts`, `lib/auth-messages.ts`, `supabase/templates/confirmation.html`, `supabase/templates/recovery.html`, `tests/auth-callback.test.mjs`, `docs/auth-email-setup.md`, `docs/audits/2026-09-09/email-confirm-mobile.png`, `docs/audits/2026-09-09/discovery-theme-tablet.png`, `TASKS.md`
+  - Summary: Enabled hosted confirmation and scoped SMTP, added branded signup/resend/recovery flows, protected confirmation tokens, unified account/admin/discovery controls and dialogs, fixed batch primary photos and missing billing promotion fields, and verified the live signup lifecycle.
+  - Validation: 110 native tests, lint, production builds, browser audit, delivered signup/resend/recovery messages, one verified owner profile, replay rejection, and complete temporary data cleanup. Actual card settlement, refunds and paid publication remain unverified.
+
+
 ### Personal contact privacy
 - [x] Remove the operator's personal phone from public legal pages — 2026-09-09
   - Files modified: `lib/site-config.ts`, `components/legal/LegalIdentity.tsx`, `docs/legal-compliance-audit.md`, `tests/personal-contact-privacy.test.mjs`, `TASKS.md`, `AGENTS.md`

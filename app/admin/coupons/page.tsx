@@ -1,5 +1,7 @@
 "use client";
 
+import { useFeedback } from "@/components/providers/FeedbackProvider";
+
 import { useEffect, useState, useCallback } from "react";
 import { AlertTriangle, Ticket, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 
@@ -16,6 +18,7 @@ interface Coupon {
 }
 
 export default function AdminCouponsPage() {
+  const { confirmAction } = useFeedback();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionError, setActionError] = useState("");
@@ -51,7 +54,7 @@ export default function AdminCouponsPage() {
   }
 
   async function deleteCoupon(id: string) {
-    if (!confirm("בטוח למחוק את הקופון?")) return;
+    if (!await confirmAction("בטוח למחוק את הקופון?")) return;
     setActionError("");
     const response = await fetch(`/api/admin/coupons/${id}`, { method: "DELETE" });
     if (!response.ok) {
@@ -98,7 +101,7 @@ export default function AdminCouponsPage() {
           <p>אין קופונים עדיין</p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+        <div className="brand-panel overflow-hidden">
           <table className="w-full">
             <thead>
               <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">

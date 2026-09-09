@@ -1,5 +1,7 @@
 "use client";
 
+import { useFeedback } from "@/components/providers/FeedbackProvider";
+
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Label } from "@/components/ui/label";
@@ -21,6 +23,7 @@ function formatHebrewDate(dateStr: string): string {
 }
 
 export default function EventsPage() {
+  const { confirmAction } = useFeedback();
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [events, setEvents] = useState<BusinessEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -97,7 +100,7 @@ export default function EventsPage() {
 
   async function handleDelete(eventId: string) {
     if (!businessId) return;
-    if (!window.confirm("למחוק את האירוע? לא ניתן לבטל את הפעולה.")) return;
+    if (!await confirmAction("למחוק את האירוע? לא ניתן לבטל את הפעולה.")) return;
     setDeleting(eventId);
     setError(null);
 
@@ -278,7 +281,7 @@ export default function EventsPage() {
 
       {/* Upcoming events */}
       {upcomingEvents.length > 0 ? (
-        <div className="bg-white rounded-2xl border border-stone-200 p-6">
+        <div className="brand-panel p-6">
           <h2 className="font-bold text-base text-stone-900 mb-4">
             אירועים קרובים ({upcomingEvents.length})
           </h2>

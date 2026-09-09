@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
-  if (!user.email) {
+  if (!user.email || !user.email_confirmed_at) {
     return NextResponse.json(
       { ok: false, error: "verified email required" },
       { status: 400 }
