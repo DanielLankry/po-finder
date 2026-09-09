@@ -6,13 +6,15 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Eye, EyeOff, MailCheck, Store, ShoppingCart } from "lucide-react";
+import { Eye, EyeOff, Store, ShoppingCart } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Typewriter } from "@/components/ui/typewriter";
 import type { UserRole } from "@/lib/types";
 import { safeRedirectPath } from "@/lib/safe-redirect";
+import { EmailVerificationPanel } from "@/components/auth/EmailVerificationPanel";
+import { registrationErrorMessage } from "@/lib/auth-messages";
 
 export default function RegisterPage() {
   return (
@@ -75,25 +77,30 @@ function RegisterForm() {
 
     const callbackUrl = registrationCallbackUrl();
 
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { name, role },
-        emailRedirectTo: callbackUrl,
-      },
-    });
+    try {
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: { name, role, registration_next: defaultRoute() },
+          emailRedirectTo: callbackUrl,
+        },
+      });
 
-    if (signUpError) { setError(signUpError.message); setLoading(false); return; }
+      if (signUpError) { setError(registrationErrorMessage(signUpError.code, signUpError.status)); return; }
 
-    if (data.user && !data.session) { setEmailSent(true); setLoading(false); return; }
+      if (data.user && !data.session) { setEmailSent(true); setLoading(false); return; }
 
-    if (data.user && data.session) {
-      await supabase.from("users").insert({ id: data.user.id, email, role, name });
-      router.push(registrationDestination());
-      router.refresh();
+      if (data.user && data.session) {
+        await supabase.from("users").insert({ id: data.user.id, email, role, name });
+        router.push(registrationDestination());
+        router.refresh();
+      }
+    } catch {
+      setError("לא ניתן להתחבר כרגע. בדקו את החיבור לאינטרנט ונסו שוב.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function handleGoogleRegister() {
@@ -158,15 +165,13 @@ function RegisterForm() {
 
           {/* Email sent screen */}
           {emailSent && (
-            <div className="text-center py-8 bg-white rounded-3xl p-8 shadow-sm border border-[#17402D]/20">
-              <MailCheck className="mx-auto mb-4 h-12 w-12 text-[#2D6A4F]" aria-hidden="true" />
-              <h2 className="font-bold text-2xl text-[#111111] mb-2">בדקו את המייל שלכם</h2>
-              <p className="text-[#78716C] text-sm leading-relaxed">
-                שלחנו קישור אימות לכתובת <strong>{email}</strong>.<br />
-                לחצו עליו כדי להפעיל את החשבון.
-              </p>
-              <p className="text-xs text-[#A8A29E] mt-4">לא קיבלתם? בדקו תיקיית ספאם</p>
-            </div>
+            <EmailVerificationPanel
+              email={email.trim()}
+              callbackUrl={registrationCallbackUrl()}
+              next={defaultRoute()}
+              justSent
+              onChangeEmail={() => { setEmailSent(false); setError(null); }}
+            />
           )}
 
           {!emailSent && (
@@ -183,7 +188,7 @@ function RegisterForm() {
                     : "פתיחת חשבון לעסקים ולקוחות"}
               </div>
 
-              <h1 className="font-display text-5xl text-[#17402D] mb-2 leading-none">
+              <h1 className="font-display text-4xl sm:text-5xl text-[#17402D] mb-2 leading-tight">
                 {isPromotionSignup
                   ? "פותחים חשבון וממשיכים לשמירת מקום"
                   : isPricingSignup
@@ -224,20 +229,20 @@ function RegisterForm() {
               <form onSubmit={handleRegister} className="space-y-4">
                 <div>
                   <Label htmlFor="name" className="text-[#17402D] font-semibold text-sm mb-2 block">שם מלא</Label>
-                  <Input id="name" type="text" placeholder="ישראל ישראלי" value={name}
+                  <Input id="name" type="text" autoComplete="name" placeholder="ישראל ישראלי" value={name}
                     onChange={(e) => setName(e.target.value)} required
                     className="brand-control h-12 rounded-xl focus-visible:ring-0 text-sm" />
                 </div>
                 <div>
                   <Label htmlFor="email" className="text-[#17402D] font-semibold text-sm mb-2 block">כתובת מייל</Label>
-                  <Input id="email" type="email" placeholder="your@email.com" value={email}
+                  <Input id="email" type="email" autoComplete="email" placeholder="your@email.com" value={email}
                     onChange={(e) => setEmail(e.target.value)} required dir="ltr"
                     className="brand-control h-12 rounded-xl focus-visible:ring-0 text-sm" />
                 </div>
                 <div>
                   <Label htmlFor="password" className="text-[#17402D] font-semibold text-sm mb-2 block">סיסמה (לפחות 6 תווים)</Label>
                   <div className="relative">
-                    <Input id="password" type={showPass ? "text" : "password"} placeholder="••••••••" value={password}
+                    <Input id="password" type={showPass ? "text" : "password"} autoComplete="new-password" placeholder="••••••••" value={password}
                       onChange={(e) => setPassword(e.target.value)} required minLength={6} dir="ltr"
                       className="brand-control h-12 rounded-xl focus-visible:ring-0 text-sm pr-12" />
                     <button type="button" onClick={() => setShowPass(!showPass)}
@@ -248,7 +253,7 @@ function RegisterForm() {
                   </div>
                 </div>
 
-                {error && <p role="alert" className="text-red-500 text-sm bg-red-50 px-4 py-2.5 rounded-xl">{error}</p>}
+                {error && <p role="alert" className="brand-notice-error">{error}</p>}
 
                 <button type="submit" disabled={loading}
                   className="brand-button w-full h-12 rounded-xl font-bold text-[15px] transition-all disabled:opacity-60">

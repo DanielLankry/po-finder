@@ -1,5 +1,7 @@
 ﻿"use client";
 
+import { useFeedback } from "@/components/providers/FeedbackProvider";
+
 import { useState, useEffect, useRef } from "react";
 import { Upload, X, Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -9,6 +11,7 @@ import { getLatestOwnedBusiness } from "@/lib/db/owned-businesses";
 import SafeBusinessImage from "@/components/business/SafeBusinessImage";
 
 export default function PhotosPage() {
+  const { confirmAction } = useFeedback();
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,6 +19,7 @@ export default function PhotosPage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadInFlight = useRef(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -41,55 +45,66 @@ export default function PhotosPage() {
   }, [supabase]);
 
   async function uploadFiles(files: FileList | File[]) {
-    if (!businessId) return;
+    if (!businessId || uploadInFlight.current) return;
+    uploadInFlight.current = true;
     setUploading(true);
     setUploadError(null);
 
     const MAX_SIZE = 10 * 1024 * 1024; // 10MB
     const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-    for (const file of Array.from(files)) {
-      if (!ALLOWED_TYPES.includes(file.type)) {
-        setUploadError(`סוג קובץ לא נתמך: ${file.name}`);
-        continue;
+    // React state is a snapshot for the whole batch; track the first successful upload locally.
+    let hasPrimaryPhoto = photos.some((photo) => photo.is_primary);
+    try {
+      for (const file of Array.from(files)) {
+        if (!ALLOWED_TYPES.includes(file.type)) {
+          setUploadError(`סוג קובץ לא נתמך: ${file.name}`);
+          continue;
+        }
+        if (file.size > MAX_SIZE) {
+          setUploadError(`הקובץ ${file.name} גדול מ-10MB`);
+          continue;
+        }
+
+        const ext = file.name.split(".").pop() ?? "jpg";
+        const fileName = `${businessId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+        const { error: storageError } = await supabase.storage
+          .from("photos")
+          .upload(fileName, file, { cacheControl: "3600" });
+
+        if (storageError) {
+          setUploadError(`שגיאה בהעלאה: ${storageError.message}`);
+          continue;
+        }
+
+        const isPrimary = !hasPrimaryPhoto;
+        const { data: photo, error: dbError } = await supabase
+          .from("photos")
+          .insert({ business_id: businessId, url: fileName, is_primary: isPrimary })
+          .select()
+          .single();
+
+        if (dbError) {
+          setUploadError(`שגיאה בשמירת תמונה: ${dbError.message}`);
+          // Clean up orphaned storage file
+          await supabase.storage.from("photos").remove([fileName]);
+          continue;
+        }
+
+        if (photo) {
+          if (photo.is_primary) hasPrimaryPhoto = true;
+          const [signedPhoto] = await signPhotoRecords(supabase, [photo as Photo]);
+          setPhotos((prev) => [...prev, signedPhoto]);
+        }
       }
-      if (file.size > MAX_SIZE) {
-        setUploadError(`הקובץ ${file.name} גדול מ-10MB`);
-        continue;
-      }
-
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const fileName = `${businessId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-
-      const { error: storageError } = await supabase.storage
-        .from("photos")
-        .upload(fileName, file, { cacheControl: "3600" });
-
-      if (storageError) {
-        setUploadError(`שגיאה בהעלאה: ${storageError.message}`);
-        continue;
-      }
-
-      const isPrimary = photos.length === 0;
-      const { data: photo, error: dbError } = await supabase
-        .from("photos")
-        .insert({ business_id: businessId, url: fileName, is_primary: isPrimary })
-        .select()
-        .single();
-
-      if (dbError) {
-        setUploadError(`שגיאה בשמירת תמונה: ${dbError.message}`);
-        // Clean up orphaned storage file
-        await supabase.storage.from("photos").remove([fileName]);
-        continue;
-      }
-
-      if (photo) {
-        const [signedPhoto] = await signPhotoRecords(supabase, [photo as Photo]);
-        setPhotos((prev) => [...prev, signedPhoto]);
-      }
+    } catch {
+      setUploadError("ההעלאה לא הושלמה. בדקו את החיבור ונסו שוב.");
+    } finally {
+      uploadInFlight.current = false;
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
-    setUploading(false);
   }
 
   async function setPrimary(photoId: string) {
@@ -106,7 +121,7 @@ export default function PhotosPage() {
   }
 
   async function deletePhoto(photo: Photo) {
-    if (!window.confirm("למחוק את התמונה? לא ניתן לבטל את הפעולה.")) return;
+    if (!await confirmAction("למחוק את התמונה? לא ניתן לבטל את הפעולה.")) return;
 
     // Remove the database row first so a transient Storage error cannot leave
     // a broken image reference visible in the owner or public experience.

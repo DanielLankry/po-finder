@@ -80,6 +80,21 @@ function wrapper(content: string): string {
 </html>`;
 }
 
+/** Shared paper card for account security and billing notifications.
+ * Callers must escape any dynamic values before composing bodyHtml.
+ */
+export function notificationTemplate(title: string, bodyHtml: string, actionLabel: string, actionUrl: string): string {
+  return wrapper(`
+    <tr><td style="background:#EFF5F0;border-bottom:2px solid #17402D;padding:30px 24px;text-align:center;">
+      ${BRAND_LOCKUP_HTML}
+      <h1 style="font-family:${BODY_FONT};font-size:28px;line-height:1.35;color:#17402D;margin:24px 0 0;">${escapeHtml(title)}</h1>
+    </td></tr>
+    <tr><td style="padding:28px 24px;font-family:${BODY_FONT};font-size:16px;line-height:1.8;color:#17402D;text-align:right;">
+      ${bodyHtml}
+      <p style="text-align:center;margin:26px 0 12px;"><a href="${escapeHtml(actionUrl)}" style="display:inline-block;background:#C4552D;color:#FFFFFF;border:2px solid #8A3618;border-radius:12px;box-shadow:4px 4px 0 #8A3618;padding:12px 22px;font-weight:800;text-decoration:none;">${escapeHtml(actionLabel)}</a></p>
+    </td></tr>`);
+}
+
 // ── 1. Business Registration Received ───────────────────────────────────────
 /** Builds the owner receipt shown immediately after a business draft is saved.
  * It confirms the review state and points owners toward profile improvements

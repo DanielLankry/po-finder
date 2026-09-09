@@ -388,7 +388,7 @@ export default function SchedulePage() {
 
       {/* ── DAILY OVERRIDE ──────────────────────────────────────────────────── */}
       {tab === "override" && (
-        <div className="bg-white rounded-2xl border border-stone-200 p-6">
+        <div className="brand-panel p-6">
           <div className="flex items-center justify-between mb-1">
             <h1 className="font-bold text-xl text-stone-900">תיקון להיום</h1>
             {schedule && (
