@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MapPin } from "lucide-react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,27 +26,28 @@ export default function ResetPasswordPage() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.updateUser({ password });
-
-    if (error) {
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) setError("שגיאה בעדכון הסיסמה. נסו שוב.");
+      else router.push("/auth/login?message=password_updated");
+    } catch {
       setError("שגיאה בעדכון הסיסמה. נסו שוב.");
-    } else {
-      router.push("/auth/login?message=password_updated");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (
-    <div className="brand-canvas flex min-h-screen items-center justify-center px-4" dir="rtl">
-      <div className="w-full max-w-sm">
+    <div className="brand-canvas flex min-h-screen items-center justify-center px-5 py-10" dir="rtl">
+      <div className="brand-panel w-full max-w-[460px] p-6 sm:p-9">
         <div className="mb-8">
           <Link href="/" className="inline-flex items-center gap-2 group">
-            <MapPin className="h-7 w-7 fill-[#2D6A4F] text-[#2D6A4F]" />
+            <Image src="/logo.png" alt="" width={40} height={40} />
             <span className="font-display font-extrabold text-2xl text-[#2D6A4F]">פה קרוב</span>
           </Link>
         </div>
 
-        <h1 className="font-display font-bold text-3xl text-stone-900 mb-1">
+        <h1 className="font-display font-bold text-3xl text-ink mb-1">
           סיסמה חדשה
         </h1>
         <p className="text-stone-500 text-sm mb-8">
@@ -61,6 +62,7 @@ export default function ResetPasswordPage() {
             <Input
               id="password"
               type="password"
+              autoComplete="new-password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -78,6 +80,7 @@ export default function ResetPasswordPage() {
             <Input
               id="confirm"
               type="password"
+              autoComplete="new-password"
               placeholder="••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -88,7 +91,7 @@ export default function ResetPasswordPage() {
             />
           </div>
 
-          {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
+          {error && <p role="alert" className="brand-notice-error">{error}</p>}
 
           <Button
             type="submit"

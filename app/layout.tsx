@@ -5,9 +5,8 @@ import "./globals.css";
 import "@/lib/env";
 import CookieConsent from "@/components/layout/CookieConsent";
 import AccessibilityWidget from "@/components/layout/AccessibilityWidget";
-import PostHogProvider from "@/components/providers/PostHogProvider";
-import ConsentAnalytics from "@/components/providers/ConsentAnalytics";
-import MetaPixelProvider from "@/components/providers/MetaPixelProvider";
+import { TrackingBoundary } from "@/components/providers/TrackingBoundary";
+import { FeedbackProvider } from "@/components/providers/FeedbackProvider";
 import { BRAND_NAME, SITE_URL } from "@/lib/site-config";
 
 const BASE_URL = SITE_URL;
@@ -142,13 +141,13 @@ export default function RootLayout({
         <a href="#main-content" className="skip-to-content">
           דלגו לתוכן הראשי
         </a>
-        <PostHogProvider>
-          <div id="main-content">{children}</div>
-        </PostHogProvider>
+        <TrackingBoundary>
+          <FeedbackProvider>
+            <div id="main-content">{children}</div>
+          </FeedbackProvider>
+        </TrackingBoundary>
         <AccessibilityWidget />
         <CookieConsent />
-        <ConsentAnalytics />
-        <MetaPixelProvider />
       </body>
     </html>
   );

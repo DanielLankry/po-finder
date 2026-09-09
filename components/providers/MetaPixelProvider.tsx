@@ -25,6 +25,7 @@ function MetaPixelTracker() {
     window.addEventListener("po-cookie-consent-accepted", onConsent);
     window.addEventListener("po-cookie-consent-declined", disableMetaPixel);
     return () => {
+      disableMetaPixel();
       window.removeEventListener("po-cookie-consent-accepted", onConsent);
       window.removeEventListener("po-cookie-consent-declined", disableMetaPixel);
     };
