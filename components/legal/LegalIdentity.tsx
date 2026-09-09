@@ -6,7 +6,6 @@ const identityRows = [
   { label: "מספר עוסק / ח.פ.", value: BUSINESS_INFO.businessId },
   { label: "כתובת למשלוח הודעות", value: BUSINESS_INFO.address },
   { label: "דוא\"ל", value: BUSINESS_INFO.contactEmail },
-  { label: "טלפון", value: BUSINESS_INFO.phoneNumber },
   { label: "דומיין", value: SITE_DOMAIN },
 ];
 
