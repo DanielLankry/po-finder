@@ -4,7 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import type { Business, BusinessCategory, KashrutStatus } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 import { signPhotoRecords } from "@/lib/storage/photo-urls";
-import { getLatestOwnedBusiness, getOwnedBusinesses } from "@/lib/db/owned-businesses";
+import { getOwnedBusinesses } from "@/lib/db/owned-businesses";
+import { businessRegistrationSchema, type BusinessRegistrationInput } from "@/lib/business-registration";
 import {
   sendBusinessRegistrationReceivedEmail,
   sendNewBusinessAlert,
@@ -119,32 +120,27 @@ export async function getBusinessByOwner(ownerId: string) {
   return businesses[0] ?? null;
 }
 
-export async function createBusiness(formData: FormData) {
+export async function createBusiness(input: BusinessRegistrationInput) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
-  const businessData = {
-    owner_id: user.id,
-    name: formData.get("name") as string,
-    description: formData.get("description") as string | null,
-    category: formData.get("category") as BusinessCategory,
-    phone: formData.get("phone") as string | null,
-    website: formData.get("website") as string | null,
-    instagram: formData.get("instagram") as string | null,
-    kashrut: (formData.get("kashrut") as KashrutStatus) ?? "none",
-    business_number: formData.get("business_number") as string | null,
-    is_active: false, // Requires admin approval before going live
-  };
+  const parsed = businessRegistrationSchema.safeParse(input);
+  if (!parsed.success) throw new Error("פרטי העסק אינם תקינים. בדקו את השדות ונסו שוב.");
+  const businessData = { ...parsed.data, owner_id: user.id, is_active: false };
 
-  const { error } = await supabase
+  const { data: inserted, error } = await supabase
     .from("businesses")
-    .insert(businessData);
+    .insert(businessData)
+    .select("id")
+    .single();
 
   if (error) throw error;
-  const data = await getLatestOwnedBusiness(supabase);
+  // Read this exact insert through the owner RPC, even if another tab creates a draft.
+  const data = (await getOwnedBusinesses(supabase)).find((business) => business.id === inserted?.id);
   if (!data) throw new Error("Created business was not returned");
 
+  let notificationWarning = !user.email;
   if (user.email) {
     const notifications = await Promise.allSettled([
       sendBusinessRegistrationReceivedEmail(user.email, data.name),
@@ -159,13 +155,14 @@ export async function createBusiness(formData: FormData) {
 
     for (const notification of notifications) {
       if (notification.status === "rejected") {
+        notificationWarning = true;
         console.error("Failed to send business registration email:", notification.reason);
       }
     }
   }
 
   revalidatePath("/dashboard");
-  return data as Business;
+  return { business: data as Business, notificationWarning };
 }
 
 export async function updateBusiness(id: string, formData: FormData) {
