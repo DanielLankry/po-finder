@@ -50,12 +50,12 @@ test.describe("mobile layout regression coverage", () => {
       await expect(logo.locator("span")).toHaveCount(0);
       await expect(changingText).toBeVisible();
       await expect(changingTextVisual).toContainText("ל");
-      await expect(page.getByRole("button", { name: "מועדפים" })).toBeVisible();
+      await expect(actions.getByRole("button", { name: "מועדפים", exact: true })).toBeVisible();
       await expect(menuButton).toBeVisible();
 
       if (viewport.width < 768) {
         const searchButton = page.getByRole("button", { name: "פתיחת חיפוש" });
-        const favoritesButton = page.getByRole("button", { name: "מועדפים" });
+        const favoritesButton = actions.getByRole("button", { name: "מועדפים", exact: true });
         await expect(searchButton).toBeVisible();
 
         const controlBoxes = await Promise.all([
@@ -208,5 +208,11 @@ test.describe("mobile layout regression coverage", () => {
     await expect(example.getByText("4.8", { exact: true })).toBeVisible();
     await expect(example.getByRole("button", { name: "נונה קפה — קפה ושתייה" })).toBeDisabled();
     await expect(example.getByRole("button", { name: "שמור למועדפים" })).toHaveCount(0);
+
+    const pricingCta = page
+      .getByTestId("business-list-scroll")
+      .getByRole("link", { name: "לפרסום העסק שלכם", exact: true });
+    await expect(pricingCta).toBeVisible();
+    await expect(pricingCta).toHaveAttribute("href", "/pricing");
   });
 });
