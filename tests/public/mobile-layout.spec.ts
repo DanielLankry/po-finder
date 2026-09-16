@@ -22,6 +22,21 @@ const RESPONSIVE_VIEWPORTS = [
   { width: 768, height: 900 },
 ] as const;
 
+function isDialogAccessibilityWarning(message: string) {
+  return (
+    /DialogContent/.test(message) &&
+    /(DialogTitle|Description|aria-describedby)/.test(message)
+  );
+}
+
+test("recognizes the Radix missing-description warning", () => {
+  expect(
+    isDialogAccessibilityWarning(
+      "Warning: Missing Description or aria-describedby={undefined} for {DialogContent}."
+    )
+  ).toBe(true);
+});
+
 test.describe("mobile layout regression coverage", () => {
   test.beforeEach(async ({ page }, testInfo) => {
     test.skip((testInfo.project.use.viewport?.width ?? 1440) >= 1440, "mobile-only layout check");
@@ -177,7 +192,7 @@ test.describe("mobile layout regression coverage", () => {
     page.on("console", (message) => {
       if (
         ["warning", "error"].includes(message.type()) &&
-        /DialogContent[\s\S]*(DialogTitle|Description|aria-describedby)/.test(message.text())
+        isDialogAccessibilityWarning(message.text())
       ) {
         dialogAccessibilityWarnings.push(message.text());
       }
