@@ -173,6 +173,16 @@ test.describe("mobile layout regression coverage", () => {
   });
 
   test("an empty launch shows the bounded offer and a labelled example business", async ({ page }) => {
+    const dialogAccessibilityWarnings: string[] = [];
+    page.on("console", (message) => {
+      if (
+        ["warning", "error"].includes(message.type()) &&
+        /DialogContent[\s\S]*(DialogTitle|Description|aria-describedby)/.test(message.text())
+      ) {
+        dialogAccessibilityWarnings.push(message.text());
+      }
+    });
+
     await page.route("**/api/businesses?includeSchedule=1", async (route) => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ businesses: [] }) });
     });
@@ -198,6 +208,7 @@ test.describe("mobile layout regression coverage", () => {
     await expect(modal).toBeVisible();
     await expect(modal.getByText("עד 20 עסקים בלבד")).toBeVisible();
     await expect(modal).not.toContainText("נותרו");
+    expect(dialogAccessibilityWarnings).toEqual([]);
     await modal.getByRole("button", { name: "סגירה" }).click();
 
     const example = page.getByTestId("example-business-card");
@@ -208,5 +219,9 @@ test.describe("mobile layout regression coverage", () => {
     await expect(example.getByText("4.8", { exact: true })).toBeVisible();
     await expect(example.getByRole("button", { name: "נונה קפה — קפה ושתייה" })).toBeDisabled();
     await expect(example.getByRole("button", { name: "שמור למועדפים" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "למחירים ולפרסום עסק", exact: true })).toHaveAttribute(
+      "href",
+      "/pricing",
+    );
   });
 });
