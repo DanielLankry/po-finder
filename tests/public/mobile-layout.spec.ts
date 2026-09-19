@@ -208,5 +208,8 @@ test.describe("mobile layout regression coverage", () => {
     await expect(example.getByText("4.8", { exact: true })).toBeVisible();
     await expect(example.getByRole("button", { name: "נונה קפה — קפה ושתייה" })).toBeDisabled();
     await expect(example.getByRole("button", { name: "שמור למועדפים" })).toHaveCount(0);
+
+    await page.getByRole("button", { name: "פתיחת תפריט", exact: true }).click();
+    await expect(page.getByRole("link", { name: "פרסום עסק", exact: true })).toHaveAttribute("href", "/pricing");
   });
 });
