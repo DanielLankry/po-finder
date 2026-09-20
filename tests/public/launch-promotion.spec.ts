@@ -20,6 +20,51 @@ test.beforeEach(async ({ page }) => {
     });
   });
 });
+
+for (const viewport of [
+  { name: "mobile", width: 390, height: 844 },
+  { name: "desktop", width: 1440, height: 900 },
+] as const) {
+  test(`the launch offer has a resolvable description without Radix warnings on ${viewport.name}`, async ({ page }) => {
+    const missingDescriptionWarnings: string[] = [];
+    page.on("console", (message) => {
+      if (
+        message.type() === "warning" &&
+        message.text().includes("Missing `Description`")
+      ) {
+        missingDescriptionWarnings.push(message.text());
+      }
+    });
+
+    await page.setViewportSize(viewport);
+    await page.route("**/api/businesses?includeSchedule=1", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ businesses: [] }),
+      });
+    });
+
+    await page.goto("/");
+    const modal = page.getByTestId("first-businesses-offer-modal");
+    await expect(modal).toBeVisible();
+
+    const descriptionId = await modal.getAttribute("aria-describedby");
+    expect(descriptionId).toBeTruthy();
+    expect(
+      await page.evaluate((id) => {
+        const description = id ? document.getElementById(id) : null;
+        return description?.textContent?.trim() ?? null;
+      }, descriptionId),
+    ).toContain("שומרים מקום ברגע שיוצרים את פרופיל העסק");
+    await expect(modal.getByRole("link", { name: "שמירת מקום חינם" })).toHaveAttribute(
+      "href",
+      "/auth/register?redirectTo=%2Fdashboard%2Fprofile%3Fcampaign%3Dfirst-20-3m",
+    );
+    expect(missingDescriptionWarnings).toEqual([]);
+  });
+}
+
 test("the launch offer opens only once per browser session", async ({ page }) => {
   await page.route("**/api/businesses?includeSchedule=1", async (route) => {
     await route.fulfill({
