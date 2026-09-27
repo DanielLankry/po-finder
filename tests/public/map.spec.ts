@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test';
 import { collectErrors } from '../utils/console';
+import { suppressLaunchOffer } from '../utils/launch-offer';
+
+test.beforeEach(async ({ page }) => {
+  await suppressLaunchOffer(page);
+});
 
 test('home renders map and search', async ({ page }) => {
   const errors = collectErrors(page);

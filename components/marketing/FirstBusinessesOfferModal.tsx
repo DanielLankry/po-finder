@@ -16,6 +16,11 @@ import { trackMetaEvent } from "@/lib/meta-pixel";
 import { trackPostHogEvent } from "@/lib/posthog";
 
 const SESSION_KEY = "po-first-businesses-offer-seen";
+const CONSENT_KEY = "po-cookie-consent";
+const CONSENT_EVENTS = [
+  "po-cookie-consent-accepted",
+  "po-cookie-consent-declined",
+] as const;
 
 /** Shows the bounded launch offer once per session without exposing live demand. */
 export default function FirstBusinessesOfferModal({
@@ -30,12 +35,32 @@ export default function FirstBusinessesOfferModal({
     if (!promotion?.isOpen) return;
     if (sessionStorage.getItem(SESSION_KEY)) return;
 
-    const timer = window.setTimeout(() => {
-      sessionStorage.setItem(SESSION_KEY, "1");
-      setOpen(true);
-    }, 800);
+    let timer: number | undefined;
 
-    return () => window.clearTimeout(timer);
+    const scheduleOffer = () => {
+      if (!localStorage.getItem(CONSENT_KEY)) return;
+      if (sessionStorage.getItem(SESSION_KEY) || timer !== undefined) return;
+
+      timer = window.setTimeout(() => {
+        timer = undefined;
+        if (sessionStorage.getItem(SESSION_KEY)) return;
+
+        sessionStorage.setItem(SESSION_KEY, "1");
+        setOpen(true);
+      }, 800);
+    };
+
+    scheduleOffer();
+    for (const eventName of CONSENT_EVENTS) {
+      window.addEventListener(eventName, scheduleOffer);
+    }
+
+    return () => {
+      if (timer !== undefined) window.clearTimeout(timer);
+      for (const eventName of CONSENT_EVENTS) {
+        window.removeEventListener(eventName, scheduleOffer);
+      }
+    };
   }, [promotion]);
 
   useEffect(() => {
