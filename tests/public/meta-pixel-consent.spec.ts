@@ -1,4 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { suppressLaunchOffer } from "../utils/launch-offer";
+
+test.beforeEach(async ({ page }) => {
+  await suppressLaunchOffer(page);
+});
 
 test("Meta Pixel stays offline until optional cookies are accepted", async ({ page }) => {
   await page.goto("/");
