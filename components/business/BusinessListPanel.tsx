@@ -412,6 +412,15 @@ export default function BusinessListPanel({
         ) : filtered.length === 0 && isPlatformEmpty ? (
           <div className="min-h-full px-4 py-8 sm:px-6 sm:py-10">
             <ExampleBusinessCard />
+            <div className="mx-auto mt-5 flex w-full max-w-[420px] flex-col items-center gap-3 text-center">
+              <p className="text-sm font-bold text-[#17402D]">רוצים שהעסק שלכם יופיע כאן?</p>
+              <Link
+                href="/pricing"
+                className="poster-hover inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-[#8A3618] bg-[#C4552D] px-6 text-sm font-black text-white shadow-[3px_3px_0_0_#8A3618] hover:bg-[#A8441F]"
+              >
+                לפרסום העסק שלכם
+              </Link>
+            </div>
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-4 px-8 py-16 text-center">
