@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { collectDialogDescriptionWarnings } from "../utils/console";
 
 const promotion = {
   code: "first-20-3m",
@@ -21,6 +22,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 test("the launch offer opens only once per browser session", async ({ page }) => {
+  const dialogWarnings = collectDialogDescriptionWarnings(page);
   await page.route("**/api/businesses?includeSchedule=1", async (route) => {
     await route.fulfill({
       status: 200,
@@ -32,6 +34,9 @@ test("the launch offer opens only once per browser session", async ({ page }) =>
   await page.goto("/");
   const modal = page.getByTestId("first-businesses-offer-modal");
   await expect(modal).toBeVisible();
+  const descriptionId = await modal.getAttribute("aria-describedby");
+  expect(descriptionId).toBeTruthy();
+  await expect(modal.locator(`[id="${descriptionId}"]`)).toBeVisible();
   await expect(modal.getByTestId("promotion-capacity")).toHaveText("עד 20 עסקים בלבד");
   await expect(modal).not.toContainText("נותרו");
   await modal.getByRole("button", { name: "סגירה" }).click();
@@ -41,6 +46,7 @@ test("the launch offer opens only once per browser session", async ({ page }) =>
   await expect(modal).toHaveCount(0);
   await expect(page.getByTestId("promotion-list-banner")).toContainText("20 העסקים הראשונים");
   await expect(page.getByTestId("promotion-list-banner")).not.toContainText("נותרו");
+  expect(dialogWarnings).toEqual([]);
 });
 
 test("a zero-result search never substitutes the example for a real platform", async ({ page }) => {

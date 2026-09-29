@@ -25,3 +25,16 @@ export function collectErrors(page: Page) {
   });
   return errors;
 }
+
+export function collectDialogDescriptionWarnings(page: Page) {
+  const warnings: string[] = [];
+  page.on("console", (msg: ConsoleMessage) => {
+    if (
+      msg.type() === "warning" &&
+      msg.text().includes("Missing `Description` or `aria-describedby={undefined}`")
+    ) {
+      warnings.push(msg.text());
+    }
+  });
+  return warnings;
+}

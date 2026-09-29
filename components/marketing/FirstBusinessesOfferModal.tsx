@@ -57,7 +57,6 @@ export default function FirstBusinessesOfferModal({
       <DialogContent
         className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-0 sm:max-w-[560px]"
         dir="rtl"
-        aria-describedby="first-businesses-offer-description"
         data-testid="first-businesses-offer-modal"
       >
         <div className="border-b-2 border-[#17402D] bg-[#FFF3B0] px-6 pb-5 pt-6 sm:px-8">
@@ -71,7 +70,6 @@ export default function FirstBusinessesOfferModal({
               <span className="mt-1 block text-[#C4552D]">ל־20 העסקים הראשונים</span>
             </DialogTitle>
             <DialogDescription
-              id="first-businesses-offer-description"
               className="max-w-md text-sm font-medium leading-relaxed text-[#17402D]/75"
             >
               שומרים מקום ברגע שיוצרים את פרופיל העסק. הפרסום מתחיל רק אחרי
