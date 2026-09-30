@@ -46,7 +46,6 @@ const CATEGORY_ICONS: Record<BusinessCategory, React.ComponentType<{ className?:
 
 export default function ProfilePage() {
   const requestedId = useSearchParams().get("businessId");
-  const [isPromotionJourney, setIsPromotionJourney] = useState(false);
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -57,12 +56,6 @@ export default function ProfilePage() {
 
   useOwnerFormAnchor(loading);
   const supabase = createClient();
-
-  useEffect(() => {
-    setIsPromotionJourney(
-      new URLSearchParams(window.location.search).get("campaign") === "first-20-3m",
-    );
-  }, []);
 
   const [form, setForm] = useState({
     name: "",
@@ -159,12 +152,6 @@ export default function ProfilePage() {
         setNotificationWarning(result.notificationWarning);
         if (inserted) {
           setBusiness(inserted);
-          if (inserted.promotion_code === "first-20-3m") {
-            trackPostHogEvent("launch_promotion_reserved", {
-              campaign_code: inserted.promotion_code,
-              category: form.category,
-            });
-          }
           trackMetaBusinessLead({
             businessId: inserted.id,
             category: form.category,
@@ -202,9 +189,7 @@ export default function ProfilePage() {
       <div className="mb-5">
         {!business && (
           <p className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-            {isPromotionJourney
-              ? "ביצירת הפרופיל נשמר מקום במבצע, כל עוד נותרו מקומות. העסק יתפרסם רק אחרי אישור מנהל, ואז יתחילו 3 החודשים החינם."
-              : "זו טיוטה פרטית בחינם. היא תופיע לציבור אחרי אישור הצוות ותשלום או הפעלת הטבה תקפה."}
+            זו טיוטה פרטית בחינם. היא תופיע לציבור אחרי אישור הצוות ותשלום או הפעלת הטבה תקפה.
           </p>
         )}
       </div>
