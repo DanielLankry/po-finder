@@ -34,10 +34,8 @@ function RegisterForm() {
     redirectTo?.startsWith("/pricing") ||
     redirectTo?.startsWith("/dashboard/billing") ||
     false;
-  const isPromotionSignup =
-    redirectTo?.startsWith("/dashboard/profile") &&
-    redirectTo.includes("campaign=first-20-3m");
-  const isBusinessSignup = isPricingSignup || isPromotionSignup;
+  const isProfileSignup = redirectTo?.startsWith("/dashboard/profile") || false;
+  const isBusinessSignup = isPricingSignup || isProfileSignup;
   const [role, setRole] = useState<UserRole>(() => (isBusinessSignup ? "business_owner" : "customer"));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -181,18 +179,18 @@ function RegisterForm() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2D6A4F] opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[#2D6A4F]" />
                 </span>
-                {isPromotionSignup
-                  ? "המשך ליצירת פרופיל ושמירת מקום"
-                  : isPricingSignup
-                    ? "המשך לבחירת משך ההופעה"
+                {isPricingSignup
+                  ? "המשך לבחירת משך ההופעה"
+                  : isProfileSignup
+                    ? "המשך ליצירת פרופיל העסק"
                     : "פתיחת חשבון לעסקים ולקוחות"}
               </div>
 
               <h1 className="font-display text-4xl sm:text-5xl text-[#17402D] mb-2 leading-tight">
-                {isPromotionSignup
-                  ? "פותחים חשבון וממשיכים לשמירת מקום"
-                  : isPricingSignup
-                    ? "כמעט סיימנו: פתחו חשבון להצטרפות"
+                {isPricingSignup
+                  ? "כמעט סיימנו: פתחו חשבון להצטרפות"
+                  : isProfileSignup
+                    ? "פותחים חשבון וממשיכים לפרופיל העסק"
                     : "יצירת חשבון חדש"}
               </h1>
               <p className="text-[#78716C] text-sm mb-6">
@@ -208,7 +206,7 @@ function RegisterForm() {
                 <p className="text-[#17402D] font-semibold text-sm mb-3">אני מצטרף/ת בתור:</p>
                 <div className="grid grid-cols-2 gap-3">
                   <RoleCard active={role === "business_owner"} onClick={() => setRole("business_owner")}
-                    icon={<Store className="h-5 w-5" />} title="בעל עסק" description={isPromotionSignup ? "3 חודשים חינם בכפוף למקום" : "פרסום בתשלום חד־פעמי"} />
+                    icon={<Store className="h-5 w-5" />} title="בעל עסק" description="פרסום בתשלום חד־פעמי" />
                   <RoleCard active={role === "customer"} onClick={() => setRole("customer")}
                     icon={<ShoppingCart className="h-5 w-5" />} title="לקוח" description="גלשו והשאירו ביקורת" />
                 </div>
@@ -259,10 +257,10 @@ function RegisterForm() {
                   className="brand-button w-full h-12 rounded-xl font-bold text-[15px] transition-all disabled:opacity-60">
                   {loading
                     ? "...נרשמים"
-                    : isPromotionSignup
-                      ? "יצירת חשבון והמשך לפרופיל העסק"
-                      : isPricingSignup
-                        ? "יצירת חשבון והמשך לתשלום"
+                    : isPricingSignup
+                      ? "יצירת חשבון והמשך לתשלום"
+                      : isProfileSignup
+                        ? "יצירת חשבון והמשך לפרופיל העסק"
                         : "יצירת חשבון"}
                 </button>
               </form>
