@@ -30,9 +30,6 @@ test.describe("mobile layout regression coverage", () => {
 
   for (const viewport of RESPONSIVE_VIEWPORTS) {
     test(`navbar changing text is visible and contained at ${viewport.width}px`, async ({ page }) => {
-      await page.addInitScript(() => {
-        sessionStorage.setItem("po-first-businesses-offer-seen", "1");
-      });
       await page.setViewportSize(viewport);
       await page.goto("/");
 
@@ -104,9 +101,6 @@ test.describe("mobile layout regression coverage", () => {
   }
 
   test("navbar audience advances with the typewriter animation", async ({ page }) => {
-    await page.addInitScript(() => {
-      sessionStorage.setItem("po-first-businesses-offer-seen", "1");
-    });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
 
@@ -118,9 +112,6 @@ test.describe("mobile layout regression coverage", () => {
   test("navbar audience swaps complete phrases when motion is reduced", async ({ page }) => {
     const errors = collectErrors(page);
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.addInitScript(() => {
-      sessionStorage.setItem("po-first-businesses-offer-seen", "1");
-    });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
 
@@ -172,41 +163,4 @@ test.describe("mobile layout regression coverage", () => {
     expect(primaryBox!.width).toBeGreaterThanOrEqual(gridBox!.width - 1);
   });
 
-  test("an empty launch shows the bounded offer and a labelled example business", async ({ page }) => {
-    await page.route("**/api/businesses?includeSchedule=1", async (route) => {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ businesses: [] }) });
-    });
-    await page.route("**/api/promotions/first-20", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          promotion: {
-            code: "first-20-3m",
-            capacity: 20,
-            durationMonths: 3,
-            startsAt: "2026-08-11T00:00:00.000Z",
-            enrollmentEndsAt: "2026-12-31T21:59:59.000Z",
-            isOpen: true,
-          },
-        }),
-      });
-    });
-
-    await page.goto("/");
-    const modal = page.getByTestId("first-businesses-offer-modal");
-    await expect(modal).toBeVisible();
-    await expect(modal.getByText("עד 20 עסקים בלבד")).toBeVisible();
-    await expect(modal).not.toContainText("נותרו");
-    await modal.getByRole("button", { name: "סגירה" }).click();
-
-    const example = page.getByTestId("example-business-card");
-    await expect(example).toBeVisible();
-    await expect(example.getByText("עסק לדוגמה", { exact: true })).toBeVisible();
-    await expect(example.getByText("נונה קפה", { exact: true })).toBeVisible();
-    await expect(example.getByText("לבונטין, תל אביב-יפו", { exact: true })).toBeVisible();
-    await expect(example.getByText("4.8", { exact: true })).toBeVisible();
-    await expect(example.getByRole("button", { name: "נונה קפה — קפה ושתייה" })).toBeDisabled();
-    await expect(example.getByRole("button", { name: "שמור למועדפים" })).toHaveCount(0);
-  });
 });
