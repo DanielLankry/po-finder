@@ -40,14 +40,13 @@ test('pricing registration defaults to a business owner', async ({ page }) => {
   await expect(page.getByRole('button', { name: /לקוח/ })).toHaveAttribute('aria-pressed', 'false');
 });
 
-test('launch promotion registration preserves owner intent and profile destination', async ({ page }) => {
-  await page.goto(
-    '/auth/register?redirectTo=%2Fdashboard%2Fprofile%3Fcampaign%3Dfirst-20-3m',
-  );
+test('profile registration preserves owner intent without promotion copy', async ({ page }) => {
+  await page.goto('/auth/register?redirectTo=%2Fdashboard%2Fprofile');
 
-  await expect(page.getByText('המשך ליצירת פרופיל ושמירת מקום')).toBeVisible();
+  await expect(page.getByText('המשך ליצירת פרופיל העסק')).toBeVisible();
   await expect(page.getByRole('button', { name: /בעל עסק/ })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByRole('button', { name: /לקוח/ })).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.getByText('3 חודשים חינם')).toHaveCount(0);
   await expect(
     page.getByRole('button', { name: 'יצירת חשבון והמשך לפרופיל העסק' }),
   ).toBeVisible();

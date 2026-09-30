@@ -28,24 +28,24 @@ function callback({ role = "business_owner", exchangeError = null, profileError 
   return compiledModule.exports.GET;
 }
 
-test("verified owner retains campaign destination and correct registration event", async () => {
-  const result = await callback()({ url: "https://example.test/auth/callback?code=valid&signup=1&next=%2Fdashboard%2Fprofile%3Fcampaign%3Dfirst-20-3m" });
+test("verified owner retains profile destination and correct registration event", async () => {
+  const result = await callback()({ url: "https://example.test/auth/callback?code=valid&signup=1&next=%2Fdashboard%2Fprofile%3Fsource%3Dsignup" });
   const url = new URL(result.location);
   assert.equal(url.pathname, "/dashboard/profile");
-  assert.equal(url.searchParams.get("campaign"), "first-20-3m");
+  assert.equal(url.searchParams.get("source"), "signup");
   assert.equal(url.searchParams.get("registration"), "business_owner");
   assert.equal(result.headers.get("cache-control"), "private, no-store");
 });
 
 test("email confirmation POST works without a PKCE cookie and retains signup intent", async () => {
-  const route = callback({ registrationNext: "/dashboard/profile?campaign=first-20-3m" });
+  const route = callback({ registrationNext: "/dashboard/profile?source=signup" });
   const response = await route.POST(new Request("https://example.test/auth/callback", {
     method: "POST", headers: { origin: "https://example.test" },
     body: new URLSearchParams({ token_hash: "a".repeat(64) }),
   }));
   const url = new URL(response.location);
   assert.equal(url.pathname, "/dashboard/profile");
-  assert.equal(url.searchParams.get("campaign"), "first-20-3m");
+  assert.equal(url.searchParams.get("source"), "signup");
   assert.equal(url.searchParams.get("registration"), "business_owner");
 });
 
