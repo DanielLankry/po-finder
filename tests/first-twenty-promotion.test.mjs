@@ -9,8 +9,11 @@ const migration = readFileSync(
   ),
   "utf8",
 );
-const publicContract = readFileSync(
-  new URL("../lib/launch-promotion.ts", import.meta.url),
+const retirementMigration = readFileSync(
+  new URL(
+    "../supabase/migrations/20260930053000_retire_first_twenty_promotion.sql",
+    import.meta.url,
+  ),
   "utf8",
 );
 
@@ -57,12 +60,10 @@ test("browser roles can read only aggregate status and cannot manage campaign ro
   );
 });
 
-test("public campaign contract exposes the fixed cap but not live claim counts", () => {
-  const interfaceBody = publicContract.match(
-    /export interface LaunchPromotionStatus \{([\s\S]*?)\n\}/,
-  )?.[1];
-  assert.ok(interfaceBody);
-  assert.match(interfaceBody, /capacity: number/);
-  assert.match(interfaceBody, /isOpen: boolean/);
-  assert.doesNotMatch(interfaceBody, /claimedCount|remaining/);
+test("retirement disables new claims without deleting historical entitlements", () => {
+  assert.match(
+    retirementMigration,
+    /UPDATE public\.promotion_campaigns[\s\S]*?SET is_active = false[\s\S]*?WHERE code = 'first-20-3m'/,
+  );
+  assert.doesNotMatch(retirementMigration, /\b(?:DELETE|DROP|TRUNCATE)\b/i);
 });
