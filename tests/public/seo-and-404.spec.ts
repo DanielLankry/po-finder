@@ -13,7 +13,20 @@ test('sitemap.xml is served and parses', async ({ request }) => {
   const body = await res.text();
   expect(body).toMatch(/<urlset|<sitemapindex/);
   expect(body).toContain('pokarov.co.il');
+  for (const route of ['/pricing', '/vendors', '/accessibility']) {
+    expect(body).toContain(`<loc>https://pokarov.co.il${route}</loc>`);
+  }
 });
+
+for (const route of ['/pricing', '/vendors', '/accessibility']) {
+  test(`${route} has a self-referencing canonical`, async ({ page }) => {
+    await page.goto(route);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      `https://pokarov.co.il${route}`,
+    );
+  });
+}
 
 test('bogus url returns 404', async ({ page }) => {
   const res = await page.goto('/this-page-definitely-does-not-exist-xyz123');
