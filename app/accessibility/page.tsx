@@ -5,6 +5,7 @@ import { BRAND_NAME, BUSINESS_INFO } from "@/lib/site-config";
 export const metadata = {
   title: "הצהרת נגישות",
   description: "הצהרת הנגישות של פה קרוב ודרכי יצירת קשר בנושא נגישות.",
+  alternates: { canonical: "/accessibility" },
 };
 
 export default function AccessibilityPage() {

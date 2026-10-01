@@ -31,6 +31,21 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("a truly empty launch links the first-business CTA to pricing", async ({ page }) => {
+  const promotionRequests: string[] = [];
+  const dialogWarnings: string[] = [];
+  page.on("request", (request) => {
+    if (request.url().includes("/api/promotions/first-20")) {
+      promotionRequests.push(request.url());
+    }
+  });
+  page.on("console", (message) => {
+    if (
+      message.type() === "warning" &&
+      message.text().includes("Missing `Description` or `aria-describedby={undefined}`")
+    ) {
+      dialogWarnings.push(message.text());
+    }
+  });
   await page.route("**/api/businesses?includeSchedule=1", async (route) => {
     await route.fulfill({
       status: 200,
@@ -51,6 +66,10 @@ test("a truly empty launch links the first-business CTA to pricing", async ({ pa
     "href",
     "/pricing",
   );
+  await expect(page.getByTestId("first-businesses-offer-modal")).toHaveCount(0);
+  await expect(page.getByTestId("promotion-list-banner")).toHaveCount(0);
+  expect(promotionRequests).toEqual([]);
+  expect(dialogWarnings).toEqual([]);
 });
 
 test("a zero-result search retains the ordinary filter state", async ({ page }) => {
