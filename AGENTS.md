@@ -111,3 +111,13 @@ Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do
 - Launch pricing is one duration-based listing product with no subscription, boost sale, promoted badge, or promoted sorting; legacy boost rows/columns remain only for historical audit and refund compatibility.
 - Full admin control is exposed through allowlisted server routes for businesses, users, reviews/events, payments, and pricing; the coupon area intentionally permits only inspection, deactivation, and deletion of inert legacy rows. Destructive user/content actions require explicit confirmation and remain behind the signed admin session.
 - Duration prices form a whole-shekel, strictly increasing ₪20–₪250 ladder and admin edits are committed atomically through a service-role-only invoker-rights RPC.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
