@@ -7,6 +7,7 @@ import { BRAND_NAME, BUSINESS_INFO } from "@/lib/site-config";
 export const metadata = {
   title: "תנאי שימוש",
   description: "תנאי השימוש בפלטפורמת פה קרוב לבעלי עסקים ולמבקרים באתר.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

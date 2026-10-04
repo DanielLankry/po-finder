@@ -7,6 +7,7 @@ import { BRAND_NAME, BUSINESS_INFO } from "@/lib/site-config";
 export const metadata = {
   title: "מדיניות ביטולים והחזרים",
   description: "מדיניות הביטולים וההחזרים לשירותי ההצטרפות העסקית של פה קרוב.",
+  alternates: { canonical: "/refund" },
 };
 
 export default function RefundPage() {

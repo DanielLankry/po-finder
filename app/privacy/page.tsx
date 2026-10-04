@@ -8,6 +8,7 @@ const contactEmail = BUSINESS_INFO.contactEmail;
 export const metadata = {
   title: "מדיניות פרטיות",
   description: "מדיניות הפרטיות של פה קרוב: איזה מידע נאסף, לאילו מטרות, למי הוא נמסר ואיך אפשר לממש זכויות.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

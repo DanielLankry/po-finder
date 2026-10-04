@@ -18,6 +18,7 @@ export const metadata = {
   title: "הצטרפות עסקים",
   description:
     "הצטרפו לפה קרוב והופיעו על מפה בזמן אמת עם פרופיל עסק, תמונות, שעות פעילות, מיקום וכפתור התקשרות.",
+  alternates: { canonical: "/vendors" },
 };
 
 const MARQUEE_ITEMS = [

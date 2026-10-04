@@ -7,6 +7,7 @@ import { BRAND_NAME, BUSINESS_INFO, LAUNCH_OFFER } from "@/lib/site-config";
 export const metadata = {
   title: "אודות",
   description: "מי אנחנו, למי פה קרוב מתאימה, איך השירות עובד ואיך יוצרים קשר.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {

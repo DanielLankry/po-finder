@@ -6,6 +6,7 @@ export const metadata = {
   title: "צרו קשר",
   description:
     "צרו קשר עם פה קרוב — שאלות כלליות, הצטרפות עסקים, דיווח על תקלה, פרטיות, חיוב ותשלומים.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {

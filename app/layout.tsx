@@ -41,10 +41,6 @@ export const metadata: Metadata = {
   creator: BRAND_NAME,
   publisher: BRAND_NAME,
   applicationName: BRAND_NAME,
-  alternates: {
-    canonical: BASE_URL,
-    languages: { "he-IL": BASE_URL },
-  },
   openGraph: {
     type: "website",
     locale: "he_IL",
