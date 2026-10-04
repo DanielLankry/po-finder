@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import MapPage from "./MapPage";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+    languages: { "he-IL": "/" },
+  },
+};
 
 export default function Home() {
   return (
