@@ -159,7 +159,7 @@ export default function MapPage() {
       />
 
       {/* Main split content */}
-      <div
+      <main
         data-testid="discovery-content"
         className="flex min-h-0 flex-1 overflow-hidden mt-[calc(72px+var(--public-filter-height,116px))]"
       >
@@ -221,7 +221,7 @@ export default function MapPage() {
           />
           </div>
         </div>
-      </div>
+      </main>
 
       {/* Privacy footer bar */}
       <div className="order-last flex shrink-0 justify-center px-2 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
