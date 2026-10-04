@@ -50,12 +50,12 @@ test.describe("mobile layout regression coverage", () => {
       await expect(logo.locator("span")).toHaveCount(0);
       await expect(changingText).toBeVisible();
       await expect(changingTextVisual).toContainText("ל");
-      await expect(page.getByRole("button", { name: "מועדפים" })).toBeVisible();
+      const favoritesButton = actions.getByRole("button", { name: "מועדפים", exact: true });
+      await expect(favoritesButton).toBeVisible();
       await expect(menuButton).toBeVisible();
 
       if (viewport.width < 768) {
         const searchButton = page.getByRole("button", { name: "פתיחת חיפוש" });
-        const favoritesButton = page.getByRole("button", { name: "מועדפים" });
         await expect(searchButton).toBeVisible();
 
         const controlBoxes = await Promise.all([
@@ -104,6 +104,7 @@ test.describe("mobile layout regression coverage", () => {
   }
 
   test("navbar audience advances with the typewriter animation", async ({ page }) => {
+    await page.clock.install();
     await page.addInitScript(() => {
       sessionStorage.setItem("po-first-businesses-offer-seen", "1");
     });
@@ -112,7 +113,8 @@ test.describe("mobile layout regression coverage", () => {
 
     const changingTextVisual = page.getByTestId("navbar-changing-text-visual");
     await expect(changingTextVisual).toHaveText("לעסקים קטנים|");
-    await expect(changingTextVisual).toHaveText("לדוכנים|", { timeout: 5_000 });
+    await page.clock.runFor(3_500);
+    await expect(changingTextVisual).toHaveText("לדוכנים|");
   });
 
   test("navbar audience swaps complete phrases when motion is reduced", async ({ page }) => {
