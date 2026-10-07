@@ -172,7 +172,7 @@ test.describe("mobile layout regression coverage", () => {
     expect(primaryBox!.width).toBeGreaterThanOrEqual(gridBox!.width - 1);
   });
 
-  test("an empty launch shows the bounded offer and a labelled example business", async ({ page }) => {
+  test("an empty launch shows the bounded offer, example business, and pricing CTA", async ({ page }) => {
     await page.route("**/api/businesses?includeSchedule=1", async (route) => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ businesses: [] }) });
     });
@@ -208,5 +208,11 @@ test.describe("mobile layout regression coverage", () => {
     await expect(example.getByText("4.8", { exact: true })).toBeVisible();
     await expect(example.getByRole("button", { name: "נונה קפה — קפה ושתייה" })).toBeDisabled();
     await expect(example.getByRole("button", { name: "שמור למועדפים" })).toHaveCount(0);
+
+    await page.getByRole("button", { name: "פתיחת תפריט", exact: true }).click();
+    const siteNavigation = page.getByRole("navigation", { name: "קישורי אתר" });
+    await expect(
+      siteNavigation.getByRole("link", { name: "פרסום עסק", exact: true }),
+    ).toHaveAttribute("href", "/pricing");
   });
 });
