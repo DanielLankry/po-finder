@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { collectErrors } from "../utils/console";
 
 const MOBILE_ROUTES = [
@@ -21,6 +22,16 @@ const RESPONSIVE_VIEWPORTS = [
   ...CUSTOMER_FLOW_VIEWPORTS,
   { width: 768, height: 900 },
 ] as const;
+
+async function waitForStableLayout(page: Page) {
+  await page.waitForFunction(() => document.readyState === "complete");
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+  });
+}
 
 test.describe("mobile layout regression coverage", () => {
   test.beforeEach(async ({ page }, testInfo) => {
@@ -50,12 +61,12 @@ test.describe("mobile layout regression coverage", () => {
       await expect(logo.locator("span")).toHaveCount(0);
       await expect(changingText).toBeVisible();
       await expect(changingTextVisual).toContainText("ל");
-      await expect(page.getByRole("button", { name: "מועדפים" })).toBeVisible();
+      const favoritesButton = actions.getByRole("button", { name: "מועדפים", exact: true });
+      await expect(favoritesButton).toBeVisible();
       await expect(menuButton).toBeVisible();
 
       if (viewport.width < 768) {
         const searchButton = page.getByRole("button", { name: "פתיחת חיפוש" });
-        const favoritesButton = page.getByRole("button", { name: "מועדפים" });
         await expect(searchButton).toBeVisible();
 
         const controlBoxes = await Promise.all([
@@ -137,6 +148,13 @@ test.describe("mobile layout regression coverage", () => {
         const response = await page.goto(route, { waitUntil: "domcontentloaded" });
         expect(response?.status(), route).toBeLessThan(400);
         await expect(page.locator("body")).toBeVisible();
+        await waitForStableLayout(page);
+
+        if (route === "/contact") {
+          const honeypot = page.getByTestId("contact-honeypot");
+          await expect(honeypot).toBeAttached();
+          await expect(honeypot.locator('input[name="website"]')).toHaveAttribute("tabindex", "-1");
+        }
 
         const dimensions = await page.evaluate(() => ({
           bodyWidth: document.body.scrollWidth,
@@ -159,11 +177,24 @@ test.describe("mobile layout regression coverage", () => {
   test("a single business photo fills its mobile gallery", async ({ page }) => {
     const response = await page.request.get("/api/businesses");
     expect(response.ok()).toBeTruthy();
-    const data = await response.json() as { businesses: Array<{ id: string; photos?: unknown[] }> };
-    const business = data.businesses.find((item) => item.photos?.length === 1);
-    test.skip(!business, "no public single-photo business exists in the launch database");
+    const data = await response.json() as { businesses: Array<{ id: string }> };
+    let businessId: string | undefined;
 
-    await page.goto(`/businesses/${business!.id}`);
+    for (const candidate of data.businesses) {
+      const detailResponse = await page.request.get(`/businesses/${candidate.id}`);
+      if (!detailResponse.ok()) continue;
+
+      const detailHtml = await detailResponse.text();
+      if (detailHtml.includes('data-photo-count="1"')) {
+        businessId = candidate.id;
+        break;
+      }
+    }
+
+    test.skip(!businessId, "no public single-photo business exists in the launch database");
+    await page.route("**/api/analytics/events", (route) => route.abort());
+
+    await page.goto(`/businesses/${businessId}`);
     const grid = page.getByTestId("photo-grid");
     const primary = page.getByTestId("photo-grid-primary");
     await expect(grid).toHaveAttribute("data-photo-count", "1");
