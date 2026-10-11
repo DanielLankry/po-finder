@@ -36,7 +36,7 @@ async function waitForStableLayout(page: Page) {
 test.describe("mobile layout regression coverage", () => {
   test.beforeEach(async ({ page }, testInfo) => {
     test.skip((testInfo.project.use.viewport?.width ?? 1440) >= 1440, "mobile-only layout check");
-    await page.addInitScript(() => localStorage.setItem("po-cookie-consent", "accepted"));
+    await page.addInitScript(() => localStorage.setItem("po-cookie-consent", "declined"));
   });
 
   for (const viewport of RESPONSIVE_VIEWPORTS) {
