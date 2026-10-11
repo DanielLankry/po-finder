@@ -1,4 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { suppressLaunchOffer } from "../utils/launch-offer";
+
+test.beforeEach(async ({ page }) => {
+  await suppressLaunchOffer(page);
+});
 
 test("filter drawer uses the shared neighborhood-paper window theme", async ({ page }) => {
   await page.goto("/");
