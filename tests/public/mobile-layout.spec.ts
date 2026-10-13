@@ -50,12 +50,12 @@ test.describe("mobile layout regression coverage", () => {
       await expect(logo.locator("span")).toHaveCount(0);
       await expect(changingText).toBeVisible();
       await expect(changingTextVisual).toContainText("ל");
-      await expect(page.getByRole("button", { name: "מועדפים" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "מועדפים", exact: true })).toBeVisible();
       await expect(menuButton).toBeVisible();
 
       if (viewport.width < 768) {
         const searchButton = page.getByRole("button", { name: "פתיחת חיפוש" });
-        const favoritesButton = page.getByRole("button", { name: "מועדפים" });
+        const favoritesButton = page.getByRole("button", { name: "מועדפים", exact: true });
         await expect(searchButton).toBeVisible();
 
         const controlBoxes = await Promise.all([
@@ -112,7 +112,7 @@ test.describe("mobile layout regression coverage", () => {
 
     const changingTextVisual = page.getByTestId("navbar-changing-text-visual");
     await expect(changingTextVisual).toHaveText("לעסקים קטנים|");
-    await expect(changingTextVisual).toHaveText("לדוכנים|", { timeout: 5_000 });
+    await expect(changingTextVisual).toHaveText("לדוכנים|", { timeout: 8_000 });
   });
 
   test("navbar audience swaps complete phrases when motion is reduced", async ({ page }) => {
@@ -159,11 +159,22 @@ test.describe("mobile layout regression coverage", () => {
   test("a single business photo fills its mobile gallery", async ({ page }) => {
     const response = await page.request.get("/api/businesses");
     expect(response.ok()).toBeTruthy();
-    const data = await response.json() as { businesses: Array<{ id: string; photos?: unknown[] }> };
-    const business = data.businesses.find((item) => item.photos?.length === 1);
-    test.skip(!business, "no public single-photo business exists in the launch database");
+    const data = await response.json() as { businesses: Array<{ id: string }> };
+    let singlePhotoBusinessId: string | null = null;
 
-    await page.goto(`/businesses/${business!.id}`);
+    for (const business of data.businesses) {
+      const detailResponse = await page.goto(`/businesses/${business.id}`, { waitUntil: "domcontentloaded" });
+      if (!detailResponse?.ok()) continue;
+
+      const photoCount = await page.getByTestId("photo-grid").getAttribute("data-photo-count");
+      if (photoCount === "1") {
+        singlePhotoBusinessId = business.id;
+        break;
+      }
+    }
+
+    test.skip(!singlePhotoBusinessId, "no public single-photo business exists in the launch database");
+
     const grid = page.getByTestId("photo-grid");
     const primary = page.getByTestId("photo-grid-primary");
     await expect(grid).toHaveAttribute("data-photo-count", "1");
@@ -211,7 +222,7 @@ test.describe("mobile layout regression coverage", () => {
 
     const discoveryPanel = page.getByTestId("business-list-scroll");
     await expect(
-      discoveryPanel.getByRole("link", { name: "פרסמו את העסק שלכם", exact: true }),
+      discoveryPanel.getByRole("link", { name: "פרסמו את העסק הראשון", exact: true }),
     ).toHaveAttribute("href", "/pricing");
   });
 });

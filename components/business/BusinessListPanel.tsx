@@ -416,7 +416,7 @@ export default function BusinessListPanel({
               href="/pricing"
               className="brand-button inline-flex min-h-11 items-center justify-center rounded-full px-6 text-sm font-black"
             >
-              פרסמו את העסק שלכם
+              פרסמו את העסק הראשון
             </Link>
           </div>
         ) : filtered.length === 0 ? (
