@@ -208,5 +208,10 @@ test.describe("mobile layout regression coverage", () => {
     await expect(example.getByText("4.8", { exact: true })).toBeVisible();
     await expect(example.getByRole("button", { name: "נונה קפה — קפה ושתייה" })).toBeDisabled();
     await expect(example.getByRole("button", { name: "שמור למועדפים" })).toHaveCount(0);
+
+    const discoveryPanel = page.getByTestId("business-list-scroll");
+    await expect(
+      discoveryPanel.getByRole("link", { name: "פרסמו את העסק שלכם", exact: true }),
+    ).toHaveAttribute("href", "/pricing");
   });
 });
