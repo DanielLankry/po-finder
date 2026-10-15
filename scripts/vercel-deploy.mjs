@@ -16,8 +16,6 @@ const optionsWithSeparateValues = new Set([
   "-F",
   "--global-config",
   "-Q",
-  "--local-config",
-  "-A",
   "--meta",
   "-m",
   "--regions",
@@ -60,6 +58,14 @@ export function parseDeploymentArgs(args) {
 
     if (argument === "--cwd" || argument.startsWith("--cwd=")) {
       throw new Error("Refusing to deploy: the project directory cannot be overridden.");
+    }
+
+    if (
+      argument === "--local-config" ||
+      argument.startsWith("--local-config=") ||
+      argument.startsWith("-A")
+    ) {
+      throw new Error("Refusing to deploy: the local Vercel config cannot be overridden.");
     }
 
     if (argument === "--prebuilt" || argument.startsWith("--prebuilt=")) {
