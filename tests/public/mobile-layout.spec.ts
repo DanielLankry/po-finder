@@ -50,12 +50,12 @@ test.describe("mobile layout regression coverage", () => {
       await expect(logo.locator("span")).toHaveCount(0);
       await expect(changingText).toBeVisible();
       await expect(changingTextVisual).toContainText("ל");
-      await expect(page.getByRole("button", { name: "מועדפים" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "מועדפים", exact: true })).toBeVisible();
       await expect(menuButton).toBeVisible();
 
       if (viewport.width < 768) {
         const searchButton = page.getByRole("button", { name: "פתיחת חיפוש" });
-        const favoritesButton = page.getByRole("button", { name: "מועדפים" });
+        const favoritesButton = page.getByRole("button", { name: "מועדפים", exact: true });
         await expect(searchButton).toBeVisible();
 
         const controlBoxes = await Promise.all([
@@ -159,11 +159,24 @@ test.describe("mobile layout regression coverage", () => {
   test("a single business photo fills its mobile gallery", async ({ page }) => {
     const response = await page.request.get("/api/businesses");
     expect(response.ok()).toBeTruthy();
-    const data = await response.json() as { businesses: Array<{ id: string; photos?: unknown[] }> };
-    const business = data.businesses.find((item) => item.photos?.length === 1);
-    test.skip(!business, "no public single-photo business exists in the launch database");
+    const data = await response.json() as { businesses: Array<{ id: string }> };
+    let singlePhotoBusinessId: string | null = null;
 
-    await page.goto(`/businesses/${business!.id}`);
+    // The collection API intentionally returns at most one photo per business.
+    // Inspect detail pages so this assertion uses the gallery's real photo count.
+    for (const business of data.businesses) {
+      await page.goto(`/businesses/${business.id}`);
+      const candidateGrid = page.getByTestId("photo-grid");
+      if (await candidateGrid.count() === 0) continue;
+      const photoCount = await candidateGrid.getAttribute("data-photo-count");
+      if (photoCount === "1") {
+        singlePhotoBusinessId = business.id;
+        break;
+      }
+    }
+
+    test.skip(!singlePhotoBusinessId, "no public single-photo business exists in the launch database");
+
     const grid = page.getByTestId("photo-grid");
     const primary = page.getByTestId("photo-grid-primary");
     await expect(grid).toHaveAttribute("data-photo-count", "1");

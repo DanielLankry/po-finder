@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
+const deploymentGitSha = process.env.PO_DEPLOY_GIT_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA;
+const deploymentHeaders = deploymentGitSha && /^[0-9a-f]{40}$/.test(deploymentGitSha)
+  ? [{ key: "X-Deployment-Git-Sha", value: deploymentGitSha }]
+  : [];
+
 const securityHeaders = [
   { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
   {
@@ -38,7 +43,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/:path*",
-        headers: securityHeaders,
+        headers: [...securityHeaders, ...deploymentHeaders],
       },
     ];
   },
