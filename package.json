@@ -14,8 +14,8 @@
     "db:reset": "supabase db reset",
     "db:gen-types": "supabase gen types typescript --linked > lib/database.types.ts",
     "vercel:env": "vercel env pull .env.local",
-    "vercel:deploy": "vercel deploy",
-    "vercel:deploy:prod": "vercel deploy --prod",
+    "vercel:deploy": "node scripts/vercel-deploy.mjs",
+    "vercel:deploy:prod": "node scripts/vercel-deploy.mjs --prod",
     "perf:baseline": "npx --yes @lhci/cli@0.15.1 autorun --config=./lighthouserc.cjs"
   },
   "dependencies": {
