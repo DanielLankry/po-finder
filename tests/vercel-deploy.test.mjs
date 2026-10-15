@@ -71,6 +71,20 @@ test("rejects a Vercel cwd override", () => {
   );
 });
 
+for (const localConfigArgs of [
+  ["--local-config", "/outside/untracked-vercel.json"],
+  ["--local-config=/outside/untracked-vercel.json"],
+  ["-A", "/outside/untracked-vercel.json"],
+  ["-A/outside/untracked-vercel.json"],
+]) {
+  test(`rejects a local Vercel config override via ${localConfigArgs[0]}`, () => {
+    assert.throws(
+      () => parseDeploymentArgs(["--prod", ...localConfigArgs]),
+      /local Vercel config cannot be overridden/,
+    );
+  });
+}
+
 test("rejects prebuilt artifacts", () => {
   assert.throws(
     () => parseDeploymentArgs(["--prod", "--prebuilt"]),
