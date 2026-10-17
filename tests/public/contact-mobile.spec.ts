@@ -6,7 +6,7 @@ const CONTACT_VIEWPORTS = [320, 390, 430] as const;
 for (const width of CONTACT_VIEWPORTS) {
   test(`contact form stays inside the ${width}px viewport after hydration`, async ({ page }) => {
     const errors = collectErrors(page);
-    await page.addInitScript(() => localStorage.setItem("po-cookie-consent", "accepted"));
+    await page.addInitScript(() => localStorage.setItem("po-cookie-consent", "declined"));
     await page.setViewportSize({ width, height: 900 });
 
     const response = await page.goto("/contact", { waitUntil: "domcontentloaded" });
