@@ -47,12 +47,17 @@ test.describe("mobile layout regression coverage", () => {
       await expect(logo.locator("span")).toHaveCount(0);
       await expect(changingText).toBeVisible();
       await expect(changingTextVisual).toContainText("ל");
-      await expect(page.getByRole("button", { name: "מועדפים" })).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "מועדפים", exact: true }),
+      ).toBeVisible();
       await expect(menuButton).toBeVisible();
 
       if (viewport.width < 768) {
         const searchButton = page.getByRole("button", { name: "פתיחת חיפוש" });
-        const favoritesButton = page.getByRole("button", { name: "מועדפים" });
+        const favoritesButton = page.getByRole("button", {
+          name: "מועדפים",
+          exact: true,
+        });
         await expect(searchButton).toBeVisible();
 
         const controlBoxes = await Promise.all([
