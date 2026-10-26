@@ -24,6 +24,7 @@ export default function ContactPage() {
     subject: "",
     message: "",
     privacyAccepted: false,
+    website: "",
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -81,7 +82,7 @@ export default function ContactPage() {
                 <button
                   onClick={() => {
                     setFormState("idle");
-                    setForm({ name: "", email: "", subject: "", message: "", privacyAccepted: false });
+                    setForm({ name: "", email: "", subject: "", message: "", privacyAccepted: false, website: "" });
                   }}
                   className="mt-6 text-[#2D6A4F] text-sm font-semibold hover:underline"
                 >
@@ -90,6 +91,22 @@ export default function ContactPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5 p-5 sm:p-8">
+                <div
+                  className="sr-only"
+                  aria-hidden="true"
+                  data-testid="contact-honeypot"
+                >
+                  <label htmlFor="website">Website</label>
+                  <input
+                    id="website"
+                    name="website"
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={form.website}
+                    onChange={(e) => setForm({ ...form, website: e.target.value })}
+                  />
+                </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="name" className="block text-sm font-semibold text-[#111] mb-1.5">
