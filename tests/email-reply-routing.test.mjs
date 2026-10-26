@@ -26,3 +26,13 @@ test("contact notifications point administrators to the private inbox", () => {
   assert.match(contactRoute, /https:\/\/pokarov\.co\.il\/admin\/contact/);
   assert.doesNotMatch(contactRoute, /replyTo: email/);
 });
+
+test("contact honeypot submissions do not reach persistence or email", () => {
+  assert.match(contactRoute, /if \(parsed\.data\.website\.trim\(\)\) \{[\s\S]*?return NextResponse\.json\(\{ ok: true \}\);/);
+
+  const honeypotGuard = contactRoute.indexOf("parsed.data.website.trim()");
+  const persistence = contactRoute.indexOf('.from("contact_messages")');
+  assert.notEqual(honeypotGuard, -1);
+  assert.notEqual(persistence, -1);
+  assert.ok(honeypotGuard < persistence);
+});

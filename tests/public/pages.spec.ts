@@ -36,6 +36,26 @@ test('contact page renders form', async ({ page }) => {
   await expect(page.locator('body')).not.toContainText(/3 ימי עסקים/);
 });
 
+for (const viewport of [
+  { width: 390, height: 860 },
+  { width: 1440, height: 900 },
+]) {
+  test(`contact form stays inside the ${viewport.width}px viewport`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.goto('/contact');
+
+    await expect(page.getByTestId('contact-honeypot')).toBeAttached();
+    const dimensions = await page.evaluate(() => ({
+      bodyWidth: document.body.scrollWidth,
+      documentWidth: document.documentElement.scrollWidth,
+      viewportWidth: window.innerWidth,
+    }));
+
+    expect(dimensions.bodyWidth).toBeLessThanOrEqual(dimensions.viewportWidth);
+    expect(dimensions.documentWidth).toBeLessThanOrEqual(dimensions.viewportWidth);
+  });
+}
+
 for (const route of ['/about', '/contact', '/pricing', '/vendors']) {
   test(`public contact options exclude WhatsApp: ${route}`, async ({ page }) => {
     await page.goto(route);

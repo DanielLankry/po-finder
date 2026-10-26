@@ -34,6 +34,7 @@ const contactSchema = z.object({
   subject: z.enum(["general", "business", "bug", "privacy", "billing", "other"]),
   message: z.string().trim().min(1, "Message is required").max(2000),
   privacyAccepted: z.literal(true),
+  website: z.string().max(200).optional().default(""),
 });
 
 export async function POST(req: NextRequest) {
@@ -51,6 +52,11 @@ export async function POST(req: NextRequest) {
         { error: parsed.error.flatten() },
         { status: 400 }
       );
+    }
+
+    // Silently accept bot submissions without persisting or sending mail.
+    if (parsed.data.website.trim()) {
+      return NextResponse.json({ ok: true });
     }
 
     const { name, email, subject, message } = parsed.data;

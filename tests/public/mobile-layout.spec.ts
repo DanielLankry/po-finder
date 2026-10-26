@@ -208,5 +208,8 @@ test.describe("mobile layout regression coverage", () => {
     await expect(example.getByText("4.8", { exact: true })).toBeVisible();
     await expect(example.getByRole("button", { name: "נונה קפה — קפה ושתייה" })).toBeDisabled();
     await expect(example.getByRole("button", { name: "שמור למועדפים" })).toHaveCount(0);
+    const pricingCta = example.getByTestId("empty-launch-pricing-cta");
+    await expect(pricingCta).toBeVisible();
+    await expect(pricingCta).toHaveAttribute("href", "/pricing");
   });
 });

@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import BusinessCard from "@/components/business/BusinessCard";
 import type { BusinessWithSchedule } from "@/lib/types";
 import { getTodayDateString } from "@/lib/utils/schedule";
@@ -55,7 +57,7 @@ function createExampleBusiness(): BusinessWithSchedule {
 /** Renders the sample through the same card component used by real businesses. */
 export default function ExampleBusinessCard() {
   return (
-    <div className="mx-auto w-full max-w-[420px]" data-testid="example-business-card">
+    <div className="mx-auto flex w-full max-w-[420px] flex-col gap-4" data-testid="example-business-card">
       <BusinessCard
         business={createExampleBusiness()}
         isSelected={false}
@@ -65,6 +67,14 @@ export default function ExampleBusinessCard() {
         hideFavorite
         disabled
       />
+      <Link
+        href="/pricing"
+        className="brand-button inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-5 text-base font-black"
+        data-testid="empty-launch-pricing-cta"
+      >
+        פרסמו את העסק שלכם
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+      </Link>
     </div>
   );
 }
