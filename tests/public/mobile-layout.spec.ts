@@ -43,6 +43,7 @@ test.describe("mobile layout regression coverage", () => {
       const changingText = page.getByTestId("navbar-changing-text");
       const changingTextVisual = page.getByTestId("navbar-changing-text-visual");
       const menuButton = page.getByRole("button", { name: "פתיחת תפריט", exact: true });
+      const favoritesButton = actions.getByRole("button", { name: "מועדפים", exact: true });
 
       await expect(header).toBeVisible();
       await expect(nav).toBeVisible();
@@ -50,12 +51,12 @@ test.describe("mobile layout regression coverage", () => {
       await expect(logo.locator("span")).toHaveCount(0);
       await expect(changingText).toBeVisible();
       await expect(changingTextVisual).toContainText("ל");
-      await expect(page.getByRole("button", { name: "מועדפים" })).toBeVisible();
+      await expect(favoritesButton).toHaveCount(1);
+      await expect(favoritesButton).toBeVisible();
       await expect(menuButton).toBeVisible();
 
       if (viewport.width < 768) {
         const searchButton = page.getByRole("button", { name: "פתיחת חיפוש" });
-        const favoritesButton = page.getByRole("button", { name: "מועדפים" });
         await expect(searchButton).toBeVisible();
 
         const controlBoxes = await Promise.all([
@@ -209,4 +210,33 @@ test.describe("mobile layout regression coverage", () => {
     await expect(example.getByRole("button", { name: "נונה קפה — קפה ושתייה" })).toBeDisabled();
     await expect(example.getByRole("button", { name: "שמור למועדפים" })).toHaveCount(0);
   });
+
+  for (const viewport of CUSTOMER_FLOW_VIEWPORTS) {
+    test(`an empty launch without a promotion links to pricing at ${viewport.width}px`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await page.addInitScript(() => {
+        sessionStorage.setItem("po-first-businesses-offer-seen", "1");
+      });
+      await page.route("**/api/businesses?includeSchedule=1", async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ businesses: [] }),
+        });
+      });
+      await page.route("**/api/promotions/first-20", async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ promotion: null }),
+        });
+      });
+
+      await page.goto("/");
+
+      const pricingCta = page.getByTestId("empty-launch-pricing-cta");
+      await expect(pricingCta).toBeVisible();
+      await expect(pricingCta).toHaveAttribute("href", "/pricing");
+    });
+  }
 });
