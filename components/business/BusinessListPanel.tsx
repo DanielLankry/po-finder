@@ -410,8 +410,17 @@ export default function BusinessListPanel({
             </div>
           </div>
         ) : filtered.length === 0 && isPlatformEmpty ? (
-          <div className="min-h-full px-4 py-8 sm:px-6 sm:py-10">
+          <div className="flex min-h-full flex-col items-center gap-6 px-4 py-8 sm:px-6 sm:py-10">
             <ExampleBusinessCard />
+            {!promotion?.isOpen ? (
+              <Link
+                href="/pricing"
+                className="brand-button inline-flex min-h-11 items-center justify-center rounded-full px-6 text-sm font-black"
+                data-testid="empty-launch-pricing-cta"
+              >
+                פרסמו את העסק שלכם
+              </Link>
+            ) : null}
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-4 px-8 py-16 text-center">
