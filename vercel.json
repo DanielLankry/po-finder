@@ -1,4 +1,7 @@
 {
+  "git": {
+    "deploymentEnabled": false
+  },
   "crons": [
     { "path": "/api/cron/payment-emails", "schedule": "0 7 * * *" },
     {
