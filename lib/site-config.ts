@@ -7,7 +7,6 @@ export const BUSINESS_INFO = {
   legalBusinessName: "דניאל לונקרי",
   businessId: "322303736",
   address: "האירוס, מטולה",
-  whatsappNumber: "REDACTED_PERSONAL_PHONE",
   contactEmail: "support@pokarov.co.il",
   founderName: null as string | null,
 };
@@ -55,7 +54,7 @@ export const VENDOR_FAQS = [
   },
 ];
 
-export function getWhatsAppHref(number = BUSINESS_INFO.whatsappNumber) {
+export function getWhatsAppHref(number = "") {
   if (!number) return null;
   const digits = number.replace(/\D/g, "");
   return digits ? `https://wa.me/${digits}` : null;
