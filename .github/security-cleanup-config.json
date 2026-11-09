@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "repository": "DanielLankry/po-finder",
+  "target_ref": "refs/heads/master",
+  "sources": [
+    {
+      "id": "personal-phone-source",
+      "commit": "fb10bb715286156e700eb6308a69647ff4dacad2",
+      "path": "lib/site-config.ts",
+      "pattern": "phoneNumber:\\s*\"([^\"]+)\"",
+      "expected_matches": 1,
+      "min_length": 10,
+      "replacement": "REDACTED_PERSONAL_PHONE",
+      "derived_forms": "israeli_phone"
+    },
+    {
+      "id": "personal-email-source",
+      "commit": "28e64190604eb39034c075d81f640f8291011b46",
+      "path": "lib/email.ts",
+      "pattern": "([A-Za-z0-9._%+-]+@gmail\\.com)",
+      "expected_matches": 1,
+      "min_length": 10,
+      "replacement": "support@pokarov.co.il"
+    }
+  ],
+  "renames": [],
+  "remove_paths": [
+    {
+      "prefix": "supabase/.temp/"
+    }
+  ]
+}
