@@ -1,0 +1,10 @@
+{
+  "execute": true,
+  "request_id": "po-finder-privacy-cleanup-2026-11-09-v1",
+  "repository": "DanielLankry/po-finder",
+  "actor": "DanielLankry",
+  "expected_default_before": "04318b52a779e054f4299e71e90468b8827fc815",
+  "payload_sha256": "c3e47c900dd18102fd77c9be08efc1ff7366297b91a3d2aeb8cf07b2a688a594",
+  "branches": 74,
+  "purpose": "Fast-forward reviewed privacy fixes on 74 retained feature branches and disable their Vercel Git deployments; preserve all other configuration, master and PR references."
+}
