@@ -1,11 +1,17 @@
 # Po-Finder (פה קרוב) - Tasks
 
 > Small business discovery app (Next.js 16 + Supabase + Google Maps)
-> Last updated: 2026-09-09
+> Last updated: 2026-11-09
 
 ---
 
 ## DONE
+
+### Public portfolio README and fictional demo
+- [x] Replace the starter README with a project presentation and portable demo — 2026-11-09
+  - Files: `README.md`, `docs/showcase/discovery-desktop.png`, `docs/showcase/discovery-mobile.png`, `public/showcase/index.html`, `public/showcase/style.css`, `public/showcase/demo.js`, `public/showcase/mark.svg`, `public/showcase/assistant.woff2`, `public/showcase/assistant-hebrew.woff2`, `public/showcase/ASSISTANT-LICENSE.txt`, `vercel.json`, `AGENTS.md`, `TASKS.md`.
+  - Summary: Added product context, screenshots, architecture, linked implementation decisions, and local demo instructions using fictional content. The repository was already public; publication does not change its visibility or grant a new source-code license.
+  - Deployment: Git-triggered Vercel builds are disabled in this snapshot so portfolio documentation changes cannot replace the separately deployed wind-down service. Explicit deployment remains a separate operation.
 
 ### Owner clarity and everyday use — part 1
 - [x] Unify today's hours, publication progress, profile completion and mobile discovery controls — 2026-09-09

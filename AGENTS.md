@@ -24,6 +24,7 @@ Keep secrets in `.env.local` only; use `.env.local.example` as the template for 
 Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do not reintroduce `middleware.ts`. Visible Hebrew branding should remain `פה קרוב`, while `pokarov.co.il` is reserved for domains, email addresses, and technical identifiers.
 
 ## Project Patterns
+- The public README presents the historical application and links a standalone fictional demo in `public/showcase/`; keep its screenshots free of real customer data, and keep README source links aligned with files in this branch.
 - Owner progress comes from the authenticated, private/no-store `/api/account/progress` read model and `lib/owner-progress.ts`; profile completion is guidance and must never grant approval or publication. `OwnerWorkspace` refreshes on saves, route changes, focus and minute boundaries without remounting unsaved forms.
 - Dashboard links must preserve `businessId`, including completion anchors and schedule tabs. An explicitly requested unowned/missing business returns no match rather than silently editing the latest owned business.
 - Authenticated payment queries must use readable columns and RLS for user scoping; `payment_attempts.user_id` is intentionally excluded from SELECT grants, including filters. Establish business ownership before reading its payment status.
@@ -92,6 +93,7 @@ Next.js 16 uses `proxy.ts` for request guarding and Supabase session refresh; do
 - Recurring autonomous operations are defined under `.agents/`: the site engineer may open tested low-risk PRs but cannot deploy or mutate production, while the Meta marketing agent remains recommendation-only until explicit campaign authority and real targets are provided.
 
 ## Known Issues
+- The public source snapshot is not the current production wind-down deployment. `vercel.json` disables Git-triggered deployments; do not redeploy this branch over the live service as part of documentation or portfolio maintenance.
 - Production has `20260909092059_support_inbox.sql` applied; preserve that exact version so future CLI pushes keep the private contact and reply tables aligned with migration history.
 - Production must receive `20260811100008_first_twenty_business_promotion.sql` before the campaign-enabled app is promoted; the API intentionally degrades to no offer when the aggregate table is absent.
 - Production has `20260715144513_launch_privacy_hardening.sql` applied; preserve that migration version so future CLI pushes do not try to replay the policy cutover.
