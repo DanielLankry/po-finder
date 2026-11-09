@@ -55,3 +55,6 @@ next-env.d.ts
 tsc_output.txt
 fix-amber.ps1
 *.zip
+
+# Supabase CLI cache is local environment metadata
+/supabase/.temp/
