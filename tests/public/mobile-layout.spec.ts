@@ -50,12 +50,12 @@ test.describe("mobile layout regression coverage", () => {
       await expect(logo.locator("span")).toHaveCount(0);
       await expect(changingText).toBeVisible();
       await expect(changingTextVisual).toContainText("ל");
-      await expect(page.getByRole("button", { name: "מועדפים" })).toBeVisible();
+      const favoritesButton = actions.getByRole("button", { name: "מועדפים", exact: true });
+      await expect(favoritesButton).toBeVisible();
       await expect(menuButton).toBeVisible();
 
       if (viewport.width < 768) {
         const searchButton = page.getByRole("button", { name: "פתיחת חיפוש" });
-        const favoritesButton = page.getByRole("button", { name: "מועדפים" });
         await expect(searchButton).toBeVisible();
 
         const controlBoxes = await Promise.all([
@@ -159,11 +159,24 @@ test.describe("mobile layout regression coverage", () => {
   test("a single business photo fills its mobile gallery", async ({ page }) => {
     const response = await page.request.get("/api/businesses");
     expect(response.ok()).toBeTruthy();
-    const data = await response.json() as { businesses: Array<{ id: string; photos?: unknown[] }> };
-    const business = data.businesses.find((item) => item.photos?.length === 1);
-    test.skip(!business, "no public single-photo business exists in the launch database");
+    const data = await response.json() as { businesses: Array<{ id: string }> };
+    let businessId: string | undefined;
 
-    await page.goto(`/businesses/${business!.id}`);
+    for (const candidate of data.businesses) {
+      const detailResponse = await page.request.get(`/businesses/${candidate.id}`);
+      if (!detailResponse.ok()) continue;
+
+      const detailHtml = await detailResponse.text();
+      if (detailHtml.includes('data-photo-count="1"')) {
+        businessId = candidate.id;
+        break;
+      }
+    }
+
+    test.skip(!businessId, "no public single-photo business exists in the launch database");
+    await page.route("**/api/analytics/events", (route) => route.abort());
+
+    await page.goto(`/businesses/${businessId}`);
     const grid = page.getByTestId("photo-grid");
     const primary = page.getByTestId("photo-grid-primary");
     await expect(grid).toHaveAttribute("data-photo-count", "1");
@@ -208,5 +221,27 @@ test.describe("mobile layout regression coverage", () => {
     await expect(example.getByText("4.8", { exact: true })).toBeVisible();
     await expect(example.getByRole("button", { name: "נונה קפה — קפה ושתייה" })).toBeDisabled();
     await expect(example.getByRole("button", { name: "שמור למועדפים" })).toHaveCount(0);
+  });
+
+  test("a promotion-closed empty launch shows a visible pricing CTA", async ({ page }) => {
+    await page.route("**/api/businesses?includeSchedule=1", async (route) => {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ businesses: [] }) });
+    });
+    await page.route("**/api/promotions/first-20", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ promotion: null }),
+      });
+    });
+
+    await page.goto("/");
+    await expect(page.getByTestId("first-businesses-offer-modal")).toHaveCount(0);
+
+    const pricingCta = page
+      .getByTestId("business-list-scroll")
+      .getByRole("link", { name: "לפרסום העסק שלכם", exact: true });
+    await expect(pricingCta).toBeVisible();
+    await expect(pricingCta).toHaveAttribute("href", "/pricing");
   });
 });
