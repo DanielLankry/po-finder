@@ -410,8 +410,14 @@ export default function BusinessListPanel({
             </div>
           </div>
         ) : filtered.length === 0 && isPlatformEmpty ? (
-          <div className="min-h-full px-4 py-8 sm:px-6 sm:py-10">
+          <div className="flex min-h-full flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
             <ExampleBusinessCard />
+            <Link
+              href="/pricing"
+              className="brand-button mx-auto inline-flex min-h-12 w-full max-w-sm items-center justify-center rounded-xl px-5 text-base font-black"
+            >
+              למחירים ולבחירת תקופה
+            </Link>
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-4 px-8 py-16 text-center">
